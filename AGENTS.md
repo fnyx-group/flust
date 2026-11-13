@@ -13,24 +13,28 @@ All user data stays on the device, encrypted. No accounts, no ads, no analytics,
 
 ## Layout
 
-- src/app/        routes only: every file is a screen, `_layout.tsx` defines navigators
-- src/features/   journal, streak, emergency, blocking
-- src/lib/        crypto, storage, shared utilities
-- src/ui/         shared components
-- modules/        native code
-- assets/         brand and images
-- docs/           architecture and threat model
+    src/app/        routes only: every file is a screen, `_layout.tsx` defines navigators
+    src/features/   journal, streak, emergency, blocking
+    src/lib/        crypto, storage, shared utilities
+    src/ui/         shared components
+    modules/        native code
+    assets/         brand and images
+    docs/           architecture, security, decisions, development guides
 
 ## Commands
 
-    pnpm expo start            # dev server
-    pnpm expo install <pkg>    # add a dependency with the SDK-compatible version
-    pnpm expo install --fix    # fix incompatible versions
-    pnpm expo lint             # lint
-    pnpm tsc --noEmit          # typecheck
-    pnpm dlx expo-doctor       # diagnose dependencies and config
+    pnpm expo start                   # dev server
+    pnpm expo install <pkg>           # add a dependency with the SDK-compatible version
+    pnpm expo install --fix           # fix incompatible versions
+    pnpm expo install <pkg> -- -D     # add a dev dependency
+    pnpm lint                         # lint
+    pnpm typecheck                    # typecheck
+    pnpm test                         # unit tests
+    pnpm format                       # format with Prettier
+    pnpm format:check                 # check formatting
+    pnpm dlx expo-doctor              # diagnose dependencies and config
 
-Lint and typecheck must pass before any change is considered done.
+Lint, typecheck, tests and format check must pass before any change is considered done.
 
 ## Expo
 
@@ -43,9 +47,23 @@ Lint and typecheck must pass before any change is considered done.
 
 ## Code style
 
-- Self-explanatory code. Comment only to explain a non-obvious reason, never to restate the code.
+- Self-explanatory code.
+- Comments are written in English, only to explain a non-obvious reason (why, not what). Short, precise, no filler.
 - No commented-out code, no banner comments, no emojis.
 - Small, focused functions and files.
+
+## Tests
+
+- Test business logic and sensitive code: encryption, storage, streak calculation, dates.
+- Test files live next to the code: `foo.ts` -> `foo.test.ts`.
+- No snapshot tests, no trivial render tests, no tests of third-party libraries.
+- Every fixed bug gets a test that reproduces it.
+
+## Docs
+
+- Documentation is written in English and lives in `docs/`. See `docs/README.md` for the index.
+- Folder and file names in English, kebab-case.
+- Every significant architecture decision gets a new file in `docs/decisions/` (`NNNN-short-title.md`: context, decision, consequences).
 
 ## Commits
 
