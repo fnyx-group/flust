@@ -16,9 +16,12 @@ const noForbiddenContent = ({ raw }) => {
 // Dependabot bodies embed upstream release notes, with long lines and emojis we do not control.
 const isDependabotCommit = (message) => message.includes('Signed-off-by: dependabot[bot]');
 
+// Grouped Dependabot titles ("... in the github-actions group across 1 directory") exceed 100 characters.
+const isDependabotHeader = (message) => /^chore\(deps(-dev)?\): bump /.test(message);
+
 export default {
   extends: ['@commitlint/config-conventional'],
-  ignores: [isDependabotCommit],
+  ignores: [isDependabotCommit, isDependabotHeader],
   plugins: [{ rules: { 'no-forbidden-content': noForbiddenContent } }],
   rules: {
     'no-forbidden-content': [2, 'always'],
