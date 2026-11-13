@@ -7,17 +7,39 @@ All user data stays on the device, encrypted. No accounts, no ads, no analytics,
 
 ## Stack
 
-- Expo / React Native, TypeScript (strict)
+- Expo SDK 58, React Native, TypeScript (strict), Expo Router
 - pnpm
 - Native modules: Swift (iOS Screen Time), Kotlin (Android VPN filtering)
 
 ## Layout
 
-- app/        screens and navigation
-- src/        features, storage, crypto, ui
-- modules/    native code
-- assets/     brand and images
-- docs/       architecture and threat model
+- src/app/        routes only: every file is a screen, `_layout.tsx` defines navigators
+- src/features/   journal, streak, emergency, blocking
+- src/lib/        crypto, storage, shared utilities
+- src/ui/         shared components
+- modules/        native code
+- assets/         brand and images
+- docs/           architecture and threat model
+
+## Commands
+
+    pnpm expo start            # dev server
+    pnpm expo install <pkg>    # add a dependency with the SDK-compatible version
+    pnpm expo install --fix    # fix incompatible versions
+    pnpm expo lint             # lint
+    pnpm tsc --noEmit          # typecheck
+    pnpm dlx expo-doctor       # diagnose dependencies and config
+
+Lint and typecheck must pass before any change is considered done.
+
+## Expo
+
+- Expo APIs change between SDK releases. Use the docs matching the installed version:
+  https://docs.expo.dev/versions/v58.0.0/ and the index at https://docs.expo.dev/llms.txt
+- Always add dependencies with `pnpm expo install`, never plain `pnpm add`.
+- `ios/` and `android/` are generated. Never edit them by hand: configure native behavior in `app.json` and config plugins.
+- Libraries with native code need a development build, not Expo Go.
+- Prefer official Expo modules over third-party libraries.
 
 ## Code style
 
