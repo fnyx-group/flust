@@ -11,7 +11,7 @@
 ## Commits
 
 - Conventional Commits. Allowed types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `ci`, `build`, `perf`, `security`.
-- Imperative mood, English, header under 72 characters.
+- Imperative mood, English. Keep the header under 72 characters; commitlint enforces a hard limit of 100.
 - One logical change per commit. All commits are signed.
 - Messages must not contain emojis, `Co-Authored-By` trailers or tool attribution lines.
 

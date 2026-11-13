@@ -42,6 +42,15 @@ updates:
       - dependency-name: '@react-native/*'
         update-types:
           [version-update:semver-major, version-update:semver-minor, version-update:semver-patch]
+      # typescript-eslint does not support TypeScript 7 yet, and ESLint 10 breaks eslint-config-expo.
+      - dependency-name: 'typescript'
+        update-types: [version-update:semver-major]
+      - dependency-name: 'eslint'
+        update-types: [version-update:semver-major]
+      - dependency-name: '@typescript-eslint/*'
+        update-types: [version-update:semver-major]
+      - dependency-name: 'typescript-eslint'
+        update-types: [version-update:semver-major]
     groups:
       npm:
         applies-to: version-updates

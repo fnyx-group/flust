@@ -68,7 +68,7 @@ Lint, typecheck, tests and format check must pass before any change is considere
 ## Commits
 
 - Conventional Commits: feat, fix, docs, refactor, test, chore, ci, build, perf, security.
-- Imperative mood, English, subject under 72 characters, no emojis.
+- Imperative mood, English, no emojis. Keep the subject under 72 characters (hard limit: 100).
 - One logical change per commit. All commits must be signed.
 
 ## Security and privacy
