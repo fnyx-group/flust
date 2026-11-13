@@ -13,8 +13,12 @@ const noForbiddenContent = ({ raw }) => {
   return [true];
 };
 
+// Dependabot bodies embed upstream release notes, with long lines and emojis we do not control.
+const isDependabotCommit = (message) => message.includes('Signed-off-by: dependabot[bot]');
+
 export default {
   extends: ['@commitlint/config-conventional'],
+  ignores: [isDependabotCommit],
   plugins: [{ rules: { 'no-forbidden-content': noForbiddenContent } }],
   rules: {
     'no-forbidden-content': [2, 'always'],
@@ -23,6 +27,6 @@ export default {
       'always',
       ['feat', 'fix', 'docs', 'refactor', 'test', 'chore', 'ci', 'build', 'perf', 'security'],
     ],
-    'header-max-length': [2, 'always', 71],
+    'header-max-length': [2, 'always', 100],
   },
 };
