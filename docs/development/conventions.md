@@ -26,6 +26,12 @@ Code in `src/` is split into layers. A layer may only import from the layers lis
 - Imports between folders use the `@/` alias (`@/domain/streak`). Parent-relative imports (`../`) are forbidden in `src/`, because the layer check reads the import path and cannot see through them.
 - Folders are created when the first code lands in them, never with placeholder files.
 
+## Errors
+
+Code in `src/domain/` does not throw for expected failures, such as a start date in the future or a lapse before the start. It returns a `Result` (`src/domain/result.ts`): `{ ok: true, value }` or `{ ok: false, error }`, where `error` is a string literal type such as `'lapse-in-future'`. Callers must handle every error case, and the type checker lists them.
+
+Domain functions never read the clock. They take the current time, `now`, as a UTC timestamp in milliseconds, so they stay deterministic and testable.
+
 ## Lint rules
 
 - No hex color literals in `src/` outside `src/ui/theme.ts`. Use a color from the theme.

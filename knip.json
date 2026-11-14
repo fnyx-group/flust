@@ -2,5 +2,6 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["src/app/**/*.{ts,tsx}"],
   "project": ["src/**/*.{ts,tsx}", "*.{js,ts}"],
-  "ignoreDependencies": ["expo-updates"]
+  "ignoreDependencies": ["expo-updates"],
+  "ignoreExportsUsedInFile": { "interface": true, "type": true }
 }
