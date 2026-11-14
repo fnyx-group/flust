@@ -3,7 +3,12 @@ import { createJourneyRepository, type JourneyRepository } from '@/data/journey-
 import { applyMigrations, latestVersion, readUserVersion } from '@/data/migrate';
 import { MIGRATIONS } from '@/data/migrations';
 import type { Migration } from '@/data/migrations/migration';
+import {
+  createOnboardingRepository,
+  type OnboardingRepository,
+} from '@/data/onboarding-repository';
 import { createRankRepository, type RankRepository } from '@/data/rank-repository';
+import { createSettingsRepository, type SettingsRepository } from '@/data/settings-repository';
 import {
   BACKUP_NAME,
   DATABASE_NAME,
@@ -16,6 +21,8 @@ import { err, ok, type Result } from '@/domain/result';
 export type Storage = {
   readonly journey: JourneyRepository;
   readonly ranks: RankRepository;
+  readonly onboarding: OnboardingRepository;
+  readonly settings: SettingsRepository;
   close(): Promise<void>;
 };
 
@@ -174,6 +181,8 @@ function toStorage(db: Database): Storage {
   return {
     journey: createJourneyRepository(db),
     ranks: createRankRepository(db),
+    onboarding: createOnboardingRepository(db),
+    settings: createSettingsRepository(db),
     close: () => db.close(),
   };
 }

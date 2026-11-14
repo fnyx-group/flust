@@ -7,16 +7,25 @@ type IconButtonProps = {
   accessibilityLabel: string;
   onPress: () => void;
   children: ReactNode;
+  disabled?: boolean;
 };
 
-export function IconButton({ accessibilityLabel, onPress, children }: IconButtonProps) {
+// The button is drawn at 40 points; the hit slop brings the touch target to 48.
+export function IconButton({
+  accessibilityLabel,
+  onPress,
+  children,
+  disabled = false,
+}: IconButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       hitSlop={4}
       onPress={onPress}
-      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.button, (pressed || disabled) && styles.pressed]}
     >
       {children}
     </Pressable>

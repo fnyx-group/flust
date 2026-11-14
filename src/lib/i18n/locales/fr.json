@@ -29,24 +29,120 @@
         "cipher-unavailable": "Cette version de flust ne peut pas chiffrer tes données, elle ne les ouvrira donc pas. Installe la dernière version de flust. Tes données n'ont pas été modifiées.",
         "schema-too-new": "Tes données ont été enregistrées par une version plus récente de flust. Mets flust à jour pour les ouvrir. Tes données n'ont pas été modifiées.",
         "migration-failed": "flust n'a pas pu mettre à jour tes données pour cette version. Elles ont été remises exactement comme avant. Réessaie, ou attends la prochaine mise à jour de flust.",
-        "reset-failed": "L'effacement n'a pas abouti. Réessaie."
+        "reset-failed": "L'effacement n'a pas abouti. Réessaie.",
+        "storage-failed": "flust n'a pas pu lire tes données sur ce téléphone. Tes données n'ont pas été modifiées. Réessaie."
       }
     },
     "reset": {
       "title": "Tes données ne peuvent pas être déchiffrées",
       "reasons": {
         "key-missing": "flust chiffre tes données avec une clé que seul ce téléphone conserve, dans son stockage sécurisé. Cette clé n'est plus là. Cela arrive quand le téléphone est restauré depuis une sauvegarde ou que les données sont transférées sur un autre téléphone, car la clé n'est jamais copiée.",
-        "database-unreadable": "flust chiffre tes données avec une clé que seul ce téléphone conserve, dans son stockage sécurisé. Les données de ce téléphone ne correspondent pas à cette clé, ou le fichier est endommagé, elles ne peuvent donc pas être déchiffrées."
+        "database-unreadable": "flust chiffre tes données avec une clé que seul ce téléphone conserve, dans son stockage sécurisé. Les données de ce téléphone ne correspondent pas à cette clé, ou le fichier est endommagé, elles ne peuvent donc pas être déchiffrées.",
+        "journey-corrupted": "flust peut ouvrir tes données, mais ton parcours y est abîmé : ses dates ne sont pas cohérentes, donc ta série et ton total de jours ne peuvent pas être calculés correctement. Réessayer relira les mêmes données."
       },
-      "noRecovery": "Il n'en existe aucune autre copie. flust n'a ni compte, ni serveur, ni sauvegarde : personne, pas même les personnes qui font flust, ne peut récupérer ces données. Tu peux réessayer, ou les effacer et recommencer.",
+      "noRecovery": "Il n'en existe aucune autre copie. flust n'a ni compte, ni serveur, ni sauvegarde : personne, pas même les personnes qui font flust, ne peut récupérer ces données. Tu peux réessayer, ou les effacer et recommencer.",
       "startOver": "Effacer et recommencer",
       "retry": "Réessayer",
       "confirm": {
-        "title": "Tout effacer ?",
+        "title": "Tout effacer ?",
         "body": "Cela supprime définitivement ton parcours, tes écarts, tes rangs et tous tes réglages de ce téléphone, et flust recommence depuis le début. C'est irréversible.",
         "erase": "Tout effacer",
         "cancel": "Annuler"
       }
+    }
+  },
+  "languages": {
+    "en": "English",
+    "fr": "Français"
+  },
+  "onboarding": {
+    "back": "Retour",
+    "close": "Fermer",
+    "continue": "Continuer",
+    "progress": "Étape {{current}} sur {{total}}",
+    "welcome": {
+      "language": "Langue : {{language}}",
+      "languageHint": "Ouvre la liste des langues",
+      "languageTitle": "Langue",
+      "title": "Reprends le contrôle.",
+      "promise": "Pas de compte, pas de pub, pas de pistage. Tout ce que tu écris reste chiffré sur ton téléphone.",
+      "duration": "Deux minutes pour poser tes bases.",
+      "start": "Commencer",
+      "footer": "Open source, par fnyx-group"
+    },
+    "reasons": {
+      "title": "Pourquoi tu arrêtes ?",
+      "subtitle": "Choisis ce qui te parle. On te le rappellera quand ce sera dur.",
+      "custom": "Écrire la mienne"
+    },
+    "riskMoments": {
+      "title": "Quand est-ce que c'est le plus dur ?",
+      "subtitle": "Connaître tes moments à risque, c'est déjà les désamorcer."
+    },
+    "plan": {
+      "title": "Ton premier plan",
+      "subtitle": "Décide maintenant, à froid. Au moment de l'envie, tu n'auras plus qu'à suivre.",
+      "if": "Si",
+      "then": "Alors",
+      "triggerHint": "Ouvre la liste des moments",
+      "triggerTitle": "Si",
+      "custom": "Autre chose",
+      "customHint": "Écrire ici choisit cette action."
+    },
+    "start": {
+      "title": "Dernière étape",
+      "subtitle": "Choisis ton point de départ.",
+      "label": "Point de départ",
+      "now": "Maintenant",
+      "pickDate": "Choisir une date",
+      "selected": "Point de départ : {{date}}",
+      "finish": "C'est parti",
+      "footer": "Tu pourras modifier tes raisons et tes plans plus tard.",
+      "errors": {
+        "start-in-future": "Ce point de départ est dans le futur. Vérifie la date et l'heure de ton téléphone, ou choisis un autre moment.",
+        "invalid-timestamp": "Ce point de départ ne peut pas être utilisé. Choisis un autre moment.",
+        "save-failed": "Tes réponses n'ont pas pu être enregistrées. Rien n'est perdu. Réessaie."
+      },
+      "picker": {
+        "previousMonth": "Mois précédent",
+        "nextMonth": "Mois suivant",
+        "hour": "Heure",
+        "minute": "Minute",
+        "earlierHour": "Une heure plus tôt",
+        "laterHour": "Une heure plus tard",
+        "earlierMinute": "Cinq minutes plus tôt",
+        "laterMinute": "Cinq minutes plus tard"
+      }
+    }
+  },
+  "presets": {
+    "reasons": {
+      "loved-ones": "Être là pour mes proches",
+      "energy": "Retrouver de l'énergie",
+      "self-esteem": "Retrouver l'estime de moi",
+      "sleep": "Mieux dormir",
+      "focus": "Améliorer ma concentration",
+      "relationship": "Prendre soin de ma relation",
+      "confidence": "Reprendre confiance en moi"
+    },
+    "riskMoments": {
+      "in-bed-at-night": "Le soir au lit",
+      "alone-at-home": "La solitude à la maison",
+      "stress": "Le stress",
+      "tiredness": "La fatigue",
+      "boredom": "L'ennui",
+      "after-social-media": "Après les réseaux sociaux",
+      "after-alcohol": "Après l'alcool",
+      "weekend": "Le week-end"
+    },
+    "triggers": {
+      "urge": "Quand une envie arrive"
+    },
+    "actions": {
+      "phone-out-of-room": "Je pose le téléphone hors de la chambre",
+      "guided-breathing": "Je lance la respiration guidée",
+      "journal-three-lines": "J'écris trois lignes dans le journal",
+      "walk-ten-minutes": "Je sors marcher dix minutes"
     }
   }
 }

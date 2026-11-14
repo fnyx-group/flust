@@ -33,6 +33,8 @@
 - [0009 Source layers](decisions/0009-source-layers.md): domain, data, features, ui and app, enforced by lint.
 - [0010 Domain errors as results](decisions/0010-domain-errors-as-results.md): expected failures are returned, not thrown.
 - [0011 Encrypted SQLite storage](decisions/0011-encrypted-sqlite-storage.md): SQLCipher, a device-only key, startup outcomes and migration backups.
+- [0012 Onboarding flow](decisions/0012-onboarding-flow.md): a journey decides the first screen, a resumable draft, answers saved in one transaction.
+- [0013 Local time to UTC](decisions/0013-local-time-to-utc.md): one tested conversion, with a fixed rule for daylight saving changes.
 
 ## Development
 

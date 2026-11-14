@@ -1,0 +1,24 @@
+# 0012 Onboarding flow
+
+## Context
+
+The onboarding runs once, before anything else. It must resume at the same step with its answers after the app is killed, let the user go back on every step, give defaults to skipped steps, and end with the user's reasons, risk moments and first plan stored as real data that the emergency screen and the reasons and plans editor will read. The app must never show the tabs without a journey, nor the onboarding once a journey exists.
+
+## Decision
+
+- Whether the onboarding is finished is not a flag: it is finished when a journey exists. `SessionGate` loads the journey, the chosen language and, while there is no journey, the draft before the splash screen hides, and the root stack uses `Stack.Protected`: the tabs and the emergency screen need a journey, the onboarding route needs none. Setting the journey after the onboarding makes the router move to the home tab.
+- The onboarding is a single route, `src/app/onboarding.tsx`. The current step is stored in the draft and is the only navigation state, so a relaunch resumes on it and the back button and the Android back button go to the previous step whatever was shown before in the session. The iOS swipe-back gesture does not move between steps.
+- The draft is one row of `onboarding_draft`: the step, and the answers as JSON. A tap is written at once; typing is written when it pauses, when the field loses focus and when the app leaves the foreground. A draft row that cannot be read is a storage failure and offers a retry. Answers are validated when read, and anything invalid inside them falls back to its default instead of blocking the onboarding. Once a journey exists, a late save never writes the draft back.
+- Finishing writes the journey, the reasons, the risk moments and the plan to their own tables (`reason`, `risk_moment`, `plan`) and deletes the draft in one transaction. If any write fails, nothing changes and the onboarding stays on the last step with its answers. The transaction fails rather than replace a journey that already exists. Going back is disabled while it runs.
+- Predefined reasons, risk moments, triggers and actions are stored as stable ids (`src/domain/presets.ts`) translated on display. Text the user writes is stored as text. Each row holds one or the other, enforced by a `CHECK` constraint.
+- Continue is always enabled. A step left empty keeps its default: no reasons, no risk moments, the plan "when an urge hits, start the guided breathing", and a start now. A plan whose risk moment was unselected afterwards falls back to "when an urge hits".
+- The chosen language is a setting, saved only when the user picks one. Without one, the device language applies.
+- This version has the steps up to the start point. The app lock step, with the warning that a forgotten passcode cannot be recovered, and the evening check-in step from [Features](../product/features.md#onboarding) come with the lock and the reminders. They are appended after `start`; a draft saved on `start` by an earlier version then resumes there and continues to the new steps.
+
+## Consequences
+
+- There is no state in which the onboarding is marked done without a journey, or the reverse.
+- An installed database at schema 1 that already has a journey skips the onboarding after migrating.
+- A journey that decrypts but fails validation offers the same two-step reset as an unreadable database, since a retry would read the same data. `SessionGate` reports it to `StorageGate`, which closes storage first. A storage error while loading the journey only offers a retry.
+- The reasons and plans editor will read and write the same tables; the onboarding offers one custom reason and one plan, the tables allow more.
+- Ids in `presets.ts` are stored on devices and are never renamed once released.

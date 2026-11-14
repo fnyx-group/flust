@@ -6,17 +6,20 @@ type ButtonProps = {
   label: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary';
+  disabled?: boolean;
 };
 
-export function Button({ label, onPress, variant = 'primary' }: ButtonProps) {
+export function Button({ label, onPress, variant = 'primary', disabled = false }: ButtonProps) {
   const isPrimary = variant === 'primary';
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
         isPrimary ? styles.primary : styles.secondary,
-        pressed && styles.pressed,
+        (pressed || disabled) && styles.pressed,
       ]}
     >
       <Text style={isPrimary ? styles.primaryLabel : styles.secondaryLabel}>{label}</Text>

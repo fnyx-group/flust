@@ -22,6 +22,7 @@
   | Database from a newer app version       | `schema-too-new`: retry only, the data is kept for the update.     |
   | Migration failed                        | `migration-failed`: the backup is restored, retry only.            |
   | File system or keystore error otherwise | `storage-unavailable`: retry only.                                 |
+  | Journey stored but invalid              | `journey-corrupted`: a reset is offered, after storage is closed.  |
 
   Each step is ordered so that a process killed at any point leads to one of these cases on next launch.
 

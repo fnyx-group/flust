@@ -56,6 +56,16 @@ async function writeJourney(tx: Executor, journey: Journey): Promise<void> {
     [journey.start],
   );
   await tx.run('DELETE FROM lapse');
+  await writeLapses(tx, journey);
+}
+
+// Fails if a journey already exists, so that starting one never replaces the user's history.
+export async function insertJourney(tx: Executor, journey: Journey): Promise<void> {
+  await tx.run('INSERT INTO journey (id, start_at) VALUES (1, ?)', [journey.start]);
+  await writeLapses(tx, journey);
+}
+
+async function writeLapses(tx: Executor, journey: Journey): Promise<void> {
   for (const lapse of journey.lapses) {
     await tx.run('INSERT INTO lapse (at) VALUES (?)', [lapse]);
   }

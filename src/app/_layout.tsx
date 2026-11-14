@@ -11,6 +11,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { I18nextProvider } from 'react-i18next';
 
+import { SessionGate } from '@/features/session/session-gate';
+import { useSession } from '@/features/session/session-context';
 import { StorageGate } from '@/features/storage/storage-gate';
 import { i18n } from '@/lib/i18n';
 import { colors, fonts } from '@/ui/theme';
@@ -49,12 +51,29 @@ export default function RootLayout() {
       <ThemeProvider value={navigationTheme}>
         <StatusBar style="light" />
         <StorageGate>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="emergency" options={{ presentation: 'fullScreenModal' }} />
-          </Stack>
+          <SessionGate>
+            <RootStack />
+          </SessionGate>
         </StorageGate>
       </ThemeProvider>
     </I18nextProvider>
+  );
+}
+
+// Until a journey exists, the onboarding is the only reachable screen. Finishing it sets the
+// journey, and the router then moves to the first screen that became available: the home tab.
+function RootStack() {
+  const { journey } = useSession();
+  const started = journey !== null;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={started}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="emergency" options={{ presentation: 'fullScreenModal' }} />
+      </Stack.Protected>
+      <Stack.Protected guard={!started}>
+        <Stack.Screen name="onboarding" />
+      </Stack.Protected>
+    </Stack>
   );
 }
