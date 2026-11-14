@@ -5,6 +5,7 @@ import { BACKUP_NAME, DATABASE_NAME } from '@/data/storage-deps';
 import { err } from '@/domain/result';
 import { journeyOf, unwrap } from '@test/arbitraries';
 import { createFakeStorage } from '@test/fakes/fake-storage';
+import { seedJourney } from '@test/seed';
 
 const START = Date.UTC(2026, 0, 1);
 const OTHER_KEY = 'cd'.repeat(32);
@@ -35,8 +36,8 @@ function userVersion(fake: ReturnType<typeof createFakeStorage>): unknown {
 async function installed() {
   const fake = createFakeStorage();
   const storage = unwrap(await openStorage(fake.deps));
-  unwrap(await storage.journey.save(journeyOf(START, [START + 1000])));
   await storage.close();
+  await seedJourney(fake, journeyOf(START, [START + 1000]));
   return fake;
 }
 

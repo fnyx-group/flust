@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { toggleRiskMoment } from '@/domain/onboarding';
 import { RISK_MOMENT_IDS } from '@/domain/presets';
-import { riskMomentLabel } from '@/features/onboarding/preset-labels';
+import { riskMomentLabel } from '@/features/shared/preset-labels';
 import { StepLayout } from '@/features/onboarding/step-layout';
 import type { StepProps } from '@/features/onboarding/step-props';
 import { ChipList } from '@/ui/chip-list';

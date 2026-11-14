@@ -37,6 +37,20 @@ export const typography = {
   unlockRankName: { fontFamily: fonts.extraBold, fontSize: 40, lineHeight: 46 },
   unlockLabel: { fontFamily: fonts.bold, fontSize: 14, letterSpacing: 3 },
   selectValue: { fontFamily: fonts.extraBold, fontSize: 17 },
+  countdown: { fontFamily: fonts.numberSemiBold, fontSize: 22, fontVariant: ['tabular-nums'] },
+  breathingCount: {
+    fontFamily: fonts.numberSemiBold,
+    fontSize: 56,
+    lineHeight: 60,
+    fontVariant: ['tabular-nums'],
+  },
+  summaryNumber: {
+    fontFamily: fonts.numberSemiBold,
+    fontSize: 48,
+    lineHeight: 52,
+    fontVariant: ['tabular-nums'],
+  },
+  breathingPhase: { fontFamily: fonts.semiBold, fontSize: 20 },
   stepperValue: { fontFamily: fonts.numberSemiBold, fontSize: 32, fontVariant: ['tabular-nums'] },
   calendarDay: { fontFamily: fonts.numberMedium, fontSize: 18, fontVariant: ['tabular-nums'] },
   row: { fontFamily: fonts.semiBold, fontSize: 15 },
@@ -114,6 +128,9 @@ export const sizes = {
   currentRankOutline: 1.5,
   weekBarHeight: 6,
   quoteBarWidth: 3,
+  breathingRing: 220,
+  breathingCircle: 170,
+  breathingStroke: 3,
   // The narrowest screen width the streak counter sizes are chosen for.
   counterDesignWidth: 360,
 } as const;

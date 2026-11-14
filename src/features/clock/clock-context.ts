@@ -1,9 +1,9 @@
 import { createContext, use, useMemo, useSyncExternalStore } from 'react';
 
 import type { Timestamp } from '@/domain/time';
-import { selectFromClock, type MinuteClock } from '@/features/clock/minute-clock';
+import { selectFromClock, type TickClock } from '@/features/clock/minute-clock';
 
-export const ClockContext = createContext<MinuteClock | null>(null);
+export const ClockContext = createContext<TickClock | null>(null);
 
 // Only the components that call this re-render on a tick, and only when the selected value
 // changes, by Object.is or by `isEqual`: a selector returning the local day re-renders once a day.

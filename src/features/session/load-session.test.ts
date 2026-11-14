@@ -5,6 +5,7 @@ import { loadSession } from '@/features/session/load-session';
 import { i18n } from '@/lib/i18n';
 import { journeyOf, unwrap } from '@test/arbitraries';
 import { createFakeStorage } from '@test/fakes/fake-storage';
+import { seedJourney } from '@test/seed';
 
 const START = Date.UTC(2026, 0, 1);
 const initialLanguage = i18n.language;
@@ -21,19 +22,19 @@ describe('loadSession', () => {
   });
 
   it('loads the journey and applies the chosen language', async () => {
-    const { storage } = await setUp();
-    unwrap(await storage.journey.save(journeyOf(START)));
+    const { storage, rawDatabase } = await setUp();
+    await seedJourney({ rawDatabase }, journeyOf(START));
     unwrap(await storage.settings.saveLanguage('fr'));
 
     expect(await loadSession(storage)).toEqual(
-      ok({ journey: journeyOf(START), draft: EMPTY_DRAFT, unlockedRanks: [] }),
+      ok({ journey: journeyOf(START), draft: EMPTY_DRAFT, unlockedRanks: [], latestLapse: null }),
     );
     expect(i18n.language).toBe('fr');
   });
 
   it('loads the ranks stored as unlocked with the journey', async () => {
-    const { storage } = await setUp();
-    unwrap(await storage.journey.save(journeyOf(START)));
+    const { storage, rawDatabase } = await setUp();
+    await seedJourney({ rawDatabase }, journeyOf(START));
     unwrap(await storage.ranks.unlock(['novice', 'apprentice']));
 
     expect(await loadSession(storage)).toEqual(
@@ -41,13 +42,46 @@ describe('loadSession', () => {
         journey: journeyOf(START),
         draft: EMPTY_DRAFT,
         unlockedRanks: ['novice', 'apprentice'],
+        latestLapse: null,
       }),
     );
   });
 
+  it('loads the last lapse logged, so home can offer to undo it', async () => {
+    const { storage, rawDatabase } = await setUp();
+    await seedJourney({ rawDatabase }, journeyOf(START));
+    const recorded = unwrap(
+      await storage.lapses.record({
+        at: START + 1000,
+        recordedAt: START + 2000,
+        details: null,
+        planChange: null,
+      }),
+    );
+
+    expect(await loadSession(storage)).toEqual(
+      ok({
+        journey: journeyOf(START, [START + 1000]),
+        draft: EMPTY_DRAFT,
+        unlockedRanks: [],
+        latestLapse: recorded,
+      }),
+    );
+  });
+
+  it('reports lapses that cannot be read as a storage failure', async () => {
+    const { storage, rawDatabase } = await setUp();
+    await seedJourney({ rawDatabase }, journeyOf(START));
+    const raw = await rawDatabase();
+    await raw.exec('ALTER TABLE lapse RENAME COLUMN recorded_at TO logged_at');
+    await raw.close();
+
+    expect(await loadSession(storage)).toEqual(err('storage-failed'));
+  });
+
   it('reports unlocked ranks that cannot be read as a storage failure', async () => {
     const { storage, rawDatabase } = await setUp();
-    unwrap(await storage.journey.save(journeyOf(START)));
+    await seedJourney({ rawDatabase }, journeyOf(START));
     const raw = await rawDatabase();
     await raw.exec('DROP TABLE unlocked_rank');
     await raw.close();
@@ -66,7 +100,7 @@ describe('loadSession', () => {
   it('starts an empty onboarding when nothing was answered yet', async () => {
     const { storage } = await setUp();
     expect(await loadSession(storage)).toEqual(
-      ok({ journey: null, draft: EMPTY_DRAFT, unlockedRanks: [] }),
+      ok({ journey: null, draft: EMPTY_DRAFT, unlockedRanks: [], latestLapse: null }),
     );
   });
 
@@ -78,14 +112,16 @@ describe('loadSession', () => {
     };
     unwrap(await storage.onboarding.saveDraft(draft));
 
-    expect(await loadSession(storage)).toEqual(ok({ journey: null, draft, unlockedRanks: [] }));
+    expect(await loadSession(storage)).toEqual(
+      ok({ journey: null, draft, unlockedRanks: [], latestLapse: null }),
+    );
   });
 
   // A corrupted journey used to be reported like a storage failure, which only offered a retry
   // that reads the same data again.
   it('reports a corrupted journey as such, so that a reset is offered', async () => {
     const { storage, rawDatabase } = await setUp();
-    unwrap(await storage.journey.save(journeyOf(START)));
+    await seedJourney({ rawDatabase }, journeyOf(START));
     const raw = await rawDatabase();
     await raw.run('INSERT INTO lapse (at) VALUES (?)', [START - 1]);
     await raw.close();

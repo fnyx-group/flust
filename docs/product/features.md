@@ -38,11 +38,12 @@ Ranks reward total clean days. A dedicated screen lists all ranks, and a rank un
 
 The emergency screen helps the user get through an urge. It contains:
 
-- an urge surfing timer,
+- a 20 minute urge surfing countdown,
 - guided breathing: 4 seconds in, 4 seconds hold, 6 seconds out,
-- the user's if/then plan,
-- help actions,
+- the user's if/then plan and reasons,
 - two exits: "I held on" and "I had a lapse".
+
+Each visit is recorded with its start, end and outcome, for future statistics. Help actions, such as a video from a good day, writing to someone or help resources, are added with the features they open.
 
 ### Lapse screen
 

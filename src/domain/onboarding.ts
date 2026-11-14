@@ -117,6 +117,15 @@ export function effectivePlan(answers: OnboardingAnswers): Plan {
     : { ...plan, trigger: URGE_TRIGGER };
 }
 
+export function samePlan(a: Plan, b: Plan): boolean {
+  return a.trigger === b.trigger && sameAction(a.action, b.action);
+}
+
+function sameAction(a: PlanAction, b: PlanAction): boolean {
+  if (a.kind === 'preset') return b.kind === 'preset' && a.id === b.id;
+  return b.kind === 'custom' && a.text === b.text;
+}
+
 export function finishOnboarding(
   answers: OnboardingAnswers,
   now: Timestamp,

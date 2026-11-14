@@ -62,7 +62,6 @@
     "typecheck": "tsc --noEmit",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
-    "knip": "knip",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

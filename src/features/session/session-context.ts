@@ -1,6 +1,7 @@
 import { createContext, use } from 'react';
 
 import type { Journey } from '@/domain/journey';
+import type { LapseRecord } from '@/domain/lapse';
 import type { OnboardingDraft } from '@/domain/onboarding';
 import type { RankId } from '@/domain/ranks';
 
@@ -11,7 +12,11 @@ export type Session = {
   readonly draft: OnboardingDraft;
   // Ranks stored as unlocked, which the rank shown can never fall below.
   readonly unlockedRanks: readonly RankId[];
+  // The last lapse logged, for undo and the hours that follow it.
+  readonly latestLapse: LapseRecord | null;
   setJourney(journey: Journey): void;
+  // Called once a lapse is stored or undone, with the journey and the last lapse that follow.
+  setLapses(journey: Journey, latestLapse: LapseRecord | null): void;
   // Stores newly unlocked ranks and adds them to the session. Returns false when they were
   // already announced in this run, so the unlock screen is never shown twice for a rank.
   announceUnlock(ids: readonly RankId[]): boolean;

@@ -71,6 +71,10 @@ function RootStack() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="emergency" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen
+          name="lapse"
+          options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+        />
+        <Stack.Screen
           name="rank-unlocked"
           options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
         />

@@ -4,6 +4,7 @@ import { BACKUP_NAME, DATABASE_NAME } from '@/data/storage-deps';
 import { err, ok } from '@/domain/result';
 import { journeyOf, unwrap } from '@test/arbitraries';
 import { createFakeStorage } from '@test/fakes/fake-storage';
+import { seedJourney } from '@test/seed';
 
 const OTHER_KEY = 'cd'.repeat(32);
 
@@ -11,8 +12,8 @@ const OTHER_KEY = 'cd'.repeat(32);
 async function unreadable() {
   const fake = createFakeStorage();
   const storage = unwrap(await openStorage(fake.deps));
-  unwrap(await storage.journey.save(journeyOf(Date.UTC(2026, 0, 1))));
   await storage.close();
+  await seedJourney(fake, journeyOf(Date.UTC(2026, 0, 1)));
   await fake.disk.files.copy(DATABASE_NAME, BACKUP_NAME);
   fake.keyStore.value = OTHER_KEY;
   return fake;

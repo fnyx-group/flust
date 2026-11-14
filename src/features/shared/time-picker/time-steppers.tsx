@@ -2,15 +2,15 @@ import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { utcToLocal, type UtcOffsetAt } from '@/domain/local-time';
-import { stepHour, stepMinute, type StartBounds } from '@/domain/start-point';
+import { stepHour, stepMinute, type TimeBounds } from '@/domain/start-point';
 import type { Timestamp } from '@/domain/time';
-import { formatHour, formatMinute } from '@/features/onboarding/start-picker/format';
+import { formatHour, formatMinute } from '@/features/shared/time-picker/format';
 import { Stepper } from '@/ui/stepper';
 import { spacing } from '@/ui/theme';
 
 type TimeSteppersProps = {
   selected: Timestamp;
-  bounds: StartBounds;
+  bounds: TimeBounds;
   offsetAt: UtcOffsetAt;
   hour12: boolean;
   onSelect: (at: Timestamp) => void;
@@ -27,20 +27,20 @@ export function TimeSteppers({ selected, bounds, offsetAt, hour12, onSelect }: T
   return (
     <View style={styles.row}>
       <Stepper
-        label={t('onboarding.start.picker.hour')}
+        label={t('timePicker.hour')}
         value={formatHour(i18n.language, hour, hour12)}
-        decrementLabel={t('onboarding.start.picker.earlierHour')}
-        incrementLabel={t('onboarding.start.picker.laterHour')}
+        decrementLabel={t('timePicker.earlierHour')}
+        incrementLabel={t('timePicker.laterHour')}
         canDecrement={earlierHour !== selected}
         canIncrement={laterHour !== selected}
         onDecrement={() => onSelect(earlierHour)}
         onIncrement={() => onSelect(laterHour)}
       />
       <Stepper
-        label={t('onboarding.start.picker.minute')}
+        label={t('timePicker.minute')}
         value={formatMinute(minute)}
-        decrementLabel={t('onboarding.start.picker.earlierMinute')}
-        incrementLabel={t('onboarding.start.picker.laterMinute')}
+        decrementLabel={t('timePicker.earlierMinute')}
+        incrementLabel={t('timePicker.laterMinute')}
         canDecrement={earlierMinute !== selected}
         canIncrement={laterMinute !== selected}
         onDecrement={() => onSelect(earlierMinute)}

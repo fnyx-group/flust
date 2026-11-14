@@ -33,10 +33,21 @@ export const ACTION_IDS = [
   'walk-ten-minutes',
 ] as const;
 
+// Where a lapse happened, asked on the lapse screen.
+export const PLACE_IDS = [
+  'bedroom',
+  'bathroom',
+  'living-room',
+  'work',
+  'transport',
+  'elsewhere',
+] as const;
+
 export type ReasonId = (typeof REASON_IDS)[number];
 export type RiskMomentId = (typeof RISK_MOMENT_IDS)[number];
 export type PlanTrigger = RiskMomentId | typeof URGE_TRIGGER;
 export type ActionId = (typeof ACTION_IDS)[number];
+export type PlaceId = (typeof PLACE_IDS)[number];
 
 export const isReasonId = isOneOf(REASON_IDS);
 
@@ -47,3 +58,5 @@ export function isPlanTrigger(value: unknown): value is PlanTrigger {
 }
 
 export const isActionId = isOneOf(ACTION_IDS);
+
+export const isPlaceId = isOneOf(PLACE_IDS);

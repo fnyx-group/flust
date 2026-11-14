@@ -37,11 +37,65 @@
     "week": {
       "summary_one": "{{count}} clean day in the last 7",
       "summary_other": "{{count}} clean days in the last 7"
+    },
+    "lapse": {
+      "link": "I had a lapse",
+      "noted": "Lapse noted",
+      "undo": "Undo",
+      "undoSpoken": "Undo the lapse you noted",
+      "undoFailed": "The lapse could not be undone. Try again.",
+      "support": "The next few hours matter. You've already done the hardest part by noting it."
     }
   },
   "emergency": {
-    "title": "Emergency",
-    "close": "Close"
+    "close": "Close",
+    "title": "Let the wave pass.",
+    "subtitle": "An urge rises, peaks and falls, often within 15 to 30 minutes.",
+    "countdownSpoken": "{{time}} left",
+    "countdownTime": "{{minutes}} {{seconds}}",
+    "waveOver": "Has the wave passed?",
+    "breathing": {
+      "inhale": "Breathe in",
+      "hold": "Hold",
+      "exhale": "Breathe out",
+      "rhythm": "Breathe in 4 s, hold 4 s, breathe out 6 s"
+    },
+    "plan": "Your plan",
+    "reasons": "Your reasons",
+    "held": "I held on",
+    "lapse": "I had a lapse"
+  },
+  "lapse": {
+    "back": "Back",
+    "skip": "Skip",
+    "title": "A lapse, not a reset.",
+    "subtitle": "Your clean days are yours to keep. We start again from here.",
+    "total_one": "clean day, kept",
+    "total_other": "clean days, kept",
+    "streakDays_one": "day, streak ended",
+    "streakDays_other": "days, streak ended",
+    "streakHours": "streak ended",
+    "streakHoursValue": "{{hours}} h {{minutes}}",
+    "rank": "Your rank stays {{name}}.",
+    "whatHappened": "What happened",
+    "where": "Where",
+    "whereHint": "Opens the list of places",
+    "whereTitle": "Where",
+    "notSet": "Not set",
+    "when": "When",
+    "now": "Now",
+    "earlier": "Earlier",
+    "selected": "Time: {{date}}",
+    "context": "Context",
+    "nextTime": "Next time",
+    "save": "Save and start again",
+    "errors": {
+      "lapse-in-future": "This time is in the future. Check your phone's date and time, or choose another moment.",
+      "lapse-before-last": "This time is before your last lapse. Check your phone's date and time, or choose another moment.",
+      "lapse-before-start": "This time is before your starting point. Choose another moment.",
+      "invalid-timestamp": "This time can't be used. Choose another moment.",
+      "save-failed": "The lapse could not be saved. Nothing has changed. Try again."
+    }
   },
   "units": {
     "day_one": "{{count}} day",
@@ -49,7 +103,19 @@
     "hour_one": "{{count}} hour",
     "hour_other": "{{count}} hours",
     "minute_one": "{{count}} minute",
-    "minute_other": "{{count}} minutes"
+    "minute_other": "{{count}} minutes",
+    "second_one": "{{count}} second",
+    "second_other": "{{count}} seconds"
+  },
+  "timePicker": {
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "hour": "Hour",
+    "minute": "Minute",
+    "earlierHour": "One hour earlier",
+    "laterHour": "One hour later",
+    "earlierMinute": "Five minutes earlier",
+    "laterMinute": "Five minutes later"
   },
   "storage": {
     "retry": {
@@ -134,16 +200,6 @@
         "start-in-future": "This starting point is in the future. Check your phone's date and time, or pick another moment.",
         "invalid-timestamp": "This starting point can't be used. Pick another moment.",
         "save-failed": "Your answers could not be saved. Nothing was lost. Try again."
-      },
-      "picker": {
-        "previousMonth": "Previous month",
-        "nextMonth": "Next month",
-        "hour": "Hour",
-        "minute": "Minute",
-        "earlierHour": "One hour earlier",
-        "laterHour": "One hour later",
-        "earlierMinute": "Five minutes earlier",
-        "laterMinute": "Five minutes later"
       }
     }
   },
@@ -175,6 +231,35 @@
       "guided-breathing": "I start the guided breathing",
       "journal-three-lines": "I write three lines in the journal",
       "walk-ten-minutes": "I go out for a ten-minute walk"
+    },
+    "places": {
+      "bedroom": "Bedroom",
+      "bathroom": "Bathroom",
+      "living-room": "Living room",
+      "work": "Work",
+      "transport": "Transport",
+      "elsewhere": "Elsewhere"
+    },
+    "sentences": {
+      "plan": "If {{condition}}, then {{action}}.",
+      "planCustom": "If {{condition}}, then: {{action}}",
+      "conditions": {
+        "urge": "an urge hits",
+        "in-bed-at-night": "I'm in bed at night",
+        "alone-at-home": "I'm alone at home",
+        "stress": "stress builds up",
+        "tiredness": "tiredness takes over",
+        "boredom": "boredom sets in",
+        "after-social-media": "I've just spent time on social media",
+        "after-alcohol": "I've been drinking",
+        "weekend": "it's the weekend"
+      },
+      "actions": {
+        "phone-out-of-room": "I put my phone outside the bedroom",
+        "guided-breathing": "I start the guided breathing",
+        "journal-three-lines": "I write three lines in the journal",
+        "walk-ten-minutes": "I go out for a ten-minute walk"
+      }
     }
   },
   "ranks": {

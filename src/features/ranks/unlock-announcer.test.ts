@@ -6,6 +6,7 @@ import { createUnlockAnnouncer } from '@/features/ranks/unlock-announcer';
 import { loadSession } from '@/features/session/load-session';
 import { journeyOf, unwrap } from '@test/arbitraries';
 import { createFakeStorage } from '@test/fakes/fake-storage';
+import { seedJourney } from '@test/seed';
 
 jest.mock('expo-localization', () => ({ getLocales: () => [{ languageCode: 'en' }] }));
 
@@ -60,7 +61,7 @@ describe('createUnlockAnnouncer', () => {
     const now = start + 20 * MS_PER_DAY;
     const fake = createFakeStorage();
     const storage = unwrap(await openStorage(fake.deps));
-    unwrap(await storage.journey.save(journeyOf(start)));
+    await seedJourney(fake, journeyOf(start));
 
     const pending = pendingUnlock(journeyOf(start), [], now);
     const ids = pending ? [...pending.unlock.others, pending.unlock.highest].map((r) => r.id) : [];
