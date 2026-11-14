@@ -2,11 +2,12 @@
 
 ## Tooling
 
-Jest with the `jest-expo` preset, configured in `package.json`. Run the suite with:
+Jest with the `jest-expo` preset, configured in `jest.config.js`. Run the suite with:
 
     pnpm test
+    pnpm test:coverage   # with coverage thresholds, as in CI
 
-CI runs it right after the typecheck.
+CI runs it with coverage right after the typecheck. Network access fails any test, and `src/domain/` and `src/data/` have coverage thresholds: see [Conventions](conventions.md#tests).
 
 ## What to test
 

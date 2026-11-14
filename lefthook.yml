@@ -9,8 +9,8 @@ pre-commit:
             glob: '*.{js,mjs,cjs,ts,tsx,json,md,yml,yaml}'
             run: pnpm prettier --check --ignore-unknown {staged_files}
           - name: eslint
-            glob: '*.{js,mjs,cjs,ts,tsx}'
-            run: pnpm eslint --max-warnings 0 {staged_files}
+            glob: '*.{js,mjs,cjs,jsx,ts,tsx}'
+            run: pnpm lint {staged_files}
           - name: typecheck
             run: pnpm tsc --noEmit
     - name: gitleaks

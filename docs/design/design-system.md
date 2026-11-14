@@ -36,6 +36,8 @@ Counters use tabular numbers so digits do not shift as they change.
 | Screen title                       | 28    | 800    |                      |
 | Rank name                          | 22    | 800    |                      |
 | Row                                | 15    | 600    |                      |
+| Primary button                     | 17    | 800    | Text on accent       |
+| Secondary button                   | 15    | 600    |                      |
 | Body                               | 15-16 | 400    |                      |
 | Label                              | 13    | 600    | Secondary text color |
 | Caption                            | 12    | 400    |                      |

@@ -14,9 +14,11 @@ All user data stays on the device, encrypted. No accounts, no ads, no analytics,
 ## Layout
 
     src/app/        routes only: every file is a screen, `_layout.tsx` defines navigators
-    src/features/   journal, streak, emergency, blocking
-    src/lib/        crypto, storage, shared utilities
-    src/ui/         shared components
+    src/features/   screens and hooks: journal, streak, emergency, blocking
+    src/domain/     pure logic: streaks, ranks, dates
+    src/data/       storage and crypto
+    src/ui/         shared components and theme
+    src/lib/        shared infrastructure such as i18n
     modules/        native code
     assets/         brand and images
     docs/           architecture, security, decisions, development guides
@@ -49,6 +51,7 @@ Lint, typecheck, tests and format check must pass before any change is considere
 
 ## Code style
 
+- Layers, lint rules and tooling are described in `docs/development/conventions.md`; follow them.
 - Self-explanatory code.
 - Comments are written in English, only to explain a non-obvious reason (why, not what). Short, precise, no filler.
 - No commented-out code, no banner comments, no emojis.

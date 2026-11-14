@@ -1,0 +1,22 @@
+{
+  "app": {
+    "name": "flust"
+  },
+  "tabs": {
+    "home": "Home",
+    "journal": "Journal",
+    "ranks": "Ranks",
+    "settings": "Settings"
+  },
+  "home": {
+    "urgeButton": "I have an urge"
+  },
+  "emergency": {
+    "title": "Emergency",
+    "close": "Close"
+  },
+  "units": {
+    "day_one": "{{count}} day",
+    "day_other": "{{count}} days"
+  }
+}

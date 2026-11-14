@@ -1,0 +1,22 @@
+{
+  "app": {
+    "name": "flust"
+  },
+  "tabs": {
+    "home": "Accueil",
+    "journal": "Journal",
+    "ranks": "Rangs",
+    "settings": "Réglages"
+  },
+  "home": {
+    "urgeButton": "J'ai une envie"
+  },
+  "emergency": {
+    "title": "Urgence",
+    "close": "Fermer"
+  },
+  "units": {
+    "day_one": "{{count}} jour",
+    "day_other": "{{count}} jours"
+  }
+}
