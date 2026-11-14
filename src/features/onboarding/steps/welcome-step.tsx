@@ -14,7 +14,7 @@ import { Button } from '@/ui/button';
 import { GlobeIcon } from '@/ui/icons/globe-icon';
 import { OptionSheet } from '@/ui/option-sheet';
 import { Screen } from '@/ui/screen';
-import { colors, radii, sizes, typography } from '@/ui/theme';
+import { colors, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type WelcomeStepProps = {
   onStart: () => void;
@@ -96,20 +96,20 @@ const styles = StyleSheet.create({
     minHeight: sizes.touchTarget,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
+    gap: spacing.s,
+    paddingHorizontal: spacing.l,
     borderRadius: radii.pill,
     backgroundColor: colors.surface,
   },
   pressed: {
-    opacity: 0.8,
+    opacity: pressedOpacity,
   },
   languageLabel: {
     ...typography.row,
     color: colors.text,
   },
   body: {
-    gap: 24,
+    gap: spacing.xl,
   },
   title: {
     ...typography.welcomeTitle,
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   footer: {
-    gap: 16,
+    gap: spacing.l,
   },
   caption: {
     ...typography.caption,

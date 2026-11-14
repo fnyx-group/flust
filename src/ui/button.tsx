@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { colors, radii, sizes, typography } from '@/ui/theme';
+import { colors, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type ButtonProps = {
   label: string;
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   // A minimum height lets the label grow with large text instead of being clipped.
   primary: {
     minHeight: sizes.primaryButtonHeight,
-    paddingVertical: 12,
+    paddingVertical: spacing.m,
     paddingHorizontal: 20,
     borderRadius: radii.primaryButton,
     backgroundColor: colors.accent,
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   secondary: {
     minHeight: sizes.secondaryButtonHeight,
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.l,
     borderRadius: radii.secondaryButton,
     borderWidth: 1,
     borderColor: colors.separator,
@@ -47,12 +47,12 @@ const styles = StyleSheet.create({
   plain: {
     minHeight: sizes.secondaryButtonHeight,
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.l,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pressed: {
-    opacity: 0.8,
+    opacity: pressedOpacity,
   },
   label: {
     textAlign: 'center',

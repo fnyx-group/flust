@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { colors } from '@/ui/theme';
+import { colors, spacing } from '@/ui/theme';
 
 type ProgressBarProps = {
   current: number;
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
   bar: {
     flex: 1,
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.s,
   },
   segment: {
     flex: 1,

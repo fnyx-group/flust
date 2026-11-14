@@ -15,7 +15,7 @@ import { TimeSteppers } from '@/features/onboarding/start-picker/time-steppers';
 import { useSession } from '@/features/session/session-context';
 import { useStorage } from '@/features/storage/storage-context';
 import { SegmentedControl } from '@/ui/segmented-control';
-import { colors, typography } from '@/ui/theme';
+import { colors, spacing, typography } from '@/ui/theme';
 
 type StartStepProps = Pick<StepProps, 'answers' | 'onChange' | 'progress' | 'onBack'>;
 
@@ -138,11 +138,11 @@ export function StartStep({ answers, onChange, progress, onBack }: StartStepProp
 
 const styles = StyleSheet.create({
   section: {
-    gap: 12,
+    gap: spacing.m,
   },
   label: {
     ...typography.label,
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing.xs,
   },
   selected: {
     ...typography.row,

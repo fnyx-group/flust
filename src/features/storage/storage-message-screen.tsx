@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '@/ui/screen';
 import { ScreenTitle } from '@/ui/screen-title';
-import { colors, typography } from '@/ui/theme';
+import { colors, spacing, typography } from '@/ui/theme';
 
 type StorageMessageScreenProps = {
   title: string;
@@ -30,13 +30,13 @@ export function StorageMessageScreen({ title, paragraphs, actions }: StorageMess
 const styles = StyleSheet.create({
   content: {
     flex: 1,
-    gap: 16,
+    gap: spacing.l,
   },
   paragraph: {
     ...typography.bodyLarge,
     color: colors.textSecondary,
   },
   actions: {
-    gap: 12,
+    gap: spacing.m,
   },
 });

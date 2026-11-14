@@ -76,8 +76,8 @@ const styles = StyleSheet.create({
   },
   sheet: {
     maxHeight: '85%',
-    gap: 16,
-    paddingTop: 24,
+    gap: spacing.l,
+    paddingTop: spacing.xl,
     paddingHorizontal: spacing.screen,
     borderTopLeftRadius: radii.cardLarge,
     borderTopRightRadius: radii.cardLarge,

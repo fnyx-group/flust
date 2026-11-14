@@ -19,7 +19,7 @@ import {
 import { IconButton } from '@/ui/icon-button';
 import { BackIcon } from '@/ui/icons/back-icon';
 import { ForwardIcon } from '@/ui/icons/forward-icon';
-import { colors, fonts, radii, sizes, typography } from '@/ui/theme';
+import { colors, fonts, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type CalendarProps = {
   selected: Timestamp;
@@ -132,8 +132,8 @@ function chunk<T>(items: readonly T[], size: number): T[][] {
 
 const styles = StyleSheet.create({
   calendar: {
-    gap: 4,
-    padding: 12,
+    gap: spacing.xs,
+    padding: spacing.m,
     borderRadius: radii.card,
     backgroundColor: colors.surface,
   },
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: spacing.s,
   },
   month: {
     ...typography.row,
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     minWidth: sizes.touchTarget - 4,
     minHeight: sizes.touchTarget - 4,
     aspectRatio: 1,
-    paddingHorizontal: 2,
+    paddingHorizontal: spacing.xxs,
     borderRadius: radii.pill,
     alignItems: 'center',
     justifyContent: 'center',
