@@ -35,6 +35,6 @@
 
 ## Development
 
-- [Setup](development/setup.md): local environment and first run.
+- [Setup](development/setup.md): local environment, first run and development builds.
 - [Conventions](development/conventions.md): code style, layers, lint rules, commits, branches, pull requests.
 - [Testing](development/testing.md): what to test, where, and how.
