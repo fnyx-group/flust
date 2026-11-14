@@ -1,7 +1,7 @@
 import type { BottomTabBarButtonProps } from 'expo-router/js-tabs';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { colors, radii } from '@/ui/theme';
+import { colors, radii, spacing } from '@/ui/theme';
 
 // Replaces the default Android ripple, which is borderless and spreads over the neighboring tabs,
 // with a highlight that stays inside the tab, the same on both platforms. Only the props a
@@ -43,14 +43,14 @@ export function TabBarButton({
 const styles = StyleSheet.create({
   highlight: {
     position: 'absolute',
-    top: 4,
-    bottom: 4,
-    left: 4,
-    right: 4,
+    top: spacing.xs,
+    bottom: spacing.xs,
+    left: spacing.xs,
+    right: spacing.xs,
     pointerEvents: 'none',
     borderRadius: radii.tabHighlight,
   },
   pressed: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.separator,
   },
 });

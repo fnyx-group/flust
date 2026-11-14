@@ -1,4 +1,6 @@
-import { MS_PER_DAY } from '@/domain/time';
+import type { Journey } from '@/domain/journey';
+import { currentStreakMs, totalCleanDays } from '@/domain/streak';
+import { MS_PER_DAY, type Timestamp } from '@/domain/time';
 
 type RankDefinition = {
   readonly id: string;
@@ -90,30 +92,31 @@ function toUnlock(newlyUnlocked: readonly Rank[]): RankUnlock | null {
 }
 
 // Without a rank, total clean days are 0, so every segment is shorter than a day and the first
-// day completes when the current streak reaches 24 hours.
+// day completes when the current streak reaches 24 hours. The streak is clamped to that day, so a
+// clock set before the streak start never shows more than 24 hours left.
 export function rankStanding(
-  progress: RankProgress,
-  totalCleanDays: number,
-  streakMs: number,
+  journey: Journey,
+  unlockedRanks: readonly RankId[],
+  now: Timestamp,
 ): RankStanding {
+  const total = totalCleanDays(journey, now);
+  const progress = rankProgress(unlockedRanks, total);
   if (progress.current === null) {
+    const elapsed = Math.min(MS_PER_DAY, Math.max(0, currentStreakMs(journey, now)));
     return {
       status: 'pending',
       first: FIRST_RANK,
-      fraction: clampFraction(streakMs / MS_PER_DAY),
-      msLeft: Math.max(0, MS_PER_DAY - streakMs),
+      fraction: elapsed / MS_PER_DAY,
+      msLeft: MS_PER_DAY - elapsed,
     };
   }
+  // The next rank is above every unlocked one, so its threshold is above the total.
   const next = progress.next?.rank ?? null;
   return {
     status: 'ranked',
     current: progress.current,
     next,
-    totalCleanDays,
-    fraction: next ? clampFraction(totalCleanDays / next.threshold) : 1,
+    totalCleanDays: total,
+    fraction: next ? total / next.threshold : 1,
   };
-}
-
-function clampFraction(value: number): number {
-  return Math.min(1, Math.max(0, value));
 }

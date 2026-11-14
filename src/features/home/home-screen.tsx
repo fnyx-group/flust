@@ -16,6 +16,7 @@ import { useSession } from '@/features/session/session-context';
 import { BrandHeader } from '@/ui/brand/brand-header';
 import { Button } from '@/ui/button';
 import { Screen } from '@/ui/screen';
+import { spacing } from '@/ui/theme';
 
 export function HomeScreen() {
   const { journey, unlockedRanks } = useSession();
@@ -71,15 +72,15 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   counter: {
-    marginTop: 40,
-    marginBottom: 24,
+    marginTop: spacing.xxxl,
+    marginBottom: spacing.xl,
   },
   quote: {
-    marginTop: 32,
+    marginTop: spacing.xxl,
   },
   action: {
     flexGrow: 1,
     justifyContent: 'flex-end',
-    paddingTop: 32,
+    paddingTop: spacing.xxl,
   },
 });

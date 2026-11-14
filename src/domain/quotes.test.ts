@@ -1,9 +1,9 @@
 import * as fc from 'fast-check';
 
-import { localDayNumber } from '@/domain/local-time';
+import { localDayNumber, localToUtc, utcToLocal } from '@/domain/local-time';
 import { QUOTES, quoteOfTheDay } from '@/domain/quotes';
-import { MS_PER_DAY, MS_PER_HOUR } from '@/domain/time';
-import { timestamp } from '@test/arbitraries';
+import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE } from '@/domain/time';
+import { timestamp, unwrap } from '@test/arbitraries';
 import { fixedOffset, zoneOffsetAt } from '@test/zones';
 
 const paris = zoneOffsetAt('Europe/Paris');
@@ -14,9 +14,16 @@ describe('QUOTES', () => {
     expect(new Set(QUOTES.map((quote) => quote.id)).size).toBe(30);
   });
 
-  it('names an author only for the ancient lines', () => {
-    const authors = new Set(QUOTES.map((quote) => quote.author));
-    expect(authors).toEqual(new Set([null, 'epictetus', 'seneca', 'marcus-aurelius']));
+  // The order of docs/product/quotes.md: ancient, original, ancient, ancient, original, with the
+  // ancient authors taking turns.
+  it('follows the documented order of authors', () => {
+    const E = 'epictetus';
+    const S = 'seneca';
+    const M = 'marcus-aurelius';
+    const O = null;
+    expect(QUOTES.map((quote) => quote.author)).toEqual(
+      Array.from({ length: 6 }, () => [E, O, S, M, O]).flat(),
+    );
   });
 });
 
@@ -41,6 +48,28 @@ describe('quoteOfTheDay', () => {
 
   it('still shows a quote when the clock is before the start', () => {
     expect(quoteOfTheDay(start, start - MS_PER_DAY, paris)).toBe(QUOTES[29]);
+  });
+
+  it('counts local days across a daylight saving change', () => {
+    // Local midnight on 1 July in Paris, in summer time, 172 days after a winter start.
+    const summerMidnight = Date.UTC(2026, 5, 30, 22);
+    expect(quoteOfTheDay(start, summerMidnight - 1, paris)).toBe(QUOTES[21]);
+    expect(quoteOfTheDay(start, summerMidnight, paris)).toBe(QUOTES[22]);
+  });
+
+  it('is the same from midnight to the end of the day in a zone with daylight saving', () => {
+    fc.assert(
+      fc.property(timestamp, timestamp, (begin, now) => {
+        const { year, month, day } = utcToLocal(now, paris);
+        const midnight = unwrap(localToUtc({ year, month, day, hour: 0, minute: 0 }, paris));
+        const lastMinute = unwrap(localToUtc({ year, month, day, hour: 23, minute: 59 }, paris));
+        const quote = quoteOfTheDay(begin, midnight, paris);
+        return (
+          quoteOfTheDay(begin, now, paris) === quote &&
+          quoteOfTheDay(begin, lastMinute + MS_PER_MINUTE - 1, paris) === quote
+        );
+      }),
+    );
   });
 
   it('is the same all day', () => {

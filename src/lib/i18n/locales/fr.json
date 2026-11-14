@@ -16,20 +16,21 @@
       "dayUnit_other": "jours",
       "hourUnit": "h",
       "minuteUnit": "min",
-      "spokenHoursMinutes": "{{hours}} {{minutes}}"
+      "spokenHoursMinutes": "{{hours}} {{minutes}}",
+      "spoken": "Série en cours : {{value}}"
     },
     "rank": {
       "first": "Premier rang",
-      "circle": "Cercle {{numeral}} · {{name}}",
+      "circle": "Cercle {{numeral}} · {{name}}",
       "unlocksIn": "Débloqué dans {{time}}",
-      "shortTime": "{{hours}} h {{minutes}}",
+      "shortTime": "{{hours}} h {{minutes}}",
       "cleanDays_one": "{{count}} jour propre",
       "cleanDays_other": "{{count}} jours propres",
       "nextAt": "{{name}} à {{count}}",
       "nextAtSpoken_one": "{{name}} à {{count}} jour propre",
       "nextAtSpoken_other": "{{name}} à {{count}} jours propres",
       "allUnlocked": "Tous les rangs débloqués",
-      "summary": "{{progress}}, {{target}}",
+      "spoken": "{{name}}, {{eyebrow}}, {{progress}}, {{target}}",
       "hint": "Ouvre les rangs"
     },
     "quote": {
@@ -228,7 +229,7 @@
     "be-one": "Cesse de discuter de ce que doit être une personne de bien : sois-en une.",
     "up-to-us": "Certaines choses dépendent de nous, d'autres non.",
     "reason": "Si tu veux tout soumettre, soumets-toi à la raison.",
-    "retreat": "Nulle part on ne trouve de retraite plus paisible ni plus libre de soucis que dans sa propre âme."
+    "retreat": "Nulle part tu ne trouveras de retraite plus paisible ni plus libre de soucis que dans ta propre âme."
   },
   "quoteAuthors": {
     "epictetus": "Épictète",

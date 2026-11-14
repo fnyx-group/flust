@@ -48,17 +48,28 @@ export const typography = {
 } as const satisfies Record<string, TextStyle>;
 
 // By number of digits: 2 or fewer, 3, then 4 or more. Hours count with their two minute digits,
-// so 7 h 40 is 176 like 3-digit days.
+// so 7 h 40 uses the size of 3-digit days. Each size is the largest that keeps the widest counter
+// of its group on one line at sizes.counterDesignWidth, in both languages.
 export const counterFontSizes: Record<CounterSize, number> = {
-  large: 240,
-  medium: 176,
-  small: 128,
+  large: 224,
+  medium: 140,
+  small: 104,
 };
 
 export const spacing = {
   screen: 20,
   screenTop: 60,
+  xxs: 2,
+  xs: 4,
+  s: 8,
+  m: 12,
+  l: 16,
+  xl: 24,
+  xxl: 32,
+  xxxl: 40,
 } as const;
+
+export const pressedOpacity = 0.8;
 
 export const radii = {
   card: 20,
@@ -84,4 +95,6 @@ export const sizes = {
   radio: 24,
   emblem: 48,
   meterHeight: 6,
+  // The narrowest screen width the streak counter sizes are chosen for.
+  counterDesignWidth: 360,
 } as const;

@@ -68,3 +68,45 @@ export function createMinuteClock(anchor: Timestamp, deps: ClockDeps): MinuteClo
     },
   };
 }
+
+export type ClockSelection<T> = {
+  subscribe(listener: () => void): () => void;
+  getSnapshot(): T;
+};
+
+// useSyncExternalStore re-renders when the snapshot changes by Object.is. Returning the previous
+// value when `isEqual` holds lets a selector build a new object on each tick and still re-render
+// only when what it shows changes. The value is cached per instant, since React reads the
+// snapshot several times for one render.
+export function selectFromClock<T>(
+  clock: MinuteClock,
+  select: (now: Timestamp) => T,
+  isEqual: (a: T, b: T) => boolean = Object.is,
+): ClockSelection<T> {
+  let cached: { now: Timestamp; value: T } | null = null;
+  return {
+    subscribe: clock.subscribe,
+    getSnapshot() {
+      const now = clock.now();
+      if (cached?.now === now) return cached.value;
+      const value = select(now);
+      cached = {
+        now,
+        value: cached !== null && isEqual(cached.value, value) ? cached.value : value,
+      };
+      return cached.value;
+    },
+  };
+}
+
+// Equal when both objects have the same keys with values equal by Object.is.
+export function sameFields(
+  a: Readonly<Record<string, unknown>>,
+  b: Readonly<Record<string, unknown>>,
+): boolean {
+  const keys = Object.keys(a);
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every((key) => Object.hasOwn(b, key) && Object.is(a[key], b[key]))
+  );
+}

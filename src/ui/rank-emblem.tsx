@@ -54,7 +54,9 @@ const SHAPES: Record<Rank['circle'], (props: ShapeProps) => ReactNode> = {
 const SUN_RAYS = [0, 45, 90, 135, 180, 225, 270, 315];
 
 // Where the spokes of the third rank of each circle meet the outer shape: its vertices, or the
-// four axes for round shapes.
+// four axes for round shapes. Circles IV and V have no third rank and circle V no second one, so
+// their inner designs and spokes are never drawn today; they are kept so that every circle and
+// tier combination the Rank type allows still draws a sensible emblem.
 const SPOKES: Record<Rank['circle'], { angles: readonly number[]; to: number }> = {
   1: { angles: [0, 90, 180, 270], to: RADIUS },
   2: { angles: [0, 90, 180, 270], to: RADIUS },

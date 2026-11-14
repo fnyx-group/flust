@@ -3,40 +3,31 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Journey } from '@/domain/journey';
-import { rankProgress, rankStanding, type RankId } from '@/domain/ranks';
-import { currentStreakMs, totalCleanDays } from '@/domain/streak';
-import type { Timestamp } from '@/domain/time';
+import { rankStanding, type RankId } from '@/domain/ranks';
 import { useClock } from '@/features/home/clock-context';
 import { rankCardText } from '@/features/home/labels';
+import { sameFields } from '@/features/home/minute-clock';
 import { ForwardIcon } from '@/ui/icons/forward-icon';
 import { Meter } from '@/ui/meter';
 import { RankEmblem } from '@/ui/rank-emblem';
-import { colors, radii, spacing, typography } from '@/ui/theme';
+import { colors, pressedOpacity, radii, spacing, typography } from '@/ui/theme';
 
 type RankCardProps = {
   journey: Journey;
   unlockedRanks: readonly RankId[];
 };
 
-const identity = (now: Timestamp) => now;
-
 // Ranks reached here are not stored: the unlock screen stores a rank when it shows it, so that
 // unlocked and announced stay the same thing. Until then the total alone gives the right rank.
+// With a rank, the standing only changes once a day, so ticks in between do not re-render.
 export function RankCard({ journey, unlockedRanks }: RankCardProps) {
   const { t } = useTranslation();
-  const now = useClock(identity);
-  const total = totalCleanDays(journey, now);
-  const standing = rankStanding(
-    rankProgress(unlockedRanks, total),
-    total,
-    currentStreakMs(journey, now),
-  );
+  const standing = useClock((now) => rankStanding(journey, unlockedRanks, now), sameFields);
   const text = rankCardText(t, standing);
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={[text.name, text.eyebrow].join(', ')}
-      accessibilityValue={{ text: text.spokenProgress }}
+      accessibilityLabel={text.spokenLabel}
       accessibilityHint={t('home.rank.hint')}
       onPress={() => router.navigate('/ranks')}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
@@ -63,19 +54,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radii.cardLarge,
     padding: spacing.screen,
-    gap: 16,
+    gap: spacing.l,
   },
   pressed: {
-    opacity: 0.8,
+    opacity: pressedOpacity,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: spacing.l,
   },
   titles: {
     flex: 1,
-    gap: 2,
+    gap: spacing.xxs,
   },
   name: {
     ...typography.rankName,
@@ -85,8 +76,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    columnGap: 12,
-    rowGap: 4,
+    columnGap: spacing.m,
+    rowGap: spacing.xs,
   },
   progress: {
     ...typography.bodyLarge,

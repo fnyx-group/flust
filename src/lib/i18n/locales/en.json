@@ -16,20 +16,21 @@
       "dayUnit_other": "days",
       "hourUnit": "h",
       "minuteUnit": "min",
-      "spokenHoursMinutes": "{{hours}} {{minutes}}"
+      "spokenHoursMinutes": "{{hours}} {{minutes}}",
+      "spoken": "Current streak: {{value}}"
     },
     "rank": {
       "first": "First rank",
-      "circle": "Circle {{numeral}} · {{name}}",
+      "circle": "Circle {{numeral}} · {{name}}",
       "unlocksIn": "Unlocks in {{time}}",
-      "shortTime": "{{hours}} h {{minutes}} min",
+      "shortTime": "{{hours}} h {{minutes}} min",
       "cleanDays_one": "{{count}} clean day",
       "cleanDays_other": "{{count}} clean days",
       "nextAt": "{{name}} at {{count}}",
       "nextAtSpoken_one": "{{name}} at {{count}} clean day",
       "nextAtSpoken_other": "{{name}} at {{count}} clean days",
       "allUnlocked": "All ranks unlocked",
-      "summary": "{{progress}}, {{target}}",
+      "spoken": "{{name}}, {{eyebrow}}, {{progress}}, {{target}}",
       "hint": "Opens the ranks"
     },
     "quote": {

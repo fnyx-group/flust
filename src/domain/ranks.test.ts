@@ -2,7 +2,7 @@ import * as fc from 'fast-check';
 
 import { isRankId, rankProgress, RANKS, rankStanding, type RankId } from '@/domain/ranks';
 import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE } from '@/domain/time';
-import { rankIds, totalDays } from '@test/arbitraries';
+import { journeyFrom, journeyInput, journeyOf, rankIds, totalDays } from '@test/arbitraries';
 
 function idsUpTo(id: RankId): RankId[] {
   const index = RANKS.findIndex((rank) => rank.id === id);
@@ -184,11 +184,11 @@ describe('rankProgress', () => {
 });
 
 describe('rankStanding', () => {
+  const start = Date.UTC(2026, 0, 1, 8);
   const sevenHoursForty = 7 * MS_PER_HOUR + 40 * MS_PER_MINUTE;
 
   it('measures the first day in time before any rank', () => {
-    const standing = rankStanding(rankProgress([], 0), 0, sevenHoursForty);
-    expect(standing).toEqual({
+    expect(rankStanding(journeyOf(start), [], start + sevenHoursForty)).toEqual({
       status: 'pending',
       first: RANKS[0],
       fraction: sevenHoursForty / MS_PER_DAY,
@@ -196,8 +196,16 @@ describe('rankStanding', () => {
     });
   });
 
+  it('never shows more than a day left when the clock is behind the streak start', () => {
+    expect(rankStanding(journeyOf(start), [], start - MS_PER_HOUR)).toMatchObject({
+      status: 'pending',
+      fraction: 0,
+      msLeft: MS_PER_DAY,
+    });
+  });
+
   it('measures total clean days against the next threshold', () => {
-    expect(rankStanding(rankProgress([], 47), 47, 12 * MS_PER_DAY)).toEqual({
+    expect(rankStanding(journeyOf(start), [], start + 47.5 * MS_PER_DAY)).toEqual({
       status: 'ranked',
       current: expect.objectContaining({ id: 'sorcerer' }),
       next: expect.objectContaining({ id: 'white-mage' }),
@@ -206,33 +214,38 @@ describe('rankStanding', () => {
     });
   });
 
+  // The example of docs/product/ranks.md: a lapse backdated to day 3.7, seen at day 7.5.
   it('keeps a rank whose threshold a backdated lapse took the total below', () => {
-    const standing = rankStanding(rankProgress(idsUpTo('initiate'), 6), 6, MS_PER_DAY);
+    const journey = journeyOf(start, [start + 3.7 * MS_PER_DAY]);
+    const standing = rankStanding(journey, idsUpTo('initiate'), start + 7.5 * MS_PER_DAY);
     expect(standing).toMatchObject({
       status: 'ranked',
       current: { id: 'initiate' },
       next: { id: 'watcher' },
+      totalCleanDays: 6,
       fraction: 6 / 14,
     });
   });
 
   it('is full once every rank is unlocked', () => {
-    expect(rankStanding(rankProgress([], 400), 400, 0)).toMatchObject({
+    expect(rankStanding(journeyOf(start), [], start + 400 * MS_PER_DAY)).toMatchObject({
       current: { id: 'free-soul' },
       next: null,
       fraction: 1,
     });
   });
 
-  it('keeps the fraction between 0 and 1', () => {
+  it('keeps the fraction between 0 and 1 and the time left within a day', () => {
     fc.assert(
       fc.property(
+        journeyInput,
         rankIds,
-        totalDays,
-        fc.integer({ min: -MS_PER_DAY, max: 2 * MS_PER_DAY }),
-        (ids, total, streakMs) => {
-          const { fraction } = rankStanding(rankProgress(ids, total), total, streakMs);
-          return fraction >= 0 && fraction <= 1;
+        fc.integer({ min: -2 * MS_PER_DAY, max: 2 * MS_PER_DAY }),
+        (input, ids, shift) => {
+          const standing = rankStanding(journeyFrom(input), ids, input.now + shift);
+          const timeLeftValid =
+            standing.status === 'ranked' || (standing.msLeft >= 0 && standing.msLeft <= MS_PER_DAY);
+          return standing.fraction >= 0 && standing.fraction <= 1 && timeLeftValid;
         },
       ),
     );

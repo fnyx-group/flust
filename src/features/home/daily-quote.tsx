@@ -5,7 +5,7 @@ import { quoteOfTheDay } from '@/domain/quotes';
 import type { Timestamp } from '@/domain/time';
 import { useClock } from '@/features/home/clock-context';
 import { deviceOffsetAt } from '@/features/shared/device-time';
-import { colors, typography } from '@/ui/theme';
+import { colors, spacing, typography } from '@/ui/theme';
 
 // The selected quote is one of the QUOTES objects, the same all day, so ticks within a day do not
 // re-render this component.
@@ -23,7 +23,7 @@ export function DailyQuote({ start }: { start: Timestamp }) {
 
 const styles = StyleSheet.create({
   container: {
-    gap: 12,
+    gap: spacing.m,
   },
   text: {
     ...typography.quote,

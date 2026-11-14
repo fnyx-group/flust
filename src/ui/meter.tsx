@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { colors, sizes } from '@/ui/theme';
 
+// A continuous bar for a fraction, unlike ProgressBar, which shows a count of discrete steps.
 type MeterProps = {
   // Between 0 and 1.
   fraction: number;

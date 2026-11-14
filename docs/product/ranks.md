@@ -51,7 +51,7 @@ The inner design identifies the rank within its circle:
 | 2              | A center dot and an inner outline |
 | 3              | A filled inner shape with spokes  |
 
-Each emblem shows rarity stars. The number of stars equals the circle number, from 1 star in circle I to 5 stars in circle V.
+On the ranks screen and the rank unlock screen, each emblem shows rarity stars. The number of stars equals the circle number, from 1 star in circle I to 5 stars in circle V. The rank card on the home screen shows the emblem without stars, since it is smaller and already names the circle.
 
 Unlocked emblems use the accent color. Locked emblems use the locked color. See the [design system](../design/design-system.md).
 

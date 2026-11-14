@@ -5,39 +5,42 @@ export type QuoteAuthor = 'epictetus' | 'seneca' | 'marcus-aurelius';
 
 type QuoteDefinition = { readonly id: string; readonly author: QuoteAuthor | null };
 
-// The order is the order of the days: authors alternate, and the first day gets an opener.
+// The order is the order of the days. There are 18 ancient lines for 12 original ones, so they
+// follow the pattern ancient, original, ancient, ancient, original: two originals are never next
+// to each other, and never more than two ancient lines. The ancient authors take turns, and the
+// first day gets an opener.
 // The text of each quote is in the locales. docs/product/quotes.md lists their sources.
 export const QUOTES = [
   { id: 'nothing-great', author: 'epictetus' },
   { id: 'urge-wave', author: null },
   { id: 'claim-yourself', author: 'seneca' },
-  { id: 'lapse-moment', author: null },
   { id: 'headland', author: 'marcus-aurelius' },
-  { id: 'instead', author: null },
+  { id: 'lapse-moment', author: null },
   { id: 'wait-impression', author: 'epictetus' },
-  { id: 'next-hour', author: null },
+  { id: 'instead', author: null },
   { id: 'imagination', author: 'seneca' },
-  { id: 'notice-urge', author: null },
   { id: 'whole-life', author: 'marcus-aurelius' },
-  { id: 'clean-day', author: null },
+  { id: 'next-hour', author: null },
   { id: 'best-of-yourself', author: 'epictetus' },
-  { id: 'rest-not-escape', author: null },
+  { id: 'notice-urge', author: null },
   { id: 'favorable-wind', author: 'seneca' },
-  { id: 'freedom-quietly', author: null },
   { id: 'color-of-thoughts', author: 'marcus-aurelius' },
-  { id: 'attention', author: null },
+  { id: 'clean-day', author: null },
   { id: 'habit', author: 'epictetus' },
-  { id: 'progress', author: null },
+  { id: 'rest-not-escape', author: null },
   { id: 'change-mind', author: 'seneca' },
-  { id: 'ten-minutes', author: null },
   { id: 'dig-within', author: 'marcus-aurelius' },
-  { id: 'why-started', author: null },
+  { id: 'freedom-quietly', author: null },
   { id: 'judgments', author: 'epictetus' },
+  { id: 'attention', author: null },
   { id: 'putting-off', author: 'seneca' },
   { id: 'be-one', author: 'marcus-aurelius' },
+  { id: 'progress', author: null },
   { id: 'up-to-us', author: 'epictetus' },
+  { id: 'ten-minutes', author: null },
   { id: 'reason', author: 'seneca' },
   { id: 'retreat', author: 'marcus-aurelius' },
+  { id: 'why-started', author: null },
 ] as const satisfies readonly QuoteDefinition[];
 
 export type Quote = (typeof QUOTES)[number];

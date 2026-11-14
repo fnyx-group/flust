@@ -31,9 +31,9 @@ Counters use tabular numbers so digits do not shift as they change.
 
 | Style                            | Size  | Weight | Notes                 |
 | -------------------------------- | ----- | ------ | --------------------- |
-| Streak counter, 1 or 2 digits    | 240   | 600    | Barlow Condensed      |
-| Streak counter, 3 digits         | 176   | 600    | Barlow Condensed      |
-| Streak counter, 4 digits or more | 128   | 600    | Barlow Condensed      |
+| Streak counter, 1 or 2 digits    | 224   | 600    | Barlow Condensed      |
+| Streak counter, 3 digits         | 140   | 600    | Barlow Condensed      |
+| Streak counter, 4 digits or more | 104   | 600    | Barlow Condensed      |
 | Streak counter unit              | 40    | 600    | Secondary text color  |
 | Welcome title                    | 40    | 800    | Onboarding welcome    |
 | Brand lockup                     | 36    | 800    | Onboarding welcome    |
@@ -51,7 +51,9 @@ Counters use tabular numbers so digits do not shift as they change.
 | Label                            | 13    | 600    | Secondary text color  |
 | Caption                          | 12    | 400    |                       |
 
-The streak counter size depends on its number of digits, so it stays on one line on a 360 point wide screen. Hours and minutes count all their digits, with minutes always shown on two: "7 h 40" has 3 digits and uses 176, "12 h 05" has 4 and uses 128. Days use 240 up to 99, 176 up to 999, then 128. On narrower screens the counter shrinks further to fit. The counter does not grow with the system text size, since it is already the largest text on screen; the units and every other text do.
+The streak counter size depends on its number of digits, so it stays on one line, units included, on a 360 point wide screen in both languages. Hours and minutes count all their digits, with minutes always shown on two: "7 h 40 min" has 3 digits and uses 140, "12 h 05 min" has 4 and uses 104. Days use 224 up to 99, 140 up to 999, then 104. A test measures the widest counter of each size with the fonts' glyph widths. Only screens narrower than 360 points shrink the counter further to fit.
+
+The counter, digits and units together, does not grow with the system text size, since it is already the largest text on screen. Screen readers read it as one sentence, such as "Série en cours : 7 heures 40 minutes". Every other text grows with the system text size.
 
 ## Layout
 
