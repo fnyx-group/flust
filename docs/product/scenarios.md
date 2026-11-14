@@ -13,9 +13,12 @@ Rule: store UTC timestamps and recompute durations on display. Never count with 
 | Leap years                     | February 29 counts as a normal day.                                                                                 |
 | Midnight                       | The day counter changes on elapsed time since the start point, not on calendar midnight.                            |
 | Clock moved backwards          | The counter is never negative and never jumps forward when the clock is corrected again.                            |
+| Clock moved forwards           | Ranks unlocked while the clock is ahead stay unlocked after it is corrected. See below.                             |
 | Start date in the future       | Refused. The date picker does not allow it and the value is validated before saving.                                |
 | App closed for weeks           | On next launch, the streak and total clean days are recomputed from timestamps, and pending rank unlocks are shown. |
 | Counter reaches 3 and 4 digits | The counter font shrinks so the number fits on one line.                                                            |
+
+A clock set forwards can unlock ranks early. This is accepted: the app is personal, with no competition, and guarding against it by keeping the latest time ever seen would freeze or distort the counter once the clock is corrected.
 
 ## Ranks and lapses
 
