@@ -5,26 +5,20 @@ import { colors, radii, sizes, typography } from '@/ui/theme';
 type ButtonProps = {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'plain';
   disabled?: boolean;
 };
 
 export function Button({ label, onPress, variant = 'primary', disabled = false }: ButtonProps) {
-  const isPrimary = variant === 'primary';
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [
-        isPrimary ? styles.primary : styles.secondary,
-        (pressed || disabled) && styles.pressed,
-      ]}
+      style={({ pressed }) => [CONTAINERS[variant], (pressed || disabled) && styles.pressed]}
     >
-      <Text style={[isPrimary ? styles.primaryLabel : styles.secondaryLabel, styles.label]}>
-        {label}
-      </Text>
+      <Text style={[LABELS[variant], styles.label]}>{label}</Text>
     </Pressable>
   );
 }
@@ -50,6 +44,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  plain: {
+    minHeight: sizes.secondaryButtonHeight,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   pressed: {
     opacity: 0.8,
   },
@@ -64,4 +65,15 @@ const styles = StyleSheet.create({
     ...typography.secondaryButton,
     color: colors.text,
   },
+  plainLabel: {
+    ...typography.secondaryButton,
+    color: colors.textSecondary,
+  },
 });
+
+const CONTAINERS = { primary: styles.primary, secondary: styles.secondary, plain: styles.plain };
+const LABELS = {
+  primary: styles.primaryLabel,
+  secondary: styles.secondaryLabel,
+  plain: styles.plainLabel,
+};

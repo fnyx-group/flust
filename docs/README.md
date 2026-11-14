@@ -37,6 +37,7 @@
 - [0012 Onboarding flow](decisions/0012-onboarding-flow.md): a journey decides the first screen, a resumable draft, answers saved in one transaction.
 - [0013 Local time to UTC](decisions/0013-local-time-to-utc.md): one tested conversion, with a fixed rule for daylight saving changes.
 - [0014 Minute clock](decisions/0014-minute-clock.md): time-driven screens recompute from timestamps on a shared tick aligned to the streak.
+- [0015 Rank unlock announcement](decisions/0015-rank-unlock-announcement.md): unlocks are checked on Home's clock and stored when their screen opens, so each rank is announced once.
 
 ## Development
 

@@ -1,22 +1,24 @@
 import { router } from 'expo-router';
 import { useMemo } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Journey } from '@/domain/journey';
 import type { RankId } from '@/domain/ranks';
 import { streakStart } from '@/domain/streak';
-import { ClockContext } from '@/features/home/clock-context';
+import { ClockContext } from '@/features/clock/clock-context';
+import { createMinuteClock } from '@/features/clock/minute-clock';
+import { nativeClockDeps } from '@/features/clock/native-clock';
 import { DailyQuote } from '@/features/home/daily-quote';
-import { createMinuteClock } from '@/features/home/minute-clock';
-import { nativeClockDeps } from '@/features/home/native-clock';
 import { RankBadge } from '@/features/home/rank-badge';
 import { StreakCounter } from '@/features/home/streak-counter';
 import { WeekStrip } from '@/features/home/week-strip';
+import { useRankUnlockTrigger } from '@/features/ranks/use-rank-unlock-trigger';
 import { useSession } from '@/features/session/session-context';
 import { BrandHeader } from '@/ui/brand/brand-header';
 import { Button } from '@/ui/button';
 import { Screen } from '@/ui/screen';
+import { ScrollView } from '@/ui/scroll-view';
 import { spacing } from '@/ui/theme';
 
 export function HomeScreen() {
@@ -41,6 +43,7 @@ function Home({ journey, unlockedRanks }: HomeProps) {
   return (
     <Screen>
       <ClockContext value={clock}>
+        <RankUnlockTrigger journey={journey} unlockedRanks={unlockedRanks} />
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.content}
@@ -95,3 +98,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.xxxl,
   },
 });
+
+// A component of its own, so that the clock ticks it subscribes to re-render nothing else.
+function RankUnlockTrigger({ journey, unlockedRanks }: HomeProps) {
+  useRankUnlockTrigger(journey, unlockedRanks);
+  return null;
+}

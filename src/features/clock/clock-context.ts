@@ -1,7 +1,7 @@
 import { createContext, use, useMemo, useSyncExternalStore } from 'react';
 
 import type { Timestamp } from '@/domain/time';
-import { selectFromClock, type MinuteClock } from '@/features/home/minute-clock';
+import { selectFromClock, type MinuteClock } from '@/features/clock/minute-clock';
 
 export const ClockContext = createContext<MinuteClock | null>(null);
 

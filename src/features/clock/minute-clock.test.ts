@@ -5,7 +5,7 @@ import {
   selectFromClock,
   type AppActivity,
   type ClockDeps,
-} from '@/features/home/minute-clock';
+} from '@/features/clock/minute-clock';
 
 // A streak started 12.5 seconds into a minute.
 const ANCHOR = Date.UTC(2026, 0, 1, 8, 0, 12, 500);

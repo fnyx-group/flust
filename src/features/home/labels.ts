@@ -4,6 +4,7 @@ import type { Rank, RankStanding } from '@/domain/ranks';
 import { remainingParts, type HoursAndMinutes, type StreakDisplay } from '@/domain/streak';
 import { MS_PER_DAY } from '@/domain/time';
 import { cleanDayCount, type WeekDay } from '@/domain/week';
+import { rankName } from '@/features/shared/rank-labels';
 
 function twoDigits(value: number): string {
   return String(value).padStart(2, '0');
@@ -91,10 +92,6 @@ export function rankBadgeText(t: TFunction, standing: RankStanding): RankBadgeTe
     detail,
     spokenLabel: t('home.rank.spoken', { name, detail }),
   };
-}
-
-function rankName(t: TFunction, rank: Rank): string {
-  return t(`ranks.names.${rank.id}`);
 }
 
 // "6 clean days in the last 7".

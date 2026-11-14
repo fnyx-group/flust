@@ -1,6 +1,16 @@
 import * as fc from 'fast-check';
 
-import { isRankId, rankProgress, RANKS, rankStanding, type RankId } from '@/domain/ranks';
+import {
+  isRankId,
+  pendingUnlock,
+  rankGrid,
+  rankProgress,
+  RANKS,
+  rankStanding,
+  unlockFromIds,
+  withUnlocked,
+  type RankId,
+} from '@/domain/ranks';
 import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE } from '@/domain/time';
 import { journeyFrom, journeyInput, journeyOf, rankIds, totalDays } from '@test/arbitraries';
 
@@ -248,6 +258,150 @@ describe('rankStanding', () => {
           return standing.fraction >= 0 && standing.fraction <= 1 && timeLeftValid;
         },
       ),
+    );
+  });
+});
+
+function gridStates(stored: readonly RankId[], total: number) {
+  return rankGrid(rankProgress(stored, total)).map((cell) => cell.state);
+}
+
+describe('rankGrid', () => {
+  it('shows the first rank as next before the first clean day', () => {
+    const grid = rankGrid(rankProgress([], 0));
+    expect(grid.map((cell) => cell.state)).toEqual(['next', ...Array(11).fill('locked')]);
+    expect(grid[0]?.nameVisible).toBe(true);
+    expect(grid.slice(1).every((cell) => !cell.nameVisible)).toBe(true);
+  });
+
+  it('marks unlocked, current, next and locked ranks', () => {
+    expect(gridStates(idsUpTo('sorcerer'), 47)).toEqual([
+      'unlocked',
+      'unlocked',
+      'unlocked',
+      'unlocked',
+      'unlocked',
+      'current',
+      'next',
+      'locked',
+      'locked',
+      'locked',
+      'locked',
+      'locked',
+    ]);
+  });
+
+  it('counts a rank the total reached before it is stored, like the home badge', () => {
+    expect(gridStates([], 7).slice(0, 4)).toEqual(['unlocked', 'unlocked', 'current', 'next']);
+  });
+
+  it('keeps stored ranks unlocked when a backdated lapse lowers the total', () => {
+    expect(gridStates(idsUpTo('initiate'), 6).slice(0, 4)).toEqual([
+      'unlocked',
+      'unlocked',
+      'current',
+      'next',
+    ]);
+  });
+
+  it('shows every name and no next rank once all ranks are unlocked', () => {
+    const grid = rankGrid(rankProgress([], 365));
+    expect(grid.at(-1)?.state).toBe('current');
+    expect(grid.every((cell) => cell.nameVisible && cell.state !== 'next')).toBe(true);
+  });
+
+  it('hides exactly the names after the next rank, and agrees with the badge', () => {
+    fc.assert(
+      fc.property(rankIds, totalDays, (stored, total) => {
+        const progress = rankProgress(stored, total);
+        const grid = rankGrid(progress);
+        const current = grid.filter((cell) => cell.state === 'current');
+        const next = grid.findIndex((cell) => cell.state === 'next');
+        expect(current.length).toBeLessThanOrEqual(1);
+        expect(current[0]?.rank).toBe(progress.current ?? undefined);
+        expect(next === -1 ? null : grid[next]?.rank).toBe(progress.next?.rank ?? null);
+        grid.forEach((cell, index) => {
+          expect(cell.nameVisible).toBe(next === -1 || index <= next);
+        });
+      }),
+    );
+  });
+});
+
+describe('pendingUnlock', () => {
+  const start = Date.UTC(2026, 0, 1);
+
+  it('has nothing to announce before the first clean day', () => {
+    expect(pendingUnlock(journeyOf(start), [], start + MS_PER_DAY - 1)).toBeNull();
+  });
+
+  it('announces the first rank once a full day is clean', () => {
+    const pending = pendingUnlock(journeyOf(start), [], start + MS_PER_DAY);
+    expect(pending?.unlock.highest.id).toBe('novice');
+    expect(pending?.unlock.others).toEqual([]);
+    expect(pending?.totalCleanDays).toBe(1);
+  });
+
+  it('announces every rank crossed while the app was closed, highest first', () => {
+    const pending = pendingUnlock(journeyOf(start), ['novice'], start + 75.5 * MS_PER_DAY);
+    expect(pending?.unlock.highest.id).toBe('white-mage');
+    expect(pending?.unlock.others.map((rank) => rank.id)).toEqual([
+      'apprentice',
+      'initiate',
+      'watcher',
+      'black-mage',
+      'sorcerer',
+    ]);
+    expect(pending?.totalCleanDays).toBe(75);
+  });
+
+  it('has nothing left to announce once the announced ranks are stored', () => {
+    fc.assert(
+      fc.property(journeyInput, rankIds, (input, stored) => {
+        const journey = journeyFrom(input);
+        const pending = pendingUnlock(journey, stored, input.now);
+        const announced = pending
+          ? [...pending.unlock.others, pending.unlock.highest].map((rank) => rank.id)
+          : [];
+        expect(pendingUnlock(journey, withUnlocked(stored, announced), input.now)).toBeNull();
+      }),
+    );
+  });
+});
+
+describe('unlockFromIds', () => {
+  it('shows the highest rank and lists the others in rank order, whatever the input order', () => {
+    const unlock = unlockFromIds(['watcher', 'novice', 'initiate']);
+    expect(unlock?.highest.id).toBe('watcher');
+    expect(unlock?.others.map((rank) => rank.id)).toEqual(['novice', 'initiate']);
+  });
+
+  it('refuses an empty list', () => {
+    expect(unlockFromIds([])).toBeNull();
+  });
+
+  it('refuses a list with an unknown id', () => {
+    expect(unlockFromIds(['novice', 'emperor'])).toBeNull();
+  });
+});
+
+describe('withUnlocked', () => {
+  it('merges without duplicates, in rank order', () => {
+    expect(withUnlocked(['initiate', 'novice'], ['apprentice', 'novice'])).toEqual([
+      'novice',
+      'apprentice',
+      'initiate',
+    ]);
+  });
+
+  it('contains exactly the stored and added ranks', () => {
+    const ids = fc.subarray(RANKS.map((rank) => rank.id));
+    fc.assert(
+      fc.property(ids, ids, (stored, added) => {
+        const merged = withUnlocked(stored, added);
+        expect(new Set(merged)).toEqual(new Set([...stored, ...added]));
+        expect(merged).toHaveLength(new Set(merged).size);
+      }),
     );
   });
 });

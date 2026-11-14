@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 
 import type { Journey } from '@/domain/journey';
 import { counterSize, currentStreakMs, streakDisplay } from '@/domain/streak';
-import { useClock } from '@/features/home/clock-context';
+import { useClock } from '@/features/clock/clock-context';
 import { counterParts, spokenCounter } from '@/features/home/labels';
-import { sameFields } from '@/features/home/minute-clock';
+import { sameFields } from '@/features/clock/minute-clock';
 import { counterFontSizes, colors, sizes, typography } from '@/ui/theme';
 
 // One line of nested text, so digits and units share a baseline. The sizes fit the counter on a

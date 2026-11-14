@@ -6,6 +6,7 @@ const globals = require('globals');
 const sourceFiles = ['src/**/*.{ts,tsx}'];
 const testFiles = ['**/*.test.{ts,tsx}'];
 const themeFile = 'src/ui/theme.ts';
+const scrollViewFile = 'src/ui/scroll-view.tsx';
 
 const layers = ['app', 'features', 'data', 'domain', 'ui', 'lib'];
 
@@ -58,7 +59,14 @@ const parentImport = {
   message: 'Import from another folder through the @/ alias.',
 };
 
-function layer(name, { forbidden, typesOnly = [], packages = false }) {
+// Scrolling goes through src/ui/scroll-view.tsx, which turns off the Android stretch effect.
+const nativeScrollViews = {
+  name: 'react-native',
+  importNames: ['ScrollView', 'FlatList', 'SectionList', 'VirtualizedList'],
+  message: `Use ScrollView from @/ui/scroll-view. Add a list there if one is needed, with overScrollMode="never".`,
+};
+
+function layer(name, { forbidden, typesOnly = [], packages = false, allowNativeScroll = false }) {
   const patterns = [parentImport];
   if (forbidden.length > 0) {
     patterns.push({
@@ -79,9 +87,10 @@ function layer(name, { forbidden, typesOnly = [], packages = false }) {
       message: `src/${name} is pure logic and may not depend on React, React Native or Expo.`,
     });
   }
+  const paths = allowNativeScroll ? [] : [nativeScrollViews];
   return {
     files: [`src/${name}/**/*.{ts,tsx}`],
-    rules: { '@typescript-eslint/no-restricted-imports': ['error', { patterns }] },
+    rules: { '@typescript-eslint/no-restricted-imports': ['error', { paths, patterns }] },
   };
 }
 
@@ -110,6 +119,14 @@ module.exports = defineConfig([
   layer('data', { forbidden: except('data', 'domain', 'lib') }),
   layer('features', { forbidden: except('features', 'domain', 'data', 'ui', 'lib') }),
   layer('ui', { forbidden: except('ui', 'domain'), typesOnly: ['domain'] }),
+  {
+    ...layer('ui', {
+      forbidden: except('ui', 'domain'),
+      typesOnly: ['domain'],
+      allowNativeScroll: true,
+    }),
+    files: [scrollViewFile],
+  },
   layer('app', { forbidden: except('app', 'features', 'ui', 'lib') }),
   layer('lib', { forbidden: except('lib') }),
   restrictedSyntax(

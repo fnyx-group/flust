@@ -1,6 +1,6 @@
 import { AppState } from 'react-native';
 
-import type { ClockDeps } from '@/features/home/minute-clock';
+import type { ClockDeps } from '@/features/clock/minute-clock';
 
 // 'inactive' is skipped: on iOS it covers the notification center and the app switcher, where
 // the screen is still partly visible.

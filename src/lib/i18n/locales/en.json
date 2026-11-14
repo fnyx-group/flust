@@ -198,6 +198,50 @@
       "3": "Light",
       "4": "Crown",
       "5": "Absolute"
+    },
+    "screen": {
+      "rule": "Your rank follows your total clean days. A lapse never brings it down.",
+      "circle": "Circle {{number}} · {{name}}",
+      "circleSpoken": "circle {{number}}, {{name}}",
+      "nextIn_one": "Next rank in {{count}} day",
+      "nextIn_other": "Next rank in {{count}} days",
+      "allUnlocked": "All ranks unlocked",
+      "spoken": "{{name}}, {{circle}}, {{detail}}",
+      "lockedName": "Locked rank",
+      "cellCircle": "circle {{number}}",
+      "cellSpoken": "{{name}}, {{circle}}, {{status}}, {{days}}",
+      "status": {
+        "current": "current rank",
+        "unlocked": "unlocked",
+        "next": "next rank, locked",
+        "locked": "locked"
+      }
+    },
+    "unlocked": {
+      "label": "New rank",
+      "days_one": "{{count}} clean day.",
+      "days_other": "{{count}} clean days.",
+      "line": "{{days}} {{circle}}",
+      "opens": {
+        "1": "The circle of Awakening opens.",
+        "2": "The circle of Shadow opens.",
+        "3": "The circle of Light opens.",
+        "4": "The circle of the Crown opens.",
+        "5": "The circle of the Absolute opens."
+      },
+      "advances": {
+        "1": "You move forward in the circle of Awakening.",
+        "2": "You move forward in the circle of Shadow.",
+        "3": "You move forward in the circle of Light.",
+        "4": "You move forward in the circle of the Crown.",
+        "5": "You move forward in the circle of the Absolute."
+      },
+      "others_one": "Also unlocked: {{names}}",
+      "others_other": "Also unlocked: {{names}}",
+      "listSeparator": ", ",
+      "spoken": "New rank: {{name}}, {{circle}}",
+      "continue": "Continue",
+      "seeRanks": "See my ranks"
     }
   },
   "quotes": {

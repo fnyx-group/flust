@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { Journey } from '@/domain/journey';
 import { localDayNumber } from '@/domain/local-time';
 import { weekStrip, type WeekDayStatus } from '@/domain/week';
-import { useClock } from '@/features/home/clock-context';
+import { useClock } from '@/features/clock/clock-context';
 import { spokenWeek, weekdayInitial } from '@/features/home/labels';
 import { deviceOffsetAt } from '@/features/shared/device-time';
 import { colors, sizes, spacing, typography } from '@/ui/theme';

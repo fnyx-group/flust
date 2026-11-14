@@ -120,3 +120,52 @@ export function rankStanding(
     fraction: next ? total / next.threshold : 1,
   };
 }
+
+export type RankCellState = 'unlocked' | 'current' | 'next' | 'locked';
+
+export type RankCell = {
+  readonly rank: Rank;
+  readonly state: RankCellState;
+  readonly nameVisible: boolean;
+};
+
+// Locked ranks hide their name, except the next one, which shows what the user is working toward.
+export function rankGrid(progress: RankProgress): RankCell[] {
+  const unlockedCount = progress.unlocked.length;
+  return ALL_RANKS.map((rank, index) => {
+    const state = cellState(index, unlockedCount);
+    return { rank, state, nameVisible: state !== 'locked' };
+  });
+}
+
+function cellState(index: number, unlockedCount: number): RankCellState {
+  if (index < unlockedCount - 1) return 'unlocked';
+  if (index === unlockedCount - 1) return 'current';
+  if (index === unlockedCount) return 'next';
+  return 'locked';
+}
+
+export type PendingUnlock = { readonly unlock: RankUnlock; readonly totalCleanDays: number };
+
+export function pendingUnlock(
+  journey: Journey,
+  storedRanks: readonly RankId[],
+  now: Timestamp,
+): PendingUnlock | null {
+  const total = totalCleanDays(journey, now);
+  const { unlock } = rankProgress(storedRanks, total);
+  return unlock ? { unlock, totalCleanDays: total } : null;
+}
+
+// Rebuilds an unlock from ids that crossed a boundary as text, such as route parameters, so
+// anything unknown is refused rather than shown.
+export function unlockFromIds(ids: readonly string[]): RankUnlock | null {
+  if (!ids.every(isRankId)) return null;
+  return toUnlock(ALL_RANKS.filter((rank) => ids.includes(rank.id)));
+}
+
+export function withUnlocked(stored: readonly RankId[], added: readonly RankId[]): RankId[] {
+  return ALL_RANKS.filter((rank) => stored.includes(rank.id) || added.includes(rank.id)).map(
+    (rank) => rank.id,
+  );
+}

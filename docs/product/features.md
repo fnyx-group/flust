@@ -132,6 +132,10 @@ Help resources by country, available offline.
 
 A page about flust and fnyx-group.
 
+### Yearly seals
+
+Yearly seals after Free soul: every additional 365 total clean days adds a seal to the rank. See [Ranks](ranks.md#after-free-soul).
+
 ## V1.0
 
 Release on the App Store and Google Play under the fnyx-group organization, once the association is registered.
