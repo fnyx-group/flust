@@ -4,7 +4,7 @@ import {
   formatHour,
   formatMinute,
   formatWeekdays,
-} from '@/features/onboarding/start-picker/format';
+} from '@/features/shared/time-picker/format';
 
 // Exact wording belongs to the platform's locale data, so these tests only check what flust
 // decides: the fields are never shifted by a time zone, and the week starts on the given day.

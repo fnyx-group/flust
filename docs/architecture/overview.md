@@ -4,7 +4,7 @@ flust is an Expo app for iOS and Android, written in TypeScript. Everything runs
 
 ## Routing
 
-Navigation uses Expo Router. Each file in `src/app/` is a screen and `_layout.tsx` files define navigators. The root layout (`src/app/_layout.tsx`) is a stack whose screens are protected by the session: the onboarding is the only screen until a journey exists, and the tabs and the emergency screen only exist afterwards. See [0012 Onboarding flow](../decisions/0012-onboarding-flow.md).
+Navigation uses Expo Router. Each file in `src/app/` is a screen and `_layout.tsx` files define navigators. The root layout (`src/app/_layout.tsx`) is a stack whose screens are protected by the session: the onboarding is the only screen until a journey exists, and the tabs, the emergency screen and the lapse screen only exist afterwards. See [0012 Onboarding flow](../decisions/0012-onboarding-flow.md).
 
 `app.json` enables two experiments:
 

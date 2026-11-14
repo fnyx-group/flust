@@ -1,9 +1,11 @@
 import {
   ACTION_IDS,
   isActionId,
+  isPlaceId,
   isPlanTrigger,
   isReasonId,
   isRiskMomentId,
+  PLACE_IDS,
   REASON_IDS,
   RISK_MOMENT_IDS,
   URGE_TRIGGER,
@@ -11,7 +13,7 @@ import {
 
 describe('presets', () => {
   it('have unique ids', () => {
-    for (const ids of [REASON_IDS, RISK_MOMENT_IDS, ACTION_IDS]) {
+    for (const ids of [REASON_IDS, RISK_MOMENT_IDS, ACTION_IDS, PLACE_IDS]) {
       expect(new Set(ids).size).toBe(ids.length);
     }
   });
@@ -26,8 +28,9 @@ describe('presets', () => {
     expect(RISK_MOMENT_IDS.every(isRiskMomentId)).toBe(true);
     expect(RISK_MOMENT_IDS.every(isPlanTrigger)).toBe(true);
     expect(ACTION_IDS.every(isActionId)).toBe(true);
+    expect(PLACE_IDS.every(isPlaceId)).toBe(true);
 
-    for (const guard of [isReasonId, isRiskMomentId, isPlanTrigger, isActionId]) {
+    for (const guard of [isReasonId, isRiskMomentId, isPlanTrigger, isActionId, isPlaceId]) {
       expect(guard('unknown')).toBe(false);
       expect(guard(null)).toBe(false);
       expect(guard(1)).toBe(false);

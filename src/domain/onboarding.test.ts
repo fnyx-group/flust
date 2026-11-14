@@ -10,6 +10,7 @@ import {
   ONBOARDING_STEPS,
   previousStep,
   QUESTION_STEPS,
+  samePlan,
   setCustomReason,
   stepProgress,
   toggleReason,
@@ -142,6 +143,32 @@ describe('plans', () => {
       trigger: 'urge',
       action: { kind: 'preset', id: 'walk-ten-minutes' },
     });
+  });
+});
+
+describe('samePlan', () => {
+  const custom = { trigger: 'stress', action: { kind: 'custom', text: text('Call Sam') } } as const;
+
+  it('compares the trigger and the action', () => {
+    expect(samePlan(DEFAULT_PLAN, { ...DEFAULT_PLAN })).toBe(true);
+    expect(
+      samePlan(custom, { ...custom, action: { kind: 'custom', text: text('Call Sam') } }),
+    ).toBe(true);
+    expect(samePlan(DEFAULT_PLAN, { ...DEFAULT_PLAN, trigger: 'stress' })).toBe(false);
+    expect(
+      samePlan(DEFAULT_PLAN, {
+        ...DEFAULT_PLAN,
+        action: { kind: 'preset', id: 'walk-ten-minutes' },
+      }),
+    ).toBe(false);
+    expect(
+      samePlan(custom, { ...custom, action: { kind: 'custom', text: text('Call Max') } }),
+    ).toBe(false);
+  });
+
+  it('tells a preset action from a custom one', () => {
+    expect(samePlan(DEFAULT_PLAN, { ...DEFAULT_PLAN, action: custom.action })).toBe(false);
+    expect(samePlan({ ...DEFAULT_PLAN, action: custom.action }, DEFAULT_PLAN)).toBe(false);
   });
 });
 

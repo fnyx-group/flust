@@ -2,6 +2,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, type ReactNode } from 'react';
 
 import type { Journey } from '@/domain/journey';
+import type { LapseRecord } from '@/domain/lapse';
 import { withUnlocked, type RankId } from '@/domain/ranks';
 import { createUnlockAnnouncer } from '@/features/ranks/unlock-announcer';
 import { loadSession, type SessionData } from '@/features/session/load-session';
@@ -47,7 +48,10 @@ export function SessionGate({ children }: { children: ReactNode }) {
     journey: data.journey,
     draft: data.draft,
     unlockedRanks: data.unlockedRanks,
+    latestLapse: data.latestLapse,
     setJourney: (journey: Journey) => setState({ status: 'ready', data: { ...data, journey } }),
+    setLapses: (journey: Journey, latestLapse: LapseRecord | null) =>
+      setState({ status: 'ready', data: { ...data, journey, latestLapse } }),
     announceUnlock: announcer.announce,
   };
   return <SessionContext value={session}>{children}</SessionContext>;

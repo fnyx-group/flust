@@ -1,21 +1,13 @@
-import { parseCustomText, type CustomText } from '@/domain/custom-text';
+import { arrayOf, decodePlan, decodeText, isRecord, parseJson } from '@/data/json-codec';
 import {
   EMPTY_DRAFT,
   isOnboardingStep,
   type OnboardingAnswers,
   type OnboardingDraft,
-  type Plan,
-  type PlanAction,
   type Reason,
   type StartChoice,
 } from '@/domain/onboarding';
-import {
-  isActionId,
-  isPlanTrigger,
-  isReasonId,
-  RISK_MOMENT_IDS,
-  type RiskMomentId,
-} from '@/domain/presets';
+import { isReasonId, RISK_MOMENT_IDS, type RiskMomentId } from '@/domain/presets';
 import { isValidTimestamp } from '@/domain/time';
 
 export type EncodedDraft = { step: string; answers: string };
@@ -29,7 +21,7 @@ export function encodeDraft(draft: OnboardingDraft): EncodedDraft {
 export function decodeDraft(step: unknown, answers: unknown): OnboardingDraft {
   return {
     step: isOnboardingStep(step) ? step : EMPTY_DRAFT.step,
-    answers: decodeAnswers(typeof answers === 'string' ? parseJson(answers) : null),
+    answers: decodeAnswers(parseJson(answers)),
   };
 }
 
@@ -67,19 +59,6 @@ function decodeRiskMoments(value: unknown): RiskMomentId[] {
   return RISK_MOMENT_IDS.filter((id) => moments.includes(id));
 }
 
-function decodePlan(value: unknown): Plan | null {
-  if (!isRecord(value) || !isPlanTrigger(value.trigger)) return null;
-  const action = decodeAction(value.action);
-  return action === null ? null : { trigger: value.trigger, action };
-}
-
-function decodeAction(value: unknown): PlanAction | null {
-  if (!isRecord(value)) return null;
-  if (value.kind === 'preset' && isActionId(value.id)) return { kind: 'preset', id: value.id };
-  const text = value.kind === 'custom' ? decodeText(value.text) : null;
-  return text === null ? null : { kind: 'custom', text };
-}
-
 function decodeStart(value: unknown): StartChoice {
   if (isRecord(value) && value.kind === 'past' && isTimestamp(value.at)) {
     return { kind: 'past', at: value.at };
@@ -87,28 +66,6 @@ function decodeStart(value: unknown): StartChoice {
   return { kind: 'now' };
 }
 
-function decodeText(value: unknown): CustomText | null {
-  if (typeof value !== 'string') return null;
-  const text = parseCustomText(value);
-  return text.ok ? text.value : null;
-}
-
 function isTimestamp(value: unknown): value is number {
   return typeof value === 'number' && isValidTimestamp(value);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function arrayOf(value: unknown): readonly unknown[] {
-  return Array.isArray(value) ? value : [];
-}
-
-function parseJson(text: string): unknown {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return null;
-  }
 }

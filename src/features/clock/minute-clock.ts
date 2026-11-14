@@ -1,4 +1,4 @@
-import { msUntilNextMinute, type Timestamp } from '@/domain/time';
+import { MS_PER_MINUTE, msUntilNextTick, type Timestamp } from '@/domain/time';
 
 export type AppActivity = 'foreground' | 'background';
 
@@ -10,16 +10,21 @@ export type ClockDeps = {
   watchActivity(listener: (activity: AppActivity) => void): () => void;
 };
 
-export type MinuteClock = {
+export type TickClock = {
   now(): Timestamp;
   subscribe(listener: () => void): () => void;
 };
 
 // A store for useSyncExternalStore. It ticks on the minutes of `anchor`, the streak start, so the
-// counter changes exactly when a minute of the streak completes. Coming back to the foreground
-// reads the time again at once, which also covers clock and time zone changes made meanwhile,
-// and nothing runs while the app is in the background.
-export function createMinuteClock(anchor: Timestamp, deps: ClockDeps): MinuteClock {
+// counter changes exactly when a minute of the streak completes.
+export function createMinuteClock(anchor: Timestamp, deps: ClockDeps): TickClock {
+  return createTickClock(anchor, MS_PER_MINUTE, deps);
+}
+
+// Ticks every `periodMs` counted from `anchor`. Coming back to the foreground reads the time again
+// at once, which also covers clock and time zone changes made meanwhile, and nothing runs while
+// the app is in the background.
+export function createTickClock(anchor: Timestamp, periodMs: number, deps: ClockDeps): TickClock {
   const listeners = new Set<() => void>();
   let current = deps.now();
   let cancelTimer: (() => void) | null = null;
@@ -32,7 +37,7 @@ export function createMinuteClock(anchor: Timestamp, deps: ClockDeps): MinuteClo
 
   function schedule() {
     stopTimer();
-    cancelTimer = deps.setTimer(tick, msUntilNextMinute(deps.now(), anchor));
+    cancelTimer = deps.setTimer(tick, msUntilNextTick(deps.now(), anchor, periodMs));
   }
 
   function tick() {
@@ -79,7 +84,7 @@ export type ClockSelection<T> = {
 // only when what it shows changes. The value is cached per instant, since React reads the
 // snapshot several times for one render.
 export function selectFromClock<T>(
-  clock: MinuteClock,
+  clock: TickClock,
   select: (now: Timestamp) => T,
   isEqual: (a: T, b: T) => boolean = Object.is,
 ): ClockSelection<T> {

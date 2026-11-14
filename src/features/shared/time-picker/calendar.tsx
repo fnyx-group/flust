@@ -9,13 +9,9 @@ import {
   type UtcOffsetAt,
   type Weekday,
 } from '@/domain/local-time';
-import { isDaySelectable, selectDay, type StartBounds } from '@/domain/start-point';
+import { isDaySelectable, selectDay, type TimeBounds } from '@/domain/start-point';
 import type { Timestamp } from '@/domain/time';
-import {
-  formatFullDate,
-  formatMonth,
-  formatWeekdays,
-} from '@/features/onboarding/start-picker/format';
+import { formatFullDate, formatMonth, formatWeekdays } from '@/features/shared/time-picker/format';
 import { IconButton } from '@/ui/icon-button';
 import { BackIcon } from '@/ui/icons/back-icon';
 import { ForwardIcon } from '@/ui/icons/forward-icon';
@@ -23,7 +19,7 @@ import { colors, fonts, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type CalendarProps = {
   selected: Timestamp;
-  bounds: StartBounds;
+  bounds: TimeBounds;
   offsetAt: UtcOffsetAt;
   firstWeekday: Weekday;
   onSelect: (at: Timestamp) => void;
@@ -54,7 +50,7 @@ export function Calendar({ selected, bounds, offsetAt, firstWeekday, onSelect }:
     <View style={styles.calendar}>
       <View style={styles.header}>
         <IconButton
-          accessibilityLabel={t('onboarding.start.picker.previousMonth')}
+          accessibilityLabel={t('timePicker.previousMonth')}
           disabled={!canGoBack}
           onPress={() => setVisible(addMonths(visible, -1))}
         >
@@ -64,7 +60,7 @@ export function Calendar({ selected, bounds, offsetAt, firstWeekday, onSelect }:
           {formatMonth(language, visible.year, visible.month)}
         </Text>
         <IconButton
-          accessibilityLabel={t('onboarding.start.picker.nextMonth')}
+          accessibilityLabel={t('timePicker.nextMonth')}
           disabled={!canGoForward}
           onPress={() => setVisible(addMonths(visible, 1))}
         >

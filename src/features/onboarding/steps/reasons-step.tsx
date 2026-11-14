@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { CUSTOM_TEXT_MAX_LENGTH, parseCustomText } from '@/domain/custom-text';
 import { customReason, setCustomReason, toggleReason } from '@/domain/onboarding';
 import { REASON_IDS } from '@/domain/presets';
-import { reasonLabel } from '@/features/onboarding/preset-labels';
+import { reasonLabel } from '@/features/shared/preset-labels';
 import { StepLayout } from '@/features/onboarding/step-layout';
 import type { StepProps } from '@/features/onboarding/step-props';
 import { ChipList } from '@/ui/chip-list';

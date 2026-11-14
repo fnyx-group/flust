@@ -37,11 +37,67 @@
     "week": {
       "summary_one": "{{count}} jour propre sur les 7 derniers",
       "summary_other": "{{count}} jours propres sur les 7 derniers"
+    },
+    "lapse": {
+      "link": "J'ai eu un écart",
+      "noted": "Écart noté",
+      "undo": "Annuler l'écart",
+      "undoSpoken": "Annuler l'écart noté",
+      "undoFailed": "L'écart n'a pas pu être annulé. Réessaie.",
+      "support": "Les prochaines heures comptent. Tu as déjà fait le plus dur en notant cet écart."
     }
   },
   "emergency": {
-    "title": "Urgence",
-    "close": "Fermer"
+    "close": "Fermer",
+    "title": "Laisse passer la vague.",
+    "subtitle": "Une envie monte, atteint un pic puis redescend, souvent en 15 à 30 minutes.",
+    "countdownSpoken": "Encore {{time}}",
+    "countdownTime": "{{minutes}} {{seconds}}",
+    "waveOver": "La vague est passée ?",
+    "breathing": {
+      "inhale": "Inspire",
+      "hold": "Retiens",
+      "exhale": "Expire",
+      "rhythm": "Inspire 4 s, retiens 4 s, expire 6 s",
+      "guide": "Guide de respiration"
+    },
+    "plan": "Ton plan",
+    "reasons": "Tes raisons",
+    "held": "J'ai tenu",
+    "lapse": "J'ai eu un écart"
+  },
+  "lapse": {
+    "back": "Retour",
+    "skip": "Passer",
+    "title": "Un écart, pas un retour à zéro.",
+    "subtitle": "Tes jours propres restent acquis. On repart d'ici.",
+    "total_one": "jour propre, conservé",
+    "total_other": "jours propres, conservés",
+    "streakDays_one": "jour sur cette série",
+    "streakDays_other": "jours sur cette série",
+    "streakHours": "sur cette série",
+    "streakHoursValue": "{{hours}} h {{minutes}}",
+    "rank": "Ton rang reste {{name}}.",
+    "whatHappened": "Ce qui s'est passé",
+    "where": "Où",
+    "whereHint": "Ouvre la liste des lieux",
+    "whereTitle": "Où",
+    "notSet": "Facultatif",
+    "when": "Quand",
+    "now": "Maintenant",
+    "earlier": "Plus tôt",
+    "selected": "Moment : {{date}}",
+    "context": "Contexte",
+    "nextTime": "La prochaine fois",
+    "save": "Enregistrer et repartir",
+    "errors": {
+      "lapse-in-future": "Ce moment est dans le futur. Vérifie l'heure de ton téléphone, ou choisis un autre moment.",
+      "lapse-before-last": "Ce moment est avant ton écart précédent. Vérifie l'heure de ton téléphone, ou choisis un autre moment.",
+      "lapse-before-start": "Ce moment est avant ton point de départ. Choisis un autre moment.",
+      "invalid-timestamp": "Ce moment ne peut pas être utilisé. Choisis un autre moment.",
+      "clock-behind": "La date et l'heure de ton téléphone sont antérieures à ta série en cours. Vérifie-les, puis réessaie.",
+      "save-failed": "L'écart n'a pas pu être enregistré. Rien n'est perdu. Réessaie."
+    }
   },
   "units": {
     "day_one": "{{count}} jour",
@@ -49,7 +105,19 @@
     "hour_one": "{{count}} heure",
     "hour_other": "{{count}} heures",
     "minute_one": "{{count}} minute",
-    "minute_other": "{{count}} minutes"
+    "minute_other": "{{count}} minutes",
+    "second_one": "{{count}} seconde",
+    "second_other": "{{count}} secondes"
+  },
+  "timePicker": {
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "hour": "Heure",
+    "minute": "Minute",
+    "earlierHour": "Une heure plus tôt",
+    "laterHour": "Une heure plus tard",
+    "earlierMinute": "Cinq minutes plus tôt",
+    "laterMinute": "Cinq minutes plus tard"
   },
   "storage": {
     "retry": {
@@ -134,16 +202,6 @@
         "start-in-future": "Ce point de départ est dans le futur. Vérifie la date et l'heure de ton téléphone, ou choisis un autre moment.",
         "invalid-timestamp": "Ce point de départ ne peut pas être utilisé. Choisis un autre moment.",
         "save-failed": "Tes réponses n'ont pas pu être enregistrées. Rien n'est perdu. Réessaie."
-      },
-      "picker": {
-        "previousMonth": "Mois précédent",
-        "nextMonth": "Mois suivant",
-        "hour": "Heure",
-        "minute": "Minute",
-        "earlierHour": "Une heure plus tôt",
-        "laterHour": "Une heure plus tard",
-        "earlierMinute": "Cinq minutes plus tôt",
-        "laterMinute": "Cinq minutes plus tard"
       }
     }
   },
@@ -175,6 +233,35 @@
       "guided-breathing": "Je lance la respiration guidée",
       "journal-three-lines": "J'écris trois lignes dans le journal",
       "walk-ten-minutes": "Je sors marcher dix minutes"
+    },
+    "places": {
+      "bedroom": "Chambre",
+      "bathroom": "Salle de bain",
+      "living-room": "Salon",
+      "work": "Travail",
+      "transport": "Transports",
+      "elsewhere": "Ailleurs"
+    },
+    "sentences": {
+      "plan": "Si {{condition}}, alors {{action}}.",
+      "planCustom": "Si {{condition}}, alors : {{action}}",
+      "conditions": {
+        "urge": "une envie arrive",
+        "in-bed-at-night": "je suis au lit le soir",
+        "alone-at-home": "il n'y a personne d'autre à la maison",
+        "stress": "le stress monte",
+        "tiredness": "la fatigue me gagne",
+        "boredom": "l'ennui s'installe",
+        "after-social-media": "je viens de passer du temps sur les réseaux sociaux",
+        "after-alcohol": "j'ai bu de l'alcool",
+        "weekend": "c'est le week-end"
+      },
+      "actions": {
+        "phone-out-of-room": "je pose le téléphone hors de la chambre",
+        "guided-breathing": "je lance la respiration guidée",
+        "journal-three-lines": "j'écris trois lignes dans le journal",
+        "walk-ten-minutes": "je sors marcher dix minutes"
+      }
     }
   },
   "ranks": {

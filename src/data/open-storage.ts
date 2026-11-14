@@ -1,5 +1,6 @@
 import { createDatabase, type Database } from '@/data/database';
 import { createJourneyRepository, type JourneyRepository } from '@/data/journey-repository';
+import { createLapseRepository, type LapseRepository } from '@/data/lapse-repository';
 import { applyMigrations, latestVersion, readUserVersion } from '@/data/migrate';
 import { MIGRATIONS } from '@/data/migrations';
 import type { Migration } from '@/data/migrations/migration';
@@ -7,6 +8,7 @@ import {
   createOnboardingRepository,
   type OnboardingRepository,
 } from '@/data/onboarding-repository';
+import { createProfileRepository, type ProfileRepository } from '@/data/profile-repository';
 import { createRankRepository, type RankRepository } from '@/data/rank-repository';
 import { createSettingsRepository, type SettingsRepository } from '@/data/settings-repository';
 import {
@@ -16,10 +18,14 @@ import {
   type StorageDeps,
 } from '@/data/storage-deps';
 import { createKey, readKey, type StorageKey } from '@/data/storage-key';
+import { createUrgeRepository, type UrgeRepository } from '@/data/urge-repository';
 import { err, ok, type Result } from '@/domain/result';
 
 export type Storage = {
   readonly journey: JourneyRepository;
+  readonly lapses: LapseRepository;
+  readonly urges: UrgeRepository;
+  readonly profile: ProfileRepository;
   readonly ranks: RankRepository;
   readonly onboarding: OnboardingRepository;
   readonly settings: SettingsRepository;
@@ -180,6 +186,9 @@ async function migrateWithBackup(
 function toStorage(db: Database): Storage {
   return {
     journey: createJourneyRepository(db),
+    lapses: createLapseRepository(db),
+    urges: createUrgeRepository(db),
+    profile: createProfileRepository(db),
     ranks: createRankRepository(db),
     onboarding: createOnboardingRepository(db),
     settings: createSettingsRepository(db),

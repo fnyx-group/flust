@@ -5,7 +5,8 @@ flust helps people quit pornography. Its data reveals intimate behavior: exposur
 ## Sensitive data
 
 - Journal entries.
-- Streak and relapse history.
+- Streak and lapse history, with where, when and in what context each lapse happened.
+- Emergency screen visits: when they started and ended, and how.
 - Blocking configuration (blocked categories and domains).
 
 ## Threats and mitigations

@@ -5,7 +5,9 @@ import {
   isValidTimestamp,
   MS_PER_DAY,
   MS_PER_MINUTE,
-  msUntilNextMinute,
+  floorToMinute,
+  msUntilNextTick,
+  MS_PER_SECOND,
   wholeDays,
 } from '@/domain/time';
 import { duration, timestamp } from '@test/arbitraries';
@@ -55,29 +57,43 @@ describe('wholeDays', () => {
   });
 });
 
-describe('msUntilNextMinute', () => {
+describe('msUntilNextTick', () => {
   const anchor = Date.UTC(2026, 0, 1, 8, 0, 12, 345);
 
-  it('waits a full minute when the elapsed time is a whole number of minutes', () => {
-    expect(msUntilNextMinute(anchor, anchor)).toBe(MS_PER_MINUTE);
-    expect(msUntilNextMinute(anchor + 3 * MS_PER_MINUTE, anchor)).toBe(MS_PER_MINUTE);
+  it('waits a full period when the elapsed time is a whole number of periods', () => {
+    expect(msUntilNextTick(anchor, anchor, MS_PER_MINUTE)).toBe(MS_PER_MINUTE);
+    expect(msUntilNextTick(anchor + 3 * MS_PER_MINUTE, anchor, MS_PER_MINUTE)).toBe(MS_PER_MINUTE);
   });
 
-  it('follows the minutes of the anchor, not those of the wall clock', () => {
-    expect(msUntilNextMinute(anchor + 40_000, anchor)).toBe(20_000);
-    expect(msUntilNextMinute(Date.UTC(2026, 0, 1, 9), anchor)).toBe(12_345);
+  it('follows the periods of the anchor, not those of the wall clock', () => {
+    expect(msUntilNextTick(anchor + 40_000, anchor, MS_PER_MINUTE)).toBe(20_000);
+    expect(msUntilNextTick(Date.UTC(2026, 0, 1, 9), anchor, MS_PER_MINUTE)).toBe(12_345);
+    expect(msUntilNextTick(anchor + 2_400, anchor, MS_PER_SECOND)).toBe(600);
   });
 
-  it('still lands on a minute of the anchor when the clock is behind it', () => {
-    expect(msUntilNextMinute(anchor - 10_000, anchor)).toBe(10_000);
+  it('still lands on a period of the anchor when the clock is behind it', () => {
+    expect(msUntilNextTick(anchor - 10_000, anchor, MS_PER_MINUTE)).toBe(10_000);
+    expect(msUntilNextTick(anchor - 300, anchor, MS_PER_SECOND)).toBe(300);
   });
 
-  it('always schedules a tick within the next minute, on a minute of the anchor', () => {
+  it('always schedules a tick within the next period, on a period of the anchor', () => {
     fc.assert(
-      fc.property(timestamp, timestamp, (now, start) => {
-        const delay = msUntilNextMinute(now, start);
-        return delay > 0 && delay <= MS_PER_MINUTE && (now + delay - start) % MS_PER_MINUTE === 0;
-      }),
+      fc.property(
+        timestamp,
+        timestamp,
+        fc.constantFrom(MS_PER_SECOND, MS_PER_MINUTE),
+        (now, start, period) => {
+          const delay = msUntilNextTick(now, start, period);
+          return delay > 0 && delay <= period && (now + delay - start) % period === 0;
+        },
+      ),
     );
+  });
+});
+
+describe('floorToMinute', () => {
+  it('drops the seconds and milliseconds', () => {
+    expect(floorToMinute(Date.UTC(2026, 0, 1, 8, 30, 59, 999))).toBe(Date.UTC(2026, 0, 1, 8, 30));
+    expect(floorToMinute(Date.UTC(2026, 0, 1, 8, 30))).toBe(Date.UTC(2026, 0, 1, 8, 30));
   });
 });

@@ -1,6 +1,7 @@
-import { MS_PER_MINUTE } from '@/domain/time';
+import { MS_PER_MINUTE, MS_PER_SECOND } from '@/domain/time';
 import {
   createMinuteClock,
+  createTickClock,
   sameFields,
   selectFromClock,
   type AppActivity,
@@ -198,6 +199,34 @@ describe('createMinuteClock', () => {
 
     fake.advance(MS_PER_MINUTE);
     expect(listener).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('createTickClock', () => {
+  it('ticks on the seconds of its anchor', () => {
+    const fake = fakeDeps(ANCHOR + 400);
+    const clock = createTickClock(ANCHOR, MS_PER_SECOND, fake.deps);
+    const listener = jest.fn();
+    clock.subscribe(listener);
+
+    expect(fake.timerAt).toBe(ANCHOR + MS_PER_SECOND);
+    fake.advance(600 + 4 * MS_PER_SECOND);
+    expect(listener).toHaveBeenCalledTimes(5);
+    expect(clock.now()).toBe(ANCHOR + 5 * MS_PER_SECOND);
+    expect(fake.timerCount).toBe(1);
+  });
+
+  it('shows the time spent in the background as soon as it comes back', () => {
+    const fake = fakeDeps(ANCHOR);
+    const clock = createTickClock(ANCHOR, MS_PER_SECOND, fake.deps);
+    clock.subscribe(jest.fn());
+
+    fake.activity('background');
+    expect(fake.timerCount).toBe(0);
+    fake.setTime(ANCHOR + 3 * MS_PER_MINUTE + 250);
+    fake.activity('foreground');
+    expect(clock.now()).toBe(ANCHOR + 3 * MS_PER_MINUTE + 250);
+    expect(fake.timerAt).toBe(ANCHOR + 3 * MS_PER_MINUTE + MS_PER_SECOND);
   });
 });
 
