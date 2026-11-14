@@ -9,15 +9,18 @@ import { createFakeStorage } from '@test/fakes/fake-storage';
 const START = Date.UTC(2026, 0, 1);
 const OTHER_KEY = 'cd'.repeat(32);
 
+const CURRENT = MIGRATIONS.length;
+const NEXT = CURRENT + 1;
+
 const addExtraTable: Migration = {
-  version: 2,
+  version: NEXT,
   async up(tx) {
     await tx.exec('CREATE TABLE extra (value INTEGER) STRICT');
   },
 };
 
 const failHalfway: Migration = {
-  version: 2,
+  version: NEXT,
   async up(tx) {
     await tx.exec('CREATE TABLE extra (value INTEGER) STRICT');
     throw new Error('migration bug');
@@ -233,7 +236,7 @@ describe('openStorage', () => {
       const storage = unwrap(await openStorage(fake.deps, [...MIGRATIONS, addExtraTable]));
 
       expect(copy).toHaveBeenCalledWith(DATABASE_NAME, BACKUP_NAME);
-      expect(userVersion(fake)).toBe(2);
+      expect(userVersion(fake)).toBe(NEXT);
       expect(fake.disk.stored.has(BACKUP_NAME)).toBe(false);
       expect(unwrap(await storage.journey.load())).toEqual(journeyOf(START, [START + 1000]));
     });
@@ -260,19 +263,21 @@ describe('openStorage', () => {
       expect(await openStorage(fake.deps, [...MIGRATIONS, addExtraTable])).toEqual(
         err('storage-unavailable'),
       );
-      expect(userVersion(fake)).toBe(1);
+      expect(userVersion(fake)).toBe(CURRENT);
     });
 
     it('restores the backup left by a migration that was interrupted', async () => {
       const fake = await installed();
       await fake.disk.files.copy(DATABASE_NAME, BACKUP_NAME);
       const raw = await fake.rawDatabase();
-      await raw.exec('CREATE TABLE half_done (value INTEGER) STRICT; PRAGMA user_version = 2');
+      await raw.exec(
+        `CREATE TABLE half_done (value INTEGER) STRICT; PRAGMA user_version = ${NEXT}`,
+      );
       await raw.close();
 
       unwrap(await openStorage(fake.deps, [...MIGRATIONS, addExtraTable]));
 
-      expect(userVersion(fake)).toBe(2);
+      expect(userVersion(fake)).toBe(NEXT);
       expect(
         fake.disk.query(DATABASE_NAME, "SELECT name FROM sqlite_master WHERE name = 'half_done'"),
       ).toEqual([]);
@@ -288,7 +293,7 @@ describe('openStorage', () => {
       expect(fake.disk.openConnections()).toBe(0);
 
       const storage = unwrap(await openStorage(fake.deps, migrations));
-      expect(userVersion(fake)).toBe(2);
+      expect(userVersion(fake)).toBe(NEXT);
       expect(unwrap(await storage.journey.load())).toEqual(journeyOf(START, [START + 1000]));
     });
   });

@@ -29,14 +29,16 @@
         "cipher-unavailable": "This version of flust cannot encrypt your data, so it will not open it. Install the latest version of flust. Your data has not been changed.",
         "schema-too-new": "Your data was saved by a newer version of flust. Update flust to open it. Your data has not been changed.",
         "migration-failed": "flust could not update your data for this version. Your data was put back exactly as it was. Try again, or wait for the next update of flust.",
-        "reset-failed": "Erasing did not finish. Try again."
+        "reset-failed": "Erasing did not finish. Try again.",
+        "storage-failed": "flust could not read your data on this phone. Your data has not been changed. Try again."
       }
     },
     "reset": {
       "title": "Your data can't be decrypted",
       "reasons": {
         "key-missing": "flust encrypts your data with a key that only this phone keeps, in its secure storage. That key is no longer there. This happens when the phone is restored from a backup or the data is moved to another phone, because the key is never copied.",
-        "database-unreadable": "flust encrypts your data with a key that only this phone keeps, in its secure storage. The data on this phone does not match that key, or the file is damaged, so it cannot be decrypted."
+        "database-unreadable": "flust encrypts your data with a key that only this phone keeps, in its secure storage. The data on this phone does not match that key, or the file is damaged, so it cannot be decrypted.",
+        "journey-corrupted": "flust can open your data, but your journey in it is damaged: its dates do not make sense, so your streak and clean days cannot be counted correctly. Trying again reads the same data."
       },
       "noRecovery": "There is no other copy. flust has no account, no server and no backup, so nobody, including the people who make flust, can recover this data. You can try again, or erase it and start over.",
       "startOver": "Erase and start over",
@@ -47,6 +49,98 @@
         "erase": "Erase everything",
         "cancel": "Cancel"
       }
+    }
+  },
+  "languages": {
+    "en": "English",
+    "fr": "Français"
+  },
+  "onboarding": {
+    "back": "Back",
+    "continue": "Continue",
+    "progress": "Step {{current}} of {{total}}",
+    "welcome": {
+      "language": "Language: {{language}}",
+      "languageHint": "Opens the list of languages",
+      "languageTitle": "Language",
+      "title": "Take back control.",
+      "promise": "No account, no ads, no tracking. Everything you write stays encrypted on your phone.",
+      "duration": "Two minutes to lay your foundations.",
+      "start": "Start",
+      "footer": "Open source, by fnyx-group"
+    },
+    "reasons": {
+      "title": "Why are you quitting?",
+      "subtitle": "Pick what speaks to you. We'll remind you of it when things get hard.",
+      "custom": "Write my own"
+    },
+    "riskMoments": {
+      "title": "When is it hardest?",
+      "subtitle": "Knowing your risky moments is already the first step to defusing them."
+    },
+    "plan": {
+      "title": "Your first plan",
+      "subtitle": "Decide now, with a clear head. When the urge comes, you'll only have to follow it.",
+      "if": "If",
+      "then": "Then",
+      "triggerHint": "Opens the list of moments",
+      "triggerTitle": "If",
+      "custom": "Something else"
+    },
+    "start": {
+      "title": "Last step",
+      "subtitle": "Choose your starting point.",
+      "label": "Starting point",
+      "now": "Now",
+      "pickDate": "Pick a date",
+      "selected": "Starting point: {{date}}",
+      "finish": "Let's go",
+      "footer": "You can change all of this later in the settings.",
+      "errors": {
+        "start-in-future": "This starting point is in the future. Check your phone's date and time, or pick another moment.",
+        "invalid-timestamp": "This starting point can't be used. Pick another moment.",
+        "save-failed": "Your answers could not be saved. Nothing was lost. Try again."
+      },
+      "picker": {
+        "previousMonth": "Previous month",
+        "nextMonth": "Next month",
+        "hour": "Hour",
+        "minute": "Minute",
+        "earlierHour": "One hour earlier",
+        "laterHour": "One hour later",
+        "earlierMinute": "Five minutes earlier",
+        "laterMinute": "Five minutes later"
+      }
+    }
+  },
+  "presets": {
+    "reasons": {
+      "loved-ones": "Be there for my loved ones",
+      "energy": "Get my energy back",
+      "self-esteem": "Regain my self-esteem",
+      "sleep": "Sleep better",
+      "focus": "My focus",
+      "relationship": "My relationship",
+      "confidence": "My confidence"
+    },
+    "riskMoments": {
+      "in-bed-at-night": "At night in bed",
+      "alone-at-home": "Being alone at home",
+      "stress": "Stress",
+      "tiredness": "Tiredness",
+      "boredom": "Boredom",
+      "after-social-media": "After social media",
+      "after-alcohol": "After alcohol",
+      "weekend": "The weekend"
+    },
+    "triggers": {
+      "urge": "When an urge hits"
+    },
+    "actions": {
+      "phone-out-of-room": "I put my phone outside the bedroom",
+      "guided-breathing": "I start the guided breathing",
+      "journal-three-lines": "I write three lines in the journal",
+      "walk-ten-minutes": "I go out for a ten-minute walk"
     }
   }
 }

@@ -33,6 +33,8 @@ export const typography = {
     fontSize: 176,
     fontVariant: ['tabular-nums'],
   },
+  welcomeTitle: { fontFamily: fonts.extraBold, fontSize: 40, lineHeight: 46 },
+  brandLockup: { fontFamily: fonts.extraBold, fontSize: 36 },
   screenTitle: { fontFamily: fonts.extraBold, fontSize: 28 },
   rankName: { fontFamily: fonts.extraBold, fontSize: 22 },
   row: { fontFamily: fonts.semiBold, fontSize: 15 },
@@ -68,4 +70,7 @@ export const sizes = {
   iconButton: 40,
   switchWidth: 48,
   switchHeight: 28,
+  // The minimum touch target on both platforms.
+  touchTarget: 44,
+  radio: 24,
 } as const;

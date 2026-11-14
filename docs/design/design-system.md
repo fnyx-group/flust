@@ -33,6 +33,8 @@ Counters use tabular numbers so digits do not shift as they change.
 | ---------------------------------- | ----- | ------ | -------------------- |
 | Streak counter (days)              | 240   | 600    | Barlow Condensed     |
 | Streak counter (hours and minutes) | 176   | 600    | Barlow Condensed     |
+| Welcome title                      | 40    | 800    | Onboarding welcome   |
+| Brand lockup                       | 36    | 800    | Onboarding welcome   |
 | Screen title                       | 28    | 800    |                      |
 | Rank name                          | 22    | 800    |                      |
 | Row                                | 15    | 600    |                      |
@@ -56,6 +58,7 @@ The streak counter shrinks when it reaches 3 and 4 digits so it fits on one line
 | Chips              | Pill shape                    |
 | Segmented controls | Radius 16, segments radius 12 |
 | Switches           | 48 by 28                      |
+| Touch targets      | At least 44 by 44             |
 
 ## Navigation
 
@@ -79,6 +82,7 @@ Quotes from living authors are not used without their permission.
 
 - Sentences are calm, plain and non-judgmental. They state what happened and what the user can do, without blame, alarm or pressure.
 - French addresses the user with "tu".
+- French text never assumes the user's gender. Use neutral nouns and phrasings instead of gendered adjectives and participles: "Le stress" rather than "Stressé", "La fatigue" rather than "Fatigué", "La solitude à la maison" rather than "Seul à la maison", "Retrouver l'estime de moi" rather than "Être fier de moi", "Être là pour mes proches" rather than "Être présent pour mes proches".
 - A lapse is "lapse" in English and "écart" in French. The interface never says "relapse" or "rechute".
 
 ## Screens

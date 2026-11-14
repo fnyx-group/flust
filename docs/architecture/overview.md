@@ -4,7 +4,7 @@ flust is an Expo app for iOS and Android, written in TypeScript. Everything runs
 
 ## Routing
 
-Navigation uses Expo Router. Each file in `src/app/` is a screen and `_layout.tsx` files define navigators. The root layout (`src/app/_layout.tsx`) is a stack.
+Navigation uses Expo Router. Each file in `src/app/` is a screen and `_layout.tsx` files define navigators. The root layout (`src/app/_layout.tsx`) is a stack whose screens are protected by the session: the onboarding is the only screen until a journey exists, and the tabs and the emergency screen only exist afterwards. See [0012 Onboarding flow](../decisions/0012-onboarding-flow.md).
 
 `app.json` enables two experiments:
 
@@ -43,4 +43,4 @@ They live in `modules/` as local Expo modules. Any native code requires a develo
 
 User data is stored on the device only and encrypted at rest. Encryption keys are held by the platform keystores (Keychain on iOS, Android Keystore on Android). See [0001 Local-first](../decisions/0001-local-first.md) and the [threat model](../security/threat-model.md).
 
-The data lives in one SQLCipher database opened by `src/data/open-storage.ts`, which also handles missing keys, damaged files and schema migrations. `StorageGate` in the root layout opens it before any screen is shown and provides the repositories to features through `useStorage()`. See [0011 Encrypted SQLite storage](../decisions/0011-encrypted-sqlite-storage.md).
+The data lives in one SQLCipher database opened by `src/data/open-storage.ts`, which also handles missing keys, damaged files and schema migrations. `StorageGate` in the root layout opens it before any screen is shown and provides the repositories to features through `useStorage()`. `SessionGate`, below it, loads the journey and the chosen language before the splash screen hides. See [0011 Encrypted SQLite storage](../decisions/0011-encrypted-sqlite-storage.md).

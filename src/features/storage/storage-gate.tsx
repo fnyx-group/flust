@@ -5,7 +5,7 @@ import { storageService } from '@/data/native';
 import type { Storage } from '@/data/open-storage';
 import { ResetScreen } from '@/features/storage/reset-screen';
 import { RetryScreen } from '@/features/storage/retry-screen';
-import { StorageContext } from '@/features/storage/storage-context';
+import { StorageContext, StorageFailureContext } from '@/features/storage/storage-context';
 import { failureScreen, type StorageFailure } from '@/features/storage/storage-failure';
 
 type GateState =
@@ -13,7 +13,8 @@ type GateState =
   | { status: 'ready'; storage: Storage }
   | { status: 'failed'; failure: StorageFailure };
 
-// Renders its children only once storage is open, and keeps the splash screen up until then.
+// Renders its children only once storage is open. The splash screen stays up until then, and
+// after that until SessionGate has loaded the first screen; a failure here hides it at once.
 export function StorageGate({ children }: { children: ReactNode }) {
   const [state, setState] = useState<GateState>({ status: 'opening' });
   const [attempt, setAttempt] = useState(0);
@@ -34,12 +35,17 @@ export function StorageGate({ children }: { children: ReactNode }) {
   }, [attempt]);
 
   useEffect(() => {
-    if (state.status !== 'opening') SplashScreen.hideAsync();
+    if (state.status === 'failed') SplashScreen.hideAsync();
   }, [state.status]);
 
   function retry() {
     setState({ status: 'opening' });
     setAttempt((count) => count + 1);
+  }
+
+  async function fail(storage: Storage, failure: StorageFailure) {
+    await storage.close().catch(() => undefined);
+    setState({ status: 'failed', failure });
   }
 
   async function reset() {
@@ -51,7 +57,14 @@ export function StorageGate({ children }: { children: ReactNode }) {
 
   if (state.status === 'opening') return null;
   if (state.status === 'ready') {
-    return <StorageContext value={state.storage}>{children}</StorageContext>;
+    const { storage } = state;
+    return (
+      <StorageContext value={storage}>
+        <StorageFailureContext value={(failure) => void fail(storage, failure)}>
+          {children}
+        </StorageFailureContext>
+      </StorageContext>
+    );
   }
 
   const screen = failureScreen(state.failure);

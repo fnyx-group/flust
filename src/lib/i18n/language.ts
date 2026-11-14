@@ -4,13 +4,13 @@ export const supportedLanguages = ['en', 'fr'] as const;
 export type Language = (typeof supportedLanguages)[number];
 export const fallbackLanguage: Language = 'en';
 
-function isSupported(code: string): code is Language {
-  return (supportedLanguages as readonly string[]).includes(code);
+export function isLanguage(value: unknown): value is Language {
+  return (supportedLanguages as readonly unknown[]).includes(value);
 }
 
 export function resolveLanguage(languageCode: string | null | undefined): Language {
   const code = languageCode?.toLowerCase();
-  return code && isSupported(code) ? code : fallbackLanguage;
+  return code && isLanguage(code) ? code : fallbackLanguage;
 }
 
 export function getDeviceLanguage(): Language {

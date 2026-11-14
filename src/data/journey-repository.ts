@@ -50,7 +50,7 @@ async function readJourney(tx: Executor): Promise<StoredJourney> {
   return { start: journey.start_at, lapses: lapses.map((lapse) => lapse.at) };
 }
 
-async function writeJourney(tx: Executor, journey: Journey): Promise<void> {
+export async function writeJourney(tx: Executor, journey: Journey): Promise<void> {
   await tx.run(
     'INSERT INTO journey (id, start_at) VALUES (1, ?) ON CONFLICT (id) DO UPDATE SET start_at = excluded.start_at',
     [journey.start],
