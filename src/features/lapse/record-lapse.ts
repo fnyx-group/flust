@@ -5,13 +5,14 @@ import { samePlan, type Plan } from '@/domain/onboarding';
 import { err, ok, type Result } from '@/domain/result';
 import type { Timestamp } from '@/domain/time';
 
-export type RecordLapseError = LogLapseError | 'save-failed';
+export type RecordLapseError = LogLapseError | 'clock-behind' | 'save-failed';
 
 export const RECORD_LAPSE_ERROR_MESSAGES = {
   'lapse-in-future': 'lapse.errors.lapse-in-future',
   'lapse-before-last': 'lapse.errors.lapse-before-last',
   'lapse-before-start': 'lapse.errors.lapse-before-start',
   'invalid-timestamp': 'lapse.errors.invalid-timestamp',
+  'clock-behind': 'lapse.errors.clock-behind',
   'save-failed': 'lapse.errors.save-failed',
 } as const satisfies Record<RecordLapseError, string>;
 
@@ -31,7 +32,9 @@ export function skippedAnswers(at: Timestamp | null): LapseAnswers {
 export type RecordedLapse = { readonly journey: Journey; readonly record: LapseRecord };
 
 // The new journey is only returned once the lapse is stored, so the session never shows a lapse
-// that a relaunch would lose. A plan left as it was is not stored as a change.
+// that a relaunch would lose. A plan left as it was is not stored as a change. A lapse logged now
+// that falls before the current streak means the phone's clock is behind: no other moment can be
+// chosen then, so the error says so.
 export async function recordLapse(
   lapses: Pick<LapseRepository, 'record'>,
   journey: Journey,
@@ -40,12 +43,18 @@ export async function recordLapse(
 ): Promise<Result<RecordedLapse, RecordLapseError>> {
   const at = answers.at ?? now;
   const logged = logLapse(journey, at, now);
-  if (!logged.ok) return err(logged.error);
+  if (!logged.ok) return err(answers.at === null ? clockError(logged.error) : logged.error);
   const { plan } = answers;
-  const planChange =
-    plan === null || samePlan(plan.current, plan.adjusted)
-      ? null
-      : { previous: plan.current, next: plan.adjusted };
-  const saved = await lapses.record({ at, recordedAt: now, details: answers.details, planChange });
+  const adjusted = plan === null || samePlan(plan.current, plan.adjusted) ? null : plan.adjusted;
+  const saved = await lapses.record({
+    at,
+    recordedAt: now,
+    details: answers.details,
+    plan: adjusted,
+  });
   return saved.ok ? ok({ journey: logged.value, record: saved.value }) : err('save-failed');
+}
+
+function clockError(error: LogLapseError): RecordLapseError {
+  return error === 'lapse-before-last' || error === 'lapse-before-start' ? 'clock-behind' : error;
 }

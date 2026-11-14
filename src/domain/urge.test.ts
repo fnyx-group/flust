@@ -9,29 +9,23 @@ import {
   URGE_OUTCOMES,
   URGE_WAVE_MS,
 } from '@/domain/urge';
-import { duration, timestamp } from '@test/arbitraries';
-
-const OPENED = Date.UTC(2026, 0, 1, 22, 0, 0, 0);
+import { duration } from '@test/arbitraries';
 
 describe('countdownMs', () => {
-  it('starts at 20 minutes and counts down from the opening time', () => {
-    expect(countdownMs(OPENED, OPENED)).toBe(20 * MS_PER_MINUTE);
-    expect(countdownMs(OPENED, OPENED + 3 * MS_PER_MINUTE)).toBe(17 * MS_PER_MINUTE);
+  it('starts at 20 minutes and counts down with the time elapsed', () => {
+    expect(countdownMs(0)).toBe(20 * MS_PER_MINUTE);
+    expect(countdownMs(3 * MS_PER_MINUTE)).toBe(17 * MS_PER_MINUTE);
   });
 
   it('stays at zero once the wave is over', () => {
-    expect(countdownMs(OPENED, OPENED + URGE_WAVE_MS)).toBe(0);
-    expect(countdownMs(OPENED, OPENED + 3 * URGE_WAVE_MS)).toBe(0);
-  });
-
-  it('never shows more than the full wave when the clock is moved backwards', () => {
-    expect(countdownMs(OPENED, OPENED - MS_PER_MINUTE)).toBe(URGE_WAVE_MS);
+    expect(countdownMs(URGE_WAVE_MS)).toBe(0);
+    expect(countdownMs(3 * URGE_WAVE_MS)).toBe(0);
   });
 
   it('always lies between zero and the full wave', () => {
     fc.assert(
-      fc.property(timestamp, timestamp, (openedAt, now) => {
-        const left = countdownMs(openedAt, now);
+      fc.property(fc.double({ noNaN: true }), (elapsed) => {
+        const left = countdownMs(elapsed);
         return left >= 0 && left <= URGE_WAVE_MS;
       }),
     );

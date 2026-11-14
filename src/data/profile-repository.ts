@@ -72,6 +72,11 @@ export async function writeFirstPlan(tx: Executor, plan: Plan): Promise<void> {
   );
 }
 
+export async function deleteFirstPlan(tx: Executor): Promise<void> {
+  const current = await readFirstPlan(tx);
+  if (current !== null) await tx.run('DELETE FROM plan WHERE id = ?', [current.id]);
+}
+
 function readPlanRows(tx: Executor): Promise<readonly Row[]> {
   return tx.all(
     `SELECT id, trigger_id, action_preset_id, action_custom_text FROM plan ORDER BY position, id`,

@@ -1,5 +1,5 @@
 import { isOneOf } from '@/domain/guards';
-import { elapsedMs, MS_PER_MINUTE, MS_PER_SECOND, type Timestamp } from '@/domain/time';
+import { MS_PER_MINUTE, MS_PER_SECOND } from '@/domain/time';
 
 // An urge rises, peaks and falls, often within 15 to 30 minutes.
 export const URGE_WAVE_MS = 20 * MS_PER_MINUTE;
@@ -12,10 +12,10 @@ export const isUrgeOutcome = isOneOf(URGE_OUTCOMES);
 
 export type MinutesAndSeconds = { readonly minutes: number; readonly seconds: number };
 
-// Computed from the opening time, so a call or the app in the background never stops it. A clock
-// moved backwards shows the full wave, never more.
-export function countdownMs(openedAt: Timestamp, now: Timestamp): number {
-  return Math.max(0, URGE_WAVE_MS - elapsedMs(openedAt, now));
+// Computed from the time elapsed since the screen opened, never from the wall clock, so moving
+// the clock neither freezes nor skips it.
+export function countdownMs(elapsed: number): number {
+  return Math.min(URGE_WAVE_MS, Math.max(0, URGE_WAVE_MS - elapsed));
 }
 
 // Rounded up to the second, so the countdown shows 20:00 when it opens and 00:00 only at the end.
@@ -43,7 +43,7 @@ export type BreathingStep = {
 };
 
 // Breathing runs on the time elapsed since opening, so it resumes in the right phase after the
-// app comes back from the background.
+// app comes back from the background. A negative time counts as the start.
 export function breathingStep(elapsed: number): BreathingStep {
   const ms = Math.max(0, elapsed);
   const cycle = Math.floor(ms / CYCLE_MS);

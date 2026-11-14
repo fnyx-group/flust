@@ -23,8 +23,8 @@ describe('summary cards', () => {
     });
     expect(endedStreakCard(fr, summary)).toEqual({
       value: '12',
-      caption: 'jours, série terminée',
-      spoken: '12 jours, série terminée',
+      caption: 'jours sur cette série',
+      spoken: '12 jours sur cette série',
     });
     expect(totalCard(en, { ...summary, totalCleanDays: 1 }).caption).toBe('clean day, kept');
   });
@@ -33,8 +33,8 @@ describe('summary cards', () => {
     const short = { ...summary, endedStreak: { unit: 'hours', hours: 3, minutes: 5 } } as const;
     expect(endedStreakCard(en, short)).toEqual({
       value: '3 h 05',
-      caption: 'streak ended',
-      spoken: '3 hours 5 minutes, streak ended',
+      caption: 'on this streak',
+      spoken: '3 hours 5 minutes on this streak',
     });
   });
 

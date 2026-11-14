@@ -11,7 +11,7 @@ The home screen shows values that change with time: the streak counter, in hours
 - Returning to the foreground reads the time again and reschedules at once, which covers clock and time zone changes made meanwhile. The timer stops in the background.
 - Components subscribe through `useSyncExternalStore` with a selector and an optional equality check. Only the components that read the clock re-render, and only when their selected value changes: the counter re-renders when the minute or the day it shows changes, the rank badge once a day once a rank is reached, and the week strip and the quote once a day.
 - The timer and the app state are passed in, so the clock is tested with fake ones.
-- The same store ticks on another period with `createTickClock`. The emergency screen uses a one-second clock anchored at its opening time ([0016](0016-lapse-records-and-urge-events.md)).
+- The same store ticks on another period with `createTickClock`. The emergency screen uses a one-second clock of the time elapsed since it opened, on a monotonic time ([0017](0017-emergency-elapsed-clock.md)).
 
 ## Consequences
 

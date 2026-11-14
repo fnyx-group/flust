@@ -1,5 +1,6 @@
 import { AppState } from 'react-native';
 
+import type { ElapsedClockDeps } from '@/features/clock/elapsed-clock';
 import type { ClockDeps } from '@/features/clock/minute-clock';
 
 // 'inactive' is skipped: on iOS it covers the notification center and the app switcher, where
@@ -17,4 +18,9 @@ export const nativeClockDeps: ClockDeps = {
     });
     return () => subscription.remove();
   },
+};
+
+export const nativeElapsedClockDeps: ElapsedClockDeps = {
+  ...nativeClockDeps,
+  monotonicNow: () => performance.now(),
 };

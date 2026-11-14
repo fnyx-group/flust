@@ -61,21 +61,36 @@ describe('logLapse', () => {
 });
 
 describe('lapseBounds', () => {
-  it('goes from the start of the current streak to the current minute', () => {
+  it('goes from a minute after the start of the current streak to the current minute', () => {
     expect(lapseBounds(journeyOf(START), NOW)).toEqual({
-      min: START,
+      min: START + MS_PER_MINUTE,
       max: NOW - 30_500,
     });
-    expect(lapseBounds(journeyOf(START, [START + MS_PER_DAY]), NOW)?.min).toBe(START + MS_PER_DAY);
+    expect(lapseBounds(journeyOf(START, [START + MS_PER_DAY]), NOW)?.min).toBe(
+      START + MS_PER_DAY + MS_PER_MINUTE,
+    );
   });
 
-  it('never ends before the streak started, when it started this minute', () => {
-    const last = NOW - 10_000;
-    expect(lapseBounds(journeyOf(START, [last]), NOW)).toEqual({ min: last, max: last });
+  it('offers no earlier time during the first minute of the streak', () => {
+    expect(lapseBounds(journeyOf(START, [NOW - 10_000]), NOW)).toBeNull();
+    expect(lapseBounds(journeyOf(START, [NOW - 30_500 - MS_PER_MINUTE]), NOW)).toEqual({
+      min: NOW - 30_500,
+      max: NOW - 30_500,
+    });
   });
 
   it('allows nothing while the clock is behind the streak start', () => {
     expect(lapseBounds(journeyOf(START, [NOW]), NOW - 1)).toBeNull();
+  });
+
+  it('never lets a lapse end a streak of nothing', () => {
+    fc.assert(
+      fc.property(journeyInput, (input) => {
+        const journey = journeyFrom(input);
+        const bounds = lapseBounds(journey, input.now);
+        return bounds === null || bounds.min > (journey.lapses.at(-1) ?? journey.start);
+      }),
+    );
   });
 
   it('suggests an hour ago, within the streak', () => {
@@ -220,7 +235,11 @@ describe('planToRestore', () => {
   const change = { previous: DEFAULT_PLAN, next: walk };
 
   it('puts the previous plan back while the plan is still the one the lapse set', () => {
-    expect(planToRestore(change, walk)).toEqual(DEFAULT_PLAN);
+    expect(planToRestore(change, walk)).toEqual({ kind: 'write', plan: DEFAULT_PLAN });
+  });
+
+  it('removes the plan the lapse added when there was none before', () => {
+    expect(planToRestore({ previous: null, next: walk }, walk)).toEqual({ kind: 'remove' });
   });
 
   it('keeps a plan edited since then', () => {

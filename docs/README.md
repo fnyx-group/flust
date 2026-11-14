@@ -39,6 +39,7 @@
 - [0014 Minute clock](decisions/0014-minute-clock.md): time-driven screens recompute from timestamps on a shared tick aligned to the streak.
 - [0015 Rank unlock announcement](decisions/0015-rank-unlock-announcement.md): unlocks are checked on Home's clock and stored when their screen opens, so each rank is announced once.
 - [0016 Lapse records and urge events](decisions/0016-lapse-records-and-urge-events.md): lapses stored and undone by id, with their details and plan change; each emergency visit recorded.
+- [0017 Emergency elapsed clock](decisions/0017-emergency-elapsed-clock.md): the countdown and the breathing follow a monotonic elapsed time, not the wall clock.
 
 ## Development
 

@@ -1,6 +1,6 @@
 import type { Database, Executor } from '@/data/database';
 import { decodePlan, parseJson } from '@/data/json-codec';
-import { readFirstPlan, writeFirstPlan } from '@/data/profile-repository';
+import { deleteFirstPlan, readFirstPlan, writeFirstPlan } from '@/data/profile-repository';
 import {
   hasDetails,
   planToRestore,
@@ -8,6 +8,7 @@ import {
   type LapseRecord,
   type PlanChange,
 } from '@/domain/lapse';
+import { samePlan, type Plan } from '@/domain/onboarding';
 import { err, ok, type Result } from '@/domain/result';
 import { isValidTimestamp, type Timestamp } from '@/domain/time';
 
@@ -19,7 +20,9 @@ export type NewLapse = {
   readonly recordedAt: Timestamp;
   // Null when the questions were skipped: nothing but the lapse is stored.
   readonly details: LapseDetails | null;
-  readonly planChange: PlanChange | null;
+  // The plan chosen on the lapse screen, or null when it was left as it was. The plan it replaces
+  // is read from storage, never taken from the screen.
+  readonly plan: Plan | null;
 };
 
 export type LapseRepository = {
@@ -40,7 +43,8 @@ export function createLapseRepository(db: Database): LapseRepository {
       }
     },
 
-    // One transaction: the plan the lapse changed comes back, then its detail and the lapse go.
+    // One transaction: the plan the lapse changed comes back, or the plan it added goes, then its
+    // detail and the lapse go.
     async undo(id) {
       try {
         const found = await db.transaction((tx) => deleteLapse(tx, id));
@@ -73,7 +77,8 @@ async function insertLapse(tx: Executor, lapse: NewLapse): Promise<LapseRecord> 
   const id = rows[0]?.id;
   if (typeof id !== 'number') throw new Error('The new lapse has no id.');
   const details = lapse.details !== null && hasDetails(lapse.details) ? lapse.details : null;
-  if (details !== null || lapse.planChange !== null) {
+  const planChange = await changePlan(tx, lapse.plan);
+  if (details !== null || planChange !== null) {
     await tx.run(
       `INSERT INTO lapse_detail (lapse_id, place_id, context, previous_plan, new_plan)
        VALUES (?, ?, ?, ?, ?)`,
@@ -81,13 +86,22 @@ async function insertLapse(tx: Executor, lapse: NewLapse): Promise<LapseRecord> 
         id,
         details?.place ?? null,
         JSON.stringify(details?.context ?? []),
-        lapse.planChange === null ? null : JSON.stringify(lapse.planChange.previous),
-        lapse.planChange === null ? null : JSON.stringify(lapse.planChange.next),
+        planChange?.previous ? JSON.stringify(planChange.previous) : null,
+        planChange === null ? null : JSON.stringify(planChange.next),
       ],
     );
   }
-  if (lapse.planChange !== null) await writeFirstPlan(tx, lapse.planChange.next);
   return { id, at: lapse.at, recordedAt: lapse.recordedAt };
+}
+
+// Read in the same transaction as the write, so the previous plan kept for an undo is the one
+// that was really stored, whatever the screen managed to load.
+async function changePlan(tx: Executor, next: Plan | null): Promise<PlanChange | null> {
+  if (next === null) return null;
+  const previous = (await readFirstPlan(tx))?.plan ?? null;
+  if (previous !== null && samePlan(previous, next)) return null;
+  await writeFirstPlan(tx, next);
+  return { previous, next };
 }
 
 async function deleteLapse(tx: Executor, id: number): Promise<boolean> {
@@ -97,7 +111,8 @@ async function deleteLapse(tx: Executor, id: number): Promise<boolean> {
     await readPlanChange(tx, id),
     (await readFirstPlan(tx))?.plan ?? null,
   );
-  if (restore !== null) await writeFirstPlan(tx, restore);
+  if (restore?.kind === 'write') await writeFirstPlan(tx, restore.plan);
+  if (restore?.kind === 'remove') await deleteFirstPlan(tx);
   await tx.run('DELETE FROM lapse_detail WHERE lapse_id = ?', [id]);
   await tx.run('DELETE FROM lapse WHERE id = ?', [id]);
   return true;
@@ -109,9 +124,11 @@ async function readPlanChange(tx: Executor, id: number): Promise<PlanChange | nu
   ]);
   const row = rows[0];
   if (row === undefined) return null;
-  const previous = decodePlan(parseJson(row.previous_plan));
   const next = decodePlan(parseJson(row.new_plan));
-  return previous === null || next === null ? null : { previous, next };
+  if (next === null) return null;
+  if (row.previous_plan === null) return { previous: null, next };
+  const previous = decodePlan(parseJson(row.previous_plan));
+  return previous === null ? null : { previous, next };
 }
 
 function isTimestamp(value: unknown): value is number {

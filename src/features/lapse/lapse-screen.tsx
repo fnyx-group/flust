@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation, usePreventRemove } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
@@ -12,12 +12,18 @@ import { useTranslation } from 'react-i18next';
 
 import type { Profile } from '@/data/profile-repository';
 import type { Journey } from '@/domain/journey';
-import { defaultEarlierLapse, lapseBounds, lapseSummary } from '@/domain/lapse';
+import { defaultEarlierLapse, lapseBounds } from '@/domain/lapse';
 import { DEFAULT_PLAN, type Plan } from '@/domain/onboarding';
 import { PLACE_IDS, RISK_MOMENT_IDS, type PlaceId, type RiskMomentId } from '@/domain/presets';
 import { clampStart } from '@/domain/start-point';
+import { streakStart } from '@/domain/streak';
 import type { Timestamp } from '@/domain/time';
+import { ClockContext } from '@/features/clock/clock-context';
+import { createMinuteClock } from '@/features/clock/minute-clock';
+import { nativeClockDeps } from '@/features/clock/native-clock';
+import { handedOffVisit } from '@/features/emergency/visit-handoff';
 import { lapseTriggers } from '@/features/lapse/labels';
+import { createLapseExit } from '@/features/lapse/lapse-exit';
 import {
   recordLapse,
   RECORD_LAPSE_ERROR_MESSAGES,
@@ -25,7 +31,7 @@ import {
   type LapseAnswers,
   type RecordLapseError,
 } from '@/features/lapse/record-lapse';
-import { SummaryCards } from '@/features/lapse/summary-cards';
+import { LapseSummaryCards } from '@/features/lapse/summary-cards';
 import { WhenField } from '@/features/lapse/when-field';
 import { useSession } from '@/features/session/session-context';
 import { PlanFields } from '@/features/shared/plan-fields';
@@ -50,11 +56,20 @@ export function LapseScreen() {
 }
 
 // Every question is optional. "Skip" and "Save" both log the lapse; skipping keeps only the time,
-// and going back logs nothing. The screen closes only once the lapse is stored.
-function Lapse({ journey }: { journey: Journey }) {
+// and going back logs nothing. The screen closes only once the lapse is stored, and cannot be
+// removed while it is being stored.
+//
+// The journey is the one from before the lapse, kept for the screen's whole life: the session
+// gets the new one while the screen is still closing, and the cards must not show it.
+function Lapse({ journey: initialJourney }: { journey: Journey }) {
   const { t } = useTranslation();
   const storage = useStorage();
+  const navigation = useNavigation();
+  const { visit: visitKey } = useLocalSearchParams<{ visit?: string }>();
   const { unlockedRanks, setLapses } = useSession();
+  const [journey] = useState(initialJourney);
+  const [exit] = useState(() => createLapseExit(handedOffVisit(visitKey)));
+  const [clock] = useState(() => createMinuteClock(streakStart(journey), nativeClockDeps));
   const [now, setNow] = useState(() => Date.now());
   const [earlier, setEarlier] = useState<Timestamp | null>(null);
   const [lastEarlier, setLastEarlier] = useState<Timestamp | null>(null);
@@ -67,22 +82,30 @@ function Lapse({ journey }: { journey: Journey }) {
   const [error, setError] = useState<RecordLapseError | null>(null);
   // State updates land one render later, so a second tap in the same frame still sees busy false.
   const saving = useRef(false);
+  const allowRemove = usePreventRemove(busy);
 
+  // The plan editor only shows once the stored plan is known: a plan shown in its place could be
+  // saved over the real one.
   useEffect(() => {
     let active = true;
     storage.profile.load().then((result) => {
-      if (!active) return;
-      const loaded = result.ok ? result.value : { reasons: [], riskMoments: [], plans: [] };
-      setProfile(loaded);
-      setPlan(loaded.plans[0] ?? DEFAULT_PLAN);
+      if (!active || !result.ok) return;
+      setProfile(result.value);
+      setPlan(result.value.plans[0] ?? DEFAULT_PLAN);
     });
     return () => {
       active = false;
     };
   }, [storage]);
 
+  // Going back, or the removal that follows a save, which keeps the visit's first outcome. The
+  // event comes after the cleanup, so unsubscribing waits.
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('removed', () => exit.removed(Date.now()));
+    return () => queueMicrotask(unsubscribe);
+  }, [navigation, exit]);
+
   const bounds = lapseBounds(journey, now);
-  const summary = lapseSummary(journey, earlier ?? now, unlockedRanks, now);
   const currentPlan = profile?.plans[0] ?? DEFAULT_PLAN;
 
   function chooseNow() {
@@ -131,8 +154,12 @@ function Lapse({ journey }: { journey: Journey }) {
     setError(null);
     const result = await recordLapse(storage.lapses, journey, answers, Date.now());
     if (result.ok) {
-      router.back();
-      setLapses(result.value.journey, result.value.record);
+      setBusy(false);
+      const close = () => {
+        allowRemove();
+        router.back();
+      };
+      exit.saved(result.value, Date.now(), { setLapses, close });
       return;
     }
     saving.current = false;
@@ -150,84 +177,86 @@ function Lapse({ journey }: { journey: Journey }) {
 
   return (
     <Screen bottomInset>
-      <KeyboardAvoidingView
-        style={styles.fill}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <View style={styles.header}>
-          <IconButton
-            accessibilityLabel={t('lapse.back')}
-            disabled={busy}
-            onPress={() => router.back()}
-          >
-            <BackIcon color={colors.text} size={20} />
-          </IconButton>
-          <View>
-            <Button
-              variant="plain"
-              label={t('lapse.skip')}
-              disabled={busy}
-              onPress={() => void save(skippedAnswers(earlier))}
-            />
-          </View>
-        </View>
-        <ScrollView
+      <ClockContext value={clock}>
+        <KeyboardAvoidingView
           style={styles.fill}
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          <View style={styles.intro}>
-            <ScreenTitle>{t('lapse.title')}</ScreenTitle>
-            <Text style={styles.subtitle}>{t('lapse.subtitle')}</Text>
-          </View>
-          {summary.ok && <SummaryCards summary={summary.value} />}
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{t('lapse.whatHappened')}</Text>
-            <SelectRow
-              prefix={t('lapse.where')}
-              value={place === null ? t('lapse.notSet') : placeLabel(t, place)}
-              accessibilityHint={t('lapse.whereHint')}
-              onPress={() => setChoosingPlace(true)}
-            />
-            <WhenField
-              earlier={earlier}
-              bounds={bounds}
-              onChooseNow={chooseNow}
-              onChooseEarlier={chooseEarlier}
-              onSelect={selectEarlier}
-            />
-            <View style={styles.field}>
-              <Text style={styles.label}>{t('lapse.context')}</Text>
-              <ChipList
-                items={RISK_MOMENT_IDS.map((id) => ({
-                  key: id,
-                  label: riskMomentLabel(t, id),
-                  selected: context.includes(id),
-                }))}
-                onToggle={toggleContext}
+          <View style={styles.header}>
+            <IconButton
+              accessibilityLabel={t('lapse.back')}
+              disabled={busy}
+              onPress={() => router.back()}
+            >
+              <BackIcon color={colors.text} size={20} />
+            </IconButton>
+            <View>
+              <Button
+                variant="plain"
+                label={t('lapse.skip')}
+                disabled={busy}
+                onPress={() => void save(skippedAnswers(earlier))}
               />
             </View>
           </View>
-          {profile !== null && plan !== null && (
+          <ScrollView
+            style={styles.fill}
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.intro}>
+              <ScreenTitle>{t('lapse.title')}</ScreenTitle>
+              <Text style={styles.subtitle}>{t('lapse.subtitle')}</Text>
+            </View>
+            <LapseSummaryCards journey={journey} at={earlier} unlockedRanks={unlockedRanks} />
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>{t('lapse.nextTime')}</Text>
-              <PlanFields
-                plan={plan}
-                triggers={lapseTriggers(profile.riskMoments, currentPlan.trigger)}
-                onChange={setPlan}
+              <Text style={styles.sectionLabel}>{t('lapse.whatHappened')}</Text>
+              <SelectRow
+                prefix={t('lapse.where')}
+                value={place === null ? t('lapse.notSet') : placeLabel(t, place)}
+                accessibilityHint={t('lapse.whereHint')}
+                onPress={() => setChoosingPlace(true)}
               />
+              <WhenField
+                earlier={earlier}
+                bounds={bounds}
+                onChooseNow={chooseNow}
+                onChooseEarlier={chooseEarlier}
+                onSelect={selectEarlier}
+              />
+              <View style={styles.field}>
+                <Text style={styles.label}>{t('lapse.context')}</Text>
+                <ChipList
+                  items={RISK_MOMENT_IDS.map((id) => ({
+                    key: id,
+                    label: riskMomentLabel(t, id),
+                    selected: context.includes(id),
+                  }))}
+                  onToggle={toggleContext}
+                />
+              </View>
             </View>
-          )}
-        </ScrollView>
-        <View style={styles.footer}>
-          {error !== null && (
-            <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>
-              {t(RECORD_LAPSE_ERROR_MESSAGES[error])}
-            </Text>
-          )}
-          <Button label={t('lapse.save')} onPress={saveAnswers} disabled={busy} />
-        </View>
-      </KeyboardAvoidingView>
+            {profile !== null && plan !== null && (
+              <View style={styles.section}>
+                <Text style={styles.sectionLabel}>{t('lapse.nextTime')}</Text>
+                <PlanFields
+                  plan={plan}
+                  triggers={lapseTriggers(profile.riskMoments, currentPlan.trigger)}
+                  onChange={setPlan}
+                />
+              </View>
+            )}
+          </ScrollView>
+          <View style={styles.footer}>
+            {error !== null && (
+              <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>
+                {t(RECORD_LAPSE_ERROR_MESSAGES[error])}
+              </Text>
+            )}
+            <Button label={t('lapse.save')} onPress={saveAnswers} disabled={busy} />
+          </View>
+        </KeyboardAvoidingView>
+      </ClockContext>
       <OptionSheet
         visible={choosingPlace}
         title={t('lapse.whereTitle')}
@@ -259,8 +288,7 @@ const styles = StyleSheet.create({
     gap: spacing.s,
   },
   subtitle: {
-    ...typography.bodyLarge,
-    lineHeight: 24,
+    ...typography.paragraph,
     color: colors.textSecondary,
   },
   section: {

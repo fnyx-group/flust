@@ -17,7 +17,7 @@ const CALL: Plan = {
 };
 
 function lapse(overrides: Partial<NewLapse> = {}): NewLapse {
-  return { at: NOW, recordedAt: NOW, details: null, planChange: null, ...overrides };
+  return { at: NOW, recordedAt: NOW, details: null, plan: null, ...overrides };
 }
 
 async function setUp(plans: readonly Plan[] = [DEFAULT_PLAN]) {
@@ -75,9 +75,7 @@ describe('lapse repository', () => {
 
     it('replaces the first plan and keeps the previous one with the lapse', async () => {
       const { storage, rows } = await setUp([DEFAULT_PLAN, CALL]);
-      unwrap(
-        await storage.lapses.record(lapse({ planChange: { previous: DEFAULT_PLAN, next: WALK } })),
-      );
+      unwrap(await storage.lapses.record(lapse({ plan: WALK })));
 
       expect(unwrap(await storage.profile.load()).plans).toEqual([WALK, CALL]);
       expect(rows('SELECT context, previous_plan, new_plan FROM lapse_detail')).toEqual([
@@ -89,13 +87,32 @@ describe('lapse repository', () => {
       ]);
     });
 
-    it('adds the plan when none is stored', async () => {
-      const { storage } = await setUp([]);
-      unwrap(
-        await storage.lapses.record(lapse({ planChange: { previous: DEFAULT_PLAN, next: CALL } })),
-      );
+    it('adds the plan when none is stored, with no previous plan', async () => {
+      const { storage, rows } = await setUp([]);
+      unwrap(await storage.lapses.record(lapse({ plan: CALL })));
 
       expect(unwrap(await storage.profile.load()).plans).toEqual([CALL]);
+      expect(rows('SELECT previous_plan, new_plan FROM lapse_detail')).toEqual([
+        { previous_plan: null, new_plan: JSON.stringify(CALL) },
+      ]);
+    });
+
+    // The screen may have shown another plan, for instance when it could not load the stored one.
+    it('keeps the stored plan as the previous one, whatever the screen showed', async () => {
+      const { storage, rows } = await setUp([CALL]);
+      unwrap(await storage.lapses.record(lapse({ plan: WALK })));
+
+      expect(rows('SELECT previous_plan, new_plan FROM lapse_detail')).toEqual([
+        { previous_plan: JSON.stringify(CALL), new_plan: JSON.stringify(WALK) },
+      ]);
+    });
+
+    it('stores no plan change when the plan given is the stored one', async () => {
+      const { storage, rows } = await setUp([WALK]);
+      unwrap(await storage.lapses.record(lapse({ plan: WALK })));
+
+      expect(rows('SELECT * FROM lapse_detail')).toEqual([]);
+      expect(unwrap(await storage.profile.load()).plans).toEqual([WALK]);
     });
 
     it('stores nothing when a write fails partway', async () => {
@@ -111,7 +128,7 @@ describe('lapse repository', () => {
         await storage.lapses.record(
           lapse({
             details: { place: 'work', context: [] },
-            planChange: { previous: DEFAULT_PLAN, next: WALK },
+            plan: WALK,
           }),
         ),
       ).toEqual(err('storage-failed'));
@@ -128,7 +145,7 @@ describe('lapse repository', () => {
         await storage.lapses.record(
           lapse({
             details: { place: 'bedroom', context: ['stress'] },
-            planChange: { previous: DEFAULT_PLAN, next: WALK },
+            plan: WALK,
           }),
         ),
       );
@@ -157,11 +174,17 @@ describe('lapse repository', () => {
       expect(await storage.lapses.latest()).toEqual(ok(first));
     });
 
+    it('removes the plan the lapse added when none was stored before', async () => {
+      const { storage } = await setUp([]);
+      const recorded = unwrap(await storage.lapses.record(lapse({ plan: CALL })));
+
+      unwrap(await storage.lapses.undo(recorded.id));
+      expect(unwrap(await storage.profile.load()).plans).toEqual([]);
+    });
+
     it('keeps a plan edited after the lapse', async () => {
       const { storage, rawDatabase } = await setUp();
-      const recorded = unwrap(
-        await storage.lapses.record(lapse({ planChange: { previous: DEFAULT_PLAN, next: WALK } })),
-      );
+      const recorded = unwrap(await storage.lapses.record(lapse({ plan: WALK })));
       const raw = await rawDatabase();
       await raw.run("UPDATE plan SET trigger_id = 'boredom'");
       await raw.close();
@@ -172,9 +195,7 @@ describe('lapse repository', () => {
 
     it('leaves the plan alone when the stored change cannot be read', async () => {
       const { storage, rawDatabase } = await setUp();
-      const recorded = unwrap(
-        await storage.lapses.record(lapse({ planChange: { previous: DEFAULT_PLAN, next: WALK } })),
-      );
+      const recorded = unwrap(await storage.lapses.record(lapse({ plan: WALK })));
       const raw = await rawDatabase();
       await raw.run("UPDATE lapse_detail SET previous_plan = 'oops'");
       await raw.close();
@@ -194,7 +215,7 @@ describe('lapse repository', () => {
         await storage.lapses.record(
           lapse({
             details: { place: 'bedroom', context: [] },
-            planChange: { previous: DEFAULT_PLAN, next: WALK },
+            plan: WALK,
           }),
         ),
       );

@@ -58,7 +58,8 @@
       "inhale": "Breathe in",
       "hold": "Hold",
       "exhale": "Breathe out",
-      "rhythm": "Breathe in 4 s, hold 4 s, breathe out 6 s"
+      "rhythm": "Breathe in 4 s, hold 4 s, breathe out 6 s",
+      "guide": "Breathing guide"
     },
     "plan": "Your plan",
     "reasons": "Your reasons",
@@ -72,16 +73,16 @@
     "subtitle": "Your clean days are yours to keep. We start again from here.",
     "total_one": "clean day, kept",
     "total_other": "clean days, kept",
-    "streakDays_one": "day, streak ended",
-    "streakDays_other": "days, streak ended",
-    "streakHours": "streak ended",
+    "streakDays_one": "day on this streak",
+    "streakDays_other": "days on this streak",
+    "streakHours": "on this streak",
     "streakHoursValue": "{{hours}} h {{minutes}}",
     "rank": "Your rank stays {{name}}.",
     "whatHappened": "What happened",
     "where": "Where",
     "whereHint": "Opens the list of places",
     "whereTitle": "Where",
-    "notSet": "Not set",
+    "notSet": "Optional",
     "when": "When",
     "now": "Now",
     "earlier": "Earlier",
@@ -91,10 +92,11 @@
     "save": "Save and start again",
     "errors": {
       "lapse-in-future": "This time is in the future. Check your phone's date and time, or choose another moment.",
-      "lapse-before-last": "This time is before your last lapse. Check your phone's date and time, or choose another moment.",
+      "lapse-before-last": "This time is before your previous lapse. Check your phone's date and time, or choose another moment.",
       "lapse-before-start": "This time is before your starting point. Choose another moment.",
       "invalid-timestamp": "This time can't be used. Choose another moment.",
-      "save-failed": "The lapse could not be saved. Nothing has changed. Try again."
+      "clock-behind": "Your phone's date and time are earlier than your current streak. Check them, then try again.",
+      "save-failed": "The lapse could not be saved. Nothing was lost. Try again."
     }
   },
   "units": {

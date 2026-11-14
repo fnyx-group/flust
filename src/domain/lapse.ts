@@ -6,7 +6,13 @@ import { rankProgress, type Rank, type RankId } from '@/domain/ranks';
 import { err, ok, type Result } from '@/domain/result';
 import { clampStart, type TimeBounds } from '@/domain/start-point';
 import { streakDisplay, streakStart, totalCleanDays, type StreakDisplay } from '@/domain/streak';
-import { elapsedMs, floorToMinute, MS_PER_HOUR, type Timestamp } from '@/domain/time';
+import {
+  elapsedMs,
+  floorToMinute,
+  MS_PER_HOUR,
+  MS_PER_MINUTE,
+  type Timestamp,
+} from '@/domain/time';
 
 // The optional answers of the lapse screen. The context uses the risk moment ids, like the
 // onboarding and the future check-in, so patterns can be matched across them.
@@ -17,8 +23,12 @@ export type LapseDetails = {
 
 export const NO_DETAILS: LapseDetails = { place: null, context: [] };
 
-// Kept with the lapse so that undoing it can put the previous plan back.
-export type PlanChange = { readonly previous: Plan; readonly next: Plan };
+// Kept with the lapse so that undoing it can put the previous plan back. `previous` is null when
+// no plan could be read before the lapse: undoing it then removes the plan the lapse added.
+export type PlanChange = { readonly previous: Plan | null; readonly next: Plan };
+
+export type PlanRestore =
+  { readonly kind: 'write'; readonly plan: Plan } | { readonly kind: 'remove' };
 
 // A stored lapse. `recordedAt` is when it was logged, which can be later than `at` when it is
 // backdated; lapses stored before it existed have none.
@@ -60,12 +70,14 @@ export function logLapse(
   return added;
 }
 
-// From the start of the current streak to now, in whole minutes like the start picker. Null when
-// the clock is behind the streak start: no time can be picked until it is corrected.
+// From a minute after the start of the current streak to now, in whole minutes like the start
+// picker: a lapse at the very start of the streak would end a streak of nothing. Null until the
+// clock is past that first minute, including when it is behind the streak start: only now can
+// be chosen then.
 export function lapseBounds(journey: Journey, now: Timestamp): TimeBounds | null {
-  const min = streakStart(journey);
-  if (now < min) return null;
-  return { min, max: Math.max(min, floorToMinute(now)) };
+  const min = streakStart(journey) + MS_PER_MINUTE;
+  const max = floorToMinute(now);
+  return max < min ? null : { min, max };
 }
 
 export function defaultEarlierLapse(bounds: TimeBounds): Timestamp {
@@ -121,9 +133,9 @@ export function canUndo(record: LapseRecord | null, now: Timestamp, offsetAt: Ut
 
 // The plan in place before the lapse comes back only if the plan is still the one the lapse set:
 // a plan edited since then is the user's newer choice.
-export function planToRestore(change: PlanChange | null, current: Plan | null): Plan | null {
-  if (change === null || current === null) return null;
-  return samePlan(change.next, current) ? change.previous : null;
+export function planToRestore(change: PlanChange | null, current: Plan | null): PlanRestore | null {
+  if (change === null || current === null || !samePlan(change.next, current)) return null;
+  return change.previous === null ? { kind: 'remove' } : { kind: 'write', plan: change.previous };
 }
 
 // A clock set back by more than the window's length ends it, so a lapse logged while the clock

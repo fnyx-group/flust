@@ -23,15 +23,15 @@ A clock set forwards can unlock ranks early. This is accepted: the app is person
 
 ## Ranks and lapses
 
-| Case                                | Expected behavior                                                                                                                                               |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Several ranks unlocked while closed | The unlock screen shows the highest rank and lists the others.                                                                                                  |
-| Undo a lapse                        | The lapse is removed and the previous streak is restored. Total clean days and rank are recomputed.                                                             |
-| Undo after midnight                 | The undo is offered until local midnight after the lapse was logged, and never less than an hour after it.                                                      |
-| Undo after a plan change            | The plan in place before the lapse comes back, unless the plan was edited again since.                                                                          |
-| Rank reached just after a lapse     | No unlock screen for six hours after the lapse was logged. The rank shows on the badge at once and is announced when the six hours end.                         |
-| Two lapses on the same day          | Both are recorded. The streak restarts from the latest one. The rank is not lowered.                                                                            |
-| Backdated lapse                     | The lapse is recorded at the chosen time, which cannot be in the future or before the start point. The streak restarts from that time. The rank is not lowered. |
+| Case                                | Expected behavior                                                                                                                                                                                         |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Several ranks unlocked while closed | The unlock screen shows the highest rank and lists the others.                                                                                                                                            |
+| Undo a lapse                        | The lapse is removed and the previous streak is restored. Total clean days are recomputed; the rank is left as it is.                                                                                     |
+| Undo after midnight                 | The undo is offered until local midnight after the lapse was logged, and never less than an hour after it.                                                                                                |
+| Undo after a plan change            | The plan in place before the lapse comes back, unless the plan was edited again since.                                                                                                                    |
+| Rank reached just after a lapse     | No unlock screen for six hours after the lapse was logged. The rank shows on the badge at once and is announced when the six hours end.                                                                   |
+| Two lapses on the same day          | Both are recorded. The streak restarts from the latest one. The rank is not lowered.                                                                                                                      |
+| Backdated lapse                     | The lapse is recorded at the chosen time, which cannot be in the future and comes at least a minute after the last lapse or the start point. The streak restarts from that time. The rank is not lowered. |
 
 ## Unresponsive user
 
@@ -72,13 +72,14 @@ Notification text is always neutral and never reveals what the app is about.
 
 ## Emergency screen
 
-| Case                            | Expected behavior                                                                                  |
-| ------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Opened from a notification      | The app unlocks, then opens the emergency screen directly.                                         |
-| Phone call or app in background | The timer is based on timestamps, so it shows the correct remaining time when the user comes back. |
-| Reduced motion enabled          | Breathing guidance and transitions use no large movement.                                          |
-| Countdown reaches zero          | The countdown stays at 00:00 and a calm line asks whether the wave has passed.                     |
-| App killed on the screen        | The visit stays recorded with its start, without an end or an outcome.                             |
+| Case                             | Expected behavior                                                                                                                 |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Opened from a notification       | The app unlocks, then opens the emergency screen directly.                                                                        |
+| Phone call or app in background  | The timer counts the time elapsed since the screen opened, so it shows the correct remaining time when the user comes back.       |
+| Phone time changed on the screen | The timer and the breathing follow a monotonic clock in the foreground: changing the phone's time neither freezes nor skips them. |
+| Reduced motion enabled           | Breathing guidance and transitions use no large movement.                                                                         |
+| Countdown reaches zero           | The countdown stays at 00:00 and a calm line asks whether the wave has passed.                                                    |
+| App killed on the screen         | The visit stays recorded with its start, without an end or an outcome.                                                            |
 
 ## Devices
 

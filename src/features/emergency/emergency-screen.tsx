@@ -4,15 +4,15 @@ import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-nativ
 import { useTranslation } from 'react-i18next';
 
 import type { Profile } from '@/data/profile-repository';
-import { MS_PER_SECOND, type Timestamp } from '@/domain/time';
 import { countdownMs } from '@/domain/urge';
 import { ClockContext, useClock } from '@/features/clock/clock-context';
-import { createTickClock } from '@/features/clock/minute-clock';
-import { nativeClockDeps } from '@/features/clock/native-clock';
+import { createElapsedClock } from '@/features/clock/elapsed-clock';
+import { nativeElapsedClockDeps } from '@/features/clock/native-clock';
 import { BreathingCircle } from '@/features/emergency/breathing-circle';
 import { CountdownChip } from '@/features/emergency/countdown-chip';
 import { PlanCard, ReasonsCard } from '@/features/emergency/profile-cards';
 import { startUrgeVisit, type UrgeVisit } from '@/features/emergency/urge-visit';
+import { handOffVisit } from '@/features/emergency/visit-handoff';
 import { useStorage } from '@/features/storage/storage-context';
 import { Button } from '@/ui/button';
 import { IconButton } from '@/ui/icon-button';
@@ -22,18 +22,21 @@ import { ScreenTitle } from '@/ui/screen-title';
 import { ScrollView } from '@/ui/scroll-view';
 import { colors, spacing, typography } from '@/ui/theme';
 
-// Everything on this screen runs on the time since it opened, read again on each tick of a
-// one-second clock, so a call or the app in the background never breaks the countdown or the
-// breathing. The plan and the reasons are read in the background and appear when they are ready:
+// Everything on this screen runs on the time elapsed since it opened, read on each tick of a
+// one-second clock that follows a monotonic time (see createElapsedClock), so a call, the app in
+// the background or a change of the phone's time never breaks the countdown or the breathing. The
+// plan and the reasons are read in the background and appear when they are ready:
 // nothing here waits on storage.
 export function EmergencyScreen() {
   const { t } = useTranslation();
   const storage = useStorage();
   const navigation = useNavigation();
   const [openedAt] = useState(() => Date.now());
-  const [clock] = useState(() => createTickClock(openedAt, MS_PER_SECOND, nativeClockDeps));
+  const [clock] = useState(() => createElapsedClock(nativeElapsedClockDeps));
   const [profile, setProfile] = useState<Profile | null>(null);
   const visit = useRef<UrgeVisit | null>(null);
+  // Set once the lapse screen has taken the visit over: it ends the visit from then on.
+  const handedOff = useRef(false);
 
   // Effects can run twice in development; the ref keeps a single visit per screen.
   useEffect(() => {
@@ -45,7 +48,7 @@ export function EmergencyScreen() {
   // never happens twice in development. The event comes after the cleanup, so unsubscribing waits.
   useEffect(() => {
     const unsubscribe = navigation.addListener('removed', () => {
-      void visit.current?.finish('closed', Date.now());
+      if (!handedOff.current) void visit.current?.finish('closed', Date.now());
     });
     return () => queueMicrotask(unsubscribe);
   }, [navigation]);
@@ -65,9 +68,16 @@ export function EmergencyScreen() {
     router.back();
   }
 
+  // The visit ends on the lapse screen: as a lapse once it is saved, as closed if the user goes
+  // back without saving.
   function lapse() {
-    void visit.current?.finish('lapse', Date.now());
-    router.replace('/lapse');
+    const current = visit.current;
+    if (current === null) {
+      router.replace('/lapse');
+      return;
+    }
+    handedOff.current = true;
+    router.replace({ pathname: '/lapse', params: { visit: handOffVisit(current) } });
   }
 
   const plan = profile?.plans[0];
@@ -85,14 +95,14 @@ export function EmergencyScreen() {
             <IconButton accessibilityLabel={t('emergency.close')} onPress={() => router.back()}>
               <CloseIcon color={colors.text} />
             </IconButton>
-            <CountdownChip openedAt={openedAt} />
+            <CountdownChip />
           </View>
           <View style={styles.intro}>
             <ScreenTitle>{t('emergency.title')}</ScreenTitle>
             <Text style={styles.subtitle}>{t('emergency.subtitle')}</Text>
-            <WaveOver openedAt={openedAt} />
+            <WaveOver />
           </View>
-          <BreathingCircle openedAt={openedAt} />
+          <BreathingCircle />
           {plan !== undefined && <PlanCard plan={plan} />}
           {reasons.length > 0 && <ReasonsCard reasons={reasons} />}
           <View style={styles.actions}>
@@ -105,10 +115,14 @@ export function EmergencyScreen() {
   );
 }
 
+function isWaveOver(elapsed: number): boolean {
+  return countdownMs(elapsed) === 0;
+}
+
 // Shown once the countdown reaches zero, and announced once.
-function WaveOver({ openedAt }: { openedAt: Timestamp }) {
+function WaveOver() {
   const { t } = useTranslation();
-  const over = useClock((now) => countdownMs(openedAt, now) === 0);
+  const over = useClock(isWaveOver);
   const text = t('emergency.waveOver');
 
   useEffect(() => {
@@ -140,8 +154,7 @@ const styles = StyleSheet.create({
     gap: spacing.s,
   },
   subtitle: {
-    ...typography.bodyLarge,
-    lineHeight: 24,
+    ...typography.paragraph,
     color: colors.textSecondary,
   },
   waveOver: {

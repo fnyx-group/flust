@@ -41,10 +41,10 @@
     "lapse": {
       "link": "J'ai eu un écart",
       "noted": "Écart noté",
-      "undo": "Annuler",
+      "undo": "Annuler l'écart",
       "undoSpoken": "Annuler l'écart noté",
       "undoFailed": "L'écart n'a pas pu être annulé. Réessaie.",
-      "support": "Les prochaines heures comptent. Tu as déjà fait le plus dur en le notant."
+      "support": "Les prochaines heures comptent. Tu as déjà fait le plus dur en notant cet écart."
     }
   },
   "emergency": {
@@ -56,9 +56,10 @@
     "waveOver": "La vague est passée ?",
     "breathing": {
       "inhale": "Inspire",
-      "hold": "Bloque",
+      "hold": "Retiens",
       "exhale": "Expire",
-      "rhythm": "Inspire 4 s, bloque 4 s, expire 6 s"
+      "rhythm": "Inspire 4 s, retiens 4 s, expire 6 s",
+      "guide": "Guide de respiration"
     },
     "plan": "Ton plan",
     "reasons": "Tes raisons",
@@ -72,16 +73,16 @@
     "subtitle": "Tes jours propres restent acquis. On repart d'ici.",
     "total_one": "jour propre, conservé",
     "total_other": "jours propres, conservés",
-    "streakDays_one": "jour, série terminée",
-    "streakDays_other": "jours, série terminée",
-    "streakHours": "série terminée",
+    "streakDays_one": "jour sur cette série",
+    "streakDays_other": "jours sur cette série",
+    "streakHours": "sur cette série",
     "streakHoursValue": "{{hours}} h {{minutes}}",
     "rank": "Ton rang reste {{name}}.",
     "whatHappened": "Ce qui s'est passé",
     "where": "Où",
     "whereHint": "Ouvre la liste des lieux",
     "whereTitle": "Où",
-    "notSet": "Non précisé",
+    "notSet": "Facultatif",
     "when": "Quand",
     "now": "Maintenant",
     "earlier": "Plus tôt",
@@ -91,10 +92,11 @@
     "save": "Enregistrer et repartir",
     "errors": {
       "lapse-in-future": "Ce moment est dans le futur. Vérifie l'heure de ton téléphone, ou choisis un autre moment.",
-      "lapse-before-last": "Ce moment est avant ton dernier écart. Vérifie l'heure de ton téléphone, ou choisis un autre moment.",
+      "lapse-before-last": "Ce moment est avant ton écart précédent. Vérifie l'heure de ton téléphone, ou choisis un autre moment.",
       "lapse-before-start": "Ce moment est avant ton point de départ. Choisis un autre moment.",
       "invalid-timestamp": "Ce moment ne peut pas être utilisé. Choisis un autre moment.",
-      "save-failed": "L'écart n'a pas pu être enregistré. Rien n'a changé. Réessaie."
+      "clock-behind": "La date et l'heure de ton téléphone sont antérieures à ta série en cours. Vérifie-les, puis réessaie.",
+      "save-failed": "L'écart n'a pas pu être enregistré. Rien n'est perdu. Réessaie."
     }
   },
   "units": {

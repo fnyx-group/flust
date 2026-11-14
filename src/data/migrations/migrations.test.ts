@@ -125,7 +125,7 @@ describe('migrations', () => {
 
     it.each([
       [
-        'a plan change with only one side',
+        'a previous plan without a new one',
         "INSERT INTO lapse_detail (lapse_id, context, previous_plan) VALUES (1, '[]', '{}')",
       ],
       ['a detail without a context', 'INSERT INTO lapse_detail (lapse_id) VALUES (1)'],

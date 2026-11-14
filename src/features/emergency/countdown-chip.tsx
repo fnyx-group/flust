@@ -1,16 +1,20 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import type { Timestamp } from '@/domain/time';
-import { countdownMs, countdownParts } from '@/domain/urge';
+import { countdownMs, countdownParts, type MinutesAndSeconds } from '@/domain/urge';
 import { useClock } from '@/features/clock/clock-context';
 import { sameFields } from '@/features/clock/minute-clock';
 import { countdownText, spokenCountdown } from '@/features/emergency/labels';
 import { colors, radii, spacing, typography } from '@/ui/theme';
 
-export function CountdownChip({ openedAt }: { openedAt: Timestamp }) {
+function countdownAt(elapsed: number): MinutesAndSeconds {
+  return countdownParts(countdownMs(elapsed));
+}
+
+// Reads the screen's elapsed clock.
+export function CountdownChip() {
   const { t } = useTranslation();
-  const parts = useClock((now) => countdownParts(countdownMs(openedAt, now)), sameFields);
+  const parts = useClock(countdownAt, sameFields);
   return (
     <View
       accessible

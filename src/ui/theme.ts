@@ -57,6 +57,9 @@ export const typography = {
   badgeName: { fontFamily: fonts.extraBold, fontSize: 15 },
   body: { fontFamily: fonts.regular, fontSize: 15 },
   bodyLarge: { fontFamily: fonts.regular, fontSize: 16 },
+  // Body text that can run over several lines.
+  paragraph: { fontFamily: fonts.regular, fontSize: 16, lineHeight: 24 },
+  paragraphSmall: { fontFamily: fonts.regular, fontSize: 15, lineHeight: 22 },
   label: { fontFamily: fonts.semiBold, fontSize: 13, color: colors.textSecondary },
   caption: { fontFamily: fonts.regular, fontSize: 12 },
   badgeDetail: { fontFamily: fonts.semiBold, fontSize: 12, color: colors.textSecondary },
@@ -81,6 +84,7 @@ export const counterFontSizes: Record<CounterSize, number> = {
 export const spacing = {
   screen: 20,
   screenTop: 60,
+  card: 20,
   xxs: 2,
   xs: 4,
   s: 8,

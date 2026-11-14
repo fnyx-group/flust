@@ -1,7 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import type { LapseSummary } from '@/domain/lapse';
+import type { Journey } from '@/domain/journey';
+import { lapseSummary, type LapseSummary } from '@/domain/lapse';
+import type { RankId } from '@/domain/ranks';
+import type { Timestamp } from '@/domain/time';
+import { useClock } from '@/features/clock/clock-context';
 import {
   endedStreakCard,
   keptRank,
@@ -10,8 +14,23 @@ import {
 } from '@/features/lapse/labels';
 import { colors, radii, spacing, typography } from '@/ui/theme';
 
+type LapseSummaryCardsProps = {
+  // The journey before the lapse.
+  journey: Journey;
+  // Null for now.
+  at: Timestamp | null;
+  unlockedRanks: readonly RankId[];
+};
+
+// Follows the clock, so a lapse logged now shows the streak it really ends even when the screen
+// stays open a while. Nothing shows when the time cannot be used: the error says why on save.
+export function LapseSummaryCards({ journey, at, unlockedRanks }: LapseSummaryCardsProps) {
+  const summary = useClock((now) => lapseSummary(journey, at ?? now, unlockedRanks, now));
+  return summary.ok ? <SummaryCards summary={summary.value} /> : null;
+}
+
 // What the lapse keeps and what it ends, side by side. Never the record streak.
-export function SummaryCards({ summary }: { summary: LapseSummary }) {
+function SummaryCards({ summary }: { summary: LapseSummary }) {
   const { t } = useTranslation();
   const rank = keptRank(t, summary);
   return (
@@ -47,7 +66,7 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     gap: spacing.xs,
-    padding: 20,
+    padding: spacing.card,
     borderRadius: radii.cardLarge,
     backgroundColor: colors.surface,
   },

@@ -12,6 +12,7 @@ const START = Date.UTC(2026, 0, 1, 8);
 const NOW = START + 12 * MS_PER_DAY;
 const SKIPPED = skippedAnswers(null);
 const WALK: Plan = { trigger: 'stress', action: { kind: 'preset', id: 'walk-ten-minutes' } };
+const BREATHE: Plan = { trigger: 'boredom', action: { kind: 'preset', id: 'guided-breathing' } };
 
 async function setUp() {
   const fake = createFakeStorage();
@@ -98,6 +99,19 @@ describe('recordLapse', () => {
     expect(rows('SELECT id FROM lapse')).toEqual([{ id: 1 }]);
   });
 
+  it('says the clock is behind when a lapse logged now falls before the current streak', async () => {
+    const { storage, journey, rows } = await setUp();
+    const first = unwrap(await recordLapse(storage.lapses, journey, SKIPPED, NOW));
+
+    expect(await recordLapse(storage.lapses, first.journey, SKIPPED, NOW - 1)).toEqual(
+      err('clock-behind'),
+    );
+    expect(await recordLapse(storage.lapses, journey, SKIPPED, START - 1)).toEqual(
+      err('clock-behind'),
+    );
+    expect(rows('SELECT id FROM lapse')).toEqual([{ id: 1 }]);
+  });
+
   it('reports a failed write, and the journey is not changed', async () => {
     const { storage, journey } = await setUp();
     await storage.close();
@@ -127,6 +141,36 @@ describe('undoLapse', () => {
     expect(await storage.journey.load()).toEqual(ok(journey));
     expect(rows('SELECT * FROM lapse_detail')).toEqual([]);
     expect(unwrap(await storage.profile.load()).plans).toEqual([DEFAULT_PLAN]);
+  });
+
+  // The screen may show another plan than the stored one, for instance when it could not load it.
+  it('puts back the stored plan, not the one the screen showed', async () => {
+    const { storage, journey } = await setUp();
+    const recorded = unwrap(
+      await recordLapse(
+        storage.lapses,
+        journey,
+        { ...SKIPPED, plan: { current: BREATHE, adjusted: WALK } },
+        NOW,
+      ),
+    );
+    expect(unwrap(await storage.profile.load()).plans).toEqual([WALK]);
+
+    unwrap(await undoLapse(storage.lapses, recorded.journey, recorded.record));
+    expect(unwrap(await storage.profile.load()).plans).toEqual([DEFAULT_PLAN]);
+  });
+
+  it('counts a lapse already undone by a second tap as undone', async () => {
+    const { storage, journey } = await setUp();
+    const recorded = unwrap(await recordLapse(storage.lapses, journey, SKIPPED, NOW));
+
+    const [first, second] = await Promise.all([
+      undoLapse(storage.lapses, recorded.journey, recorded.record),
+      undoLapse(storage.lapses, recorded.journey, recorded.record),
+    ]);
+    expect(first).toEqual(ok({ journey, latestLapse: null }));
+    expect(second).toEqual(ok({ journey, latestLapse: null }));
+    expect(await storage.journey.load()).toEqual(ok(journey));
   });
 
   it('leaves the previous lapse as the last one, so it can be undone in turn', async () => {

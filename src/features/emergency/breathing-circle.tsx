@@ -10,10 +10,10 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import type { Timestamp } from '@/domain/time';
-import { breathingStep, type BreathingPhase, type BreathingStep } from '@/domain/urge';
-import { useClock } from '@/features/clock/clock-context';
+import { breathingStep, type BreathingPhase } from '@/domain/urge';
+import { useClock, useTickClock } from '@/features/clock/clock-context';
 import { sameFields } from '@/features/clock/minute-clock';
+import { nativeClockDeps } from '@/features/clock/native-clock';
 import { breathingLabel } from '@/features/emergency/labels';
 import { useReduceMotion } from '@/features/shared/use-reduce-motion';
 import { colors, sizes, spacing, typography } from '@/ui/theme';
@@ -26,55 +26,86 @@ const SCALES: Record<BreathingPhase, readonly [number, number]> = {
   exhale: [1, SMALL],
 };
 
-function samePhase(a: BreathingStep, b: BreathingStep): boolean {
-  return a.index === b.index;
+const EASING = Easing.inOut(Easing.sin);
+
+// Module-level selectors, so the clock subscriptions stay the same from one render to the next.
+function shownStep(elapsed: number) {
+  const { phase, secondsLeft } = breathingStep(elapsed);
+  return { phase, secondsLeft };
 }
 
-// The circle grows on the inhale, stays on the hold and shrinks on the exhale. Each phase starts
-// from where the elapsed time puts it, so coming back from the background never restarts it.
-// With reduce motion on, only the text changes.
-export function BreathingCircle({ openedAt }: { openedAt: Timestamp }) {
+function phaseIndex(elapsed: number): number {
+  return breathingStep(elapsed).index;
+}
+
+// Counts the returns to the foreground, once the screen's clock has read the time again.
+function useForegroundCount(): number {
+  const [count, setCount] = useState(0);
+  useEffect(
+    () =>
+      nativeClockDeps.watchActivity((activity) => {
+        if (activity === 'foreground') queueMicrotask(() => setCount((value) => value + 1));
+      }),
+    [],
+  );
+  return count;
+}
+
+// The circle grows on the inhale, stays on the hold and shrinks on the exhale, on the screen's
+// elapsed clock. With reduce motion on, only the text changes.
+//
+// Screen readers hear the rhythm once when the screen opens. After that, the phase is the value
+// of the breathing guide, read again as it changes only while the guide has focus: iOS re-reads a
+// focused element that updates frequently, which the progress bar role gives it, and TalkBack
+// re-reads the focused element when its description changes. React Native has no accessibility
+// focus event to do more.
+export function BreathingCircle() {
   const { t } = useTranslation();
   const reduceMotion = useReduceMotion();
-  const shown = useClock((now) => {
-    const { phase, secondsLeft } = breathingStep(now - openedAt);
-    return { phase, secondsLeft };
-  }, sameFields);
-  const step = useClock((now) => breathingStep(now - openedAt), samePhase);
+  const clock = useTickClock();
+  const shown = useClock(shownStep, sameFields);
+  const index = useClock(phaseIndex);
+  const resumes = useForegroundCount();
   const [scale] = useState(() => new Animated.Value(1));
+  const [rhythm] = useState(() => t('emergency.breathing.rhythm'));
   const label = breathingLabel(t, shown.phase);
 
+  useEffect(() => {
+    AccessibilityInfo.announceForAccessibility(rhythm);
+  }, [rhythm]);
+
+  // Starts again at each phase and after each return to the foreground, from where the elapsed
+  // time puts it: a native animation paused in the background would otherwise lag behind the text.
   useEffect(() => {
     if (reduceMotion !== false) {
       scale.setValue(1);
       return;
     }
+    const step = breathingStep(clock.now());
     const [from, to] = SCALES[step.phase];
-    scale.setValue(from + (to - from) * step.progress);
+    scale.setValue(from + (to - from) * EASING(step.progress));
     const animation = Animated.timing(scale, {
       toValue: to,
       duration: step.msLeft,
-      easing: Easing.inOut(Easing.sin),
+      easing: EASING,
       useNativeDriver: true,
     });
     animation.start();
     return () => animation.stop();
-  }, [step, reduceMotion, scale]);
-
-  // Android reads the phase through its live region; iOS has none, so it is announced there.
-  // Consecutive phases always have different names, so this runs once per phase.
-  useEffect(() => {
-    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(label);
-  }, [label]);
+  }, [index, resumes, reduceMotion, scale, clock]);
 
   return (
     <View style={styles.container}>
-      <View style={styles.ring}>
+      <View
+        accessible
+        accessibilityLabel={t('emergency.breathing.guide')}
+        accessibilityValue={{ text: label }}
+        accessibilityRole={Platform.OS === 'ios' ? 'progressbar' : undefined}
+        style={styles.ring}
+      >
         <Animated.View style={[styles.circle, { transform: [{ scale }] }]} />
         <View style={styles.center}>
-          <Text accessibilityLiveRegion="polite" style={styles.phase}>
-            {label}
-          </Text>
+          <Text style={styles.phase}>{label}</Text>
           <Text
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
@@ -85,7 +116,7 @@ export function BreathingCircle({ openedAt }: { openedAt: Timestamp }) {
           </Text>
         </View>
       </View>
-      <Text style={styles.rhythm}>{t('emergency.breathing.rhythm')}</Text>
+      <Text style={styles.rhythm}>{rhythm}</Text>
     </View>
   );
 }

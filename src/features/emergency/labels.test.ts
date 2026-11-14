@@ -32,6 +32,6 @@ describe('breathingLabel', () => {
     const fr = createI18n('fr').t;
     expect(
       (['inhale', 'hold', 'exhale'] as const).map((phase) => breathingLabel(fr, phase)),
-    ).toEqual(['Inspire', 'Bloque', 'Expire']);
+    ).toEqual(['Inspire', 'Retiens', 'Expire']);
   });
 });

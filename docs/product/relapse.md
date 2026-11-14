@@ -13,7 +13,7 @@ The lapse screen opens from the emergency screen ("I had a lapse") or from the d
 - shows the message "A lapse, not a reset",
 - shows the total clean days kept and the streak that just ended, and that the rank is kept,
 - restarts the streak, which shows hours and minutes again,
-- asks optional questions: where it happened (bedroom, bathroom, living room, work, transport, elsewhere), when (now by default, or earlier within the streak that just ended, never before the last lapse or the start), and the context (the risk moment presets),
+- asks optional questions: where it happened (bedroom, bathroom, living room, work, transport, elsewhere), when (now by default, or earlier within the streak that just ended, at least a minute after the last lapse or the start), and the context (the risk moment presets),
 - offers to adjust the if/then plan, prefilled with the current plan.
 
 Every step can be skipped. "Save and start again" and "Skip" both log the lapse; "Skip" stores no place, context or plan change; it keeps an earlier time if one was chosen, and logs the lapse now otherwise. Going back logs nothing. If the user closes the app during or after the lapse screen, no follow-up alert is sent.

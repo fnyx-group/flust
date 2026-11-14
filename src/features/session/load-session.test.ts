@@ -55,7 +55,7 @@ describe('loadSession', () => {
         at: START + 1000,
         recordedAt: START + 2000,
         details: null,
-        planChange: null,
+        plan: null,
       }),
     );
 

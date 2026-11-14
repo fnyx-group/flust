@@ -100,7 +100,7 @@ From top to bottom, with the screen padding of 20:
 2. One block, without a card, centered vertically in the free space between the header and the button: the "Série en cours" label, the streak counter, the week strip, then the daily quote. The week strip and the quote are 40 points apart. The free space goes above and below the block, never between its parts.
 3. At the bottom: the "J'ai une envie" button, then the discreet "J'ai eu un écart" text button.
 
-For six hours after a lapse is logged, one supportive line in secondary text sits above the "J'ai une envie" button. Until local midnight after a lapse is logged, and at least an hour, a caption line "Écart noté · Annuler" sits under the text button; "Annuler" is a text button. Neither uses red, the record streak or an animation.
+For six hours after a lapse is logged, one supportive line in secondary text sits above the "J'ai une envie" button. Until local midnight after a lapse is logged, and at least an hour, a caption line "Écart noté · Annuler l'écart" sits under the text button; "Annuler l'écart" is a text button. Neither uses red, the record streak or an animation.
 
 ### Rank badge
 
@@ -165,7 +165,7 @@ A full screen without the tab bar, in a scrolling column with 24 points between 
 
 1. A header row: the close button on the left, the countdown chip on the right (a pill on the surface color, 22/600 Barlow Condensed, from 20:00 to 00:00). Screen readers read it in words, such as "Encore 19 minutes 42 secondes".
 2. "Laisse passer la vague." (screen title) and the explanation (16/400, line height 24, secondary text). Once the countdown reaches zero, "La vague est passée ?" (row style) appears under it and is announced once.
-3. The breathing guide: a 220 point ring in the separator color around a 170 point circle on the surface color with a 3 point accent stroke. The circle grows from 70 to 100 percent on the inhale, stays on the hold and shrinks on the exhale. The phase name (20/600) and the seconds left in the phase (56/600 Barlow Condensed) sit in the middle and do not scale. The rhythm is written under it in secondary body text. With reduce motion on, the circle keeps its size and only the text changes. Screen readers hear each phase name, not the seconds.
+3. The breathing guide: a 220 point ring in the separator color around a 170 point circle on the surface color with a 3 point accent stroke. The circle grows from 70 to 100 percent on the inhale, stays on the hold and shrinks on the exhale. The phase name (20/600) and the seconds left in the phase (56/600 Barlow Condensed) sit in the middle and do not scale. The rhythm is written under it in secondary body text. With reduce motion on, the circle keeps its size and only the text changes. Screen readers hear the rhythm once when the screen opens. The ring is one element, "Guide de respiration", whose value is the phase name; screen readers read the phase again as it changes only while that element has focus, and never the seconds.
 4. The plan card ("Ton plan", then the plan as one sentence) and the reasons card ("Tes raisons", one line per reason), on the surface color with radius 22. Each card only shows when it has content.
 5. At the bottom: "J'ai tenu" (primary) and "J'ai eu un écart" (text button).
 

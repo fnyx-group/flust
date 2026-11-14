@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AccessibilityInfo, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -24,20 +24,28 @@ type UndoLineProps = { journey: Journey; latestLapse: LapseRecord | null };
 
 // "Lapse noted · Undo", until local midnight and at least an hour after the lapse was logged.
 export function UndoLine({ journey, latestLapse }: UndoLineProps) {
+  const shown = useClock((now) => canUndo(latestLapse, now, deviceOffsetAt));
+  if (!shown || latestLapse === null) return null;
+  // A new lapse gets a fresh line, so an error about the previous one never stays on screen.
+  return <Undo key={latestLapse.id} journey={journey} record={latestLapse} />;
+}
+
+function Undo({ journey, record }: { journey: Journey; record: LapseRecord }) {
   const { t } = useTranslation();
   const storage = useStorage();
   const { setLapses } = useSession();
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
-  const shown = useClock((now) => canUndo(latestLapse, now, deviceOffsetAt));
-  if (!shown || latestLapse === null) return null;
-  const record = latestLapse;
+  // State updates land one render later, so a second tap in the same frame still sees busy false.
+  const undoing = useRef(false);
 
   async function undo() {
-    if (busy) return;
+    if (undoing.current) return;
+    undoing.current = true;
     setBusy(true);
     setFailed(false);
     const result = await undoLapse(storage.lapses, journey, record);
+    undoing.current = false;
     setBusy(false);
     if (result.ok) {
       setLapses(result.value.journey, result.value.latestLapse);
@@ -60,7 +68,7 @@ export function UndoLine({ journey, latestLapse }: UndoLineProps) {
           accessibilityLabel={t('home.lapse.undoSpoken')}
           accessibilityState={{ disabled: busy }}
           disabled={busy}
-          hitSlop={8}
+          hitSlop={spacing.s}
           onPress={undo}
           style={({ pressed }) => [styles.undoButton, (pressed || busy) && styles.pressed]}
         >
@@ -78,8 +86,7 @@ export function UndoLine({ journey, latestLapse }: UndoLineProps) {
 
 const styles = StyleSheet.create({
   support: {
-    ...typography.body,
-    lineHeight: 22,
+    ...typography.paragraphSmall,
     textAlign: 'center',
     color: colors.textSecondary,
   },

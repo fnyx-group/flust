@@ -15,7 +15,7 @@ import { colors, spacing, typography } from '@/ui/theme';
 type WhenFieldProps = {
   // Null for now.
   earlier: Timestamp | null;
-  // Null while the clock is behind the streak start: only now can be chosen.
+  // Null while no earlier time is possible: only now can be chosen.
   bounds: TimeBounds | null;
   onChooseNow: () => void;
   onChooseEarlier: () => void;
@@ -35,6 +35,7 @@ export function WhenField({
   return (
     <View style={styles.section}>
       <Text style={styles.label}>{t('lapse.when')}</Text>
+      {bounds === null && <Text style={styles.selected}>{t('lapse.now')}</Text>}
       {bounds !== null && (
         <SegmentedControl
           accessibilityLabel={t('lapse.when')}

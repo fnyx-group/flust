@@ -3,8 +3,8 @@ import type { TFunction } from 'i18next';
 import type { LapseSummary } from '@/domain/lapse';
 import { triggerOptions } from '@/domain/onboarding';
 import type { PlanTrigger, RiskMomentId } from '@/domain/presets';
-import { spokenStreak } from '@/features/home/labels';
 import { rankName } from '@/features/shared/rank-labels';
+import { spokenStreak } from '@/features/shared/streak-labels';
 
 export type SummaryCardText = {
   readonly value: string;
@@ -19,7 +19,7 @@ export function totalCard(t: TFunction, { totalCleanDays }: LapseSummary): Summa
   return { value, caption, spoken: `${value} ${caption}` };
 }
 
-// "12 days, streak ended", or "3 h 20, streak ended" for a streak shorter than a day.
+// "12 days on this streak", or "3 h 20" over "on this streak" for a streak shorter than a day.
 export function endedStreakCard(t: TFunction, { endedStreak }: LapseSummary): SummaryCardText {
   if (endedStreak.unit === 'days') {
     const value = String(endedStreak.days);
@@ -33,7 +33,7 @@ export function endedStreakCard(t: TFunction, { endedStreak }: LapseSummary): Su
       minutes: String(endedStreak.minutes).padStart(2, '0'),
     }),
     caption,
-    spoken: `${spokenStreak(t, endedStreak)}, ${caption}`,
+    spoken: `${spokenStreak(t, endedStreak)} ${caption}`,
   };
 }
 
