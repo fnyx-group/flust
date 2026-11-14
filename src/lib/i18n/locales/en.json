@@ -18,5 +18,35 @@
   "units": {
     "day_one": "{{count}} day",
     "day_other": "{{count}} days"
+  },
+  "storage": {
+    "retry": {
+      "title": "Your data can't be opened right now",
+      "action": "Try again",
+      "reasons": {
+        "key-unavailable": "The secure storage of this phone is not available yet. This can happen right after the phone restarts. Unlock your phone, then try again. Your data has not been changed.",
+        "storage-unavailable": "flust could not reach its storage on this phone. Your data has not been changed. Try again.",
+        "cipher-unavailable": "This version of flust cannot encrypt your data, so it will not open it. Install the latest version of flust. Your data has not been changed.",
+        "schema-too-new": "Your data was saved by a newer version of flust. Update flust to open it. Your data has not been changed.",
+        "migration-failed": "flust could not update your data for this version. Your data was put back exactly as it was. Try again, or wait for the next update of flust.",
+        "reset-failed": "Erasing did not finish. Try again."
+      }
+    },
+    "reset": {
+      "title": "Your data can't be decrypted",
+      "reasons": {
+        "key-missing": "flust encrypts your data with a key that only this phone keeps, in its secure storage. That key is no longer there. This happens when the phone is restored from a backup or the data is moved to another phone, because the key is never copied.",
+        "database-unreadable": "flust encrypts your data with a key that only this phone keeps, in its secure storage. The data on this phone does not match that key, or the file is damaged, so it cannot be decrypted."
+      },
+      "noRecovery": "There is no other copy. flust has no account, no server and no backup, so nobody, including the people who make flust, can recover this data. You can try again, or erase it and start over.",
+      "startOver": "Erase and start over",
+      "retry": "Try again",
+      "confirm": {
+        "title": "Erase everything?",
+        "body": "This permanently deletes your journey, your lapses, your ranks and every setting from this phone, and flust starts again from the beginning. This cannot be undone.",
+        "erase": "Erase everything",
+        "cancel": "Cancel"
+      }
+    }
   }
 }

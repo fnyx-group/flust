@@ -1,5 +1,7 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
+import { withAndroidNoBackup } from './plugins/with-android-no-backup.ts';
+
 const production = { name: 'flust', identifier: 'org.fnyxgroup.flust', scheme: 'flust' };
 
 // A distinct identifier and scheme let the development build sit next to the store app on the same phone.
@@ -16,12 +18,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       `Unknown APP_VARIANT "${name}". Use one of: ${Object.keys(variants).join(', ')}.`,
     );
   }
-  return {
+  return withAndroidNoBackup({
     ...config,
     name: variant.name,
     scheme: variant.scheme,
     slug: config.slug ?? 'flust',
     ios: { ...config.ios, bundleIdentifier: variant.identifier },
     android: { ...config.android, package: variant.identifier },
-  };
+  });
 };

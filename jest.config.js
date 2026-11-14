@@ -24,6 +24,12 @@ module.exports = {
     'node_modules/(?!(.pnpm|(jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*))',
   ],
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
-  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!**/*.test.{ts,tsx}', '!**/*.d.ts'],
+  // The native adapters only forward to Expo modules, which cannot run outside a device.
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!**/*.test.{ts,tsx}',
+    '!**/*.d.ts',
+    '!src/data/native/**',
+  ],
   coverageThreshold,
 };

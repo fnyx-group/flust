@@ -18,7 +18,8 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "allowBackup": false
     },
     "web": {
       "output": "server",
@@ -36,7 +37,9 @@
         }
       ],
       "expo-font",
-      "expo-localization"
+      "expo-localization",
+      ["expo-sqlite", { "useSQLCipher": true }],
+      ["expo-secure-store", { "configureAndroidBackup": false, "faceIDPermission": false }]
     ],
     "experiments": {
       "typedRoutes": true,

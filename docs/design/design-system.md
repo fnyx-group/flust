@@ -75,6 +75,12 @@ Daily quotes are either original lines written for flust or lines from public do
 
 Quotes from living authors are not used without their permission.
 
+## Voice and wording
+
+- Sentences are calm, plain and non-judgmental. They state what happened and what the user can do, without blame, alarm or pressure.
+- French addresses the user with "tu".
+- A lapse is "lapse" in English and "écart" in French. The interface never says "relapse" or "rechute".
+
 ## Screens
 
 ### Design system

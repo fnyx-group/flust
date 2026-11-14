@@ -9,9 +9,9 @@ import { useFonts } from 'expo-font';
 import { DarkTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 
+import { StorageGate } from '@/features/storage/storage-gate';
 import { i18n } from '@/lib/i18n';
 import { colors, fonts } from '@/ui/theme';
 
@@ -41,20 +41,19 @@ export default function RootLayout() {
   });
   const ready = fontsLoaded || fontError !== null;
 
-  useEffect(() => {
-    if (ready) SplashScreen.hideAsync();
-  }, [ready]);
-
+  // The splash screen stays up until StorageGate has opened storage or has a failure to show.
   if (!ready) return null;
 
   return (
     <I18nextProvider i18n={i18n}>
       <ThemeProvider value={navigationTheme}>
         <StatusBar style="light" />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="emergency" options={{ presentation: 'fullScreenModal' }} />
-        </Stack>
+        <StorageGate>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="emergency" options={{ presentation: 'fullScreenModal' }} />
+          </Stack>
+        </StorageGate>
       </ThemeProvider>
     </I18nextProvider>
   );
