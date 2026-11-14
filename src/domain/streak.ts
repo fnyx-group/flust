@@ -8,6 +8,9 @@ import {
   type Timestamp,
 } from '@/domain/time';
 
+// Every function taking `now` expects a valid timestamp (see isValidTimestamp): NaN is not
+// checked and propagates to the result.
+
 export type StreakDisplay =
   { unit: 'hours'; hours: number; minutes: number } | { unit: 'days'; days: number };
 

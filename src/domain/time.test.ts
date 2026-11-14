@@ -1,19 +1,16 @@
 import * as fc from 'fast-check';
 
-import { duration, timestamp } from '@/domain/arbitraries';
 import { elapsedMs, isValidTimestamp, MS_PER_DAY, wholeDays } from '@/domain/time';
+import { duration, timestamp } from '@test/arbitraries';
 
 describe('isValidTimestamp', () => {
-  it.each([0, Date.UTC(2026, 10, 14)])('accepts %p', (value) => {
+  it.each([0, Date.UTC(2026, 10, 14), 8.64e15])('accepts %p', (value) => {
     expect(isValidTimestamp(value)).toBe(true);
   });
 
-  it.each([-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1])(
-    'refuses %p',
-    (value) => {
-      expect(isValidTimestamp(value)).toBe(false);
-    },
-  );
+  it.each([-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, 8.64e15 + 1])('refuses %p', (value) => {
+    expect(isValidTimestamp(value)).toBe(false);
+  });
 });
 
 describe('elapsedMs', () => {

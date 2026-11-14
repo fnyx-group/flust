@@ -24,11 +24,6 @@ module.exports = {
     'node_modules/(?!(.pnpm|(jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*))',
   ],
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
-  collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    '!**/*.test.{ts,tsx}',
-    '!**/*.d.ts',
-    '!src/domain/arbitraries.ts',
-  ],
+  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!**/*.test.{ts,tsx}', '!**/*.d.ts'],
   coverageThreshold,
 };

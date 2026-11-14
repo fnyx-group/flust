@@ -1,6 +1,5 @@
 import * as fc from 'fast-check';
 
-import { journeyFrom, journeyInput, timestamp, valueOf } from '@/domain/arbitraries';
 import {
   addLapse,
   createJourney,
@@ -9,10 +8,25 @@ import {
   type Journey,
 } from '@/domain/journey';
 import { MS_PER_DAY, MS_PER_HOUR } from '@/domain/time';
+import {
+  journeyFrom,
+  journeyInput,
+  journeyOf,
+  timestamp,
+  unwrap,
+  type JourneyInput,
+} from '@test/arbitraries';
 
 const start = Date.UTC(2026, 0, 1, 8);
 const now = start + 10 * MS_PER_DAY;
-const journey: Journey = { start, lapses: [] };
+const journey = journeyOf(start);
+
+function addOneByOne(input: JourneyInput): Journey {
+  return input.lapses.reduce(
+    (built, lapse) => unwrap(addLapse(built, lapse, input.now)),
+    unwrap(createJourney(input.start, input.now)),
+  );
+}
 
 describe('createJourney', () => {
   it('starts a journey with no lapse', () => {
@@ -48,25 +62,25 @@ describe('createJourney', () => {
 describe('addLapse', () => {
   it('records a lapse', () => {
     const lapse = start + MS_PER_DAY;
-    expect(valueOf(addLapse(journey, lapse, now)).lapses).toEqual([lapse]);
+    expect(unwrap(addLapse(journey, lapse, now)).lapses).toEqual([lapse]);
   });
 
   it('accepts a lapse exactly at the start and exactly at now', () => {
-    expect(valueOf(addLapse(journey, start, now)).lapses).toEqual([start]);
-    expect(valueOf(addLapse(journey, now, now)).lapses).toEqual([now]);
+    expect(unwrap(addLapse(journey, start, now)).lapses).toEqual([start]);
+    expect(unwrap(addLapse(journey, now, now)).lapses).toEqual([now]);
   });
 
   it('records two lapses on the same day', () => {
     const first = start + 2 * MS_PER_DAY;
     const second = first + 3 * MS_PER_HOUR;
-    const result = valueOf(addLapse(valueOf(addLapse(journey, first, now)), second, now));
+    const result = unwrap(addLapse(unwrap(addLapse(journey, first, now)), second, now));
     expect(result.lapses).toEqual([first, second]);
   });
 
   it('inserts a backdated lapse in order', () => {
     const later = start + 5 * MS_PER_DAY;
     const backdated = start + 2 * MS_PER_DAY;
-    const result = valueOf(addLapse(valueOf(addLapse(journey, later, now)), backdated, now));
+    const result = unwrap(addLapse(unwrap(addLapse(journey, later, now)), backdated, now));
     expect(result.lapses).toEqual([backdated, later]);
   });
 
@@ -94,7 +108,11 @@ describe('addLapse', () => {
           const snapshot = structuredClone(original);
           const at = before ? input.start - offset : input.now + offset;
           const result = addLapse(original, at, input.now);
-          return !result.ok && JSON.stringify(original) === JSON.stringify(snapshot);
+          expect(result).toEqual({
+            ok: false,
+            error: before ? 'lapse-before-start' : 'lapse-in-future',
+          });
+          expect(original).toEqual(snapshot);
         },
       ),
     );
@@ -110,8 +128,8 @@ describe('addLapse', () => {
           ),
         ),
         ([input, shuffled]) => {
-          const inOrder = journeyFrom(input);
-          const shuffledOrder = journeyFrom({ ...input, lapses: shuffled });
+          const inOrder = addOneByOne(input);
+          const shuffledOrder = addOneByOne({ ...input, lapses: shuffled });
           const sorted = [...input.lapses].sort((a, b) => a - b);
           expect(inOrder.lapses).toEqual(sorted);
           expect(shuffledOrder).toEqual(inOrder);
@@ -124,8 +142,8 @@ describe('addLapse', () => {
 describe('removeLapse', () => {
   it('removes one occurrence of the lapse', () => {
     const lapse = start + MS_PER_DAY;
-    const twice = valueOf(addLapse(valueOf(addLapse(journey, lapse, now)), lapse, now));
-    expect(valueOf(removeLapse(twice, lapse)).lapses).toEqual([lapse]);
+    const twice = unwrap(addLapse(unwrap(addLapse(journey, lapse, now)), lapse, now));
+    expect(unwrap(removeLapse(twice, lapse)).lapses).toEqual([lapse]);
   });
 
   it('reports a lapse that does not exist', () => {
@@ -140,7 +158,7 @@ describe('removeLapse', () => {
         ),
         ([input, at]) => {
           const before = journeyFrom(input);
-          const after = valueOf(removeLapse(valueOf(addLapse(before, at, input.now)), at));
+          const after = unwrap(removeLapse(unwrap(addLapse(before, at, input.now)), at));
           expect(after).toEqual(before);
         },
       ),
@@ -173,7 +191,7 @@ describe('restoreJourney', () => {
   it('gives the same journey as adding the lapses one by one', () => {
     fc.assert(
       fc.property(journeyInput, (input) => {
-        expect(valueOf(restoreJourney(input.start, input.lapses))).toEqual(journeyFrom(input));
+        expect(unwrap(restoreJourney(input.start, input.lapses))).toEqual(addOneByOne(input));
       }),
     );
   });

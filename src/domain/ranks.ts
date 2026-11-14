@@ -1,34 +1,11 @@
-export type RankId =
-  | 'novice'
-  | 'apprentice'
-  | 'initiate'
-  | 'watcher'
-  | 'black-mage'
-  | 'sorcerer'
-  | 'white-mage'
-  | 'silver-mage'
-  | 'archmage'
-  | 'sovereign'
-  | 'scarlet-mage'
-  | 'free-soul';
-
-export type Rank = {
-  readonly id: RankId;
+type RankDefinition = {
+  readonly id: string;
   readonly circle: 1 | 2 | 3 | 4 | 5;
   readonly tier: 1 | 2 | 3;
   readonly threshold: number;
 };
 
-type RankUnlock = { highest: Rank; others: readonly Rank[] };
-
-export type RankProgress = {
-  current: Rank | null;
-  unlocked: readonly RankId[];
-  unlock: RankUnlock | null;
-  next: { rank: Rank; daysLeft: number } | null;
-};
-
-export const RANKS: readonly Rank[] = [
+export const RANKS = [
   { id: 'novice', circle: 1, tier: 1, threshold: 1 },
   { id: 'apprentice', circle: 1, tier: 2, threshold: 3 },
   { id: 'initiate', circle: 1, tier: 3, threshold: 7 },
@@ -41,31 +18,50 @@ export const RANKS: readonly Rank[] = [
   { id: 'sovereign', circle: 4, tier: 1, threshold: 180 },
   { id: 'scarlet-mage', circle: 4, tier: 2, threshold: 270 },
   { id: 'free-soul', circle: 5, tier: 1, threshold: 365 },
-];
+] as const satisfies readonly RankDefinition[];
 
-export function isRankId(value: string): value is RankId {
-  return RANKS.some((rank) => rank.id === value);
+export type RankId = (typeof RANKS)[number]['id'];
+
+export type Rank = RankDefinition & { readonly id: RankId };
+
+export type RankUnlock = { readonly highest: Rank; readonly others: readonly Rank[] };
+
+export type RankProgress = {
+  readonly current: Rank | null;
+  readonly unlocked: readonly RankId[];
+  readonly unlock: RankUnlock | null;
+  readonly next: { readonly rank: Rank; readonly daysLeft: number } | null;
+};
+
+const ALL_RANKS: readonly Rank[] = RANKS;
+
+export function isRankId(value: unknown): value is RankId {
+  return ALL_RANKS.some((rank) => rank.id === value);
 }
 
 // Unlocked ranks are passed in rather than recomputed, because a backdated lapse can lower
-// the total and a rank must never be lost.
+// the total and a rank must never be lost. Ranks unlock in order, so every rank up to the
+// highest previously unlocked one counts as unlocked, which also fills gaps in corrupted data.
 export function rankProgress(
   previouslyUnlocked: readonly RankId[],
   totalCleanDays: number,
 ): RankProgress {
-  const previous = new Set(previouslyUnlocked);
-  const unlockedRanks = RANKS.filter(
-    (rank) => previous.has(rank.id) || rank.threshold <= totalCleanDays,
+  const previousCount = highestIndex(previouslyUnlocked) + 1;
+  const unlockedRanks = ALL_RANKS.filter(
+    (rank, index) => index < previousCount || rank.threshold <= totalCleanDays,
   );
-  const newlyUnlocked = unlockedRanks.filter((rank) => !previous.has(rank.id));
   const current = unlockedRanks.at(-1) ?? null;
-  const nextRank = RANKS.find((rank) => rank.threshold > (current?.threshold ?? 0));
+  const nextRank = ALL_RANKS[unlockedRanks.length];
   return {
     current,
     unlocked: unlockedRanks.map((rank) => rank.id),
-    unlock: toUnlock(newlyUnlocked),
+    unlock: toUnlock(unlockedRanks.slice(previousCount)),
     next: nextRank ? { rank: nextRank, daysLeft: nextRank.threshold - totalCleanDays } : null,
   };
+}
+
+function highestIndex(ids: readonly RankId[]): number {
+  return Math.max(-1, ...ids.map((id) => ALL_RANKS.findIndex((rank) => rank.id === id)));
 }
 
 function toUnlock(newlyUnlocked: readonly Rank[]): RankUnlock | null {

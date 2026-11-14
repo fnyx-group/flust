@@ -31,6 +31,7 @@
 - [0007 Typography](decisions/0007-typography.md): Manrope and Barlow Condensed.
 - [0008 Internationalization](decisions/0008-internationalization.md): French and English, all strings externalized.
 - [0009 Source layers](decisions/0009-source-layers.md): domain, data, features, ui and app, enforced by lint.
+- [0010 Domain errors as results](decisions/0010-domain-errors-as-results.md): expected failures are returned, not thrown.
 
 ## Development
 

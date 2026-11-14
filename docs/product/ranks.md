@@ -8,7 +8,7 @@ The rank depends on total clean days, never on the current streak. A lapse resta
 
 ## Total clean days
 
-Total clean days are computed from the start point and the lapses, never counted with a running timer. The lapses split the journey into segments: from the start to the first lapse, from each lapse to the next, and from the last lapse to now. Each segment counts its whole days, the elapsed time divided by 24 hours and rounded down, and the total is the sum over all segments.
+Total clean days are computed from the start point and the lapses, never counted with a running timer. The lapses split the journey into segments: from the start to the first lapse, from each lapse to the next, and from the last lapse to now. Each segment counts its whole days, the elapsed time divided by 24 hours and rounded down, and the total is the sum over all segments. Segments are capped at now: a lapse recorded after now, because the clock is behind, ends its segment at now, so time that has not elapsed yet is never counted.
 
 A lapse therefore costs at most the partial day it interrupts. For example, 7.5 days after the start the total is 7. A lapse backdated to day 3.7 splits this into segments of 3.7 and 3.8 days, which count 3 days each, so the total becomes 6. The rank stays Initiate, because an unlocked rank is never lost, and the next rank, Watcher, is 8 days away.
 

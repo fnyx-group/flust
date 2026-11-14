@@ -1,7 +1,7 @@
 import * as fc from 'fast-check';
 
-import { rankIds, totalDays } from '@/domain/arbitraries';
 import { isRankId, rankProgress, RANKS, type RankId } from '@/domain/ranks';
+import { rankIds, totalDays } from '@test/arbitraries';
 
 function idsUpTo(id: RankId): RankId[] {
   const index = RANKS.findIndex((rank) => rank.id === id);
@@ -48,6 +48,10 @@ describe('isRankId', () => {
   it('recognizes known ids only', () => {
     expect(isRankId('archmage')).toBe(true);
     expect(isRankId('emperor')).toBe(false);
+  });
+
+  it.each([null, undefined, 3, {}])('refuses a value that is not a string: %p', (value) => {
+    expect(isRankId(value)).toBe(false);
   });
 });
 
@@ -103,6 +107,14 @@ describe('rankProgress', () => {
     expect(progress.current?.id).toBe('initiate');
     expect(progress.unlock).toBeNull();
     expect(progress.next).toEqual({ rank: RANKS[3], daysLeft: 8 });
+  });
+
+  it('fills gaps in corrupted data up to the highest unlocked rank, without announcing them', () => {
+    const progress = rankProgress(['novice', 'watcher'], 0);
+    expect(progress.unlocked).toEqual(idsUpTo('watcher'));
+    expect(progress.current?.id).toBe('watcher');
+    expect(progress.unlock).toBeNull();
+    expect(progress.next).toEqual({ rank: RANKS[4], daysLeft: 30 });
   });
 
   it('never loses an unlocked rank', () => {

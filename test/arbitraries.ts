@@ -1,6 +1,6 @@
 import * as fc from 'fast-check';
 
-import { addLapse, createJourney, type Journey } from '@/domain/journey';
+import { restoreJourney, type Journey } from '@/domain/journey';
 import { RANKS, type RankId } from '@/domain/ranks';
 import type { Result } from '@/domain/result';
 import { MS_PER_DAY, type Timestamp } from '@/domain/time';
@@ -25,18 +25,22 @@ export const journeyInput: fc.Arbitrary<JourneyInput> = fc
     }),
   );
 
-export const rankIds: fc.Arbitrary<RankId[]> = fc.subarray(RANKS.map((rank) => rank.id));
+// Ranks unlock in order, so a valid list of unlocked ranks is always a prefix of RANKS.
+export const rankIds: fc.Arbitrary<RankId[]> = fc
+  .nat({ max: RANKS.length })
+  .map((count) => RANKS.slice(0, count).map((rank) => rank.id));
 
 export const totalDays = fc.integer({ min: 0, max: 500 });
 
-export function valueOf<T, E>(result: Result<T, E>): T {
+export function unwrap<T, E>(result: Result<T, E>): T {
   if (!result.ok) throw new Error(`Unexpected error: ${String(result.error)}`);
   return result.value;
 }
 
-export function journeyFrom({ start, lapses, now }: JourneyInput): Journey {
-  return lapses.reduce(
-    (journey, lapse) => valueOf(addLapse(journey, lapse, now)),
-    valueOf(createJourney(start, now)),
-  );
+export function journeyOf(start: Timestamp, lapses: readonly Timestamp[] = []): Journey {
+  return unwrap(restoreJourney(start, lapses));
+}
+
+export function journeyFrom({ start, lapses }: JourneyInput): Journey {
+  return journeyOf(start, lapses);
 }

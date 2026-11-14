@@ -1,6 +1,5 @@
 import * as fc from 'fast-check';
 
-import { duration, journeyFrom, journeyInput, valueOf } from '@/domain/arbitraries';
 import { addLapse, removeLapse, type Journey } from '@/domain/journey';
 import {
   currentStreakMs,
@@ -9,16 +8,37 @@ import {
   streakStart,
   totalCleanDays,
 } from '@/domain/streak';
-import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE, wholeDays } from '@/domain/time';
+import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE, wholeDays, type Timestamp } from '@/domain/time';
+import { duration, journeyFrom, journeyInput, journeyOf, unwrap } from '@test/arbitraries';
 
 const start = Date.UTC(2026, 0, 1, 8);
 const days = (n: number) => n * MS_PER_DAY;
 
 function withLapses(...offsets: number[]): Journey {
-  return { start, lapses: offsets.map((offset) => start + offset) };
+  return journeyOf(
+    start,
+    offsets.map((offset) => start + offset),
+  );
 }
 
 const journeyWithLaterNow = journeyInput.chain((input) => fc.tuple(fc.constant(input), duration));
+
+const clockShift = fc.integer({ min: -days(30), max: days(30) });
+
+function referenceTotalCleanDays(start: Timestamp, lapses: Timestamp[], now: Timestamp): number {
+  const sortedLapses = [...lapses].sort((a, b) => a - b);
+  let previous = start;
+  let total = 0;
+  for (const point of [...sortedLapses.map((lapse) => Math.min(lapse, now)), now]) {
+    total += wholeDays(point - previous);
+    previous = point;
+  }
+  return total;
+}
+
+function referenceCurrentStreakMs(start: Timestamp, lapses: Timestamp[], now: Timestamp): number {
+  return Math.max(0, now - Math.max(start, ...lapses));
+}
 
 describe('current streak', () => {
   it('runs from the start when there is no lapse', () => {
@@ -57,7 +77,7 @@ describe('totalCleanDays', () => {
 
   it('counts a day on elapsed time, not on calendar midnight', () => {
     const lateEvening = Date.UTC(2026, 4, 10, 23);
-    const journey: Journey = { start: lateEvening, lapses: [] };
+    const journey = journeyOf(lateEvening);
     expect(totalCleanDays(journey, lateEvening + 90 * MS_PER_MINUTE)).toBe(0);
     expect(streakDisplay(currentStreakMs(journey, lateEvening + 90 * MS_PER_MINUTE))).toEqual({
       unit: 'hours',
@@ -67,14 +87,14 @@ describe('totalCleanDays', () => {
   });
 
   it('counts February 29 as a normal day', () => {
-    const journey: Journey = { start: Date.UTC(2028, 1, 28), lapses: [] };
+    const journey = journeyOf(Date.UTC(2028, 1, 28));
     expect(totalCleanDays(journey, Date.UTC(2028, 2, 1))).toBe(2);
   });
 
   it('is not affected by a daylight saving time change', () => {
     const parisNoonBeforeChange = Date.UTC(2026, 2, 28, 11);
     const parisNoonAfterChange = Date.UTC(2026, 2, 29, 10);
-    const journey: Journey = { start: parisNoonBeforeChange, lapses: [] };
+    const journey = journeyOf(parisNoonBeforeChange);
     expect(totalCleanDays(journey, parisNoonAfterChange)).toBe(0);
     expect(currentStreakMs(journey, parisNoonAfterChange)).toBe(23 * MS_PER_HOUR);
     expect(totalCleanDays(journey, parisNoonBeforeChange + MS_PER_DAY)).toBe(1);
@@ -122,18 +142,20 @@ describe('streakDisplay', () => {
     expect(streakDisplay(-MS_PER_HOUR)).toEqual({ unit: 'hours', hours: 0, minutes: 0 });
   });
 
-  it('splits any duration consistently', () => {
+  it('shows the last completed day, or the last completed minute under a day', () => {
     fc.assert(
       fc.property(duration, (ms) => {
         const display = streakDisplay(ms);
         if (display.unit === 'days') {
           expect(ms).toBeGreaterThanOrEqual(MS_PER_DAY);
-          expect(display.days).toBe(Math.floor(ms / MS_PER_DAY));
+          expect(display.days * MS_PER_DAY).toBeLessThanOrEqual(ms);
+          expect(ms).toBeLessThan((display.days + 1) * MS_PER_DAY);
         } else {
           expect(ms).toBeLessThan(MS_PER_DAY);
-          expect(display.hours).toBeLessThanOrEqual(23);
           expect(display.minutes).toBeLessThanOrEqual(59);
-          expect(display.hours * 60 + display.minutes).toBe(Math.floor(ms / MS_PER_MINUTE));
+          const shown = display.hours * MS_PER_HOUR + display.minutes * MS_PER_MINUTE;
+          expect(shown).toBeLessThanOrEqual(ms);
+          expect(ms).toBeLessThan(shown + MS_PER_MINUTE);
         }
       }),
     );
@@ -141,9 +163,31 @@ describe('streakDisplay', () => {
 });
 
 describe('properties', () => {
+  it('counts the whole days of each segment between start, lapses and now', () => {
+    fc.assert(
+      fc.property(journeyInput, clockShift, (input, shift) => {
+        const now = input.now + shift;
+        expect(totalCleanDays(journeyFrom(input), now)).toBe(
+          referenceTotalCleanDays(input.start, input.lapses, now),
+        );
+      }),
+    );
+  });
+
+  it('runs the current streak from the latest of the start and the lapses', () => {
+    fc.assert(
+      fc.property(journeyInput, clockShift, (input, shift) => {
+        const now = input.now + shift;
+        expect(currentStreakMs(journeyFrom(input), now)).toBe(
+          referenceCurrentStreakMs(input.start, input.lapses, now),
+        );
+      }),
+    );
+  });
+
   it('never gives a negative streak or total, whatever the clock says', () => {
     fc.assert(
-      fc.property(journeyInput, fc.integer({ min: -days(30), max: days(30) }), (input, shift) => {
+      fc.property(journeyInput, clockShift, (input, shift) => {
         const journey = journeyFrom(input);
         const now = input.now + shift;
         expect(currentStreakMs(journey, now)).toBeGreaterThanOrEqual(0);
@@ -195,7 +239,7 @@ describe('properties', () => {
         ([input, at]) => {
           const before = totalCleanDays(journeyFrom(input), input.now);
           const after = totalCleanDays(
-            valueOf(addLapse(journeyFrom(input), at, input.now)),
+            unwrap(addLapse(journeyFrom(input), at, input.now)),
             input.now,
           );
           expect(after).toBeLessThanOrEqual(before);
@@ -213,7 +257,7 @@ describe('properties', () => {
         ),
         ([input, at]) => {
           const before = journeyFrom(input);
-          const undone = valueOf(removeLapse(valueOf(addLapse(before, at, input.now)), at));
+          const undone = unwrap(removeLapse(unwrap(addLapse(before, at, input.now)), at));
           expect(currentStreakMs(undone, input.now)).toBe(currentStreakMs(before, input.now));
           expect(longestStreakMs(undone, input.now)).toBe(longestStreakMs(before, input.now));
           expect(totalCleanDays(undone, input.now)).toBe(totalCleanDays(before, input.now));
@@ -227,15 +271,13 @@ describe('properties', () => {
       fc.property(journeyWithLaterNow, ([input, later]) => {
         const journey = journeyFrom(input);
         const now = input.now;
-        expect(currentStreakMs(journey, now + later)).toBeGreaterThanOrEqual(
-          currentStreakMs(journey, now),
-        );
+        expect(currentStreakMs(journey, now + later)).toBe(currentStreakMs(journey, now) + later);
         expect(longestStreakMs(journey, now + later)).toBeGreaterThanOrEqual(
           longestStreakMs(journey, now),
         );
-        expect(totalCleanDays(journey, now + later)).toBeGreaterThanOrEqual(
-          totalCleanDays(journey, now),
-        );
+        const gained = totalCleanDays(journey, now + later) - totalCleanDays(journey, now);
+        expect(gained).toBeGreaterThanOrEqual(0);
+        expect(gained).toBeLessThanOrEqual(wholeDays(later) + 1);
       }),
     );
   });
@@ -250,6 +292,9 @@ describe('properties', () => {
         );
         expect(currentStreakMs(journey, earlier)).toBeLessThanOrEqual(
           currentStreakMs(journey, input.now),
+        );
+        expect(longestStreakMs(journey, earlier)).toBeLessThanOrEqual(
+          longestStreakMs(journey, input.now),
         );
       }),
     );
