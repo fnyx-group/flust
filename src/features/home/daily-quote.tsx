@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { quoteOfTheDay } from '@/domain/quotes';
 import type { Timestamp } from '@/domain/time';
-import { useClock } from '@/features/home/clock-context';
+import { useClock } from '@/features/clock/clock-context';
 import { spokenQuote } from '@/features/home/labels';
 import { deviceOffsetAt } from '@/features/shared/device-time';
 import { colors, sizes, spacing, typography } from '@/ui/theme';

@@ -198,6 +198,50 @@
       "3": "Lumière",
       "4": "Couronne",
       "5": "Absolu"
+    },
+    "screen": {
+      "rule": "Ton rang suit tes jours propres au total. Un écart ne te fait jamais redescendre.",
+      "circle": "Cercle {{number}} · {{name}}",
+      "circleSpoken": "cercle {{number}}, {{name}}",
+      "nextIn_one": "Prochain rang dans {{count}} jour",
+      "nextIn_other": "Prochain rang dans {{count}} jours",
+      "allUnlocked": "Tous les rangs débloqués",
+      "spoken": "{{name}}, {{circle}}, {{detail}}",
+      "lockedName": "Rang verrouillé",
+      "cellCircle": "cercle {{number}}",
+      "cellSpoken": "{{name}}, {{circle}}, {{status}}, {{days}}",
+      "status": {
+        "current": "rang actuel",
+        "unlocked": "débloqué",
+        "next": "prochain rang, verrouillé",
+        "locked": "verrouillé"
+      }
+    },
+    "unlocked": {
+      "label": "Nouveau rang",
+      "days_one": "{{count}} jour propre.",
+      "days_other": "{{count}} jours propres.",
+      "line": "{{days}} {{circle}}",
+      "opens": {
+        "1": "Le cercle de l'Éveil s'ouvre.",
+        "2": "Le cercle de l'Ombre s'ouvre.",
+        "3": "Le cercle de la Lumière s'ouvre.",
+        "4": "Le cercle de la Couronne s'ouvre.",
+        "5": "Le cercle de l'Absolu s'ouvre."
+      },
+      "advances": {
+        "1": "Tu avances dans le cercle de l'Éveil.",
+        "2": "Tu avances dans le cercle de l'Ombre.",
+        "3": "Tu avances dans le cercle de la Lumière.",
+        "4": "Tu avances dans le cercle de la Couronne.",
+        "5": "Tu avances dans le cercle de l'Absolu."
+      },
+      "others_one": "Aussi débloqué : {{names}}",
+      "others_other": "Aussi débloqués : {{names}}",
+      "listSeparator": ", ",
+      "spoken": "Nouveau rang : {{name}}, {{circle}}",
+      "continue": "Continuer",
+      "seeRanks": "Voir mes rangs"
     }
   },
   "quotes": {

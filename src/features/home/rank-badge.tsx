@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import type { Journey } from '@/domain/journey';
 import { rankStanding, type RankId } from '@/domain/ranks';
-import { useClock } from '@/features/home/clock-context';
+import { useClock } from '@/features/clock/clock-context';
 import { rankBadgeText } from '@/features/home/labels';
-import { sameFields } from '@/features/home/minute-clock';
+import { sameFields } from '@/features/clock/minute-clock';
 import { ProgressRing } from '@/ui/progress-ring';
 import { RankEmblem } from '@/ui/rank-emblem';
 import { colors, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/theme';

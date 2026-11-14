@@ -70,6 +70,10 @@ function RootStack() {
       <Stack.Protected guard={started}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="emergency" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen
+          name="rank-unlocked"
+          options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+        />
       </Stack.Protected>
       <Stack.Protected guard={!started}>
         <Stack.Screen name="onboarding" />

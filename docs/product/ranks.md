@@ -64,3 +64,25 @@ Locked ranks show "???" instead of their name, except the next rank to unlock, w
 The rank unlock screen appears when the user reaches a new rank.
 
 When several ranks unlock while the app is closed, the unlock screen shows the highest one and lists the others below it. It is shown once, not once per rank.
+
+The unlock screen appears on the home screen: when it opens, within the minute a rank is reached, and when the app returns to the foreground. It never covers another screen: a rank reached while the emergency screen or another tab is open is announced on returning home. It never appears during the onboarding, but a journey started in the past shows its unlock screen as soon as the home screen first appears.
+
+A rank is stored as unlocked when its unlock screen opens, so the screen is never shown twice for the same rank. If storing fails, the screen is shown again on the next launch.
+
+The unlock screen shows "Nouveau rang", the emblem with its stars, the rank name, the total clean days and one line about the circle: "Le cercle de la Lumière s'ouvre." for the first rank of a circle, "Tu avances dans le cercle de l'Ombre." for the others. "Continuer" returns home, "Voir mes rangs" opens the ranks tab.
+
+## Ranks screen
+
+The ranks tab shows the current rank with its emblem, stars, circle and the days left to the next rank, then the rule in one line, then the twelve ranks in a grid. Before the first clean day, it shows the first rank, locked, and the time left to it, like the home badge.
+
+## After Free soul
+
+This section describes a planned evolution, not implemented yet. It is planned for V0.4 (see [Features](features.md)).
+
+Once Free soul is unlocked, every additional 365 total clean days adds a yearly seal to the rank. The rank then reads "Âme libre · an II" at 730 total clean days, "Âme libre · an III" at 1095, and so on. The year is shown in Roman numerals on screen and spoken as a number by screen readers, such as "Âme libre, an 2".
+
+A yearly seal reuses the Free soul emblem, with a small seal marker next to the rank name. Reaching a new seal shows a lighter version of the rank unlock screen.
+
+There are no new circles or ranks after Free soul. Progress slows down on purpose, to once a year, because the goal is for the person to need the app less over time.
+
+To watch with testers: the gaps between 180, 270 and 365 days. If they feel too long, an intermediate rank around 225 days may be added.

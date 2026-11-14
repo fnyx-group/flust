@@ -1,13 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import {
-  BackHandler,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { BackHandler, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { StepProgress } from '@/domain/onboarding';
@@ -19,6 +11,7 @@ import { BackIcon } from '@/ui/icons/back-icon';
 import { ProgressBar } from '@/ui/progress-bar';
 import { Screen } from '@/ui/screen';
 import { ScreenTitle } from '@/ui/screen-title';
+import { ScrollView } from '@/ui/scroll-view';
 import { colors, typography } from '@/ui/theme';
 
 type StepLayoutProps = {

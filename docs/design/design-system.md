@@ -39,6 +39,7 @@ Counters use tabular numbers so digits do not shift as they change.
 | Streak counter unit               | 40    | 600    | Secondary text color  |
 | Welcome title                     | 40    | 800    | Onboarding welcome    |
 | Brand lockup                      | 36    | 800    | Onboarding welcome    |
+| Unlocked rank name                | 40    | 800    | Rank unlock screen    |
 | Stepper value                     | 32    | 600    | Barlow Condensed      |
 | Screen title                      | 28    | 800    |                       |
 | Rank name                         | 22    | 800    |                       |
@@ -51,6 +52,7 @@ Counters use tabular numbers so digits do not shift as they change.
 | Secondary button                  | 15    | 600    |                       |
 | Body                              | 15-16 | 400    |                       |
 | Section label                     | 16    | 600    | Secondary text color  |
+| Unlock label                      | 14    | 700    | Accent, uppercase     |
 | Label                             | 13    | 600    | Secondary text color  |
 | Caption                           | 12    | 400    |                       |
 | Rank badge detail                 | 12    | 600    | Secondary text color  |
@@ -73,6 +75,10 @@ The counter, digits and units together, does not grow with the system text size,
 | Segmented controls | Radius 16, segments radius 12 |
 | Switches           | 48 by 28                      |
 | Touch targets      | At least 44 by 44             |
+
+### Scrolling
+
+Scrolling content never stretches at its ends on Android: the over-scroll effect of Android 12 and later is turned off on every scroll view and list. iOS keeps its default bounce. Every scrolling container uses `ScrollView` from `src/ui/scroll-view.tsx`, which sets this once; ESLint rejects `ScrollView`, `FlatList`, `SectionList` and `VirtualizedList` imported from `react-native` elsewhere. A list needed later gets its own wrapper in that file.
 
 ## Navigation
 
@@ -118,6 +124,34 @@ Days before the journey start show no bar, only their initial, so the first week
 ### Daily quote
 
 No title. A 3 point accent bar runs along the left of the quote (19/700, line height 26), with the author under it in secondary text when there is one. Screen readers read it as one label starting with "Mot du jour", followed by the author.
+
+## Ranks
+
+From top to bottom, in a scrolling screen with the screen padding of 20 and 24 points between blocks:
+
+1. The "Rangs" screen title.
+2. A card (radius 22, padding 20) with the 64 point emblem of the current rank on the left. On the right: the circle label, such as "Cercle II · Ombre" (section label), followed by the rarity stars, then the rank name (22/800) and "Prochain rang dans 13 jours" (body, secondary text). Before day one it shows "Premier rang" and the time left to Novice, with the emblem and stars in the locked color.
+3. The rule, "Ton rang suit tes jours propres au total. Un écart ne te fait jamais redescendre." (16/400, line height 24, secondary text).
+4. The twelve ranks in 3 columns, 8 points apart. Each cell is a card (radius 20) with the 36 point emblem, the name (15/800), the stars and the threshold (body, secondary text).
+
+| Rank         | Emblem | Name                 | Stars  | Outline |
+| ------------ | ------ | -------------------- | ------ | ------- |
+| Unlocked     | Accent | Its name, text color | Text   | None    |
+| Current      | Accent | Its name, text color | Text   | Accent  |
+| Next         | Locked | Its name, secondary  | Locked | None    |
+| Other locked | Locked | "???", locked color  | Locked | None    |
+
+### Rarity stars
+
+Stars show the circle number: one in circle I, five in circle V. They are drawn as SVG, 10 points on the ranks screen and 18 on the unlock screen, never on the home badge. Screen readers skip them, since each label already names the circle. Screen readers read the circle as a number ("cercle 2"), since they spell out Roman numerals.
+
+Each grid cell is read as one label: name or "Rang verrouillé", circle, state and threshold, such as "Sorcier, cercle 2, rang actuel, 45 jours".
+
+## Rank unlock screen
+
+A full screen, without the tab bar. Centered in the free space: three rings, 300 points wide (an outer one in the surface color, a middle one in the separator color, a dashed accent one), with the 120 point emblem in accent inside them. Under them: "Nouveau rang" (unlock label), the rank name (40/800), the stars, then the total clean days and the circle line (16/400, line height 24, secondary text). Other ranks unlocked at the same time are listed below in body text. At the bottom, the "Continuer" primary button and the "Voir mes rangs" text button.
+
+The screen reveals itself in about 900 milliseconds: the rings fade in, then the emblem fades in while growing from 85 to 100 percent, then the text rises 8 points into place. With reduce motion on, everything shows at once. Screen readers announce "Nouveau rang : Mage blanc, cercle 3, Lumière" when the screen opens.
 
 ## Notifications
 
