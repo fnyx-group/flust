@@ -7,8 +7,10 @@ import {
   monthGrid,
   utcToLocal,
   type LocalDateTime,
+  type UtcOffsetAt,
 } from '@/domain/local-time';
 import { err, ok } from '@/domain/result';
+import { MS_PER_DAY, MS_PER_MINUTE } from '@/domain/time';
 import { fixedOffset, zoneOffsetAt } from '@test/zones';
 
 function local(year: number, month: number, day: number, hour = 0, minute = 0): LocalDateTime {
@@ -19,6 +21,27 @@ const paris = zoneOffsetAt('Europe/Paris');
 const newYork = zoneOffsetAt('America/New_York');
 const sydney = zoneOffsetAt('Australia/Sydney');
 const lordHowe = zoneOffsetAt('Australia/Lord_Howe');
+const santiago = zoneOffsetAt('America/Santiago');
+const havana = zoneOffsetAt('America/Havana');
+
+// Instants where the offset grows, found day by day and then to the minute.
+function forwardTransitions(offsetAt: UtcOffsetAt, from: number, to: number) {
+  const found: { at: number; before: number; after: number }[] = [];
+  for (let day = from; day < to; day += MS_PER_DAY) {
+    const before = offsetAt(day);
+    const after = offsetAt(day + MS_PER_DAY);
+    if (after <= before) continue;
+    let low = day;
+    let high = day + MS_PER_DAY;
+    while (high - low > MS_PER_MINUTE) {
+      const middle = Math.floor((low + high) / 2 / MS_PER_MINUTE) * MS_PER_MINUTE;
+      if (offsetAt(middle) === before) low = middle;
+      else high = middle;
+    }
+    found.push({ at: high, before, after });
+  }
+  return found;
+}
 
 describe('localToUtc', () => {
   it.each([
@@ -62,6 +85,13 @@ describe('localToUtc', () => {
       expect(localToUtc(local(2026, 10, 4, 2, 15), lordHowe)).toEqual(
         ok(Date.UTC(2026, 9, 3, 15, 45)),
       );
+    });
+
+    it('moves a skipped midnight forward, as in Santiago', () => {
+      // Santiago goes from 24:00 -04:00 to 01:00 -03:00 on 6 September 2026: 00:00 does not exist.
+      const midnight = localToUtc(local(2026, 9, 6, 0, 0), santiago);
+      expect(midnight).toEqual(ok(Date.UTC(2026, 8, 6, 4, 0)));
+      expect(midnight.ok && utcToLocal(midnight.value, santiago)).toEqual(local(2026, 9, 6, 1, 0));
     });
 
     it('handles the southern hemisphere, where summer time starts in October', () => {
@@ -130,10 +160,31 @@ describe('localToUtc', () => {
       zoneOffsetAt('America/St_Johns'),
       zoneOffsetAt('Pacific/Kiritimati'),
       zoneOffsetAt('Europe/London'),
+      santiago,
+      havana,
     );
     const minute = fc
       .integer({ min: Date.UTC(2020, 0, 1) / 60_000, max: Date.UTC(2030, 0, 1) / 60_000 })
       .map((minutes) => minutes * 60_000);
+
+    it('moves every skipped wall time forward by the length of the gap', () => {
+      const zonesWithGaps = { paris, newYork, sydney, lordHowe, santiago, havana };
+      for (const offsetAt of Object.values(zonesWithGaps)) {
+        const gaps = forwardTransitions(offsetAt, Date.UTC(2024, 0, 1), Date.UTC(2029, 0, 1));
+        expect(gaps.length).toBeGreaterThanOrEqual(5);
+        for (const { at, before, after } of gaps) {
+          const firstSkipped = at + before * MS_PER_MINUTE;
+          const end = at + after * MS_PER_MINUTE;
+          for (let wall = firstSkipped; wall < end; wall += 15 * MS_PER_MINUTE) {
+            const result = localToUtc(utcToLocal(wall, fixedOffset(0)), offsetAt);
+            expect(result).toEqual(ok(wall - before * MS_PER_MINUTE));
+            expect(result.ok && utcToLocal(result.value, offsetAt)).toEqual(
+              utcToLocal(wall + (after - before) * MS_PER_MINUTE, fixedOffset(0)),
+            );
+          }
+        }
+      }
+    });
 
     it('finds the same instant again, or its first occurrence when the time repeats', () => {
       fc.assert(

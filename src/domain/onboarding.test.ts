@@ -9,6 +9,7 @@ import {
   nextStep,
   ONBOARDING_STEPS,
   previousStep,
+  QUESTION_STEPS,
   setCustomReason,
   stepProgress,
   toggleReason,
@@ -49,8 +50,8 @@ describe('steps', () => {
   });
 
   it('show progress on every step but the welcome', () => {
-    expect(ONBOARDING_STEPS.map(stepProgress)).toEqual([
-      null,
+    expect(ONBOARDING_STEPS).toEqual(['welcome', ...QUESTION_STEPS]);
+    expect(QUESTION_STEPS.map(stepProgress)).toEqual([
       { current: 1, total: 4 },
       { current: 2, total: 4 },
       { current: 3, total: 4 },

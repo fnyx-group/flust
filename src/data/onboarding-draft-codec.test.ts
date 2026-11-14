@@ -66,6 +66,12 @@ describe('draft codec', () => {
     expect(decodeAnswers({ riskMoments: 'stress' }).riskMoments).toEqual([]);
   });
 
+  it('keeps each risk moment once, in preset order', () => {
+    expect(
+      decodeAnswers({ riskMoments: ['weekend', 'stress', 'stress', 'weekend'] }).riskMoments,
+    ).toEqual(['stress', 'weekend']);
+  });
+
   it.each([
     ['an unknown trigger', { trigger: 'rain', action: { kind: 'preset', id: 'guided-breathing' } }],
     ['an unknown action', { trigger: 'urge', action: { kind: 'preset', id: 'sing' } }],

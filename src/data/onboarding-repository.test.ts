@@ -65,10 +65,13 @@ describe('onboarding repository', () => {
       expect(query('SELECT count(*) AS count FROM onboarding_draft')).toEqual([{ count: 1 }]);
     });
 
-    it('is encrypted with the rest of the database', async () => {
-      const { storage, disk } = await setUp();
-      unwrap(await storage.onboarding.saveDraft(draft));
-      expect(disk.stored.get(DATABASE_NAME)?.key).toMatch(/^[0-9a-f]{64}$/);
+    // A back press while the onboarding finishes queues a save after the final transaction.
+    it('is not saved again once a journey exists', async () => {
+      const { storage, query } = await setUp();
+      unwrap(await storage.onboarding.complete(result()));
+
+      expect(await storage.onboarding.saveDraft(draft)).toEqual(ok(undefined));
+      expect(query('SELECT * FROM onboarding_draft')).toEqual([]);
     });
   });
 
@@ -119,6 +122,34 @@ describe('onboarding repository', () => {
           action_custom_text: null,
         },
       ]);
+    });
+
+    it('finishes a draft whose stored risk moments were duplicated', async () => {
+      const { storage, rawDatabase, query } = await setUp();
+      const raw = await rawDatabase();
+      await raw.run('INSERT INTO onboarding_draft (id, step, answers) VALUES (1, ?, ?)', [
+        'start',
+        JSON.stringify({ ...draft.answers, riskMoments: ['stress', 'stress', 'in-bed-at-night'] }),
+      ]);
+      await raw.close();
+
+      const loaded = unwrap(await storage.onboarding.loadDraft());
+      const finished = unwrap(finishOnboarding(loaded.answers, NOW));
+      expect(await storage.onboarding.complete(finished)).toEqual(ok(undefined));
+      expect(query('SELECT preset_id FROM risk_moment ORDER BY position')).toEqual([
+        { preset_id: 'in-bed-at-night' },
+        { preset_id: 'stress' },
+      ]);
+    });
+
+    it('never replaces an existing journey or its answers', async () => {
+      const { storage, query } = await setUp();
+      unwrap(await storage.onboarding.complete(result()));
+      const again = unwrap(finishOnboarding(EMPTY_DRAFT.answers, NOW + 1000));
+
+      expect(await storage.onboarding.complete(again)).toEqual(err('storage-failed'));
+      expect(await storage.journey.load()).toEqual(ok(journeyOf(NOW - 3_600_000)));
+      expect(query('SELECT count(*) AS count FROM reason')).toEqual([{ count: 3 }]);
     });
 
     it.each([

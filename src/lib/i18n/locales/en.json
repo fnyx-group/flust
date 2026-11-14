@@ -57,6 +57,7 @@
   },
   "onboarding": {
     "back": "Back",
+    "close": "Close",
     "continue": "Continue",
     "progress": "Step {{current}} of {{total}}",
     "welcome": {
@@ -76,7 +77,7 @@
     },
     "riskMoments": {
       "title": "When is it hardest?",
-      "subtitle": "Knowing your risky moments is already the first step to defusing them."
+      "subtitle": "Knowing your risky moments is already a way to defuse them."
     },
     "plan": {
       "title": "Your first plan",
@@ -85,7 +86,8 @@
       "then": "Then",
       "triggerHint": "Opens the list of moments",
       "triggerTitle": "If",
-      "custom": "Something else"
+      "custom": "Something else",
+      "customHint": "Writing here chooses this action."
     },
     "start": {
       "title": "Last step",
@@ -95,7 +97,7 @@
       "pickDate": "Pick a date",
       "selected": "Starting point: {{date}}",
       "finish": "Let's go",
-      "footer": "You can change all of this later in the settings.",
+      "footer": "You can change your reasons and plans later.",
       "errors": {
         "start-in-future": "This starting point is in the future. Check your phone's date and time, or pick another moment.",
         "invalid-timestamp": "This starting point can't be used. Pick another moment.",
@@ -119,9 +121,9 @@
       "energy": "Get my energy back",
       "self-esteem": "Regain my self-esteem",
       "sleep": "Sleep better",
-      "focus": "My focus",
-      "relationship": "My relationship",
-      "confidence": "My confidence"
+      "focus": "Improve my focus",
+      "relationship": "Take care of my relationship",
+      "confidence": "Build my confidence"
     },
     "riskMoments": {
       "in-bed-at-night": "At night in bed",

@@ -7,6 +7,7 @@ import {
   stepHour,
   stepMinute,
 } from '@/domain/start-point';
+import { utcToLocal } from '@/domain/local-time';
 import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE } from '@/domain/time';
 import { fixedOffset, zoneOffsetAt } from '@test/zones';
 
@@ -78,6 +79,18 @@ describe('stepHour and stepMinute', () => {
     expect(stepMinute(selected, -1, bounds)).toBe(selected - 5 * MS_PER_MINUTE);
   });
 
+  it('land the first minute step on a multiple of five, in both directions', () => {
+    const odd = Date.UTC(2026, 10, 10, 8, 37);
+    expect(stepMinute(odd, 1, bounds)).toBe(Date.UTC(2026, 10, 10, 8, 40));
+    expect(stepMinute(odd, -1, bounds)).toBe(Date.UTC(2026, 10, 10, 8, 35));
+  });
+
+  it('align the wall clock in a zone with a 45 minute offset', () => {
+    const kathmandu = zoneOffsetAt('Asia/Kathmandu');
+    const odd = Date.UTC(2026, 10, 10, 8, 37);
+    expect(utcToLocal(stepMinute(odd, 1, bounds), kathmandu).minute % 5).toBe(0);
+  });
+
   it('stop at now', () => {
     expect(stepHour(bounds.max - MS_PER_MINUTE, 1, bounds)).toBe(bounds.max);
     expect(stepMinute(bounds.max, 1, bounds)).toBe(bounds.max);
@@ -86,8 +99,22 @@ describe('stepHour and stepMinute', () => {
   it('step back through an hour skipped by a clock change', () => {
     // 03:30 in Paris on 29 March 2026; one hour earlier is 01:30, since 02:30 does not exist.
     const afterGap = Date.UTC(2026, 2, 29, 1, 30);
+    expect(utcToLocal(afterGap, paris)).toEqual({
+      year: 2026,
+      month: 3,
+      day: 29,
+      hour: 3,
+      minute: 30,
+    });
     const before = stepHour(afterGap, -1, bounds);
-    expect(before).toBe(Date.UTC(2026, 2, 29, 0, 30));
+    expect(utcToLocal(before, paris)).toEqual({
+      year: 2026,
+      month: 3,
+      day: 29,
+      hour: 1,
+      minute: 30,
+    });
+    expect(utcToLocal(stepHour(before, 1, bounds), paris).hour).toBe(3);
   });
 });
 
@@ -106,6 +133,12 @@ describe('isDaySelectable', () => {
     expect(isDaySelectable({ year: 2026, month: 11, day: 15 }, fixedOffset(840), bounds)).toBe(
       true,
     );
+  });
+
+  it('allows a day whose midnight is skipped by a clock change', () => {
+    // Santiago skips from 24:00 to 01:00 on the night of 5 to 6 September 2026.
+    const santiago = zoneOffsetAt('America/Santiago');
+    expect(isDaySelectable({ year: 2026, month: 9, day: 6 }, santiago, bounds)).toBe(true);
   });
 
   it('refuses a date that does not exist', () => {

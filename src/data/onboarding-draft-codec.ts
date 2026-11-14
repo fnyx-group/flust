@@ -9,7 +9,13 @@ import {
   type Reason,
   type StartChoice,
 } from '@/domain/onboarding';
-import { isActionId, isPlanTrigger, isReasonId, isRiskMomentId } from '@/domain/presets';
+import {
+  isActionId,
+  isPlanTrigger,
+  isReasonId,
+  RISK_MOMENT_IDS,
+  type RiskMomentId,
+} from '@/domain/presets';
 import { isValidTimestamp } from '@/domain/time';
 
 export type EncodedDraft = { step: string; answers: string };
@@ -32,7 +38,7 @@ function decodeAnswers(value: unknown): OnboardingAnswers {
   if (!isRecord(value)) return defaults;
   return {
     reasons: decodeReasons(value.reasons),
-    riskMoments: arrayOf(value.riskMoments).filter(isRiskMomentId),
+    riskMoments: decodeRiskMoments(value.riskMoments),
     plan: decodePlan(value.plan),
     start: decodeStart(value.start),
   };
@@ -52,6 +58,13 @@ function decodeReasons(value: unknown): Reason[] {
       reasons.findIndex((other) => other.kind === 'preset' && other.id === reason.id) === index,
   );
   return custom ? [...presets, custom] : presets;
+}
+
+// Stored once each and in preset order, as toggling them does: a duplicate would break the
+// primary key of risk_moment and block the end of the onboarding.
+function decodeRiskMoments(value: unknown): RiskMomentId[] {
+  const moments = arrayOf(value);
+  return RISK_MOMENT_IDS.filter((id) => moments.includes(id));
 }
 
 function decodePlan(value: unknown): Plan | null {

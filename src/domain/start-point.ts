@@ -42,8 +42,12 @@ export function stepHour(selected: Timestamp, steps: number, bounds: StartBounds
   return clampStart(selected + steps * MS_PER_HOUR, bounds);
 }
 
+// The first step lands on a multiple of five minutes. Every offset in use is a multiple of 15
+// minutes, so aligning in UTC also aligns the wall clock.
 export function stepMinute(selected: Timestamp, steps: number, bounds: StartBounds): Timestamp {
-  return clampStart(selected + steps * MINUTE_STEP * MS_PER_MINUTE, bounds);
+  const size = MINUTE_STEP * MS_PER_MINUTE;
+  const aligned = (steps > 0 ? Math.floor : Math.ceil)(selected / size) * size;
+  return clampStart(aligned + steps * size, bounds);
 }
 
 export function isDaySelectable(

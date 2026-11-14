@@ -15,8 +15,9 @@ type StepperProps = {
   onIncrement: () => void;
 };
 
-// Screen readers see a single adjustable element and change it by swiping up or down; the
-// buttons inside are for touch only.
+// Screen readers see a single adjustable element and change it by swiping up or down. The
+// buttons inside are for touch only: iOS hides them behind the accessible parent, and Android is
+// told to hide them too, since TalkBack would otherwise focus them without a role.
 export function Stepper({
   label,
   value,
@@ -41,7 +42,11 @@ export function Stepper({
       style={styles.stepper}
     >
       <Text style={styles.label}>{label}</Text>
-      <View style={styles.controls}>
+      <View
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={styles.controls}
+      >
         <StepButton
           label={decrementLabel}
           disabled={!canDecrement}
@@ -71,6 +76,7 @@ function StepButton({ label, disabled, onPress, icon }: StepButtonProps) {
   const color = disabled ? colors.locked : colors.text;
   return (
     <Pressable
+      accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled }}
       disabled={disabled}
@@ -84,7 +90,8 @@ function StepButton({ label, disabled, onPress, icon }: StepButtonProps) {
 
 const styles = StyleSheet.create({
   stepper: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: 140,
     gap: 8,
     padding: 12,
     borderRadius: radii.card,
@@ -94,15 +101,19 @@ const styles = StyleSheet.create({
     ...typography.label,
     textAlign: 'center',
   },
+  // With large text the value wraps below the buttons instead of overflowing.
   controls: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 8,
   },
   button: {
-    width: sizes.touchTarget,
-    height: sizes.touchTarget,
-    borderRadius: sizes.touchTarget / 2,
+    minWidth: sizes.touchTarget,
+    minHeight: sizes.touchTarget,
+    aspectRatio: 1,
+    borderRadius: radii.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.separator,
@@ -111,9 +122,9 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   value: {
-    fontFamily: typography.streakDays.fontFamily,
-    fontVariant: ['tabular-nums'],
-    fontSize: 32,
+    ...typography.stepperValue,
+    flexShrink: 1,
+    textAlign: 'center',
     color: colors.text,
   },
 });

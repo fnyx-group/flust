@@ -12,6 +12,12 @@ function keysOf(value: object, prefix = ''): string[] {
   );
 }
 
+function valuesOf(value: object): string[] {
+  return Object.values(value).flatMap((child) =>
+    typeof child === 'object' && child !== null ? valuesOf(child) : [String(child)],
+  );
+}
+
 function expectDayPlurals() {
   const french = createI18n('fr');
   expect(french.t('units.day', { count: 0 })).toBe('0 jour');
@@ -49,5 +55,14 @@ describe('plurals', () => {
 describe('locales', () => {
   it('have exactly the same keys in English and French', () => {
     expect(keysOf(fr).sort()).toEqual(keysOf(en).sort());
+  });
+
+  // docs/design/design-system.md: a narrow no-break space before ? ! ; and a no-break space
+  // before :, so the sign never wraps alone onto the next line.
+  it('put the right no-break space before French double punctuation', () => {
+    const french = valuesOf(fr);
+    expect(french.filter((text) => /(?<!\u202f)[?!;]/.test(text))).toEqual([]);
+    expect(french.filter((text) => /(?<!\u00a0):/.test(text))).toEqual([]);
+    expect(french.some((text) => text.includes('\u202f?'))).toBe(true);
   });
 });

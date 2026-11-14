@@ -1,4 +1,5 @@
 import type { CustomText } from '@/domain/custom-text';
+import { isOneOf } from '@/domain/guards';
 import { createJourney, type CreateJourneyError, type Journey } from '@/domain/journey';
 import {
   REASON_IDS,
@@ -12,9 +13,16 @@ import {
 import { err, ok, type Result } from '@/domain/result';
 import type { Timestamp } from '@/domain/time';
 
-export const ONBOARDING_STEPS = ['welcome', 'reasons', 'risk-moments', 'plan', 'start'] as const;
+// The welcome step has no progress bar: it is the door, not a question.
+export const QUESTION_STEPS = ['reasons', 'risk-moments', 'plan', 'start'] as const;
+
+export const ONBOARDING_STEPS = ['welcome', ...QUESTION_STEPS] as const;
 
 export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
+
+export type QuestionStep = (typeof QUESTION_STEPS)[number];
+
+export type StepProgress = { readonly current: number; readonly total: number };
 
 export type Reason = { kind: 'preset'; id: ReasonId } | { kind: 'custom'; text: CustomText };
 
@@ -55,12 +63,7 @@ export const EMPTY_DRAFT: OnboardingDraft = {
   answers: { reasons: [], riskMoments: [], plan: null, start: { kind: 'now' } },
 };
 
-// The welcome step has no progress bar: it is the door, not a question.
-const PROGRESS_STEPS = ONBOARDING_STEPS.slice(1);
-
-export function isOnboardingStep(value: unknown): value is OnboardingStep {
-  return (ONBOARDING_STEPS as readonly unknown[]).includes(value);
-}
+export const isOnboardingStep = isOneOf(ONBOARDING_STEPS);
 
 export function nextStep(step: OnboardingStep): OnboardingStep | null {
   return ONBOARDING_STEPS[ONBOARDING_STEPS.indexOf(step) + 1] ?? null;
@@ -70,9 +73,8 @@ export function previousStep(step: OnboardingStep): OnboardingStep | null {
   return ONBOARDING_STEPS[ONBOARDING_STEPS.indexOf(step) - 1] ?? null;
 }
 
-export function stepProgress(step: OnboardingStep): { current: number; total: number } | null {
-  const index = PROGRESS_STEPS.indexOf(step);
-  return index === -1 ? null : { current: index + 1, total: PROGRESS_STEPS.length };
+export function stepProgress(step: QuestionStep): StepProgress {
+  return { current: QUESTION_STEPS.indexOf(step) + 1, total: QUESTION_STEPS.length };
 }
 
 export function toggleReason(reasons: readonly Reason[], id: ReasonId): Reason[] {

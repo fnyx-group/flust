@@ -3,7 +3,12 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { useStorage } from '@/features/storage/storage-context';
-import { isLanguage, supportedLanguages, type Language } from '@/lib/i18n/language';
+import {
+  fallbackLanguage,
+  isLanguage,
+  supportedLanguages,
+  type Language,
+} from '@/lib/i18n/language';
 import { BrandLockup } from '@/ui/brand/brand-lockup';
 import { Button } from '@/ui/button';
 import { GlobeIcon } from '@/ui/icons/globe-icon';
@@ -43,7 +48,7 @@ function LanguageChoice() {
   const { t, i18n } = useTranslation();
   const storage = useStorage();
   const [open, setOpen] = useState(false);
-  const current: Language = isLanguage(i18n.language) ? i18n.language : 'en';
+  const current: Language = isLanguage(i18n.language) ? i18n.language : fallbackLanguage;
   const currentLabel = t(`languages.${current}`);
 
   function choose(language: Language) {
@@ -66,7 +71,7 @@ function LanguageChoice() {
       <OptionSheet
         visible={open}
         title={t('onboarding.welcome.languageTitle')}
-        closeLabel={t('onboarding.back')}
+        closeLabel={t('onboarding.close')}
         options={supportedLanguages.map((language) => ({
           key: language,
           label: t(`languages.${language}`),

@@ -35,7 +35,15 @@ export function Calendar({ selected, bounds, offsetAt, firstWeekday, onSelect }:
   const { t, i18n } = useTranslation();
   const language = i18n.language;
   const local = utcToLocal(selected, offsetAt);
-  const [visible, setVisible] = useState<Month>({ year: local.year, month: local.month });
+  const selectedMonth = { year: local.year, month: local.month };
+  const [visible, setVisible] = useState<Month>(selectedMonth);
+  // When the steppers move the selection into another month, the calendar follows it; browsing
+  // other months with the arrows is left alone until then.
+  const [followed, setFollowed] = useState(monthIndex(selectedMonth));
+  if (monthIndex(selectedMonth) !== followed) {
+    setFollowed(monthIndex(selectedMonth));
+    setVisible(selectedMonth);
+  }
   const first = utcToLocal(bounds.min, offsetAt);
   const last = utcToLocal(bounds.max, offsetAt);
   const canGoBack = monthIndex(visible) > monthIndex(first);
@@ -155,9 +163,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Grows with the text size instead of clipping the day number.
   day: {
-    width: sizes.touchTarget - 4,
-    height: sizes.touchTarget - 4,
+    minWidth: sizes.touchTarget - 4,
+    minHeight: sizes.touchTarget - 4,
+    aspectRatio: 1,
+    paddingHorizontal: 2,
     borderRadius: radii.pill,
     alignItems: 'center',
     justifyContent: 'center',
@@ -166,9 +177,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
   },
   dayLabel: {
-    fontFamily: fonts.numberMedium,
-    fontVariant: ['tabular-nums'],
-    fontSize: 18,
+    ...typography.calendarDay,
     color: colors.text,
   },
   disabledLabel: {

@@ -22,13 +22,13 @@ describe('settings repository', () => {
     expect(await storage.settings.loadLanguage()).toEqual(ok('en'));
   });
 
-  it('ignores an unknown stored language', async () => {
+  it('returns the stored value as written, for the caller to validate', async () => {
     const { storage, rawDatabase } = await setUp();
     const raw = await rawDatabase();
     await raw.run("INSERT INTO setting (key, value) VALUES ('language', 'de')");
     await raw.close();
 
-    expect(await storage.settings.loadLanguage()).toEqual(ok(null));
+    expect(await storage.settings.loadLanguage()).toEqual(ok('de'));
   });
 
   it('reports storage failures', async () => {

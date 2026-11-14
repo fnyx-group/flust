@@ -47,8 +47,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   value: {
-    ...typography.rankName,
-    fontSize: 17,
+    ...typography.selectValue,
     flex: 1,
     color: colors.text,
   },

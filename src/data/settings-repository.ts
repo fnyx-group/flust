@@ -1,24 +1,24 @@
 import type { Database } from '@/data/database';
 import { err, ok, type Result } from '@/domain/result';
-import { isLanguage, type Language } from '@/lib/i18n/language';
 
 export type SettingsStorageError = 'storage-failed';
 
+// The language is stored as written. Storage does not know which languages exist: the feature
+// that applies it validates it, and anything unknown reads as no choice.
 export type SettingsRepository = {
-  loadLanguage(): Promise<Result<Language | null, SettingsStorageError>>;
-  saveLanguage(language: Language): Promise<Result<void, SettingsStorageError>>;
+  loadLanguage(): Promise<Result<string | null, SettingsStorageError>>;
+  saveLanguage(language: string): Promise<Result<void, SettingsStorageError>>;
 };
 
 const LANGUAGE_KEY = 'language';
 
 export function createSettingsRepository(db: Database): SettingsRepository {
   return {
-    // An unknown value reads as no choice, so the device language applies again.
     async loadLanguage() {
       try {
         const rows = await db.all('SELECT value FROM setting WHERE key = ?', [LANGUAGE_KEY]);
         const value = rows[0]?.value;
-        return ok(isLanguage(value) ? value : null);
+        return ok(typeof value === 'string' ? value : null);
       } catch {
         return err('storage-failed');
       }

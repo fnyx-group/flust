@@ -2,14 +2,14 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, type ReactNode } from 'react';
 
 import type { Journey } from '@/domain/journey';
-import { loadSession } from '@/features/session/load-session';
+import { loadSession, type SessionData } from '@/features/session/load-session';
 import { SessionContext } from '@/features/session/session-context';
 import { useReportStorageFailure, useStorage } from '@/features/storage/storage-context';
 
-type SessionState = { status: 'loading' } | { status: 'ready'; journey: Journey | null };
+type SessionState = { status: 'loading' } | { status: 'ready'; data: SessionData };
 
-// Loads what decides the first screen, the journey and the chosen language, before hiding the
-// splash screen, so the onboarding never flashes before the home or the other way round. A
+// Loads what decides the first screen, the journey, the onboarding draft and the chosen language,
+// before hiding the splash screen, so nothing blank or wrong flashes before the first screen. A
 // failure goes to StorageGate, which shows the retry or reset screen it calls for.
 export function SessionGate({ children }: { children: ReactNode }) {
   const storage = useStorage();
@@ -20,7 +20,7 @@ export function SessionGate({ children }: { children: ReactNode }) {
     let active = true;
     loadSession(storage).then((result) => {
       if (!active) return;
-      if (result.ok) setState({ status: 'ready', journey: result.value });
+      if (result.ok) setState({ status: 'ready', data: result.value });
       else reportFailure(result.error);
     });
     return () => {
@@ -34,9 +34,11 @@ export function SessionGate({ children }: { children: ReactNode }) {
 
   if (state.status === 'loading') return null;
 
+  const { data } = state;
   const session = {
-    journey: state.journey,
-    setJourney: (journey: Journey) => setState({ status: 'ready', journey }),
+    journey: data.journey,
+    draft: data.draft,
+    setJourney: (journey: Journey) => setState({ status: 'ready', data: { ...data, journey } }),
   };
   return <SessionContext value={session}>{children}</SessionContext>;
 }

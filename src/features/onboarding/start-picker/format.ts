@@ -24,7 +24,15 @@ export function formatDateTime(language: string, local: LocalDateTime, hour12: b
   const { year, month, day, hour, minute } = local;
   return format(
     language,
-    { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit', hour12 },
+    {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12,
+    },
     Date.UTC(year, month - 1, day, hour, minute),
   );
 }

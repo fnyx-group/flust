@@ -3,7 +3,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { CUSTOM_TEXT_MAX_LENGTH, parseCustomText } from '@/domain/custom-text';
-import { DEFAULT_PLAN, effectivePlan, triggerOptions, type Plan } from '@/domain/onboarding';
+import {
+  DEFAULT_PLAN,
+  effectivePlan,
+  triggerOptions,
+  type OnboardingAnswers,
+  type Plan,
+} from '@/domain/onboarding';
 import { ACTION_IDS } from '@/domain/presets';
 import { actionLabel, triggerLabel } from '@/features/onboarding/preset-labels';
 import { StepLayout } from '@/features/onboarding/step-layout';
@@ -14,14 +20,23 @@ import { SelectRow } from '@/ui/select-row';
 import { TextEntryRow } from '@/ui/text-entry-row';
 import { typography } from '@/ui/theme';
 
-export function PlanStep({ answers, onChange, progress, onBack, onContinue }: StepProps) {
+export function PlanStep({
+  answers,
+  onChange,
+  onType,
+  onTypingEnd,
+  progress,
+  onBack,
+  onContinue,
+}: StepProps) {
   const { t } = useTranslation();
   const plan = effectivePlan(answers);
   const [text, setText] = useState(() => (plan.action.kind === 'custom' ? plan.action.text : ''));
   const [choosingTrigger, setChoosingTrigger] = useState(false);
+  const customSelected = plan.action.kind === 'custom';
 
-  function update(next: Partial<Plan>) {
-    onChange({ ...answers, plan: { ...plan, ...next } });
+  function update(next: Partial<Plan>, save: (answers: OnboardingAnswers) => void = onChange) {
+    save({ ...answers, plan: { ...plan, ...next } });
   }
 
   // The custom action is chosen as soon as it holds text. Emptying it falls back to the default
@@ -29,8 +44,8 @@ export function PlanStep({ answers, onChange, progress, onBack, onContinue }: St
   function changeText(value: string) {
     setText(value);
     const parsed = parseCustomText(value);
-    if (parsed.ok) update({ action: { kind: 'custom', text: parsed.value } });
-    else if (plan.action.kind === 'custom') update({ action: DEFAULT_PLAN.action });
+    if (parsed.ok) update({ action: { kind: 'custom', text: parsed.value } }, onType);
+    else if (customSelected) update({ action: DEFAULT_PLAN.action }, onType);
   }
 
   function selectCustom() {
@@ -59,20 +74,25 @@ export function PlanStep({ answers, onChange, progress, onBack, onContinue }: St
           options={ACTION_IDS.map((id) => ({ key: id, label: actionLabel(t, id) }))}
           selected={plan.action.kind === 'preset' ? plan.action.id : null}
           onSelect={(id) => update({ action: { kind: 'preset', id } })}
-        />
-        <TextEntryRow
-          label={t('onboarding.plan.custom')}
-          value={text}
-          maxLength={CUSTOM_TEXT_MAX_LENGTH}
-          selected={plan.action.kind === 'custom'}
-          onChangeText={changeText}
-          onFocus={selectCustom}
+          last={
+            <TextEntryRow
+              embedded
+              label={t('onboarding.plan.custom')}
+              accessibilityHint={t('onboarding.plan.customHint')}
+              value={text}
+              maxLength={CUSTOM_TEXT_MAX_LENGTH}
+              selected={customSelected}
+              onChangeText={changeText}
+              onFocus={selectCustom}
+              onBlur={onTypingEnd}
+            />
+          }
         />
       </View>
       <OptionSheet
         visible={choosingTrigger}
         title={t('onboarding.plan.triggerTitle')}
-        closeLabel={t('onboarding.back')}
+        closeLabel={t('onboarding.close')}
         options={triggerOptions(answers.riskMoments).map((trigger) => ({
           key: trigger,
           label: triggerLabel(t, trigger),

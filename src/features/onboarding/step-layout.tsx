@@ -1,6 +1,17 @@
-import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, type ReactNode } from 'react';
+import {
+  BackHandler,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
+
+import type { StepProgress } from '@/domain/onboarding';
+import { handleBackPress } from '@/features/onboarding/back-press';
 
 import { Button } from '@/ui/button';
 import { IconButton } from '@/ui/icon-button';
@@ -11,12 +22,14 @@ import { ScreenTitle } from '@/ui/screen-title';
 import { colors, typography } from '@/ui/theme';
 
 type StepLayoutProps = {
-  progress: { current: number; total: number };
+  progress: StepProgress;
   title: string;
   subtitle: string;
   children: ReactNode;
   action: { label: string; onPress: () => void; disabled?: boolean };
   onBack: () => void;
+  // Set while the answers are being saved, so that going back cannot race the final save.
+  backDisabled?: boolean;
   footer?: ReactNode;
 };
 
@@ -27,9 +40,18 @@ export function StepLayout({
   children,
   action,
   onBack,
+  backDisabled = false,
   footer,
 }: StepLayoutProps) {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () =>
+      handleBackPress(onBack, backDisabled),
+    );
+    return () => subscription.remove();
+  }, [onBack, backDisabled]);
+
   return (
     <Screen bottomInset>
       <KeyboardAvoidingView
@@ -37,7 +59,11 @@ export function StepLayout({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.header}>
-          <IconButton accessibilityLabel={t('onboarding.back')} onPress={onBack}>
+          <IconButton
+            accessibilityLabel={t('onboarding.back')}
+            disabled={backDisabled}
+            onPress={onBack}
+          >
             <BackIcon color={colors.text} size={20} />
           </IconButton>
           <ProgressBar

@@ -7,7 +7,18 @@ import { StepLayout } from '@/features/onboarding/step-layout';
 import type { StepProps } from '@/features/onboarding/step-props';
 import { ChipList } from '@/ui/chip-list';
 
-export function RiskMomentsStep({ answers, onChange, progress, onBack, onContinue }: StepProps) {
+type RiskMomentsStepProps = Pick<
+  StepProps,
+  'answers' | 'onChange' | 'progress' | 'onBack' | 'onContinue'
+>;
+
+export function RiskMomentsStep({
+  answers,
+  onChange,
+  progress,
+  onBack,
+  onContinue,
+}: RiskMomentsStepProps) {
   const { t } = useTranslation();
   return (
     <StepLayout

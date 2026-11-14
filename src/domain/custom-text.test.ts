@@ -6,6 +6,10 @@ describe('parseCustomText', () => {
     expect(parseCustomText('  For my kids \n')).toEqual(ok('For my kids'));
   });
 
+  it('puts pasted lines on one line', () => {
+    expect(parseCustomText('For my\nkids,\t  always')).toEqual(ok('For my kids, always'));
+  });
+
   it.each(['', '   ', '\n\t'])('refuses empty text: %j', (raw) => {
     expect(parseCustomText(raw)).toEqual(err('empty'));
   });
@@ -15,7 +19,7 @@ describe('parseCustomText', () => {
     expect(parseCustomText('a'.repeat(CUSTOM_TEXT_MAX_LENGTH + 1))).toEqual(err('too-long'));
   });
 
-  it('counts an emoji as one character', () => {
+  it('counts a single code point emoji as one character', () => {
     const emoji = '\u{1F331}';
     expect(parseCustomText(emoji.repeat(CUSTOM_TEXT_MAX_LENGTH)).ok).toBe(true);
     expect(parseCustomText(emoji.repeat(CUSTOM_TEXT_MAX_LENGTH + 1))).toEqual(err('too-long'));

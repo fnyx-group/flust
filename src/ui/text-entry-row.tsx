@@ -9,9 +9,13 @@ type TextEntryRowProps = {
   value: string;
   maxLength: number;
   onChangeText: (text: string) => void;
+  accessibilityHint?: string;
   // Set when the row is one choice among radio options: it then shows whether it is chosen.
   selected?: boolean;
+  // Drawn inside another card, such as the last row of a radio group, instead of as its own.
+  embedded?: boolean;
   onFocus?: () => void;
+  onBlur?: () => void;
 };
 
 export function TextEntryRow({
@@ -19,11 +23,14 @@ export function TextEntryRow({
   value,
   maxLength,
   onChangeText,
+  accessibilityHint,
   selected,
+  embedded = false,
   onFocus,
+  onBlur,
 }: TextEntryRowProps) {
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, !embedded && styles.card]}>
       {selected === undefined ? (
         <PlusIcon color={colors.textSecondary} />
       ) : (
@@ -31,6 +38,7 @@ export function TextEntryRow({
       )}
       <TextInput
         accessibilityLabel={label}
+        accessibilityHint={accessibilityHint}
         accessibilityState={selected === undefined ? undefined : { selected }}
         placeholder={label}
         placeholderTextColor={colors.textSecondary}
@@ -38,6 +46,7 @@ export function TextEntryRow({
         maxLength={maxLength}
         onChangeText={onChangeText}
         onFocus={onFocus}
+        onBlur={onBlur}
         multiline
         submitBehavior="blurAndSubmit"
         returnKeyType="done"
@@ -56,6 +65,8 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingHorizontal: 20,
     paddingVertical: 8,
+  },
+  card: {
     borderRadius: radii.card,
     backgroundColor: colors.surface,
   },

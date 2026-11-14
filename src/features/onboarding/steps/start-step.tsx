@@ -1,66 +1,81 @@
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import type { CreateJourneyError } from '@/domain/journey';
 import { utcToLocal } from '@/domain/local-time';
-import { finishOnboarding } from '@/domain/onboarding';
-import { defaultPastStart, startBounds } from '@/domain/start-point';
-import { useSession } from '@/features/session/session-context';
+import { clampStart, defaultPastStart, startBounds } from '@/domain/start-point';
+import type { Timestamp } from '@/domain/time';
+import { finish, FINISH_ERROR_MESSAGES, type FinishError } from '@/features/onboarding/finish';
 import { StepLayout } from '@/features/onboarding/step-layout';
 import type { StepProps } from '@/features/onboarding/step-props';
 import { Calendar } from '@/features/onboarding/start-picker/calendar';
 import { deviceCalendar, deviceOffsetAt } from '@/features/onboarding/start-picker/device-time';
 import { formatDateTime } from '@/features/onboarding/start-picker/format';
 import { TimeSteppers } from '@/features/onboarding/start-picker/time-steppers';
+import { useSession } from '@/features/session/session-context';
 import { useStorage } from '@/features/storage/storage-context';
 import { SegmentedControl } from '@/ui/segmented-control';
 import { colors, typography } from '@/ui/theme';
 
-type FinishError = CreateJourneyError | 'save-failed';
+type StartStepProps = Pick<StepProps, 'answers' | 'onChange' | 'progress' | 'onBack'>;
 
-export function StartStep({ answers, onChange, progress, onBack }: Omit<StepProps, 'onContinue'>) {
+export function StartStep({ answers, onChange, progress, onBack }: StartStepProps) {
   const { t, i18n } = useTranslation();
   const storage = useStorage();
   const { setJourney } = useSession();
   const [now, setNow] = useState(() => Date.now());
+  const [{ firstWeekday, hour12 }] = useState(deviceCalendar);
+  const [lastPast, setLastPast] = useState<Timestamp | null>(
+    answers.start.kind === 'past' ? answers.start.at : null,
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<FinishError | null>(null);
+  // State updates land one render later, so a second tap in the same frame still sees busy false.
+  const finishing = useRef(false);
   const bounds = startBounds(now);
-  const { firstWeekday, hour12 } = deviceCalendar();
   const { start } = answers;
 
+  // Going back to "Pick a date" restores the last date picked rather than starting over.
   function chooseKind(kind: 'now' | 'past') {
     setError(null);
     if (kind === 'now') return onChange({ ...answers, start: { kind: 'now' } });
     const current = Date.now();
+    const currentBounds = startBounds(current);
     setNow(current);
-    onChange({ ...answers, start: { kind: 'past', at: defaultPastStart(startBounds(current)) } });
-  }
-
-  function choosePast(at: number) {
-    setError(null);
+    const at =
+      lastPast === null ? defaultPastStart(currentBounds) : clampStart(lastPast, currentBounds);
     onChange({ ...answers, start: { kind: 'past', at } });
   }
 
-  // The journey, the answers and the end of the draft are written in one transaction; the
-  // session then switches the navigator to the tabs.
-  async function finish() {
+  function choosePast(at: Timestamp) {
+    setError(null);
+    setLastPast(at);
+    onChange({ ...answers, start: { kind: 'past', at } });
+  }
+
+  // Android reads the message through its live region; iOS has no live regions, so it is
+  // announced there.
+  function showError(failure: FinishError) {
+    setError(failure);
+    if (Platform.OS === 'ios') {
+      AccessibilityInfo.announceForAccessibility(t(FINISH_ERROR_MESSAGES[failure]));
+    }
+  }
+
+  // The session switches the navigator to the tabs once everything is stored.
+  async function submit() {
+    if (finishing.current) return;
+    finishing.current = true;
     setBusy(true);
     setError(null);
-    const result = finishOnboarding(answers, Date.now());
-    if (!result.ok) {
-      setError(result.error);
-      setBusy(false);
+    const result = await finish(storage.onboarding, answers, Date.now());
+    if (result.ok) {
+      setJourney(result.value);
       return;
     }
-    const saved = await storage.onboarding.complete(result.value);
-    if (!saved.ok) {
-      setError('save-failed');
-      setBusy(false);
-      return;
-    }
-    setJourney(result.value.journey);
+    finishing.current = false;
+    setBusy(false);
+    showError(result.error);
   }
 
   return (
@@ -69,12 +84,13 @@ export function StartStep({ answers, onChange, progress, onBack }: Omit<StepProp
       title={t('onboarding.start.title')}
       subtitle={t('onboarding.start.subtitle')}
       onBack={onBack}
-      action={{ label: t('onboarding.start.finish'), onPress: finish, disabled: busy }}
+      backDisabled={busy}
+      action={{ label: t('onboarding.start.finish'), onPress: submit, disabled: busy }}
       footer={
         <>
           {error !== null && (
             <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>
-              {t(`onboarding.start.errors.${error}`)}
+              {t(FINISH_ERROR_MESSAGES[error])}
             </Text>
           )}
           <Text style={styles.caption}>{t('onboarding.start.footer')}</Text>

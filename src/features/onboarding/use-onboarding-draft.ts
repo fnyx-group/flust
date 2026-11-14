@@ -1,28 +1,44 @@
 import { useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 
-import { EMPTY_DRAFT, type OnboardingDraft } from '@/domain/onboarding';
+import type { OnboardingDraft } from '@/domain/onboarding';
+import { createDraftSaver } from '@/features/onboarding/draft-saver';
+import { useSession } from '@/features/session/session-context';
 import { useStorage } from '@/features/storage/storage-context';
 
-// Every change is saved at once, so a kill in the background never loses an answer. A draft that
-// cannot be read starts the onboarding over rather than blocking it.
+// The draft was read with the session, before the splash screen hid. A failed save is not shown:
+// the answers stay on screen, the next change saves them all again, and finishing writes them in
+// its own transaction, which does report failures.
 export function useOnboardingDraft() {
   const storage = useStorage();
-  const [draft, setDraft] = useState<OnboardingDraft | null>(null);
+  const session = useSession();
+  const [draft, setDraft] = useState(session.draft);
+  const [saver] = useState(() =>
+    createDraftSaver((next) => {
+      void storage.onboarding.saveDraft(next);
+    }),
+  );
 
   useEffect(() => {
-    let active = true;
-    storage.onboarding.loadDraft().then((result) => {
-      if (active) setDraft(result.ok ? result.value : EMPTY_DRAFT);
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') saver.flush();
     });
     return () => {
-      active = false;
+      subscription.remove();
+      saver.flush();
     };
-  }, [storage]);
+  }, [saver]);
 
-  function update(next: OnboardingDraft) {
-    setDraft(next);
-    void storage.onboarding.saveDraft(next);
-  }
-
-  return { draft, update };
+  return {
+    draft,
+    change(next: OnboardingDraft) {
+      setDraft(next);
+      saver.saveNow(next);
+    },
+    type(next: OnboardingDraft) {
+      setDraft(next);
+      saver.saveSoon(next);
+    },
+    flush: saver.flush,
+  };
 }

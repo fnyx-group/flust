@@ -1,5 +1,5 @@
 import type { Database, Executor } from '@/data/database';
-import { writeJourney } from '@/data/journey-repository';
+import { insertJourney } from '@/data/journey-repository';
 import { decodeDraft, encodeDraft } from '@/data/onboarding-draft-codec';
 import {
   EMPTY_DRAFT,
@@ -31,12 +31,15 @@ export function createOnboardingRepository(db: Database): OnboardingRepository {
       }
     },
 
+    // A save queued behind the end of the onboarding, such as a back press while it finishes,
+    // must not bring the draft back once a journey exists: nothing would ever delete it.
     async saveDraft(draft) {
       const { step, answers } = encodeDraft(draft);
       try {
         await db.transaction((tx) =>
           tx.run(
-            `INSERT INTO onboarding_draft (id, step, answers) VALUES (1, ?, ?)
+            `INSERT INTO onboarding_draft (id, step, answers)
+             SELECT 1, ?, ? WHERE NOT EXISTS (SELECT 1 FROM journey)
              ON CONFLICT (id) DO UPDATE SET step = excluded.step, answers = excluded.answers`,
             [step, answers],
           ),
@@ -48,11 +51,12 @@ export function createOnboardingRepository(db: Database): OnboardingRepository {
     },
 
     // One transaction: either the journey exists with every answer saved and the draft is gone,
-    // or nothing changed and the onboarding resumes where it was.
+    // or nothing changed and the onboarding resumes where it was. An existing journey makes it
+    // fail rather than be replaced.
     async complete(result) {
       try {
         await db.transaction(async (tx) => {
-          await writeJourney(tx, result.journey);
+          await insertJourney(tx, result.journey);
           await writeReasons(tx, result.reasons);
           await writeRiskMoments(tx, result.riskMoments);
           await writePlans(tx, result.plans);

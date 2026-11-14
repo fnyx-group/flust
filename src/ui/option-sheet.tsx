@@ -1,6 +1,7 @@
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Button } from '@/ui/button';
 import { RadioGroup, type RadioOption } from '@/ui/radio-group';
 import { colors, radii, spacing, typography } from '@/ui/theme';
 
@@ -15,6 +16,8 @@ type OptionSheetProps<K extends string> = {
 };
 
 // A fade keeps the motion small for people who reduce motion; the sheet itself does not move.
+// VoiceOver cannot reach the backdrop behind a modal view, so the sheet has its own close button
+// and answers the escape gesture. The options scroll on small screens and with large text.
 export function OptionSheet<K extends string>({
   visible,
   title,
@@ -36,20 +39,24 @@ export function OptionSheet<K extends string>({
         />
         <View
           accessibilityViewIsModal
+          onAccessibilityEscape={onClose}
           style={[styles.sheet, { paddingBottom: insets.bottom + spacing.screen }]}
         >
           <Text accessibilityRole="header" style={styles.title}>
             {title}
           </Text>
-          <RadioGroup
-            accessibilityLabel={title}
-            options={options}
-            selected={selected}
-            onSelect={(key) => {
-              onSelect(key);
-              onClose();
-            }}
-          />
+          <ScrollView style={styles.options}>
+            <RadioGroup
+              accessibilityLabel={title}
+              options={options}
+              selected={selected}
+              onSelect={(key) => {
+                onSelect(key);
+                onClose();
+              }}
+            />
+          </ScrollView>
+          <Button variant="secondary" label={closeLabel} onPress={onClose} />
         </View>
       </View>
     </Modal>
@@ -67,6 +74,7 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   sheet: {
+    maxHeight: '85%',
     gap: 16,
     paddingTop: 24,
     paddingHorizontal: spacing.screen,
@@ -79,5 +87,9 @@ const styles = StyleSheet.create({
   title: {
     ...typography.rankName,
     color: colors.text,
+  },
+  options: {
+    flexGrow: 0,
+    flexShrink: 1,
   },
 });

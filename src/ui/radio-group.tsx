@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, fonts, radii, sizes, typography } from '@/ui/theme';
@@ -9,6 +10,8 @@ type RadioGroupProps<K extends string> = {
   options: readonly RadioOption<K>[];
   selected: K | null;
   onSelect: (key: K) => void;
+  // A last choice that is not a fixed option, such as a text field, drawn as one more row.
+  last?: ReactNode;
 };
 
 export function RadioGroup<K extends string>({
@@ -16,6 +19,7 @@ export function RadioGroup<K extends string>({
   options,
   selected,
   onSelect,
+  last,
 }: RadioGroupProps<K>) {
   return (
     <View
@@ -42,6 +46,7 @@ export function RadioGroup<K extends string>({
           </Pressable>
         );
       })}
+      {last !== undefined && <View style={styles.separated}>{last}</View>}
     </View>
   );
 }

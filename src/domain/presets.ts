@@ -1,3 +1,5 @@
+import { isOneOf } from '@/domain/guards';
+
 // Ids are stored on the device and translated on display, so a released id is never renamed.
 
 export const REASON_IDS = [
@@ -36,18 +38,12 @@ export type RiskMomentId = (typeof RISK_MOMENT_IDS)[number];
 export type PlanTrigger = RiskMomentId | typeof URGE_TRIGGER;
 export type ActionId = (typeof ACTION_IDS)[number];
 
-export function isReasonId(value: unknown): value is ReasonId {
-  return (REASON_IDS as readonly unknown[]).includes(value);
-}
+export const isReasonId = isOneOf(REASON_IDS);
 
-export function isRiskMomentId(value: unknown): value is RiskMomentId {
-  return (RISK_MOMENT_IDS as readonly unknown[]).includes(value);
-}
+export const isRiskMomentId = isOneOf(RISK_MOMENT_IDS);
 
 export function isPlanTrigger(value: unknown): value is PlanTrigger {
   return value === URGE_TRIGGER || isRiskMomentId(value);
 }
 
-export function isActionId(value: unknown): value is ActionId {
-  return (ACTION_IDS as readonly unknown[]).includes(value);
-}
+export const isActionId = isOneOf(ACTION_IDS);

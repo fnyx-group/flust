@@ -50,8 +50,10 @@ export function TimeSteppers({ selected, bounds, offsetAt, hour12, onSelect }: T
 }
 
 const styles = StyleSheet.create({
+  // With large text the two steppers no longer fit side by side, and stack.
   row: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
   },
 });

@@ -50,12 +50,22 @@ async function readJourney(tx: Executor): Promise<StoredJourney> {
   return { start: journey.start_at, lapses: lapses.map((lapse) => lapse.at) };
 }
 
-export async function writeJourney(tx: Executor, journey: Journey): Promise<void> {
+async function writeJourney(tx: Executor, journey: Journey): Promise<void> {
   await tx.run(
     'INSERT INTO journey (id, start_at) VALUES (1, ?) ON CONFLICT (id) DO UPDATE SET start_at = excluded.start_at',
     [journey.start],
   );
   await tx.run('DELETE FROM lapse');
+  await writeLapses(tx, journey);
+}
+
+// Fails if a journey already exists, so that starting one never replaces the user's history.
+export async function insertJourney(tx: Executor, journey: Journey): Promise<void> {
+  await tx.run('INSERT INTO journey (id, start_at) VALUES (1, ?)', [journey.start]);
+  await writeLapses(tx, journey);
+}
+
+async function writeLapses(tx: Executor, journey: Journey): Promise<void> {
   for (const lapse of journey.lapses) {
     await tx.run('INSERT INTO lapse (at) VALUES (?)', [lapse]);
   }

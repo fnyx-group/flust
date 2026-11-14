@@ -5,6 +5,7 @@ import { storageService } from '@/data/native';
 import type { Storage } from '@/data/open-storage';
 import { ResetScreen } from '@/features/storage/reset-screen';
 import { RetryScreen } from '@/features/storage/retry-screen';
+import { closeThenShow } from '@/features/storage/close-then-show';
 import { StorageContext, StorageFailureContext } from '@/features/storage/storage-context';
 import { failureScreen, type StorageFailure } from '@/features/storage/storage-failure';
 
@@ -43,9 +44,8 @@ export function StorageGate({ children }: { children: ReactNode }) {
     setAttempt((count) => count + 1);
   }
 
-  async function fail(storage: Storage, failure: StorageFailure) {
-    await storage.close().catch(() => undefined);
-    setState({ status: 'failed', failure });
+  function fail(storage: Storage, failure: StorageFailure) {
+    void closeThenShow(storage, failure, (shown) => setState({ status: 'failed', failure: shown }));
   }
 
   async function reset() {
@@ -60,7 +60,7 @@ export function StorageGate({ children }: { children: ReactNode }) {
     const { storage } = state;
     return (
       <StorageContext value={storage}>
-        <StorageFailureContext value={(failure) => void fail(storage, failure)}>
+        <StorageFailureContext value={(failure) => fail(storage, failure)}>
           {children}
         </StorageFailureContext>
       </StorageContext>
