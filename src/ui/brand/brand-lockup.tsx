@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { FlustSymbol } from '@/ui/brand/flust-symbol';
-import { colors, typography } from '@/ui/theme';
+import { colors, spacing, typography } from '@/ui/theme';
 
 // The large symbol and name of the welcome screen; BrandHeader is the small one of the home.
 export function BrandLockup() {
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: spacing.l,
   },
   name: {
     ...typography.brandLockup,

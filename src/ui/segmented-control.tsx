@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { RadioOption } from '@/ui/radio-group';
-import { colors, fonts, radii, sizes, typography } from '@/ui/theme';
+import { colors, fonts, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type SegmentedControlProps<K extends string> = {
   accessibilityLabel: string;
@@ -44,8 +44,8 @@ export function SegmentedControl<K extends string>({
 const styles = StyleSheet.create({
   control: {
     flexDirection: 'row',
-    padding: 4,
-    gap: 4,
+    padding: spacing.xs,
+    gap: spacing.xs,
     borderRadius: radii.segmentedControl,
     backgroundColor: colors.surface,
   },
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     minHeight: sizes.touchTarget + 4,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing.s,
     borderRadius: radii.segment,
   },
   checked: {

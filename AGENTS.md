@@ -14,7 +14,7 @@ All user data stays on the device, encrypted. No accounts, no ads, no analytics,
 ## Layout
 
     src/app/        routes only: every file is a screen, `_layout.tsx` defines navigators
-    src/features/   screens and hooks: journal, streak, emergency, blocking
+    src/features/   screens and hooks: clock, home, onboarding, ranks, session, shared, storage
     src/domain/     pure logic: streaks, ranks, dates
     src/data/       storage and crypto
     src/ui/         shared components and theme
@@ -27,13 +27,15 @@ All user data stays on the device, encrypted. No accounts, no ads, no analytics,
 
 ## Commands
 
-    pnpm expo start                   # dev server
+    pnpm dev                          # dev server for the development build
     pnpm expo install <pkg>           # add a dependency with the SDK-compatible version
     pnpm expo install --fix           # fix incompatible versions
     pnpm expo install <pkg> -- -D     # add a dev dependency
     pnpm lint                         # lint
     pnpm typecheck                    # typecheck
     pnpm test                         # unit tests
+    pnpm test:coverage                # unit tests with coverage
+    pnpm knip                         # unused files, exports and dependencies
     pnpm format                       # format with Prettier
     pnpm format:check                 # check formatting
     pnpm dlx expo-doctor              # diagnose dependencies and config
@@ -46,7 +48,7 @@ Lint, typecheck, tests and format check must pass before any change is considere
   https://docs.expo.dev/versions/v58.0.0/ and the index at https://docs.expo.dev/llms.txt
 - Always add dependencies with `pnpm expo install`, never plain `pnpm add`.
 - `ios/` and `android/` are generated. Never edit them by hand: configure native behavior in `app.json` and config plugins.
-- Libraries with native code need a development build, not Expo Go.
+- Run the app in a development build (`pnpm dev`), not Expo Go: native code and libraries with native modules need it.
 - Prefer official Expo modules over third-party libraries.
 
 ## Code style

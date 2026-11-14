@@ -6,6 +6,7 @@ import { stepHour, stepMinute, type StartBounds } from '@/domain/start-point';
 import type { Timestamp } from '@/domain/time';
 import { formatHour, formatMinute } from '@/features/onboarding/start-picker/format';
 import { Stepper } from '@/ui/stepper';
+import { spacing } from '@/ui/theme';
 
 type TimeSteppersProps = {
   selected: Timestamp;
@@ -54,6 +55,6 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: spacing.m,
   },
 });

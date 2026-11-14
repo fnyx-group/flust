@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts, radii, sizes, typography } from '@/ui/theme';
+import { colors, fonts, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type ChipItem<K extends string> = { key: K; label: string; selected: boolean };
 
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   list: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: spacing.m,
   },
   chip: {
     minHeight: sizes.touchTarget,
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     borderColor: colors.accent,
   },
   pressed: {
-    opacity: 0.8,
+    opacity: pressedOpacity,
   },
   label: {
     ...typography.bodyLarge,

@@ -18,7 +18,7 @@ import { OptionSheet } from '@/ui/option-sheet';
 import { RadioGroup } from '@/ui/radio-group';
 import { SelectRow } from '@/ui/select-row';
 import { TextEntryRow } from '@/ui/text-entry-row';
-import { typography } from '@/ui/theme';
+import { spacing, typography } from '@/ui/theme';
 
 export function PlanStep({
   answers,
@@ -107,10 +107,10 @@ export function PlanStep({
 
 const styles = StyleSheet.create({
   then: {
-    gap: 12,
+    gap: spacing.m,
   },
   label: {
     ...typography.label,
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing.xs,
   },
 });

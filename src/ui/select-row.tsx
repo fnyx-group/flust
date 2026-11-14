@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { ChevronDownIcon } from '@/ui/icons/chevron-down-icon';
-import { colors, radii, sizes, typography } from '@/ui/theme';
+import { colors, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type SelectRowProps = {
   prefix: string;
@@ -32,14 +32,14 @@ const styles = StyleSheet.create({
     minHeight: sizes.touchTarget + 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: spacing.l,
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: radii.card,
     backgroundColor: colors.surface,
   },
   pressed: {
-    opacity: 0.8,
+    opacity: pressedOpacity,
   },
   prefix: {
     ...typography.bodyLarge,

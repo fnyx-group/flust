@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { MinusIcon } from '@/ui/icons/minus-icon';
 import { PlusIcon } from '@/ui/icons/plus-icon';
-import { colors, radii, sizes, typography } from '@/ui/theme';
+import { colors, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type StepperProps = {
   label: string;
@@ -92,8 +92,8 @@ const styles = StyleSheet.create({
   stepper: {
     flexGrow: 1,
     flexBasis: 140,
-    gap: 8,
-    padding: 12,
+    gap: spacing.s,
+    padding: spacing.m,
     borderRadius: radii.card,
     backgroundColor: colors.surface,
   },
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: spacing.s,
   },
   button: {
     minWidth: sizes.touchTarget,
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.separator,
   },
   pressed: {
-    opacity: 0.8,
+    opacity: pressedOpacity,
   },
   value: {
     ...typography.stepperValue,

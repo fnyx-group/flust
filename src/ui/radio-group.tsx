@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts, radii, sizes, typography } from '@/ui/theme';
+import { colors, fonts, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/theme';
 
 export type RadioOption<K extends string> = { key: K; label: string };
 
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     minHeight: sizes.touchTarget + 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: spacing.l,
     paddingHorizontal: 20,
     paddingVertical: 14,
   },
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.separator,
   },
   pressed: {
-    opacity: 0.8,
+    opacity: pressedOpacity,
   },
   label: {
     ...typography.bodyLarge,

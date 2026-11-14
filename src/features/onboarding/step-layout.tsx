@@ -12,7 +12,7 @@ import { ProgressBar } from '@/ui/progress-bar';
 import { Screen } from '@/ui/screen';
 import { ScreenTitle } from '@/ui/screen-title';
 import { ScrollView } from '@/ui/scroll-view';
-import { colors, typography } from '@/ui/theme';
+import { colors, spacing, typography } from '@/ui/theme';
 
 type StepLayoutProps = {
   progress: StepProgress;
@@ -92,22 +92,22 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    marginBottom: 32,
+    gap: spacing.l,
+    marginBottom: spacing.xxl,
   },
   content: {
     gap: 28,
-    paddingBottom: 24,
+    paddingBottom: spacing.xl,
   },
   intro: {
-    gap: 12,
+    gap: spacing.m,
   },
   subtitle: {
     ...typography.bodyLarge,
     color: colors.textSecondary,
   },
   footer: {
-    gap: 16,
-    paddingTop: 12,
+    gap: spacing.l,
+    paddingTop: spacing.m,
   },
 });

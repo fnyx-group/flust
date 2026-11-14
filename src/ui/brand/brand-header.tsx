@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { FlustSymbol } from '@/ui/brand/flust-symbol';
-import { colors, typography } from '@/ui/theme';
+import { colors, spacing, typography } from '@/ui/theme';
 
 export function BrandHeader() {
   const { t } = useTranslation();
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: spacing.m,
   },
   name: {
     ...typography.screenTitle,

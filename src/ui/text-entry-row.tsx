@@ -2,7 +2,7 @@ import { StyleSheet, TextInput, View } from 'react-native';
 
 import { PlusIcon } from '@/ui/icons/plus-icon';
 import { RadioMark } from '@/ui/radio-group';
-import { colors, radii, sizes, typography } from '@/ui/theme';
+import { colors, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type TextEntryRowProps = {
   label: string;
@@ -62,9 +62,9 @@ const styles = StyleSheet.create({
     minHeight: sizes.touchTarget + 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: spacing.l,
     paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingVertical: spacing.s,
   },
   card: {
     borderRadius: radii.card,

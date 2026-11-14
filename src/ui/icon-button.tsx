@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
-import { colors, radii, sizes } from '@/ui/theme';
+import { colors, pressedOpacity, radii, sizes } from '@/ui/theme';
 
 type IconButtonProps = {
   accessibilityLabel: string;
@@ -42,6 +42,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pressed: {
-    opacity: 0.8,
+    opacity: pressedOpacity,
   },
 });
