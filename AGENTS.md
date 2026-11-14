@@ -20,6 +20,8 @@ All user data stays on the device, encrypted. No accounts, no ads, no analytics,
     modules/        native code
     assets/         brand and images
     docs/           architecture, security, decisions, development guides
+    docs/product/   vision, features, ranks, relapse, scenarios
+    docs/design/    design system and screen mockups
 
 ## Commands
 
@@ -64,6 +66,7 @@ Lint, typecheck, tests and format check must pass before any change is considere
 - Documentation is written in English and lives in `docs/`. See `docs/README.md` for the index.
 - Folder and file names in English, kebab-case.
 - Every significant architecture decision gets a new file in `docs/decisions/` (`NNNN-short-title.md`: context, decision, consequences).
+- Product behavior must follow `docs/product/`. Visuals must follow `docs/design/design-system.md`.
 
 ## Commits
 
