@@ -22,21 +22,28 @@ export function Button({ label, onPress, variant = 'primary', disabled = false }
         (pressed || disabled) && styles.pressed,
       ]}
     >
-      <Text style={isPrimary ? styles.primaryLabel : styles.secondaryLabel}>{label}</Text>
+      <Text style={[isPrimary ? styles.primaryLabel : styles.secondaryLabel, styles.label]}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  // A minimum height lets the label grow with large text instead of being clipped.
   primary: {
-    height: sizes.primaryButtonHeight,
+    minHeight: sizes.primaryButtonHeight,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: radii.primaryButton,
     backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
   secondary: {
-    height: sizes.secondaryButtonHeight,
+    minHeight: sizes.secondaryButtonHeight,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: radii.secondaryButton,
     borderWidth: 1,
     borderColor: colors.separator,
@@ -45,6 +52,9 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.8,
+  },
+  label: {
+    textAlign: 'center',
   },
   primaryLabel: {
     ...typography.primaryButton,

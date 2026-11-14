@@ -1,3 +1,7 @@
+import type { Journey } from '@/domain/journey';
+import { currentStreakMs, totalCleanDays } from '@/domain/streak';
+import { MS_PER_DAY, type Timestamp } from '@/domain/time';
+
 type RankDefinition = {
   readonly id: string;
   readonly circle: 1 | 2 | 3 | 4 | 5;
@@ -33,7 +37,25 @@ export type RankProgress = {
   readonly next: { readonly rank: Rank; readonly daysLeft: number } | null;
 };
 
+// Before the first rank, progress is measured in time toward the first clean day. Afterwards it
+// is total clean days over the next threshold, and full once every rank is unlocked.
+export type RankStanding =
+  | {
+      readonly status: 'pending';
+      readonly first: Rank;
+      readonly fraction: number;
+      readonly msLeft: number;
+    }
+  | {
+      readonly status: 'ranked';
+      readonly current: Rank;
+      readonly next: Rank | null;
+      readonly totalCleanDays: number;
+      readonly fraction: number;
+    };
+
 const ALL_RANKS: readonly Rank[] = RANKS;
+const FIRST_RANK: Rank = RANKS[0];
 
 export function isRankId(value: unknown): value is RankId {
   return ALL_RANKS.some((rank) => rank.id === value);
@@ -67,4 +89,34 @@ function highestIndex(ids: readonly RankId[]): number {
 function toUnlock(newlyUnlocked: readonly Rank[]): RankUnlock | null {
   const highest = newlyUnlocked.at(-1);
   return highest ? { highest, others: newlyUnlocked.slice(0, -1) } : null;
+}
+
+// Without a rank, total clean days are 0, so every segment is shorter than a day and the first
+// day completes when the current streak reaches 24 hours. The streak is clamped to that day, so a
+// clock set before the streak start never shows more than 24 hours left.
+export function rankStanding(
+  journey: Journey,
+  unlockedRanks: readonly RankId[],
+  now: Timestamp,
+): RankStanding {
+  const total = totalCleanDays(journey, now);
+  const progress = rankProgress(unlockedRanks, total);
+  if (progress.current === null) {
+    const elapsed = Math.min(MS_PER_DAY, Math.max(0, currentStreakMs(journey, now)));
+    return {
+      status: 'pending',
+      first: FIRST_RANK,
+      fraction: elapsed / MS_PER_DAY,
+      msLeft: MS_PER_DAY - elapsed,
+    };
+  }
+  // The next rank is above every unlocked one, so its threshold is above the total.
+  const next = progress.next?.rank ?? null;
+  return {
+    status: 'ranked',
+    current: progress.current,
+    next,
+    totalCleanDays: total,
+    fraction: next ? total / next.threshold : 1,
+  };
 }

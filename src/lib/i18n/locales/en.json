@@ -9,7 +9,35 @@
     "settings": "Settings"
   },
   "home": {
-    "urgeButton": "I have an urge"
+    "urgeButton": "I have an urge",
+    "streak": {
+      "label": "Current streak",
+      "dayUnit_one": "day",
+      "dayUnit_other": "days",
+      "hourUnit": "h",
+      "minuteUnit": "min",
+      "spokenHoursMinutes": "{{hours}} {{minutes}}",
+      "spoken": "Current streak: {{value}}"
+    },
+    "rank": {
+      "first": "First rank",
+      "firstIn": "{{name}} in {{time}}",
+      "shortTime": "{{hours}} h {{minutes}} min",
+      "nextIn_one": "{{name}} in {{count}} day",
+      "nextIn_other": "{{name}} in {{count}} days",
+      "allUnlocked": "All ranks unlocked",
+      "spoken": "{{name}}, {{detail}}",
+      "hint": "Opens the ranks"
+    },
+    "quote": {
+      "text": "“{{text}}”",
+      "spoken": "Quote of the day: {{text}}",
+      "spokenWithAuthor": "Quote of the day: {{text}}, {{author}}"
+    },
+    "week": {
+      "summary_one": "{{count}} clean day in the last 7",
+      "summary_other": "{{count}} clean days in the last 7"
+    }
   },
   "emergency": {
     "title": "Emergency",
@@ -17,7 +45,11 @@
   },
   "units": {
     "day_one": "{{count}} day",
-    "day_other": "{{count}} days"
+    "day_other": "{{count}} days",
+    "hour_one": "{{count}} hour",
+    "hour_other": "{{count}} hours",
+    "minute_one": "{{count}} minute",
+    "minute_other": "{{count}} minutes"
   },
   "storage": {
     "retry": {
@@ -144,5 +176,65 @@
       "journal-three-lines": "I write three lines in the journal",
       "walk-ten-minutes": "I go out for a ten-minute walk"
     }
+  },
+  "ranks": {
+    "names": {
+      "novice": "Novice",
+      "apprentice": "Apprentice",
+      "initiate": "Initiate",
+      "watcher": "Watcher",
+      "black-mage": "Black mage",
+      "sorcerer": "Sorcerer",
+      "white-mage": "White mage",
+      "silver-mage": "Silver mage",
+      "archmage": "Archmage",
+      "sovereign": "Sovereign",
+      "scarlet-mage": "Scarlet mage",
+      "free-soul": "Free soul"
+    },
+    "circles": {
+      "1": "Awakening",
+      "2": "Shadow",
+      "3": "Light",
+      "4": "Crown",
+      "5": "Absolute"
+    }
+  },
+  "quotes": {
+    "nothing-great": "Nothing great comes into being all at once.",
+    "urge-wave": "An urge is a wave. It rises, peaks and passes.",
+    "claim-yourself": "Claim yourself back.",
+    "lapse-moment": "A lapse is a moment, not a verdict.",
+    "headland": "Be like the headland the waves keep breaking on: it stands firm, and around it the churning water grows calm.",
+    "instead": "What you do instead matters more than what you resist.",
+    "wait-impression": "Wait for me a little, impression. Let me see what you are and what you are about.",
+    "next-hour": "You don't have to settle everything today. Only the next hour.",
+    "imagination": "More things frighten us than crush us, and we suffer more often in imagination than in reality.",
+    "notice-urge": "Notice the urge. Name it. Let it go by.",
+    "whole-life": "Do not let the thought of your whole life unsettle you.",
+    "clean-day": "Every clean day is yours to keep.",
+    "best-of-yourself": "How long will you wait before you demand the best of yourself?",
+    "rest-not-escape": "Tiredness, stress and boredom ask for rest, not for an escape.",
+    "favorable-wind": "No wind is favorable to someone who does not know which port they are making for.",
+    "freedom-quietly": "Freedom is built quietly, one choice after another.",
+    "color-of-thoughts": "Your mind takes on the color of the images you often dwell on, for the soul is dyed by its thoughts.",
+    "attention": "Your attention is precious. Give it to what you love.",
+    "habit": "If you want something to become a habit, do it. If you want to stop, don't do it, and get used to doing something else instead.",
+    "progress": "Progress is not a straight line, and it still counts.",
+    "change-mind": "It is your mind you must change, not your sky.",
+    "ten-minutes": "Ten minutes of breathing can change the whole evening.",
+    "dig-within": "Dig within. Within is the spring of good, and it can always well up if you keep digging.",
+    "why-started": "Remember why you started.",
+    "judgments": "It is not things that disturb us, but our judgments about them.",
+    "putting-off": "While we put things off, life runs past.",
+    "be-one": "Stop arguing about what a good person should be. Be one.",
+    "up-to-us": "Some things are up to us, and some are not.",
+    "reason": "If you want to bring everything under your rule, put yourself under the rule of reason.",
+    "retreat": "Nowhere can you withdraw to a place more peaceful or more free of trouble than your own soul."
+  },
+  "quoteAuthors": {
+    "epictetus": "Epictetus",
+    "seneca": "Seneca",
+    "marcus-aurelius": "Marcus Aurelius"
   }
 }

@@ -7,6 +7,7 @@
 - [Ranks](product/ranks.md): circles, ranks, emblems and unlock rules.
 - [Relapse](product/relapse.md): how the app responds to a lapse.
 - [Scenarios](product/scenarios.md): edge cases and expected behavior.
+- [Quotes](product/quotes.md): the daily quotes, their order and their sources.
 
 ## Design
 
@@ -35,6 +36,7 @@
 - [0011 Encrypted SQLite storage](decisions/0011-encrypted-sqlite-storage.md): SQLCipher, a device-only key, startup outcomes and migration backups.
 - [0012 Onboarding flow](decisions/0012-onboarding-flow.md): a journey decides the first screen, a resumable draft, answers saved in one transaction.
 - [0013 Local time to UTC](decisions/0013-local-time-to-utc.md): one tested conversion, with a fixed rule for daylight saving changes.
+- [0014 Minute clock](decisions/0014-minute-clock.md): time-driven screens recompute from timestamps on a shared tick aligned to the streak.
 
 ## Development
 

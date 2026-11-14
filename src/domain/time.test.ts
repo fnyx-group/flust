@@ -1,6 +1,13 @@
 import * as fc from 'fast-check';
 
-import { elapsedMs, isValidTimestamp, MS_PER_DAY, wholeDays } from '@/domain/time';
+import {
+  elapsedMs,
+  isValidTimestamp,
+  MS_PER_DAY,
+  MS_PER_MINUTE,
+  msUntilNextMinute,
+  wholeDays,
+} from '@/domain/time';
 import { duration, timestamp } from '@test/arbitraries';
 
 describe('isValidTimestamp', () => {
@@ -43,6 +50,33 @@ describe('wholeDays', () => {
       fc.property(duration, (ms) => {
         const days = wholeDays(ms);
         return days * MS_PER_DAY <= ms && ms < (days + 1) * MS_PER_DAY;
+      }),
+    );
+  });
+});
+
+describe('msUntilNextMinute', () => {
+  const anchor = Date.UTC(2026, 0, 1, 8, 0, 12, 345);
+
+  it('waits a full minute when the elapsed time is a whole number of minutes', () => {
+    expect(msUntilNextMinute(anchor, anchor)).toBe(MS_PER_MINUTE);
+    expect(msUntilNextMinute(anchor + 3 * MS_PER_MINUTE, anchor)).toBe(MS_PER_MINUTE);
+  });
+
+  it('follows the minutes of the anchor, not those of the wall clock', () => {
+    expect(msUntilNextMinute(anchor + 40_000, anchor)).toBe(20_000);
+    expect(msUntilNextMinute(Date.UTC(2026, 0, 1, 9), anchor)).toBe(12_345);
+  });
+
+  it('still lands on a minute of the anchor when the clock is behind it', () => {
+    expect(msUntilNextMinute(anchor - 10_000, anchor)).toBe(10_000);
+  });
+
+  it('always schedules a tick within the next minute, on a minute of the anchor', () => {
+    fc.assert(
+      fc.property(timestamp, timestamp, (now, start) => {
+        const delay = msUntilNextMinute(now, start);
+        return delay > 0 && delay <= MS_PER_MINUTE && (now + delay - start) % MS_PER_MINUTE === 0;
       }),
     );
   });

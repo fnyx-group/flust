@@ -3,6 +3,7 @@ import * as fc from 'fast-check';
 import {
   addMonths,
   daysInMonth,
+  localDayNumber,
   localToUtc,
   monthGrid,
   utcToLocal,
@@ -249,5 +250,36 @@ describe('addMonths', () => {
     expect(addMonths({ year: 2026, month: 12 }, 1)).toEqual({ year: 2027, month: 1 });
     expect(addMonths({ year: 2026, month: 1 }, -1)).toEqual({ year: 2025, month: 12 });
     expect(addMonths({ year: 2026, month: 5 }, -17)).toEqual({ year: 2024, month: 12 });
+  });
+});
+
+describe('localDayNumber', () => {
+  it('changes at local midnight, not at UTC midnight', () => {
+    const parisMidnight = Date.UTC(2026, 5, 14, 22);
+    expect(localDayNumber(parisMidnight, paris) - localDayNumber(parisMidnight - 1, paris)).toBe(1);
+    expect(localDayNumber(Date.UTC(2026, 5, 15), paris)).toBe(localDayNumber(parisMidnight, paris));
+  });
+
+  it('counts each day of a daylight saving change once', () => {
+    const before = localDayNumber(Date.UTC(2026, 2, 28, 12), paris);
+    expect(localDayNumber(Date.UTC(2026, 2, 29, 12), paris)).toBe(before + 1);
+    expect(localDayNumber(Date.UTC(2026, 9, 25, 12), paris)).toBe(
+      localDayNumber(Date.UTC(2026, 9, 24, 12), paris) + 1,
+    );
+  });
+
+  it('follows offsets far from UTC and offsets with half hours', () => {
+    const instant = Date.UTC(2026, 0, 1, 11, 30);
+    expect(localDayNumber(instant, fixedOffset(13 * 60))).toBe(
+      localDayNumber(instant, fixedOffset(0)) + 1,
+    );
+    expect(localDayNumber(instant, fixedOffset(-12 * 60))).toBe(
+      localDayNumber(instant, fixedOffset(0)) - 1,
+    );
+    const stJohns = zoneOffsetAt('America/St_Johns');
+    const stJohnsMidnight = Date.UTC(2026, 0, 2, 3, 30);
+    expect(
+      localDayNumber(stJohnsMidnight, stJohns) - localDayNumber(stJohnsMidnight - 1, stJohns),
+    ).toBe(1);
   });
 });

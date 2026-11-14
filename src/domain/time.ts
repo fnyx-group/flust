@@ -20,3 +20,10 @@ export function elapsedMs(from: Timestamp, to: Timestamp): number {
 export function wholeDays(ms: number): number {
   return Math.floor(Math.max(0, ms) / MS_PER_DAY);
 }
+
+// The delay until the time elapsed since `anchor` next reaches a whole minute, so that a counter
+// started at the anchor changes on its own minutes rather than on the wall clock's.
+export function msUntilNextMinute(now: Timestamp, anchor: Timestamp): number {
+  const intoMinute = (((now - anchor) % MS_PER_MINUTE) + MS_PER_MINUTE) % MS_PER_MINUTE;
+  return MS_PER_MINUTE - intoMinute;
+}

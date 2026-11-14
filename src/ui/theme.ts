@@ -1,5 +1,7 @@
 import type { TextStyle } from 'react-native';
 
+import type { CounterSize } from '@/domain/streak';
+
 export const colors = {
   background: '#111116',
   surface: '#1A1A21',
@@ -23,16 +25,11 @@ export const fonts = {
 } as const;
 
 export const typography = {
-  streakDays: {
-    fontFamily: fonts.numberSemiBold,
-    fontSize: 240,
-    fontVariant: ['tabular-nums'],
-  },
-  streakHours: {
-    fontFamily: fonts.numberSemiBold,
-    fontSize: 176,
-    fontVariant: ['tabular-nums'],
-  },
+  // The size comes from counterFontSizes.
+  streakNumber: { fontFamily: fonts.numberSemiBold, fontVariant: ['tabular-nums'] },
+  streakUnit: { fontFamily: fonts.semiBold, fontSize: 40, color: colors.textSecondary },
+  sectionLabel: { fontFamily: fonts.semiBold, fontSize: 16, color: colors.textSecondary },
+  quote: { fontFamily: fonts.bold, fontSize: 19, lineHeight: 26 },
   welcomeTitle: { fontFamily: fonts.extraBold, fontSize: 40, lineHeight: 46 },
   brandLockup: { fontFamily: fonts.extraBold, fontSize: 36 },
   screenTitle: { fontFamily: fonts.extraBold, fontSize: 28 },
@@ -41,19 +38,44 @@ export const typography = {
   stepperValue: { fontFamily: fonts.numberSemiBold, fontSize: 32, fontVariant: ['tabular-nums'] },
   calendarDay: { fontFamily: fonts.numberMedium, fontSize: 18, fontVariant: ['tabular-nums'] },
   row: { fontFamily: fonts.semiBold, fontSize: 15 },
+  badgeName: { fontFamily: fonts.extraBold, fontSize: 15 },
   body: { fontFamily: fonts.regular, fontSize: 15 },
   bodyLarge: { fontFamily: fonts.regular, fontSize: 16 },
   label: { fontFamily: fonts.semiBold, fontSize: 13, color: colors.textSecondary },
   caption: { fontFamily: fonts.regular, fontSize: 12 },
+  badgeDetail: { fontFamily: fonts.semiBold, fontSize: 12, color: colors.textSecondary },
+  weekdayInitial: { fontFamily: fonts.semiBold, fontSize: 11, color: colors.textSecondary },
   primaryButton: { fontFamily: fonts.extraBold, fontSize: 17 },
   secondaryButton: { fontFamily: fonts.semiBold, fontSize: 15 },
   tabLabel: { fontFamily: fonts.semiBold, fontSize: 11 },
 } as const satisfies Record<string, TextStyle>;
 
+// Days by number of digits: 2 or fewer, 3, then 4 or more. Hours by their own digits: 1, then 2,
+// always followed by two minute digits. Each size is the largest whole size that keeps the widest
+// counter of its group on one line across the screen width minus its padding, at
+// sizes.counterDesignWidth, in both languages (labels.test.ts checks both bounds).
+export const counterFontSizes: Record<CounterSize, number> = {
+  large: 226,
+  medium: 150,
+  small: 113,
+  hoursMedium: 141,
+  hoursSmall: 105,
+};
+
 export const spacing = {
   screen: 20,
   screenTop: 60,
+  xxs: 2,
+  xs: 4,
+  s: 8,
+  m: 12,
+  l: 16,
+  xl: 24,
+  xxl: 32,
+  xxxl: 40,
 } as const;
+
+export const pressedOpacity = 0.8;
 
 export const radii = {
   card: 20,
@@ -63,6 +85,7 @@ export const radii = {
   segmentedControl: 16,
   segment: 12,
   iconButton: 20,
+  tabHighlight: 12,
   pill: 999,
 } as const;
 
@@ -76,4 +99,12 @@ export const sizes = {
   // The minimum touch target on both platforms.
   touchTarget: 44,
   radio: 24,
+  emblem: 48,
+  badgeRing: 56,
+  badgeRingStroke: 3,
+  badgeEmblem: 28,
+  weekBarHeight: 6,
+  quoteBarWidth: 3,
+  // The narrowest screen width the streak counter sizes are chosen for.
+  counterDesignWidth: 360,
 } as const;

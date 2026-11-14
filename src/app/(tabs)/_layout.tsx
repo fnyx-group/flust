@@ -7,6 +7,7 @@ import { JournalIcon } from '@/ui/icons/journal-icon';
 import type { IconProps } from '@/ui/icons/line-icon';
 import { RanksIcon } from '@/ui/icons/ranks-icon';
 import { SettingsIcon } from '@/ui/icons/settings-icon';
+import { TabBarButton } from '@/ui/tab-bar-button';
 import { colors, typography } from '@/ui/theme';
 
 function tabIcon(Icon: ComponentType<IconProps>) {
@@ -24,6 +25,7 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.text,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarLabelStyle: typography.tabLabel,
+        tabBarButton: TabBarButton,
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopWidth: 1,

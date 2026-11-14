@@ -14,6 +14,12 @@ import {
 export type StreakDisplay =
   { unit: 'hours'; hours: number; minutes: number } | { unit: 'days'; days: number };
 
+// The streak counter shrinks with its number of digits so that it stays on one line.
+// Hours have their own sizes, as their " h " and " min" units take more room than " days".
+export type CounterSize = 'large' | 'medium' | 'small' | 'hoursMedium' | 'hoursSmall';
+
+export type HoursAndMinutes = { hours: number; minutes: number };
+
 export function streakStart(journey: Journey): Timestamp {
   return journey.lapses.at(-1) ?? journey.start;
 }
@@ -39,6 +45,22 @@ export function streakDisplay(streakMs: number): StreakDisplay {
     hours: Math.floor(ms / MS_PER_HOUR),
     minutes: Math.floor((ms % MS_PER_HOUR) / MS_PER_MINUTE),
   };
+}
+
+// Minutes always show two digits, so only the hours change the width: 7 h 05 is as wide as 7 h 40.
+export function counterSize(display: StreakDisplay): CounterSize {
+  if (display.unit === 'hours') return display.hours < 10 ? 'hoursMedium' : 'hoursSmall';
+  const digits = String(display.days).length;
+  if (digits <= 2) return 'large';
+  if (digits === 3) return 'medium';
+  return 'small';
+}
+
+// Rounded up to the minute, unlike the elapsed time, so that elapsed and remaining always add up:
+// 7 h 40 elapsed shows 16 h 20 left even 30 seconds into that minute.
+export function remainingParts(ms: number): HoursAndMinutes {
+  const minutes = Math.ceil(Math.max(0, ms) / MS_PER_MINUTE);
+  return { hours: Math.floor(minutes / 60), minutes: minutes % 60 };
 }
 
 // Points are capped at now so that lapses logged while the clock was ahead add no time.
