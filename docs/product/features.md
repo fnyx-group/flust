@@ -20,10 +20,13 @@ The onboarding runs once, on first launch. Its steps are:
 
 The home screen shows:
 
+- a rank badge with the current rank and progress toward the next one, which opens the ranks,
 - the current streak,
-- a rank card with the current rank and progress toward the next one,
+- a week strip of the last 7 days, showing clean days,
 - a daily quote,
 - an emergency button that opens the emergency screen.
+
+The daily check-in will add a single line under the quote.
 
 During the first 24 hours of a streak, the counter shows hours and minutes. After that, it shows days.
 

@@ -21,21 +21,22 @@
     },
     "rank": {
       "first": "First rank",
-      "circle": "Circle {{numeral}} · {{name}}",
-      "unlocksIn": "Unlocks in {{time}}",
+      "firstIn": "{{name}} in {{time}}",
       "shortTime": "{{hours}} h {{minutes}} min",
-      "cleanDays_one": "{{count}} clean day",
-      "cleanDays_other": "{{count}} clean days",
-      "nextAt": "{{name}} at {{count}}",
-      "nextAtSpoken_one": "{{name}} at {{count}} clean day",
-      "nextAtSpoken_other": "{{name}} at {{count}} clean days",
+      "nextIn_one": "{{name}} in {{count}} day",
+      "nextIn_other": "{{name}} in {{count}} days",
       "allUnlocked": "All ranks unlocked",
-      "spoken": "{{name}}, {{eyebrow}}, {{progress}}, {{target}}",
+      "spoken": "{{name}}, {{detail}}",
       "hint": "Opens the ranks"
     },
     "quote": {
-      "title": "Quote of the day",
-      "text": "“{{text}}”"
+      "text": "“{{text}}”",
+      "spoken": "Quote of the day: {{text}}",
+      "spokenWithAuthor": "Quote of the day: {{text}}, {{author}}"
+    },
+    "week": {
+      "summary_one": "{{count}} clean day in the last 7",
+      "summary_other": "{{count}} clean days in the last 7"
     }
   },
   "emergency": {

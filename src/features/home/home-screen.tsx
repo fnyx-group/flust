@@ -10,8 +10,9 @@ import { ClockContext } from '@/features/home/clock-context';
 import { DailyQuote } from '@/features/home/daily-quote';
 import { createMinuteClock } from '@/features/home/minute-clock';
 import { nativeClockDeps } from '@/features/home/native-clock';
-import { RankCard } from '@/features/home/rank-card';
+import { RankBadge } from '@/features/home/rank-badge';
 import { StreakCounter } from '@/features/home/streak-counter';
+import { WeekStrip } from '@/features/home/week-strip';
 import { useSession } from '@/features/session/session-context';
 import { BrandHeader } from '@/ui/brand/brand-header';
 import { Button } from '@/ui/button';
@@ -30,9 +31,9 @@ type HomeProps = {
   unlockedRanks: readonly RankId[];
 };
 
-// This component never reads the clock: only the counter, the rank card and the quote subscribe
-// to it, so a tick re-renders them and nothing else. A lapse moves the streak start, which the
-// clock's ticks are aligned to, so it gets a new clock.
+// This component never reads the clock: only the badge, the counter, the week strip and the quote
+// subscribe to it, so a tick re-renders them and nothing else. A lapse moves the streak start,
+// which the clock's ticks are aligned to, so it gets a new clock.
 function Home({ journey, unlockedRanks }: HomeProps) {
   const { t } = useTranslation();
   const anchor = streakStart(journey);
@@ -45,17 +46,20 @@ function Home({ journey, unlockedRanks }: HomeProps) {
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
         >
-          <BrandHeader />
-          <View style={styles.counter}>
-            <StreakCounter journey={journey} />
+          <View style={styles.header}>
+            <BrandHeader />
+            <RankBadge journey={journey} unlockedRanks={unlockedRanks} />
           </View>
-          <RankCard journey={journey} unlockedRanks={unlockedRanks} />
-          <View style={styles.quote}>
-            <DailyQuote start={journey.start} />
+          <View style={styles.middle}>
+            <View style={styles.hero}>
+              <StreakCounter journey={journey} />
+              <WeekStrip journey={journey} />
+            </View>
+            <View style={styles.quote}>
+              <DailyQuote start={journey.start} />
+            </View>
           </View>
-          <View style={styles.action}>
-            <Button label={t('home.urgeButton')} onPress={() => router.push('/emergency')} />
-          </View>
+          <Button label={t('home.urgeButton')} onPress={() => router.push('/emergency')} />
         </ScrollView>
       </ClockContext>
     </Screen>
@@ -66,21 +70,28 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
-  // flexGrow keeps the button at the bottom when everything fits, and lets the screen scroll when
+  // flexGrow lets the middle take the free height when everything fits, and the screen scroll when
   // large text makes it taller.
   content: {
     flexGrow: 1,
   },
-  counter: {
-    marginTop: spacing.xxxl,
-    marginBottom: spacing.xl,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.m,
+  },
+  // The counter, the week strip and the quote are one block: the free space goes above and below
+  // it, never between its parts. The padding is the least space left around it.
+  middle: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingVertical: spacing.xl,
+  },
+  hero: {
+    gap: spacing.xl,
   },
   quote: {
-    marginTop: spacing.xxl,
-  },
-  action: {
-    flexGrow: 1,
-    justifyContent: 'flex-end',
-    paddingTop: spacing.xxl,
+    marginTop: spacing.xxxl,
   },
 });

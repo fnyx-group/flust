@@ -2,14 +2,8 @@ import type { TFunction } from 'i18next';
 
 import type { Rank, RankStanding } from '@/domain/ranks';
 import { remainingParts, type HoursAndMinutes, type StreakDisplay } from '@/domain/streak';
-
-const CIRCLE_NUMERALS: Record<Rank['circle'], string> = {
-  1: 'I',
-  2: 'II',
-  3: 'III',
-  4: 'IV',
-  5: 'V',
-};
+import { MS_PER_DAY } from '@/domain/time';
+import { cleanDayCount, type WeekDay } from '@/domain/week';
 
 function twoDigits(value: number): string {
   return String(value).padStart(2, '0');
@@ -54,65 +48,71 @@ function spokenHoursMinutes(t: TFunction, { hours, minutes }: HoursAndMinutes): 
   return t('home.streak.spokenHoursMinutes', { hours: spokenHours, minutes: spokenMinutes });
 }
 
-export type RankCardText = {
+export type RankBadgeText = {
   readonly rank: Rank;
   readonly unlocked: boolean;
-  readonly eyebrow: string;
   readonly name: string;
-  readonly progress: string;
-  readonly target: string;
-  // The card is a single button, so its one label says everything on it, in full words.
+  readonly detail: string;
+  // The badge is a single button, so its one label says everything on it, in full words.
   readonly spokenLabel: string;
 };
 
-export function rankCardText(t: TFunction, standing: RankStanding): RankCardText {
+// Before day one the badge shows the first rank, locked, and the time left to it.
+export function rankBadgeText(t: TFunction, standing: RankStanding): RankBadgeText {
   if (standing.status === 'pending') {
     const left = remainingParts(standing.msLeft);
-    const eyebrow = t('home.rank.first');
-    const name = rankName(t, standing.first);
-    const target = t('units.day', { count: standing.first.threshold });
+    const firstName = rankName(t, standing.first);
+    const name = t('home.rank.first');
+    const detail = t('home.rank.firstIn', {
+      name: firstName,
+      time: t('home.rank.shortTime', { hours: left.hours, minutes: twoDigits(left.minutes) }),
+    });
+    const spokenDetail = t('home.rank.firstIn', {
+      name: firstName,
+      time: spokenHoursMinutes(t, left),
+    });
     return {
       rank: standing.first,
       unlocked: false,
-      eyebrow,
       name,
-      progress: t('home.rank.unlocksIn', {
-        time: t('home.rank.shortTime', { hours: left.hours, minutes: twoDigits(left.minutes) }),
-      }),
-      target,
-      spokenLabel: t('home.rank.spoken', {
-        name,
-        eyebrow,
-        progress: t('home.rank.unlocksIn', { time: spokenHoursMinutes(t, left) }),
-        target,
-      }),
+      detail,
+      spokenLabel: t('home.rank.spoken', { name, detail: spokenDetail }),
     };
   }
   const { current, next, totalCleanDays } = standing;
-  const eyebrow = t('home.rank.circle', {
-    numeral: CIRCLE_NUMERALS[current.circle],
-    name: t(`ranks.circles.${current.circle}`),
-  });
   const name = rankName(t, current);
-  const progress = t('home.rank.cleanDays', { count: totalCleanDays });
-  const allUnlocked = t('home.rank.allUnlocked');
-  const target = next
-    ? t('home.rank.nextAt', { name: rankName(t, next), count: next.threshold })
-    : allUnlocked;
-  const spokenTarget = next
-    ? t('home.rank.nextAtSpoken', { name: rankName(t, next), count: next.threshold })
-    : allUnlocked;
+  const detail = next
+    ? t('home.rank.nextIn', { name: rankName(t, next), count: next.threshold - totalCleanDays })
+    : t('home.rank.allUnlocked');
   return {
     rank: current,
     unlocked: true,
-    eyebrow,
     name,
-    progress,
-    target,
-    spokenLabel: t('home.rank.spoken', { name, eyebrow, progress, target: spokenTarget }),
+    detail,
+    spokenLabel: t('home.rank.spoken', { name, detail }),
   };
 }
 
 function rankName(t: TFunction, rank: Rank): string {
   return t(`ranks.names.${rank.id}`);
+}
+
+// "6 clean days in the last 7".
+export function spokenWeek(t: TFunction, week: readonly WeekDay[]): string {
+  return t('home.week.summary', { count: cleanDayCount(week) });
+}
+
+// Local day numbers count days from 1970-01-01, so formatting the day's start in UTC gives its
+// weekday without the device time zone shifting it a second time.
+export function weekdayInitial(language: string, day: number): string {
+  return new Intl.DateTimeFormat(language, { weekday: 'narrow', timeZone: 'UTC' }).format(
+    day * MS_PER_DAY,
+  );
+}
+
+// "Quote of the day: “text”, Seneca".
+export function spokenQuote(t: TFunction, text: string, author: string | null): string {
+  return author === null
+    ? t('home.quote.spoken', { text })
+    : t('home.quote.spokenWithAuthor', { text, author });
 }

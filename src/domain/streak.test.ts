@@ -311,10 +311,10 @@ describe('counterSize', () => {
     [{ unit: 'days', days: 999 }, 'medium'],
     [{ unit: 'days', days: 1000 }, 'small'],
     [{ unit: 'days', days: 12_000 }, 'small'],
-    [{ unit: 'hours', hours: 0, minutes: 0 }, 'medium'],
-    [{ unit: 'hours', hours: 9, minutes: 59 }, 'medium'],
-    [{ unit: 'hours', hours: 10, minutes: 0 }, 'small'],
-    [{ unit: 'hours', hours: 23, minutes: 59 }, 'small'],
+    [{ unit: 'hours', hours: 0, minutes: 0 }, 'hoursMedium'],
+    [{ unit: 'hours', hours: 9, minutes: 59 }, 'hoursMedium'],
+    [{ unit: 'hours', hours: 10, minutes: 0 }, 'hoursSmall'],
+    [{ unit: 'hours', hours: 23, minutes: 59 }, 'hoursSmall'],
   ] as const)('sizes %o as %s', (display, size) => {
     expect(counterSize(display)).toBe(size);
   });

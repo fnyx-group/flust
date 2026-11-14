@@ -29,7 +29,7 @@ export const typography = {
   streakNumber: { fontFamily: fonts.numberSemiBold, fontVariant: ['tabular-nums'] },
   streakUnit: { fontFamily: fonts.semiBold, fontSize: 40, color: colors.textSecondary },
   sectionLabel: { fontFamily: fonts.semiBold, fontSize: 16, color: colors.textSecondary },
-  quote: { fontFamily: fonts.bold, fontSize: 22, lineHeight: 30 },
+  quote: { fontFamily: fonts.bold, fontSize: 19, lineHeight: 26 },
   welcomeTitle: { fontFamily: fonts.extraBold, fontSize: 40, lineHeight: 46 },
   brandLockup: { fontFamily: fonts.extraBold, fontSize: 36 },
   screenTitle: { fontFamily: fonts.extraBold, fontSize: 28 },
@@ -38,22 +38,28 @@ export const typography = {
   stepperValue: { fontFamily: fonts.numberSemiBold, fontSize: 32, fontVariant: ['tabular-nums'] },
   calendarDay: { fontFamily: fonts.numberMedium, fontSize: 18, fontVariant: ['tabular-nums'] },
   row: { fontFamily: fonts.semiBold, fontSize: 15 },
+  badgeName: { fontFamily: fonts.extraBold, fontSize: 15 },
   body: { fontFamily: fonts.regular, fontSize: 15 },
   bodyLarge: { fontFamily: fonts.regular, fontSize: 16 },
   label: { fontFamily: fonts.semiBold, fontSize: 13, color: colors.textSecondary },
   caption: { fontFamily: fonts.regular, fontSize: 12 },
+  badgeDetail: { fontFamily: fonts.semiBold, fontSize: 12, color: colors.textSecondary },
+  weekdayInitial: { fontFamily: fonts.semiBold, fontSize: 11, color: colors.textSecondary },
   primaryButton: { fontFamily: fonts.extraBold, fontSize: 17 },
   secondaryButton: { fontFamily: fonts.semiBold, fontSize: 15 },
   tabLabel: { fontFamily: fonts.semiBold, fontSize: 11 },
 } as const satisfies Record<string, TextStyle>;
 
-// By number of digits: 2 or fewer, 3, then 4 or more. Hours count with their two minute digits,
-// so 7 h 40 uses the size of 3-digit days. Each size is the largest that keeps the widest counter
-// of its group on one line at sizes.counterDesignWidth, in both languages.
+// Days by number of digits: 2 or fewer, 3, then 4 or more. Hours by their own digits: 1, then 2,
+// always followed by two minute digits. Each size is the largest whole size that keeps the widest
+// counter of its group on one line across the screen width minus its padding, at
+// sizes.counterDesignWidth, in both languages (labels.test.ts checks both bounds).
 export const counterFontSizes: Record<CounterSize, number> = {
-  large: 224,
-  medium: 140,
-  small: 104,
+  large: 226,
+  medium: 150,
+  small: 113,
+  hoursMedium: 141,
+  hoursSmall: 105,
 };
 
 export const spacing = {
@@ -94,7 +100,11 @@ export const sizes = {
   touchTarget: 44,
   radio: 24,
   emblem: 48,
-  meterHeight: 6,
+  badgeRing: 56,
+  badgeRingStroke: 3,
+  badgeEmblem: 28,
+  weekBarHeight: 6,
+  quoteBarWidth: 3,
   // The narrowest screen width the streak counter sizes are chosen for.
   counterDesignWidth: 360,
 } as const;

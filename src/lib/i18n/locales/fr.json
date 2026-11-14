@@ -21,21 +21,22 @@
     },
     "rank": {
       "first": "Premier rang",
-      "circle": "Cercle {{numeral}} · {{name}}",
-      "unlocksIn": "Débloqué dans {{time}}",
+      "firstIn": "{{name}} dans {{time}}",
       "shortTime": "{{hours}} h {{minutes}}",
-      "cleanDays_one": "{{count}} jour propre",
-      "cleanDays_other": "{{count}} jours propres",
-      "nextAt": "{{name}} à {{count}}",
-      "nextAtSpoken_one": "{{name}} à {{count}} jour propre",
-      "nextAtSpoken_other": "{{name}} à {{count}} jours propres",
+      "nextIn_one": "{{name}} dans {{count}} jour",
+      "nextIn_other": "{{name}} dans {{count}} jours",
       "allUnlocked": "Tous les rangs débloqués",
-      "spoken": "{{name}}, {{eyebrow}}, {{progress}}, {{target}}",
+      "spoken": "{{name}}, {{detail}}",
       "hint": "Ouvre les rangs"
     },
     "quote": {
-      "title": "Le mot du jour",
-      "text": "« {{text}} »"
+      "text": "« {{text}} »",
+      "spoken": "Mot du jour : {{text}}",
+      "spokenWithAuthor": "Mot du jour : {{text}}, {{author}}"
+    },
+    "week": {
+      "summary_one": "{{count}} jour propre sur les 7 derniers",
+      "summary_other": "{{count}} jours propres sur les 7 derniers"
     }
   },
   "emergency": {
