@@ -18,5 +18,35 @@
   "units": {
     "day_one": "{{count}} jour",
     "day_other": "{{count}} jours"
+  },
+  "storage": {
+    "retry": {
+      "title": "Tes données ne peuvent pas être ouvertes pour l'instant",
+      "action": "Réessayer",
+      "reasons": {
+        "key-unavailable": "Le stockage sécurisé de ce téléphone n'est pas encore disponible. Cela peut arriver juste après un redémarrage. Déverrouille ton téléphone, puis réessaie. Tes données n'ont pas été modifiées.",
+        "storage-unavailable": "flust n'a pas pu accéder à son stockage sur ce téléphone. Tes données n'ont pas été modifiées. Réessaie.",
+        "cipher-unavailable": "Cette version de flust ne peut pas chiffrer tes données, elle ne les ouvrira donc pas. Installe la dernière version de flust. Tes données n'ont pas été modifiées.",
+        "schema-too-new": "Tes données ont été enregistrées par une version plus récente de flust. Mets flust à jour pour les ouvrir. Tes données n'ont pas été modifiées.",
+        "migration-failed": "flust n'a pas pu mettre à jour tes données pour cette version. Elles ont été remises exactement comme avant. Réessaie, ou attends la prochaine mise à jour de flust.",
+        "reset-failed": "L'effacement n'a pas abouti. Réessaie."
+      }
+    },
+    "reset": {
+      "title": "Tes données ne peuvent pas être déchiffrées",
+      "reasons": {
+        "key-missing": "flust chiffre tes données avec une clé que seul ce téléphone conserve, dans son stockage sécurisé. Cette clé n'est plus là. Cela arrive quand le téléphone est restauré depuis une sauvegarde ou que les données sont transférées sur un autre téléphone, car la clé n'est jamais copiée.",
+        "database-unreadable": "flust chiffre tes données avec une clé que seul ce téléphone conserve, dans son stockage sécurisé. Les données de ce téléphone ne correspondent pas à cette clé, ou le fichier est endommagé, elles ne peuvent donc pas être déchiffrées."
+      },
+      "noRecovery": "Il n'en existe aucune autre copie. flust n'a ni compte, ni serveur, ni sauvegarde : personne, pas même les personnes qui font flust, ne peut récupérer ces données. Tu peux réessayer, ou les effacer et recommencer.",
+      "startOver": "Effacer et recommencer",
+      "retry": "Réessayer",
+      "confirm": {
+        "title": "Tout effacer ?",
+        "body": "Cela supprime définitivement ton parcours, tes écarts, tes rangs et tous tes réglages de ce téléphone, et flust recommence depuis le début. C'est irréversible.",
+        "erase": "Tout effacer",
+        "cancel": "Annuler"
+      }
+    }
   }
 }
