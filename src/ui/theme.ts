@@ -1,5 +1,7 @@
 import type { TextStyle } from 'react-native';
 
+import type { CounterSize } from '@/domain/streak';
+
 export const colors = {
   background: '#111116',
   surface: '#1A1A21',
@@ -23,16 +25,11 @@ export const fonts = {
 } as const;
 
 export const typography = {
-  streakDays: {
-    fontFamily: fonts.numberSemiBold,
-    fontSize: 240,
-    fontVariant: ['tabular-nums'],
-  },
-  streakHours: {
-    fontFamily: fonts.numberSemiBold,
-    fontSize: 176,
-    fontVariant: ['tabular-nums'],
-  },
+  // The size comes from counterFontSizes.
+  streakNumber: { fontFamily: fonts.numberSemiBold, fontVariant: ['tabular-nums'] },
+  streakUnit: { fontFamily: fonts.semiBold, fontSize: 40, color: colors.textSecondary },
+  sectionLabel: { fontFamily: fonts.semiBold, fontSize: 16, color: colors.textSecondary },
+  quote: { fontFamily: fonts.bold, fontSize: 22, lineHeight: 30 },
   welcomeTitle: { fontFamily: fonts.extraBold, fontSize: 40, lineHeight: 46 },
   brandLockup: { fontFamily: fonts.extraBold, fontSize: 36 },
   screenTitle: { fontFamily: fonts.extraBold, fontSize: 28 },
@@ -50,6 +47,14 @@ export const typography = {
   tabLabel: { fontFamily: fonts.semiBold, fontSize: 11 },
 } as const satisfies Record<string, TextStyle>;
 
+// By number of digits: 2 or fewer, 3, then 4 or more. Hours count with their two minute digits,
+// so 7 h 40 is 176 like 3-digit days.
+export const counterFontSizes: Record<CounterSize, number> = {
+  large: 240,
+  medium: 176,
+  small: 128,
+};
+
 export const spacing = {
   screen: 20,
   screenTop: 60,
@@ -63,6 +68,7 @@ export const radii = {
   segmentedControl: 16,
   segment: 12,
   iconButton: 20,
+  tabHighlight: 12,
   pill: 999,
 } as const;
 
@@ -76,4 +82,6 @@ export const sizes = {
   // The minimum touch target on both platforms.
   touchTarget: 44,
   radio: 24,
+  emblem: 48,
+  meterHeight: 6,
 } as const;

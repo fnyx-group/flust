@@ -9,7 +9,33 @@
     "settings": "Réglages"
   },
   "home": {
-    "urgeButton": "J'ai une envie"
+    "urgeButton": "J'ai une envie",
+    "streak": {
+      "label": "Série en cours",
+      "dayUnit_one": "jour",
+      "dayUnit_other": "jours",
+      "hourUnit": "h",
+      "minuteUnit": "min",
+      "spokenHoursMinutes": "{{hours}} {{minutes}}"
+    },
+    "rank": {
+      "first": "Premier rang",
+      "circle": "Cercle {{numeral}} · {{name}}",
+      "unlocksIn": "Débloqué dans {{time}}",
+      "shortTime": "{{hours}} h {{minutes}}",
+      "cleanDays_one": "{{count}} jour propre",
+      "cleanDays_other": "{{count}} jours propres",
+      "nextAt": "{{name}} à {{count}}",
+      "nextAtSpoken_one": "{{name}} à {{count}} jour propre",
+      "nextAtSpoken_other": "{{name}} à {{count}} jours propres",
+      "allUnlocked": "Tous les rangs débloqués",
+      "summary": "{{progress}}, {{target}}",
+      "hint": "Ouvre les rangs"
+    },
+    "quote": {
+      "title": "Le mot du jour",
+      "text": "« {{text}} »"
+    }
   },
   "emergency": {
     "title": "Urgence",
@@ -17,7 +43,11 @@
   },
   "units": {
     "day_one": "{{count}} jour",
-    "day_other": "{{count}} jours"
+    "day_other": "{{count}} jours",
+    "hour_one": "{{count}} heure",
+    "hour_other": "{{count}} heures",
+    "minute_one": "{{count}} minute",
+    "minute_other": "{{count}} minutes"
   },
   "storage": {
     "retry": {
@@ -144,5 +174,65 @@
       "journal-three-lines": "J'écris trois lignes dans le journal",
       "walk-ten-minutes": "Je sors marcher dix minutes"
     }
+  },
+  "ranks": {
+    "names": {
+      "novice": "Novice",
+      "apprentice": "Apprenti",
+      "initiate": "Initié",
+      "watcher": "Veilleur",
+      "black-mage": "Mage noir",
+      "sorcerer": "Sorcier",
+      "white-mage": "Mage blanc",
+      "silver-mage": "Mage d'argent",
+      "archmage": "Archimage",
+      "sovereign": "Souverain",
+      "scarlet-mage": "Mage écarlate",
+      "free-soul": "Âme libre"
+    },
+    "circles": {
+      "1": "Éveil",
+      "2": "Ombre",
+      "3": "Lumière",
+      "4": "Couronne",
+      "5": "Absolu"
+    }
+  },
+  "quotes": {
+    "nothing-great": "Rien de grand ne naît d'un seul coup.",
+    "urge-wave": "Une envie est une vague. Elle monte, culmine, puis retombe.",
+    "claim-yourself": "Reprends possession de toi-même.",
+    "lapse-moment": "Un écart est un moment, pas un verdict.",
+    "headland": "Sois comme le promontoire où les vagues se brisent sans cesse : il reste debout, et autour de lui l'eau agitée s'apaise.",
+    "instead": "Ce que tu fais à la place compte plus que ce à quoi tu résistes.",
+    "wait-impression": "Attends-moi un peu, impression. Laisse-moi voir ce que tu es et de quoi il s'agit.",
+    "next-hour": "Tu n'as pas à tout régler aujourd'hui. Seulement l'heure qui vient.",
+    "imagination": "Bien des choses nous effraient plus qu'elles ne nous accablent, et nous souffrons plus souvent en imagination qu'en réalité.",
+    "notice-urge": "Remarque l'envie. Nomme-la. Laisse-la passer.",
+    "whole-life": "Ne laisse pas l'image de ta vie entière te troubler.",
+    "clean-day": "Chaque jour propre t'appartient pour de bon.",
+    "best-of-yourself": "Jusqu'à quand attendras-tu pour exiger de toi le meilleur ?",
+    "rest-not-escape": "La fatigue, le stress et l'ennui demandent du repos, pas une fuite.",
+    "favorable-wind": "Aucun vent n'est favorable à qui ne sait pas quel port rejoindre.",
+    "freedom-quietly": "La liberté se construit sans bruit, un choix après l'autre.",
+    "color-of-thoughts": "Ton esprit prend la couleur des images que tu contemples souvent, car l'âme se teint de ses pensées.",
+    "attention": "Ton attention est précieuse. Donne-la à ce que tu aimes.",
+    "habit": "Si tu veux faire de quelque chose une habitude, fais-le. Si tu veux arrêter, ne le fais pas, et habitue-toi à faire autre chose à la place.",
+    "progress": "Le progrès n'est pas une ligne droite, et il compte quand même.",
+    "change-mind": "C'est d'esprit qu'il faut changer, pas de ciel.",
+    "ten-minutes": "Dix minutes à respirer peuvent changer toute la soirée.",
+    "dig-within": "Creuse en toi. En toi est la source du bien, et elle peut toujours jaillir si tu continues à creuser.",
+    "why-started": "Rappelle-toi pourquoi tu as commencé.",
+    "judgments": "Ce ne sont pas les choses qui nous troublent, mais les jugements que nous portons sur elles.",
+    "putting-off": "Pendant qu'on remet à plus tard, la vie passe.",
+    "be-one": "Cesse de discuter de ce que doit être une personne de bien : sois-en une.",
+    "up-to-us": "Certaines choses dépendent de nous, d'autres non.",
+    "reason": "Si tu veux tout soumettre, soumets-toi à la raison.",
+    "retreat": "Nulle part on ne trouve de retraite plus paisible ni plus libre de soucis que dans sa propre âme."
+  },
+  "quoteAuthors": {
+    "epictetus": "Épictète",
+    "seneca": "Sénèque",
+    "marcus-aurelius": "Marc Aurèle"
   }
 }

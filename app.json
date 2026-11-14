@@ -32,8 +32,8 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#111116",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 120
+          "image": "./assets/brand/flust-lockup.png",
+          "imageWidth": 200
         }
       ],
       "expo-font",

@@ -94,3 +94,8 @@ export function addMonths(
 function wallAsUtc({ year, month, day, hour, minute }: LocalDateTime): number {
   return Date.UTC(year, month - 1, day, hour, minute);
 }
+
+// The number of days since 1970-01-01 in the local calendar: it changes at local midnight.
+export function localDayNumber(utc: Timestamp, offsetAt: UtcOffsetAt): number {
+  return Math.floor((utc + offsetAt(utc) * MS_PER_MINUTE) / MS_PER_DAY);
+}

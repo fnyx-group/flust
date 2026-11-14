@@ -1,3 +1,5 @@
+import { MS_PER_DAY } from '@/domain/time';
+
 type RankDefinition = {
   readonly id: string;
   readonly circle: 1 | 2 | 3 | 4 | 5;
@@ -33,7 +35,25 @@ export type RankProgress = {
   readonly next: { readonly rank: Rank; readonly daysLeft: number } | null;
 };
 
+// Before the first rank, progress is measured in time toward the first clean day. Afterwards it
+// is total clean days over the next threshold, and full once every rank is unlocked.
+export type RankStanding =
+  | {
+      readonly status: 'pending';
+      readonly first: Rank;
+      readonly fraction: number;
+      readonly msLeft: number;
+    }
+  | {
+      readonly status: 'ranked';
+      readonly current: Rank;
+      readonly next: Rank | null;
+      readonly totalCleanDays: number;
+      readonly fraction: number;
+    };
+
 const ALL_RANKS: readonly Rank[] = RANKS;
+const FIRST_RANK: Rank = RANKS[0];
 
 export function isRankId(value: unknown): value is RankId {
   return ALL_RANKS.some((rank) => rank.id === value);
@@ -67,4 +87,33 @@ function highestIndex(ids: readonly RankId[]): number {
 function toUnlock(newlyUnlocked: readonly Rank[]): RankUnlock | null {
   const highest = newlyUnlocked.at(-1);
   return highest ? { highest, others: newlyUnlocked.slice(0, -1) } : null;
+}
+
+// Without a rank, total clean days are 0, so every segment is shorter than a day and the first
+// day completes when the current streak reaches 24 hours.
+export function rankStanding(
+  progress: RankProgress,
+  totalCleanDays: number,
+  streakMs: number,
+): RankStanding {
+  if (progress.current === null) {
+    return {
+      status: 'pending',
+      first: FIRST_RANK,
+      fraction: clampFraction(streakMs / MS_PER_DAY),
+      msLeft: Math.max(0, MS_PER_DAY - streakMs),
+    };
+  }
+  const next = progress.next?.rank ?? null;
+  return {
+    status: 'ranked',
+    current: progress.current,
+    next,
+    totalCleanDays,
+    fraction: next ? clampFraction(totalCleanDays / next.threshold) : 1,
+  };
+}
+
+function clampFraction(value: number): number {
+  return Math.min(1, Math.max(0, value));
 }

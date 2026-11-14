@@ -29,25 +29,29 @@ Two typefaces, bundled with the app:
 
 Counters use tabular numbers so digits do not shift as they change.
 
-| Style                              | Size  | Weight | Notes                 |
-| ---------------------------------- | ----- | ------ | --------------------- |
-| Streak counter (days)              | 240   | 600    | Barlow Condensed      |
-| Streak counter (hours and minutes) | 176   | 600    | Barlow Condensed      |
-| Welcome title                      | 40    | 800    | Onboarding welcome    |
-| Brand lockup                       | 36    | 800    | Onboarding welcome    |
-| Stepper value                      | 32    | 600    | Barlow Condensed      |
-| Screen title                       | 28    | 800    |                       |
-| Rank name                          | 22    | 800    |                       |
-| Calendar day                       | 18    | 500    | Barlow Condensed      |
-| Select value                       | 17    | 800    | Value of a select row |
-| Row                                | 15    | 600    |                       |
-| Primary button                     | 17    | 800    | Text on accent        |
-| Secondary button                   | 15    | 600    |                       |
-| Body                               | 15-16 | 400    |                       |
-| Label                              | 13    | 600    | Secondary text color  |
-| Caption                            | 12    | 400    |                       |
+| Style                            | Size  | Weight | Notes                 |
+| -------------------------------- | ----- | ------ | --------------------- |
+| Streak counter, 1 or 2 digits    | 240   | 600    | Barlow Condensed      |
+| Streak counter, 3 digits         | 176   | 600    | Barlow Condensed      |
+| Streak counter, 4 digits or more | 128   | 600    | Barlow Condensed      |
+| Streak counter unit              | 40    | 600    | Secondary text color  |
+| Welcome title                    | 40    | 800    | Onboarding welcome    |
+| Brand lockup                     | 36    | 800    | Onboarding welcome    |
+| Stepper value                    | 32    | 600    | Barlow Condensed      |
+| Screen title                     | 28    | 800    |                       |
+| Rank name                        | 22    | 800    |                       |
+| Daily quote                      | 22    | 700    | Line height 30        |
+| Calendar day                     | 18    | 500    | Barlow Condensed      |
+| Select value                     | 17    | 800    | Value of a select row |
+| Row                              | 15    | 600    |                       |
+| Primary button                   | 17    | 800    | Text on accent        |
+| Secondary button                 | 15    | 600    |                       |
+| Body                             | 15-16 | 400    |                       |
+| Section label                    | 16    | 600    | Secondary text color  |
+| Label                            | 13    | 600    | Secondary text color  |
+| Caption                          | 12    | 400    |                       |
 
-The streak counter shrinks when it reaches 3 and 4 digits so it fits on one line.
+The streak counter size depends on its number of digits, so it stays on one line on a 360 point wide screen. Hours and minutes count all their digits, with minutes always shown on two: "7 h 40" has 3 digits and uses 176, "12 h 05" has 4 and uses 128. Days use 240 up to 99, 176 up to 999, then 128. On narrower screens the counter shrinks further to fit. The counter does not grow with the system text size, since it is already the largest text on screen; the units and every other text do.
 
 ## Layout
 

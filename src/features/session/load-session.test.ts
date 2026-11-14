@@ -26,9 +26,33 @@ describe('loadSession', () => {
     unwrap(await storage.settings.saveLanguage('fr'));
 
     expect(await loadSession(storage)).toEqual(
-      ok({ journey: journeyOf(START), draft: EMPTY_DRAFT }),
+      ok({ journey: journeyOf(START), draft: EMPTY_DRAFT, unlockedRanks: [] }),
     );
     expect(i18n.language).toBe('fr');
+  });
+
+  it('loads the ranks stored as unlocked with the journey', async () => {
+    const { storage } = await setUp();
+    unwrap(await storage.journey.save(journeyOf(START)));
+    unwrap(await storage.ranks.unlock(['novice', 'apprentice']));
+
+    expect(await loadSession(storage)).toEqual(
+      ok({
+        journey: journeyOf(START),
+        draft: EMPTY_DRAFT,
+        unlockedRanks: ['novice', 'apprentice'],
+      }),
+    );
+  });
+
+  it('reports unlocked ranks that cannot be read as a storage failure', async () => {
+    const { storage, rawDatabase } = await setUp();
+    unwrap(await storage.journey.save(journeyOf(START)));
+    const raw = await rawDatabase();
+    await raw.exec('DROP TABLE unlocked_rank');
+    await raw.close();
+
+    expect(await loadSession(storage)).toEqual(err('storage-failed'));
   });
 
   it('keeps the device language when the stored one is unknown', async () => {
@@ -41,7 +65,9 @@ describe('loadSession', () => {
 
   it('starts an empty onboarding when nothing was answered yet', async () => {
     const { storage } = await setUp();
-    expect(await loadSession(storage)).toEqual(ok({ journey: null, draft: EMPTY_DRAFT }));
+    expect(await loadSession(storage)).toEqual(
+      ok({ journey: null, draft: EMPTY_DRAFT, unlockedRanks: [] }),
+    );
   });
 
   it('resumes the onboarding on the step and with the answers it was left at', async () => {
@@ -52,7 +78,7 @@ describe('loadSession', () => {
     };
     unwrap(await storage.onboarding.saveDraft(draft));
 
-    expect(await loadSession(storage)).toEqual(ok({ journey: null, draft }));
+    expect(await loadSession(storage)).toEqual(ok({ journey: null, draft, unlockedRanks: [] }));
   });
 
   // A corrupted journey used to be reported like a storage failure, which only offered a retry

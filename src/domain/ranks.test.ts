@@ -1,6 +1,7 @@
 import * as fc from 'fast-check';
 
-import { isRankId, rankProgress, RANKS, type RankId } from '@/domain/ranks';
+import { isRankId, rankProgress, RANKS, rankStanding, type RankId } from '@/domain/ranks';
+import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE } from '@/domain/time';
 import { rankIds, totalDays } from '@test/arbitraries';
 
 function idsUpTo(id: RankId): RankId[] {
@@ -178,6 +179,62 @@ describe('rankProgress', () => {
         expect(progress.next.daysLeft).toBe(progress.next.rank.threshold - total);
         expect(progress.next.rank.threshold).toBeGreaterThan(progress.current?.threshold ?? 0);
       }),
+    );
+  });
+});
+
+describe('rankStanding', () => {
+  const sevenHoursForty = 7 * MS_PER_HOUR + 40 * MS_PER_MINUTE;
+
+  it('measures the first day in time before any rank', () => {
+    const standing = rankStanding(rankProgress([], 0), 0, sevenHoursForty);
+    expect(standing).toEqual({
+      status: 'pending',
+      first: RANKS[0],
+      fraction: sevenHoursForty / MS_PER_DAY,
+      msLeft: MS_PER_DAY - sevenHoursForty,
+    });
+  });
+
+  it('measures total clean days against the next threshold', () => {
+    expect(rankStanding(rankProgress([], 47), 47, 12 * MS_PER_DAY)).toEqual({
+      status: 'ranked',
+      current: expect.objectContaining({ id: 'sorcerer' }),
+      next: expect.objectContaining({ id: 'white-mage' }),
+      totalCleanDays: 47,
+      fraction: 47 / 60,
+    });
+  });
+
+  it('keeps a rank whose threshold a backdated lapse took the total below', () => {
+    const standing = rankStanding(rankProgress(idsUpTo('initiate'), 6), 6, MS_PER_DAY);
+    expect(standing).toMatchObject({
+      status: 'ranked',
+      current: { id: 'initiate' },
+      next: { id: 'watcher' },
+      fraction: 6 / 14,
+    });
+  });
+
+  it('is full once every rank is unlocked', () => {
+    expect(rankStanding(rankProgress([], 400), 400, 0)).toMatchObject({
+      current: { id: 'free-soul' },
+      next: null,
+      fraction: 1,
+    });
+  });
+
+  it('keeps the fraction between 0 and 1', () => {
+    fc.assert(
+      fc.property(
+        rankIds,
+        totalDays,
+        fc.integer({ min: -MS_PER_DAY, max: 2 * MS_PER_DAY }),
+        (ids, total, streakMs) => {
+          const { fraction } = rankStanding(rankProgress(ids, total), total, streakMs);
+          return fraction >= 0 && fraction <= 1;
+        },
+      ),
     );
   });
 });

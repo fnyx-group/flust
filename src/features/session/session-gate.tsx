@@ -38,6 +38,7 @@ export function SessionGate({ children }: { children: ReactNode }) {
   const session = {
     journey: data.journey,
     draft: data.draft,
+    unlockedRanks: data.unlockedRanks,
     setJourney: (journey: Journey) => setState({ status: 'ready', data: { ...data, journey } }),
   };
   return <SessionContext value={session}>{children}</SessionContext>;

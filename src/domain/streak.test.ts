@@ -2,8 +2,10 @@ import * as fc from 'fast-check';
 
 import { addLapse, removeLapse, type Journey } from '@/domain/journey';
 import {
+  counterSize,
   currentStreakMs,
   longestStreakMs,
+  remainingParts,
   streakDisplay,
   streakStart,
   totalCleanDays,
@@ -296,6 +298,48 @@ describe('properties', () => {
         expect(longestStreakMs(journey, earlier)).toBeLessThanOrEqual(
           longestStreakMs(journey, input.now),
         );
+      }),
+    );
+  });
+});
+
+describe('counterSize', () => {
+  it.each([
+    [{ unit: 'days', days: 1 }, 'large'],
+    [{ unit: 'days', days: 99 }, 'large'],
+    [{ unit: 'days', days: 100 }, 'medium'],
+    [{ unit: 'days', days: 999 }, 'medium'],
+    [{ unit: 'days', days: 1000 }, 'small'],
+    [{ unit: 'days', days: 12_000 }, 'small'],
+    [{ unit: 'hours', hours: 0, minutes: 0 }, 'medium'],
+    [{ unit: 'hours', hours: 9, minutes: 59 }, 'medium'],
+    [{ unit: 'hours', hours: 10, minutes: 0 }, 'small'],
+    [{ unit: 'hours', hours: 23, minutes: 59 }, 'small'],
+  ] as const)('sizes %o as %s', (display, size) => {
+    expect(counterSize(display)).toBe(size);
+  });
+});
+
+describe('remainingParts', () => {
+  it('rounds up to the minute', () => {
+    expect(remainingParts(16 * MS_PER_HOUR + 19 * MS_PER_MINUTE + 30_000)).toEqual({
+      hours: 16,
+      minutes: 20,
+    });
+    expect(remainingParts(MS_PER_HOUR)).toEqual({ hours: 1, minutes: 0 });
+  });
+
+  it('is zero once the time has run out', () => {
+    expect(remainingParts(-5_000)).toEqual({ hours: 0, minutes: 0 });
+  });
+
+  it('adds up with the elapsed time shown by the counter to 24 hours', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 0, max: MS_PER_DAY - 1 }), (elapsed) => {
+        const shown = streakDisplay(elapsed);
+        const left = remainingParts(MS_PER_DAY - elapsed);
+        if (shown.unit !== 'hours') return false;
+        return (shown.hours + left.hours) * 60 + shown.minutes + left.minutes === 24 * 60;
       }),
     );
   });

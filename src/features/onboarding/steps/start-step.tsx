@@ -9,7 +9,7 @@ import { finish, FINISH_ERROR_MESSAGES, type FinishError } from '@/features/onbo
 import { StepLayout } from '@/features/onboarding/step-layout';
 import type { StepProps } from '@/features/onboarding/step-props';
 import { Calendar } from '@/features/onboarding/start-picker/calendar';
-import { deviceCalendar, deviceOffsetAt } from '@/features/onboarding/start-picker/device-time';
+import { deviceCalendar, deviceOffsetAt } from '@/features/shared/device-time';
 import { formatDateTime } from '@/features/onboarding/start-picker/format';
 import { TimeSteppers } from '@/features/onboarding/start-picker/time-steppers';
 import { useSession } from '@/features/session/session-context';
