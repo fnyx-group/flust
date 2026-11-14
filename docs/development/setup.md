@@ -32,8 +32,9 @@ Requirements:
 ## Checks
 
     pnpm typecheck
-    pnpm test
+    pnpm test:coverage
     pnpm lint
+    pnpm knip
     pnpm format:check
 
 The same checks run in CI on every pull request and on pushes to `main`.

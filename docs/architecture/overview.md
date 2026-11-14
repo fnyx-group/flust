@@ -13,18 +13,20 @@ Navigation uses Expo Router. Each file in `src/app/` is a screen and `_layout.ts
 
 ## Source layout
 
-`src/app/` contains routes only. Logic lives outside the routes:
+`src/app/` contains routes only. Logic lives outside the routes, in layers whose imports are enforced by lint (see [Conventions](../development/conventions.md#layers)):
 
-| Folder          | Purpose                                            |
-| --------------- | -------------------------------------------------- |
-| `src/app/`      | Screens and navigators                             |
-| `src/features/` | Feature code: journal, streak, emergency, blocking |
-| `src/lib/`      | Crypto, storage, shared utilities                  |
-| `src/ui/`       | Shared components                                  |
-| `modules/`      | Native modules                                     |
-| `assets/`       | Brand and images                                   |
+| Folder          | Purpose                                                 |
+| --------------- | ------------------------------------------------------- |
+| `src/app/`      | Screens and navigators                                  |
+| `src/features/` | Screens and hooks: journal, streak, emergency, blocking |
+| `src/domain/`   | Pure logic: streaks, ranks, dates                       |
+| `src/data/`     | Storage and crypto                                      |
+| `src/ui/`       | Shared components and theme                             |
+| `src/lib/`      | Shared infrastructure such as i18n                      |
+| `modules/`      | Native modules                                          |
+| `assets/`       | Brand and images                                        |
 
-Only `src/app/` exists so far. The other folders are the target structure and are created as features land.
+Folders are created when their first code lands.
 
 ## Native modules
 

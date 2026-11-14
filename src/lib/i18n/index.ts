@@ -6,7 +6,7 @@ import en from './locales/en.json';
 import fr from './locales/fr.json';
 import { ensurePluralRules } from './plural-rules';
 
-export const resources = {
+const resources = {
   en: { translation: en },
   fr: { translation: fr },
 } as const;

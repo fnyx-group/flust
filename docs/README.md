@@ -30,9 +30,10 @@
 - [0006 No network access](decisions/0006-no-network-access.md): no network calls, no remote crash reporting.
 - [0007 Typography](decisions/0007-typography.md): Manrope and Barlow Condensed.
 - [0008 Internationalization](decisions/0008-internationalization.md): French and English, all strings externalized.
+- [0009 Source layers](decisions/0009-source-layers.md): domain, data, features, ui and app, enforced by lint.
 
 ## Development
 
 - [Setup](development/setup.md): local environment and first run.
-- [Conventions](development/conventions.md): code style, commits, branches, pull requests.
+- [Conventions](development/conventions.md): code style, layers, lint rules, commits, branches, pull requests.
 - [Testing](development/testing.md): what to test, where, and how.

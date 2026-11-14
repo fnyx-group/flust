@@ -33,9 +33,11 @@ jobs:
 
       - run: pnpm typecheck
 
-      - run: pnpm test
+      - run: pnpm test:coverage
 
       - run: pnpm lint
+
+      - run: pnpm knip
 
       - run: pnpm format:check
 

@@ -5,7 +5,7 @@ const cardinalRules: Record<string, (n: number) => PluralCategory> = {
   fr: (n) => (Math.trunc(Math.abs(n)) <= 1 ? 'one' : 'other'),
 };
 
-export class FallbackPluralRules {
+class FallbackPluralRules {
   private readonly selectCategory: (n: number) => PluralCategory;
 
   constructor(locale: string, options?: { type?: 'cardinal' | 'ordinal' }) {
