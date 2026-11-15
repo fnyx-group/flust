@@ -7,6 +7,7 @@ import { recordLapse, skippedAnswers } from '@/features/lapse/record-lapse';
 import { undoLapse } from '@/features/lapse/undo-lapse';
 import { journeyOf, unwrap } from '@test/arbitraries';
 import { createFakeStorage } from '@test/fakes/fake-storage';
+import { NO_PROTECTION_SETTINGS } from '@test/protection';
 
 const START = Date.UTC(2026, 0, 1, 8);
 const NOW = START + 12 * MS_PER_DAY;
@@ -24,6 +25,7 @@ async function setUp() {
       reasons: [],
       riskMoments: ['stress'],
       plans: [DEFAULT_PLAN],
+      ...NO_PROTECTION_SETTINGS,
     }),
   );
   const rows = (sql: string) => fake.disk.query(DATABASE_NAME, sql);

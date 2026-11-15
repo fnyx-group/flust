@@ -2,6 +2,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/ui/button';
+import { useOverlaysHidden } from '@/ui/overlays';
 import { backdropOpacity, colors, radii, spacing, typography } from '@/ui/theme';
 
 type ConfirmSheetProps = {
@@ -28,8 +29,9 @@ export function ConfirmSheet({
   onCancel,
 }: ConfirmSheetProps) {
   const insets = useSafeAreaInsets();
+  const hidden = useOverlaysHidden();
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
+    <Modal visible={visible && !hidden} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.container}>
         <Pressable
           accessible={false}

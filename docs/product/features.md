@@ -12,9 +12,7 @@ The onboarding runs once, on first launch. Its steps are:
 2. Reasons: why the user wants to quit.
 3. Risk moments: the times and situations where urges are most likely.
 4. First if/then plan: "If this happens, then I will do that."
-5. Start point: now, or a date in the past.
-6. App lock: Face ID or the platform biometrics, with a passcode fallback.
-7. Evening check-in: whether to receive a daily reminder, and at what time.
+5. Start point: now, or a date in the past, with a Protection card: the app lock and the evening check-in reminder, both off until turned on. Turning the lock on asks the device once; turning the reminder on asks for notifications. Both can be changed later in the settings.
 
 ### Home
 
@@ -79,19 +77,32 @@ The user can edit their reasons, their risk moments and their if/then plans at a
 The settings show only what works in this version:
 
 - "Raisons et plans", with the number of plans.
+- "Rappels": the check-in time, else the thought time, else "Désactivés" when none is on.
+- "Verrouillage": the method, "Désactivé" or "En pause".
 - "Langue": the device language, French or English, applied at once and stored.
 - "À propos": the version, the MPL-2.0 license, links to the website and the source code, and the privacy promise in one line.
 - "Tout effacer": erases every piece of data and the key after two confirmations, then returns to the onboarding.
 
-The filter, reminders and the lock join the settings with their features.
+The filter joins the settings with its feature.
 
 ### Reminders
 
-Optional local reminders, including the evening check-in. Notification text is always neutral and never reveals what the app is about.
+Local reminders, all off until turned on, each with a switch:
+
+- Evening check-in, at a chosen time (21:00 by default). Opens the check-in.
+- Quote of the day, at a chosen time (08:00 by default).
+- Risk hours: before "In bed at night" (22:30) and on "The weekend" (Saturday 10:00), when those risk moments are chosen. Other risk moments have no time. They come at their moment even on a day that already has other reminders.
+- Ranks and milestones: when the next rank is reached, in the daytime, never in the six hours after a lapse is logged.
+
+Reminders thin out when the app is not opened, and stop after a week with one last message: "flust is here whenever you like, no pressure." There is no reminder after a lapse. See [0022](../decisions/0022-reminder-schedule.md).
+
+Notification text is always neutral and never reveals what the app is about. It may show on the lock screen, depending on the device's settings: on Android, when sensitive content is shown on the lock screen, which most devices do by default; on iOS, when previews are shown, and a note explains how to hide them. The permission is asked only when a reminder is turned on. A refusal leaves it off, with a way to the system settings. When notifications are no longer allowed, every reminder is turned off, and allowing them again turns none back on by itself.
 
 ### App lock
 
-The app is locked with biometrics, with a passcode fallback.
+The app is locked with the device's own authentication: biometrics, with the device passcode as fallback. flust has no passcode of its own. The lock asks again after a chosen delay in the background: immediately, after 1, 5 or 15 minutes, or after 1 hour (1 minute by default). Attempts after the first two wait longer each time, up to an hour. Without a screen lock on the device, the lock is paused. See [0023](../decisions/0023-app-lock.md) and [0024](../decisions/0024-lock-wait.md).
+
+In production builds, screenshots are blocked and the app switcher preview is hidden ([0025](../decisions/0025-screen-privacy.md)).
 
 ### Encrypted storage
 

@@ -43,9 +43,16 @@
 - [0018 Daily check-in](decisions/0018-daily-check-in.md): one check-in per stored local day, editable until midnight, and the low mood rule.
 - [0019 Journal notes](decisions/0019-journal-notes.md): notes keep their stored local day and UTC offset, grouped by week and month, an excerpt-only list.
 - [0020 Editable reasons and plans](decisions/0020-editable-reasons-and-plans.md): rows edited by id, limits and at least one plan, an undo that only restores the row the lapse wrote.
+- [0021 Local notifications](decisions/0021-local-notifications.md): expo-notifications on iOS without push, a local Kotlin module on Android, no Firebase.
+- [0022 Reminder schedule](decisions/0022-reminder-schedule.md): a week planned ahead, spacing that thins out, a cap per day, one return message, then silence.
+- [0023 App lock](decisions/0023-app-lock.md): device authentication as a UI gate, a cover in the background, held links, a pause without a screen lock.
+- [0024 Lock wait](decisions/0024-lock-wait.md): a growing wait between attempts, on a clock that counts sleep and ignores the date, resumed after a restart.
+- [0025 Screen privacy](decisions/0025-screen-privacy.md): screenshots and app switcher previews blocked in production, allowed in development.
+- [0026 Android splash symbol](decisions/0026-android-splash-symbol.md): the symbol alone, sized for the Android 12 splash mask.
 
 ## Development
 
 - [Setup](development/setup.md): local environment, first run and development builds.
 - [Conventions](development/conventions.md): code style, layers, lint rules, commits, branches, pull requests.
 - [Testing](development/testing.md): what to test, where, and how.
+- [Release](development/release.md): the checks before each store release.

@@ -6,6 +6,7 @@ import { err, ok } from '@/domain/result';
 import { MS_PER_HOUR } from '@/domain/time';
 import { journeyOf, unwrap } from '@test/arbitraries';
 import { createFakeStorage } from '@test/fakes/fake-storage';
+import { NO_PROTECTION_SETTINGS } from '@test/protection';
 import { DATABASE_NAME } from '@/data/storage-deps';
 
 const START = Date.UTC(2026, 0, 1);
@@ -29,6 +30,7 @@ async function setUp(plans: readonly Plan[] = [DEFAULT_PLAN]) {
       reasons: [],
       riskMoments: ['stress'],
       plans,
+      ...NO_PROTECTION_SETTINGS,
     }),
   );
   const rows = (sql: string) => fake.disk.query(DATABASE_NAME, sql);

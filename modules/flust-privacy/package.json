@@ -1,0 +1,6 @@
+{
+  "name": "flust-privacy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Screen privacy on Android and a clock that keeps running while the phone sleeps."
+}

@@ -1,7 +1,10 @@
 import type { Database, Executor } from '@/data/database';
 import { insertJourney } from '@/data/journey-repository';
+import { encodeLockSettings } from '@/data/lock-codec';
 import { decodeDraft, encodeDraft } from '@/data/onboarding-draft-codec';
 import { writeRiskMoments } from '@/data/profile-repository';
+import { encodeReminderSettings } from '@/data/reminder-settings-codec';
+import { SETTING_KEYS, writeSetting } from '@/data/setting-store';
 import {
   EMPTY_DRAFT,
   type OnboardingDraft,
@@ -60,6 +63,8 @@ export function createOnboardingRepository(db: Database): OnboardingRepository {
           await writeReasons(tx, result.reasons);
           await writeRiskMoments(tx, result.riskMoments);
           await writePlans(tx, result.plans);
+          await writeSetting(tx, SETTING_KEYS.lock, encodeLockSettings(result.lock));
+          await writeSetting(tx, SETTING_KEYS.reminders, encodeReminderSettings(result.reminders));
           await tx.run('DELETE FROM onboarding_draft');
         });
         return ok(undefined);

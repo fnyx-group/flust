@@ -9,6 +9,12 @@ Jest with the `jest-expo` preset, configured in `jest.config.js`. Run the suite 
 
 CI runs it with coverage right after the typecheck. Network access fails any test, and `src/domain/` and `src/data/` have coverage thresholds: see [Conventions](conventions.md#tests).
 
+The Kotlin tests of `modules/flust-reminders` run in their own CI job, on the JVM without the Android SDK:
+
+    gradle --project-dir modules/flust-reminders/jvm-test test
+
+They also run in the Android project, with `./gradlew :flust-reminders:testDebugUnitTest` from `android/`. The wall time cases in `test/fixtures/local-to-utc.tsv` are shared with the JS tests of `localToUtc`.
+
 ## What to test
 
 Tests target business logic and sensitive code:

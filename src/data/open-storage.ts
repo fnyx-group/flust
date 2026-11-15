@@ -3,6 +3,7 @@ import { createDatabase, type Database } from '@/data/database';
 import { createJournalRepository, type JournalRepository } from '@/data/journal-repository';
 import { createJourneyRepository, type JourneyRepository } from '@/data/journey-repository';
 import { createLapseRepository, type LapseRepository } from '@/data/lapse-repository';
+import { createLockRepository, type LockRepository } from '@/data/lock-repository';
 import { applyMigrations, latestVersion, readUserVersion } from '@/data/migrate';
 import { MIGRATIONS } from '@/data/migrations';
 import type { Migration } from '@/data/migrations/migration';
@@ -12,6 +13,7 @@ import {
 } from '@/data/onboarding-repository';
 import { createProfileRepository, type ProfileRepository } from '@/data/profile-repository';
 import { createRankRepository, type RankRepository } from '@/data/rank-repository';
+import { createReminderRepository, type ReminderRepository } from '@/data/reminder-repository';
 import { createSettingsRepository, type SettingsRepository } from '@/data/settings-repository';
 import {
   BACKUP_NAME,
@@ -33,6 +35,8 @@ export type Storage = {
   readonly ranks: RankRepository;
   readonly onboarding: OnboardingRepository;
   readonly settings: SettingsRepository;
+  readonly reminders: ReminderRepository;
+  readonly lock: LockRepository;
   close(): Promise<void>;
 };
 
@@ -212,6 +216,8 @@ function toStorage(db: Database): Storage {
     ranks: createRankRepository(db),
     onboarding: createOnboardingRepository(db),
     settings: createSettingsRepository(db),
+    reminders: createReminderRepository(db),
+    lock: createLockRepository(db),
     close: () => db.close(),
   };
 }

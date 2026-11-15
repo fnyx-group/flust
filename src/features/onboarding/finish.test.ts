@@ -10,12 +10,15 @@ import { createFakeStorage } from '@test/fakes/fake-storage';
 jest.mock('expo-localization', () => ({ getLocales: () => [{ languageCode: 'en' }] }));
 
 const NOW = Date.UTC(2026, 10, 14, 12);
+const TODAY = 20_000;
 
 describe('finish', () => {
   it('returns the journey once the answers are stored', async () => {
     const storage = unwrap(await openStorage(createFakeStorage().deps));
 
-    expect(await finish(storage.onboarding, EMPTY_DRAFT.answers, NOW)).toEqual(ok(journeyOf(NOW)));
+    expect(await finish(storage.onboarding, EMPTY_DRAFT.answers, NOW, TODAY)).toEqual(
+      ok(journeyOf(NOW)),
+    );
     expect(await storage.journey.load()).toEqual(ok(journeyOf(NOW)));
   });
 
@@ -26,13 +29,13 @@ describe('finish', () => {
       start: { kind: 'past', at: NOW + MS_PER_HOUR },
     };
 
-    expect(await finish({ complete }, answers, NOW)).toEqual(err('start-in-future'));
+    expect(await finish({ complete }, answers, NOW, TODAY)).toEqual(err('start-in-future'));
     expect(complete).not.toHaveBeenCalled();
   });
 
   it('returns no journey when saving fails', async () => {
     const complete = jest.fn().mockResolvedValue(err('storage-failed'));
-    expect(await finish({ complete }, EMPTY_DRAFT.answers, NOW)).toEqual(err('save-failed'));
+    expect(await finish({ complete }, EMPTY_DRAFT.answers, NOW, TODAY)).toEqual(err('save-failed'));
   });
 
   it.each(['en', 'fr'] as const)('has a message for every error in %s', (language) => {

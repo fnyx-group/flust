@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["FlustPrivacyModule"]
+  },
+  "android": {
+    "modules": ["org.fnyxgroup.flust.privacy.FlustPrivacyModule"]
+  }
+}

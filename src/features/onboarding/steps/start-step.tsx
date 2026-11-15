@@ -2,11 +2,15 @@ import { useRef, useState } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { utcToLocal } from '@/domain/local-time';
+import { localDayNumber, utcToLocal } from '@/domain/local-time';
+import { DEFAULT_LOCK_SETTINGS } from '@/domain/lock';
 import { clampStart, defaultPastStart, startBounds } from '@/domain/start-point';
 import type { Timestamp } from '@/domain/time';
 import { finish, FINISH_ERROR_MESSAGES, type FinishError } from '@/features/onboarding/finish';
+import { ProtectionCard } from '@/features/onboarding/steps/protection-card';
 import { StepLayout } from '@/features/onboarding/step-layout';
+import { useLock } from '@/features/lock/lock-context';
+import { requestReminderSync } from '@/features/reminders/sync-requests';
 import type { StepProps } from '@/features/onboarding/step-props';
 import { Calendar } from '@/features/shared/time-picker/calendar';
 import { deviceCalendar, deviceOffsetAt } from '@/features/shared/device-time';
@@ -23,6 +27,7 @@ export function StartStep({ answers, onChange, progress, onBack }: StartStepProp
   const { t, i18n } = useTranslation();
   const storage = useStorage();
   const { setJourney } = useSession();
+  const lock = useLock();
   const [now, setNow] = useState(() => Date.now());
   const [{ firstWeekday, hour12 }] = useState(deviceCalendar);
   const [lastPast, setLastPast] = useState<Timestamp | null>(
@@ -68,8 +73,16 @@ export function StartStep({ answers, onChange, progress, onBack }: StartStepProp
     finishing.current = true;
     setBusy(true);
     setError(null);
-    const result = await finish(storage.onboarding, answers, Date.now());
+    const at = Date.now();
+    const result = await finish(
+      storage.onboarding,
+      answers,
+      at,
+      localDayNumber(at, deviceOffsetAt),
+    );
     if (result.ok) {
+      lock.applySettings({ ...DEFAULT_LOCK_SETTINGS, enabled: answers.protection.lock });
+      requestReminderSync();
       setJourney(result.value);
       return;
     }
@@ -109,6 +122,10 @@ export function StartStep({ answers, onChange, progress, onBack }: StartStepProp
           onSelect={chooseKind}
         />
       </View>
+      <ProtectionCard
+        protection={answers.protection}
+        onChange={(protection) => onChange({ ...answers, protection })}
+      />
       {start.kind === 'past' && (
         <View style={styles.section}>
           <Text accessibilityLiveRegion="polite" style={styles.selected}>

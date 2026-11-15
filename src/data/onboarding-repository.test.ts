@@ -36,11 +36,14 @@ const draft: OnboardingDraft = {
     riskMoments: ['in-bed-at-night', 'stress'],
     plan: { trigger: 'stress', action: { kind: 'custom', text: text('Call Sam') } },
     start: { kind: 'past', at: NOW - 3_600_000 },
+    protection: { lock: false, checkInReminder: false },
   },
 };
 
+const TODAY = 20_000;
+
 function result(): OnboardingResult {
-  return unwrap(finishOnboarding(draft.answers, NOW));
+  return unwrap(finishOnboarding(draft.answers, NOW, TODAY));
 }
 
 describe('onboarding repository', () => {
@@ -110,7 +113,11 @@ describe('onboarding repository', () => {
 
     it('saves the defaults when every step was skipped', async () => {
       const { storage, query } = await setUp();
-      unwrap(await storage.onboarding.complete(unwrap(finishOnboarding(EMPTY_DRAFT.answers, NOW))));
+      unwrap(
+        await storage.onboarding.complete(
+          unwrap(finishOnboarding(EMPTY_DRAFT.answers, NOW, TODAY)),
+        ),
+      );
 
       expect(await storage.journey.load()).toEqual(ok(journeyOf(NOW)));
       expect(query('SELECT * FROM reason')).toEqual([]);
@@ -134,7 +141,7 @@ describe('onboarding repository', () => {
       await raw.close();
 
       const loaded = unwrap(await storage.onboarding.loadDraft());
-      const finished = unwrap(finishOnboarding(loaded.answers, NOW));
+      const finished = unwrap(finishOnboarding(loaded.answers, NOW, TODAY));
       expect(await storage.onboarding.complete(finished)).toEqual(ok(undefined));
       expect(query('SELECT preset_id FROM risk_moment ORDER BY position')).toEqual([
         { preset_id: 'in-bed-at-night' },
@@ -145,7 +152,7 @@ describe('onboarding repository', () => {
     it('never replaces an existing journey or its answers', async () => {
       const { storage, query } = await setUp();
       unwrap(await storage.onboarding.complete(result()));
-      const again = unwrap(finishOnboarding(EMPTY_DRAFT.answers, NOW + 1000));
+      const again = unwrap(finishOnboarding(EMPTY_DRAFT.answers, NOW + 1000, TODAY));
 
       expect(await storage.onboarding.complete(again)).toEqual(err('storage-failed'));
       expect(await storage.journey.load()).toEqual(ok(journeyOf(NOW - 3_600_000)));

@@ -43,6 +43,8 @@ Counters use tabular numbers so digits do not shift as they change.
 | Breathing count                   | 56    | 600    | Barlow Condensed      |
 | Lapse summary number              | 48    | 600    | Barlow Condensed      |
 | Stepper value                     | 32    | 600    | Barlow Condensed      |
+| Wheel, selected row               | 30    | 600    | Barlow Condensed      |
+| Wheel, other rows                 | 22    | 500    | Barlow Condensed      |
 | Countdown                         | 22    | 600    | Barlow Condensed      |
 | Breathing phase                   | 20    | 600    |                       |
 | Screen title                      | 28    | 800    |                       |
@@ -92,6 +94,8 @@ The tab bar has four tabs: Home, Journal, Ranks and Settings. Tab icons are line
 The emergency screen is not a tab. It is reached from the emergency button on the home screen.
 
 The home header shows the flust symbol with the name next to it. The lock screen shows the same symbol and name, larger and centered.
+
+Full screens shown over the others (emergency, note, lapse, rank unlocked) slide up from the bottom as cards, without the swipe to dismiss. They are not native modals, which would sit above the lock cover.
 
 ## Home
 
@@ -234,12 +238,14 @@ A note that cannot be opened shows the close button and a calm centered message 
 A tab screen, scrolling, with 24 points between blocks: the "Réglages" screen title, then one card (surface color, radius 22) of rows separated by lines. Each row holds its label (row style), its value in secondary body text on the right when it has one, and a chevron:
 
 1. "Raisons et plans", with the number of plans ("2 plans").
-2. "Langue", with "Langue de l'appareil", "Français" or "English". It opens the language sheet; the choice applies at once. Each language is named in itself.
-3. "À propos".
+2. "Rappels", with the check-in time ("21:00"), else the thought time, else nothing when another reminder is on, else "Désactivés". Reminders read as off while notifications are not allowed.
+3. "Verrouillage", with the method ("Face ID", "Empreinte", "Code"), "Désactivé", or "En pause" when the phone has no screen lock.
+4. "Langue", with "Langue de l'appareil", "Français" or "English". It opens the language sheet; the choice applies at once. Each language is named in itself.
+5. "À propos".
 
 Under the card, a centered "Tout effacer" text button, in secondary text. No red. At the bottom of the screen, or after the rows when they fill it, a discreet footer in caption style and secondary text, centered: "flust 0.1.0 · Open source, chiffré sur ton téléphone" (a non-breaking space before the dot), with the version from the app config.
 
-The filter, reminders and lock rows of the mockup come with their features.
+The filter row of the mockup comes with its feature.
 
 ## Reasons and plans
 
@@ -262,9 +268,34 @@ A screen pushed over the tabs: the back button and "À propos" title, the versio
 
 A screen pushed over the tabs: the back button and "Tout effacer" title, then what is erased, that no copy exists and that flust starts again (16/400, line height 24, secondary text). At the bottom, a line reminding that a lapse only needs to be noted (15/400, line height 22, text color), then "Effacer mes données" (secondary button). It opens a sheet, "Effacer définitivement ?", with "Annuler" (primary) and "Tout effacer" (text button). No red. While erasing, and until the app has opened again, a screen shows "Effacement en cours…" (screen title). Once erased, the onboarding welcome screen appears and, once it shows, screen readers hear "Tes données ont été effacées." If erasing fails, a message screen offers to try again, which erases again.
 
+## Reminders
+
+A screen pushed over the tabs: the back button and "Rappels" title, then, scrolling, with 32 points between blocks:
+
+1. A card of four switch rows: "Check-in du soir", "Mot du jour", "Heures à risque" and "Rangs et paliers", each with its subtitle in secondary body text. A switch row is one element for screen readers. The check-in and the thought show their time as a chip (radius 10, separator color) under the subtitle when on. The chip opens a sheet built like the confirmation sheet, the same on Android and iOS: the reminder's name as title, the time wheels, then "Enregistrer" (primary) and "Annuler" (text button).
+
+   - Two wheels, hours and minutes, in five minute steps. With a 12 hour clock on the device, hours run 12, 1 to 11, with a third wheel for the period, in the language's own words ("AM", "PM"); otherwise 00 to 23.
+   - Each wheel shows five rows, 44 points high, and snaps to one with momentum. The middle row sits in a band (surface color, radius 12); the rows above and below fade out (0.5, then 0.2).
+   - Numbers use Barlow Condensed with tabular figures: the selected row 30/600 in the text color, the others 22/500 in secondary text.
+   - A time that is not on the wheels, such as 21:07, shows as the nearest five minutes and is kept as it is until a wheel moves.
+   - For screen readers, each wheel is one adjustable element ("Heures", "Minutes", "Matin ou après-midi"), moved row by row, with its row as value. With Reduce Motion, the wheels move without animation.
+
+2. Without "Le soir au lit" or "Le week-end" among the risk moments, "Heures à risque" is disabled and a line in secondary body text says which to choose.
+3. When notifications are not allowed: a line saying so and "Ouvrir les réglages" (secondary button).
+4. "Aperçu": a notification card (surface color, radius 22): the symbol, "flust", the time, and "Comment s'est passée ta journée ?".
+5. A centered footer in secondary body text: the notifications stay neutral. On iOS, a second line explains how to hide previews on the lock screen.
+
+## Lock
+
+The lock screen shows the flust lockup centered, with "Verrouillé" under it in secondary text. At the bottom, "Déverrouiller" (primary) and "Entrer le code" (text button) when biometrics are enrolled; "Entrer le code" alone, as primary, otherwise. While a wait runs, a line above the buttons reads "Nouvel essai possible dans 30 s." and the buttons are disabled.
+
+When the app leaves the foreground, a cover with the same lockup, at the same place and without buttons, hides its content until it comes back.
+
+The "Verrouillage" settings screen: the back button and title, a card with the "Verrouiller avec Face ID" switch row (the method named as the system names it, "Verrouiller flust" without one) and, when on, a "Demander à nouveau" row opening a sheet of delays. Under it, notices in body text, then a note in secondary text: the lock protects access, the data stays encrypted either way.
+
 ## Notifications
 
-Notifications are always neutral and never reveal what the app is about.
+Notifications are always neutral and never reveal what the app is about. They have no title: the app name and the text only. On Android, they use the symbol as their small icon, in the accent color, and the lock screen shows only that flust sent something. On iOS, a hidden preview reads "Rappel".
 
 ## Daily quotes
 
@@ -297,6 +328,8 @@ Quotes from living authors are not used without their permission.
 ![Onboarding, step 4](screens/onboarding-4.png)
 
 ![Onboarding, step 5](screens/onboarding-5.png)
+
+Step 5 also holds a "Protection" card under the start point: a switch row for the lock and one for the evening check-in reminder ("Un rappel discret à 21:00"), both off. Its subtitle reads "Protège ton espace et choisis ton point de départ.", and its footer "Tu pourras tout changer dans les réglages."
 
 ### Home, first day
 

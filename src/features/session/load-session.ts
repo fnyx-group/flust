@@ -41,13 +41,18 @@ const NO_CHECK_INS = { checkIns: [], lowMoodDismissedDay: null } as const;
 // Check-ins are read from the start of the low mood window of `today`, the local day at launch:
 // the window only moves forward, so check-ins saved later are added by the session. A low mood
 // dismissal that cannot be read only shows the card again.
+// Also used by the lock screen, which shows before the session is loaded.
+export async function applyStoredLanguage(storage: Pick<Storage, 'settings'>): Promise<void> {
+  const stored = await storage.settings.loadLanguage();
+  const preference = toPreference(stored.ok ? stored.value : null);
+  await i18n.changeLanguage(languageOf(preference, getDeviceLanguage()));
+}
+
 export async function loadSession(
   storage: Storage,
   today: number,
 ): Promise<Result<SessionData, LoadSessionError>> {
-  const stored = await storage.settings.loadLanguage();
-  const preference = toPreference(stored.ok ? stored.value : null);
-  await i18n.changeLanguage(languageOf(preference, getDeviceLanguage()));
+  await applyStoredLanguage(storage);
   const journey = await storage.journey.load();
   if (!journey.ok) return err(journey.error);
   if (journey.value !== null) {

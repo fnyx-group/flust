@@ -48,3 +48,7 @@ example
 
 # test coverage
 coverage/
+modules/*/android/build/
+modules/*/jvm-test/build/
+modules/*/jvm-test/.gradle/
+modules/*/jvm-test/.kotlin/

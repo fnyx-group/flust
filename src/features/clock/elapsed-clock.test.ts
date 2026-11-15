@@ -61,9 +61,9 @@ function fakeDeps() {
   };
 }
 
-function setUp() {
+function setUp(monotonicCountsSleep = false) {
   const fake = fakeDeps();
-  const clock = createElapsedClock(fake.deps);
+  const clock = createElapsedClock({ ...fake.deps, monotonicCountsSleep });
   const listener = jest.fn();
   clock.subscribe(listener);
   return { fake, clock, listener };
@@ -113,6 +113,16 @@ describe('createElapsedClock', () => {
     fake.activity('background');
 
     fake.sleep(-MS_PER_HOUR, 2 * MS_PER_MINUTE);
+    fake.activity('foreground');
+    expect(clock.now()).toBe(3 * MS_PER_MINUTE);
+  });
+
+  it('ignores a clock moved forward in the background when the monotonic clock counts sleep', () => {
+    const { fake, clock } = setUp(true);
+    fake.advance(MS_PER_MINUTE);
+    fake.activity('background');
+
+    fake.sleep(MS_PER_HOUR, 2 * MS_PER_MINUTE);
     fake.activity('foreground');
     expect(clock.now()).toBe(3 * MS_PER_MINUTE);
   });

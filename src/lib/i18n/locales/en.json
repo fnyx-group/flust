@@ -217,7 +217,9 @@
     "erase": "Erase everything",
     "eraseHint": "Explains what will be erased before asking to confirm",
     "footer": "flust {{version}} · Open source, encrypted on your phone",
-    "languageSaveFailed": "The language could not be saved."
+    "languageSaveFailed": "The language could not be saved.",
+    "reminders": "Reminders",
+    "lock": "App lock"
   },
   "about": {
     "title": "About",
@@ -406,17 +408,23 @@
     },
     "start": {
       "title": "Last step",
-      "subtitle": "Choose your starting point.",
+      "subtitle": "Protect your space and choose your starting point.",
       "label": "Starting point",
       "now": "Now",
       "pickDate": "Pick a date",
       "selected": "Starting point: {{date}}",
       "finish": "Let's go",
-      "footer": "You can change your reasons and plans later.",
+      "footer": "You can change all of this later in the settings.",
       "errors": {
         "start-in-future": "This starting point is in the future. Check your phone's date and time, or pick another moment.",
         "invalid-timestamp": "This starting point can't be used. Pick another moment.",
         "save-failed": "Your answers could not be saved. Nothing was lost. Try again."
+      },
+      "protection": {
+        "label": "Protection",
+        "checkInSubtitle": "A discreet reminder at {{time}}",
+        "lockUnavailable": "Set a screen lock on your phone to turn this on.",
+        "lockNotConfirmed": "Unlocking was not confirmed. The lock stays off."
       }
     }
   },
@@ -579,5 +587,104 @@
     "epictetus": "Epictetus",
     "seneca": "Seneca",
     "marcus-aurelius": "Marcus Aurelius"
+  },
+  "reminders": {
+    "title": "Reminders",
+    "checkIn": {
+      "title": "Evening check-in",
+      "subtitle": "Take stock in ten seconds"
+    },
+    "thought": {
+      "title": "Quote of the day",
+      "subtitle": "A quote every morning"
+    },
+    "riskHours": {
+      "title": "Risky hours",
+      "subtitle": "A reminder before your sensitive moments",
+      "unavailable": "To turn it on, choose “{{night}}” or “{{weekend}}” in your risk moments."
+    },
+    "ranks": {
+      "title": "Ranks and milestones",
+      "subtitle": "When you unlock a rank"
+    },
+    "time": "Reminder time, {{time}}",
+    "timeHint": "Opens the time picker",
+    "sheet": {
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "period": "AM or PM",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "preview": "Preview",
+    "previewLabel": "Preview of a flust notification: {{text}}",
+    "footer": "Notifications stay neutral. Nobody can tell what the app is about by looking at your screen.",
+    "iosPreviews": "To also hide their text on the lock screen, go to Settings, Notifications, Show Previews.",
+    "denied": "Notifications are off for flust. You can allow them in your phone's settings.",
+    "openSettings": "Open settings",
+    "saveFailed": "The reminder could not be saved. Try again.",
+    "loadFailed": "Reminders could not be read. Try again later.",
+    "off": "Off",
+    "notifications": {
+      "check-in": "How was your day?",
+      "thought": "Your quote for today is here.",
+      "risk-hours": "A moment for yourself, if you need it.",
+      "rank": "A new milestone is waiting for you.",
+      "return": "flust is here whenever you like, no pressure.",
+      "channelName": "Reminders",
+      "channelDescription": "The reminders you turned on in flust",
+      "previewPlaceholder": "Reminder"
+    },
+    "back": "Back"
+  },
+  "lock": {
+    "locked": "Locked",
+    "unlock": "Unlock",
+    "usePasscode": "Enter passcode",
+    "prompt": "Unlock flust",
+    "cancel": "Cancel",
+    "wait": "You can try again in {{time}}.",
+    "waitSeconds": "{{count}} s",
+    "waitMinutes": "{{count}} min",
+    "lockout": "Too many attempts. Unlock your phone, then try again.",
+    "cover": "flust is hidden",
+    "settings": {
+      "title": "App lock",
+      "toggle": "Lock flust",
+      "toggleWith": "Lock with {{method}}",
+      "toggleSubtitle": "With your phone's passcode as a fallback",
+      "delay": "Ask again",
+      "noDeviceLock": "Set a screen lock on your phone to turn this on.",
+      "paused": "Lock paused: your phone no longer has a screen lock.",
+      "note": "The lock protects access to flust on this phone. Your data stays encrypted either way.",
+      "notConfirmed": "Unlocking was not confirmed. The lock stays off.",
+      "saveFailed": "The setting could not be saved. Try again.",
+      "back": "Back"
+    },
+    "delays": {
+      "0": "Immediately",
+      "60000": "After 1 min",
+      "300000": "After 5 min",
+      "900000": "After 15 min",
+      "3600000": "After 1 h"
+    },
+    "methods": {
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "face": "face unlock",
+      "fingerprint": "fingerprint",
+      "iris": "iris",
+      "passcode": "passcode"
+    },
+    "values": {
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "face": "Face",
+      "fingerprint": "Fingerprint",
+      "iris": "Iris",
+      "passcode": "Passcode",
+      "off": "Off",
+      "paused": "Paused"
+    }
   }
 }

@@ -1,7 +1,7 @@
 import { err, ok } from '@/domain/result';
 import { createErasedNotice, createEraseFlow } from '@/features/storage/erase-flow';
 
-function setUp(resets: ('ok' | 'fail')[]) {
+function setUp(resets: ('ok' | 'fail')[], clearReminders: 'ok' | 'fail' = 'ok') {
   const events: string[] = [];
   const flow = createEraseFlow({
     reset: async () => {
@@ -9,6 +9,14 @@ function setUp(resets: ('ok' | 'fail')[]) {
       return resets.shift() === 'fail' ? err('reset-failed') : ok(undefined);
     },
     applyDeviceLanguage: async () => void events.push('device language'),
+    pauseReminders: async () => {
+      events.push('pause');
+      return () => void events.push('resume');
+    },
+    clearReminders: async () => {
+      events.push('reminders');
+      if (clearReminders === 'fail') throw new Error('notifications unavailable');
+    },
     show: (step) => void events.push(step),
   });
   const storage = { close: async () => void events.push('close') };
@@ -16,18 +24,44 @@ function setUp(resets: ('ok' | 'fail')[]) {
 }
 
 describe('createEraseFlow', () => {
-  it('hides every screen, closes, erases, goes back to the device language, then reopens', async () => {
+  it('hides every screen, pauses and cancels reminders, erases, cancels them again, then reopens', async () => {
     const { events, flow, storage } = setUp(['ok']);
 
     await flow.eraseAll(storage);
-    expect(events).toEqual(['erasing', 'close', 'reset', 'device language', 'erased']);
+    expect(events).toEqual([
+      'erasing',
+      'pause',
+      'reminders',
+      'close',
+      'reset',
+      'reminders',
+      'device language',
+      'erased',
+      'resume',
+    ]);
+  });
+
+  it('still erases when reminders cannot be cancelled', async () => {
+    const { events, flow, storage } = setUp(['ok'], 'fail');
+
+    await flow.eraseAll(storage);
+    expect(events).toContain('erased');
   });
 
   it('shows the failure and keeps the language when erasing fails', async () => {
     const { events, flow, storage } = setUp(['fail']);
 
     await flow.eraseAll(storage);
-    expect(events).toEqual(['erasing', 'close', 'reset', 'erase-failed']);
+    expect(events).toEqual([
+      'erasing',
+      'pause',
+      'reminders',
+      'close',
+      'reset',
+      'reminders',
+      'erase-failed',
+      'resume',
+    ]);
   });
 
   it('erases again on retry, and never opens what is left', async () => {
@@ -36,7 +70,16 @@ describe('createEraseFlow', () => {
     events.length = 0;
 
     await flow.retry();
-    expect(events).toEqual(['erasing', 'reset', 'device language', 'erased']);
+    expect(events).toEqual([
+      'erasing',
+      'pause',
+      'reminders',
+      'reset',
+      'reminders',
+      'device language',
+      'erased',
+      'resume',
+    ]);
   });
 
   it('ignores a second request while one runs', async () => {

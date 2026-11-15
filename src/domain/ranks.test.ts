@@ -2,6 +2,7 @@ import * as fc from 'fast-check';
 
 import {
   isRankId,
+  nextRankAt,
   pendingUnlock,
   rankGrid,
   rankProgress,
@@ -11,6 +12,7 @@ import {
   withUnlocked,
   type RankId,
 } from '@/domain/ranks';
+import { totalCleanDays } from '@/domain/streak';
 import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE } from '@/domain/time';
 import { journeyFrom, journeyInput, journeyOf, rankIds, totalDays } from '@test/arbitraries';
 
@@ -401,6 +403,43 @@ describe('withUnlocked', () => {
         const merged = withUnlocked(stored, added);
         expect(new Set(merged)).toEqual(new Set([...stored, ...added]));
         expect(merged).toHaveLength(new Set(merged).size);
+      }),
+    );
+  });
+});
+
+describe('nextRankAt', () => {
+  const start = Date.UTC(2026, 0, 1, 20);
+
+  it('is one day after the start for the first rank', () => {
+    expect(nextRankAt(journeyOf(start), [], start + MS_PER_HOUR)).toBe(start + MS_PER_DAY);
+  });
+
+  it('counts the rest from the current streak, after days already earned', () => {
+    const lapse = start + 2 * MS_PER_DAY;
+    const journey = journeyOf(start, [lapse]);
+    // Two clean days earned before the lapse; the apprentice needs three.
+    expect(nextRankAt(journey, ['novice'], lapse + MS_PER_HOUR)).toBe(lapse + MS_PER_DAY);
+  });
+
+  it('is null once every rank is unlocked', () => {
+    const all = RANKS.map((rank) => rank.id);
+    expect(nextRankAt(journeyOf(start), all, start + MS_PER_DAY)).toBeNull();
+  });
+
+  it('is the first instant the next rank is reached if the streak goes on', () => {
+    fc.assert(
+      fc.property(journeyInput, (input) => {
+        const journey = journeyFrom(input);
+        const unlocked = rankProgress([], totalCleanDays(journey, input.now)).unlocked;
+        const at = nextRankAt(journey, unlocked, input.now);
+        const next = RANKS[unlocked.length];
+        if (next === undefined) return expect(at).toBeNull();
+        expect(at).not.toBeNull();
+        const reached = at ?? 0;
+        expect(reached).toBeGreaterThan(input.now);
+        expect(totalCleanDays(journey, reached)).toBeGreaterThanOrEqual(next.threshold);
+        expect(totalCleanDays(journey, reached - 1)).toBeLessThan(next.threshold);
       }),
     );
   });

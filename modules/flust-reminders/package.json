@@ -1,0 +1,6 @@
+{
+  "name": "flust-reminders",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local reminders on Android, without Firebase or any network access."
+}
