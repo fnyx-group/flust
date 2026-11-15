@@ -5,6 +5,7 @@ import { err, ok } from '@/domain/result';
 import { eraseAll } from '@/features/storage/erase-all';
 import { journeyOf, unwrap } from '@test/arbitraries';
 import { createFakeStorage } from '@test/fakes/fake-storage';
+import { NO_PROTECTION_SETTINGS } from '@test/protection';
 
 describe('eraseAll', () => {
   it('closes storage, then deletes the data and the key, and a new open starts empty', async () => {
@@ -17,6 +18,7 @@ describe('eraseAll', () => {
         reasons: [],
         riskMoments: [],
         plans: [],
+        ...NO_PROTECTION_SETTINGS,
       }),
     );
     unwrap(await storage.settings.saveLanguage('fr'));

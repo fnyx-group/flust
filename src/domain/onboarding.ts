@@ -1,6 +1,7 @@
 import type { CustomText } from '@/domain/custom-text';
 import { isOneOf } from '@/domain/guards';
 import { createJourney, type CreateJourneyError, type Journey } from '@/domain/journey';
+import { DEFAULT_LOCK_SETTINGS, type LockSettings } from '@/domain/lock';
 import {
   REASON_IDS,
   RISK_MOMENT_IDS,
@@ -10,6 +11,11 @@ import {
   type ReasonId,
   type RiskMomentId,
 } from '@/domain/presets';
+import {
+  DEFAULT_REMINDER_SETTINGS,
+  setCheckInReminder,
+  type ReminderSettings,
+} from '@/domain/reminders';
 import { err, ok, type Result } from '@/domain/result';
 import type { Timestamp } from '@/domain/time';
 
@@ -32,11 +38,18 @@ export type Plan = { readonly trigger: PlanTrigger; readonly action: PlanAction 
 
 export type StartChoice = { kind: 'now' } | { kind: 'past'; at: Timestamp };
 
+// Both are off until the person turns them on: the lock once the device has confirmed it can
+// unlock, the reminder once notifications are allowed.
+export type Protection = { readonly lock: boolean; readonly checkInReminder: boolean };
+
+const NO_PROTECTION: Protection = { lock: false, checkInReminder: false };
+
 export type OnboardingAnswers = {
   readonly reasons: readonly Reason[];
   readonly riskMoments: readonly RiskMomentId[];
   readonly plan: Plan | null;
   readonly start: StartChoice;
+  readonly protection: Protection;
 };
 
 export type OnboardingDraft = {
@@ -49,6 +62,8 @@ export type OnboardingResult = {
   readonly reasons: readonly Reason[];
   readonly riskMoments: readonly RiskMomentId[];
   readonly plans: readonly Plan[];
+  readonly lock: LockSettings;
+  readonly reminders: ReminderSettings;
 };
 
 export const DEFAULT_PLAN: Plan = {
@@ -57,10 +72,16 @@ export const DEFAULT_PLAN: Plan = {
 };
 
 // Every answer starts empty, so a skipped step keeps the defaults: no reasons, no risk moments,
-// the default plan and a start now.
+// the default plan, a start now, and no lock or reminder.
 export const EMPTY_DRAFT: OnboardingDraft = {
   step: 'welcome',
-  answers: { reasons: [], riskMoments: [], plan: null, start: { kind: 'now' } },
+  answers: {
+    reasons: [],
+    riskMoments: [],
+    plan: null,
+    start: { kind: 'now' },
+    protection: NO_PROTECTION,
+  },
 };
 
 export const isOnboardingStep = isOneOf(ONBOARDING_STEPS);
@@ -131,9 +152,11 @@ function sameAction(a: PlanAction, b: PlanAction): boolean {
   return b.kind === 'custom' && a.text === b.text;
 }
 
+// `today` is the local day number at `now`, from which the check-in reminder counts.
 export function finishOnboarding(
   answers: OnboardingAnswers,
   now: Timestamp,
+  today: number,
 ): Result<OnboardingResult, CreateJourneyError> {
   const start = answers.start.kind === 'now' ? now : answers.start.at;
   const journey = createJourney(start, now);
@@ -143,6 +166,12 @@ export function finishOnboarding(
     reasons: answers.reasons,
     riskMoments: answers.riskMoments,
     plans: [effectivePlan(answers)],
+    lock: { ...DEFAULT_LOCK_SETTINGS, enabled: answers.protection.lock },
+    reminders: setCheckInReminder(
+      DEFAULT_REMINDER_SETTINGS,
+      answers.protection.checkInReminder,
+      today,
+    ),
   });
 }
 

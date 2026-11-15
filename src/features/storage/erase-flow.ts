@@ -10,6 +10,8 @@ type EraseFlowDeps = Pick<StorageService, 'reset'> & {
   // The stored language is erased with the rest, so the app goes back to the device language,
   // which the next launch would choose too.
   applyDeviceLanguage: () => Promise<void>;
+  // Planned reminders live outside storage, with the system, so they are cancelled on their own.
+  clearReminders: () => Promise<void>;
   show: (step: EraseStep) => void;
 };
 
@@ -25,6 +27,7 @@ export function createEraseFlow(deps: EraseFlowDeps) {
     running = true;
     try {
       deps.show('erasing');
+      await deps.clearReminders().catch(() => undefined);
       const result = await erase();
       if (!result.ok) {
         deps.show('erase-failed');

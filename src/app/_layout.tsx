@@ -11,6 +11,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { I18nextProvider } from 'react-i18next';
 
+import { LockGate } from '@/features/lock/lock-gate';
+import { useHeldNavigation } from '@/features/lock/use-held-navigation';
+import { useNotificationTaps } from '@/features/reminders/use-notification-taps';
+import { useReminderSync } from '@/features/reminders/use-reminder-sync';
 import { SessionGate } from '@/features/session/session-gate';
 import { useSession } from '@/features/session/session-context';
 import { StorageGate } from '@/features/storage/storage-gate';
@@ -51,40 +55,45 @@ export default function RootLayout() {
       <ThemeProvider value={navigationTheme}>
         <StatusBar style="light" />
         <StorageGate>
-          <SessionGate>
-            <RootStack />
-          </SessionGate>
+          <LockGate>
+            <SessionGate>
+              <RootStack />
+            </SessionGate>
+          </LockGate>
         </StorageGate>
       </ThemeProvider>
     </I18nextProvider>
   );
 }
 
+// Screens shown over the others slide up as cards rather than native modals: a native modal
+// would sit above the lock cover, which is drawn inside the app.
+const COVERING = { animation: 'slide_from_bottom', gestureEnabled: false } as const;
+
 // Until a journey exists, the onboarding is the only reachable screen. Finishing it sets the
 // journey, and the router then moves to the first screen that became available: the home tab.
 function RootStack() {
   const { journey } = useSession();
   const started = journey !== null;
+  useReminderSync();
+  useNotificationTaps();
+  useHeldNavigation();
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={started}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="emergency" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="emergency" options={COVERING} />
         <Stack.Screen name="check-in" />
-        <Stack.Screen name="note" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="note" options={COVERING} />
         <Stack.Screen name="reasons-and-plans" />
         <Stack.Screen name="reason" />
         <Stack.Screen name="plan" />
         <Stack.Screen name="about" />
         <Stack.Screen name="erase" />
-        <Stack.Screen
-          name="lapse"
-          options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="rank-unlocked"
-          options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
-        />
+        <Stack.Screen name="reminders" />
+        <Stack.Screen name="lock-settings" />
+        <Stack.Screen name="lapse" options={COVERING} />
+        <Stack.Screen name="rank-unlocked" options={COVERING} />
       </Stack.Protected>
       <Stack.Protected guard={!started}>
         <Stack.Screen name="onboarding" />

@@ -25,5 +25,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     slug: config.slug ?? 'flust',
     ios: { ...config.ios, bundleIdentifier: variant.identifier },
     android: { ...config.android, package: variant.identifier },
+    // Hides the app from screenshots and the app switcher, except in the development build,
+    // where screenshots are part of the work. See docs/decisions/0025-screen-privacy.md.
+    extra: { ...config.extra, screenPrivacy: name !== 'development' },
   });
 };

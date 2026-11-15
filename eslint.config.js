@@ -66,8 +66,46 @@ const nativeScrollViews = {
   message: `Use ScrollView from @/ui/scroll-view. Add a list there if one is needed, with overScrollMode="never".`,
 };
 
-function layer(name, { forbidden, typesOnly = [], packages = false, allowNativeScroll = false }) {
-  const patterns = [parentImport];
+// Native libraries that touch privacy are each used from one file, so what they may do is
+// reviewed in one place. Other files may import their types.
+const ownedPackages = [
+  { name: 'expo-notifications', owner: 'src/features/reminders/notifier.ios.ts' },
+  { name: 'expo-local-authentication', owner: 'src/features/lock/local-auth.ts' },
+  { name: 'expo-screen-capture', owner: 'src/features/lock/privacy-screen.ts' },
+];
+
+// Local notifications only: nothing that registers the device with a push service.
+const pushFunctions = {
+  name: 'expo-notifications',
+  importNames: [
+    'getExpoPushTokenAsync',
+    'getDevicePushTokenAsync',
+    'addPushTokenListener',
+    'removePushTokenSubscription',
+    'setAutoServerRegistrationEnabledAsync',
+    'unregisterForNotificationsAsync',
+    'registerTaskAsync',
+    'unregisterTaskAsync',
+  ],
+  message:
+    'flust sends no data off the device: push notifications are not used. See docs/decisions/0021-local-notifications.md.',
+};
+
+function ownedPackagePatterns(owner) {
+  return ownedPackages
+    .filter((owned) => owned.owner !== owner)
+    .map((owned) => ({
+      regex: `^${owned.name}(/|$)`,
+      allowTypeImports: true,
+      message: `${owned.name} is only used from ${owned.owner}.`,
+    }));
+}
+
+function layer(
+  name,
+  { forbidden, typesOnly = [], packages = false, allowNativeScroll = false, owner = null },
+) {
+  const patterns = [parentImport, ...ownedPackagePatterns(owner)];
   if (forbidden.length > 0) {
     patterns.push({
       regex: layerImports(forbidden),
@@ -88,6 +126,7 @@ function layer(name, { forbidden, typesOnly = [], packages = false, allowNativeS
     });
   }
   const paths = allowNativeScroll ? [] : [nativeScrollViews];
+  if (owner === 'src/features/reminders/notifier.ios.ts') paths.push(pushFunctions);
   return {
     files: [`src/${name}/**/*.{ts,tsx}`],
     rules: { '@typescript-eslint/no-restricted-imports': ['error', { paths, patterns }] },
@@ -118,6 +157,10 @@ module.exports = defineConfig([
   layer('domain', { forbidden: except('domain'), packages: true }),
   layer('data', { forbidden: except('data', 'domain', 'lib') }),
   layer('features', { forbidden: except('features', 'domain', 'data', 'ui', 'lib') }),
+  ...ownedPackages.map(({ owner }) => ({
+    ...layer('features', { forbidden: except('features', 'domain', 'data', 'ui', 'lib'), owner }),
+    files: [owner],
+  })),
   layer('ui', { forbidden: except('ui', 'domain'), typesOnly: ['domain'] }),
   {
     ...layer('ui', {

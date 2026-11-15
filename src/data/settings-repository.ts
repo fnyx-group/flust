@@ -1,4 +1,5 @@
 import type { Database } from '@/data/database';
+import { readSetting, SETTING_KEYS, writeSetting } from '@/data/setting-store';
 import { err, ok, type Result } from '@/domain/result';
 
 export type SettingsStorageError = 'storage-failed';
@@ -14,15 +15,10 @@ export type SettingsRepository = {
   saveLowMoodDismissedDay(day: number): Promise<Result<void, SettingsStorageError>>;
 };
 
-const LANGUAGE_KEY = 'language';
-const LOW_MOOD_DISMISSED_KEY = 'low-mood-dismissed-day';
-
 export function createSettingsRepository(db: Database): SettingsRepository {
   async function load(key: string): Promise<Result<string | null, SettingsStorageError>> {
     try {
-      const rows = await db.all('SELECT value FROM setting WHERE key = ?', [key]);
-      const value = rows[0]?.value;
-      return ok(typeof value === 'string' ? value : null);
+      return ok(await readSetting(db, key));
     } catch {
       return err('storage-failed');
     }
@@ -30,13 +26,7 @@ export function createSettingsRepository(db: Database): SettingsRepository {
 
   async function save(key: string, value: string): Promise<Result<void, SettingsStorageError>> {
     try {
-      await db.transaction((tx) =>
-        tx.run(
-          `INSERT INTO setting (key, value) VALUES (?, ?)
-           ON CONFLICT (key) DO UPDATE SET value = excluded.value`,
-          [key, value],
-        ),
-      );
+      await db.transaction((tx) => writeSetting(tx, key, value));
       return ok(undefined);
     } catch {
       return err('storage-failed');
@@ -44,13 +34,13 @@ export function createSettingsRepository(db: Database): SettingsRepository {
   }
 
   return {
-    loadLanguage: () => load(LANGUAGE_KEY),
-    saveLanguage: (language) => save(LANGUAGE_KEY, language),
+    loadLanguage: () => load(SETTING_KEYS.language),
+    saveLanguage: (language) => save(SETTING_KEYS.language, language),
     async loadLowMoodDismissedDay() {
-      const value = await load(LOW_MOOD_DISMISSED_KEY);
+      const value = await load(SETTING_KEYS.lowMoodDismissedDay);
       return value.ok ? ok(parseDay(value.value)) : value;
     },
-    saveLowMoodDismissedDay: (day) => save(LOW_MOOD_DISMISSED_KEY, String(day)),
+    saveLowMoodDismissedDay: (day) => save(SETTING_KEYS.lowMoodDismissedDay, String(day)),
   };
 }
 

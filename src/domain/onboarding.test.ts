@@ -19,11 +19,14 @@ import {
   triggerOptions,
   type OnboardingAnswers,
 } from '@/domain/onboarding';
+import { DEFAULT_LOCK_SETTINGS } from '@/domain/lock';
+import { DEFAULT_REMINDER_SETTINGS } from '@/domain/reminders';
 import { err } from '@/domain/result';
 import { MS_PER_DAY } from '@/domain/time';
 import { journeyOf, unwrap } from '@test/arbitraries';
 
 const NOW = Date.UTC(2026, 10, 14, 12);
+const TODAY = 20_000;
 
 function text(value: string): CustomText {
   return unwrap(parseCustomText(value));
@@ -67,10 +70,16 @@ describe('steps', () => {
     expect(isOnboardingStep(undefined)).toBe(false);
   });
 
-  it('start on the welcome step with nothing chosen', () => {
+  it('start on the welcome step with nothing chosen, and no protection', () => {
     expect(EMPTY_DRAFT).toEqual({
       step: 'welcome',
-      answers: { reasons: [], riskMoments: [], plan: null, start: { kind: 'now' } },
+      answers: {
+        reasons: [],
+        riskMoments: [],
+        plan: null,
+        start: { kind: 'now' },
+        protection: { lock: false, checkInReminder: false },
+      },
     });
   });
 });
@@ -193,30 +202,42 @@ describe('finishOnboarding', () => {
       reasons: [{ kind: 'preset', id: 'sleep' }],
       riskMoments: ['boredom'],
     });
-    expect(unwrap(finishOnboarding(chosen, NOW))).toEqual({
+    expect(unwrap(finishOnboarding(chosen, NOW, TODAY))).toEqual({
       journey: journeyOf(NOW),
       reasons: [{ kind: 'preset', id: 'sleep' }],
       riskMoments: ['boredom'],
       plans: [DEFAULT_PLAN],
+      lock: DEFAULT_LOCK_SETTINGS,
+      reminders: DEFAULT_REMINDER_SETTINGS,
     });
   });
 
   it('starts the journey at a chosen past date', () => {
     const at = NOW - 3 * MS_PER_DAY;
-    const result = unwrap(finishOnboarding(answers({ start: { kind: 'past', at } }), NOW));
+    const result = unwrap(finishOnboarding(answers({ start: { kind: 'past', at } }), NOW, TODAY));
     expect(result.journey).toEqual(journeyOf(at));
   });
 
   it('refuses a start in the future, as when the clock was moved back after choosing', () => {
     const at = NOW + 1;
-    expect(finishOnboarding(answers({ start: { kind: 'past', at } }), NOW)).toEqual(
+    expect(finishOnboarding(answers({ start: { kind: 'past', at } }), NOW, TODAY)).toEqual(
       err('start-in-future'),
     );
   });
 
-  it('refuses an invalid start', () => {
-    expect(finishOnboarding(answers({ start: { kind: 'past', at: Number.NaN } }), NOW)).toEqual(
-      err('invalid-timestamp'),
+  it('stores the lock and the check-in reminder only when they were turned on', () => {
+    const result = unwrap(
+      finishOnboarding(answers({ protection: { lock: true, checkInReminder: true } }), NOW, TODAY),
     );
+    expect(result.lock).toEqual({ ...DEFAULT_LOCK_SETTINGS, enabled: true });
+    expect(result.reminders.checkIn).toEqual({ on: true, minute: 21 * 60 });
+    expect(result.reminders.checkInSince).toBe(TODAY);
+    expect(result.reminders.thought.on).toBe(false);
+  });
+
+  it('refuses an invalid start', () => {
+    expect(
+      finishOnboarding(answers({ start: { kind: 'past', at: Number.NaN } }), NOW, TODAY),
+    ).toEqual(err('invalid-timestamp'));
   });
 });

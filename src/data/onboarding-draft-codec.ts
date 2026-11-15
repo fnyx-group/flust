@@ -4,6 +4,7 @@ import {
   isOnboardingStep,
   type OnboardingAnswers,
   type OnboardingDraft,
+  type Protection,
   type Reason,
   type StartChoice,
 } from '@/domain/onboarding';
@@ -33,6 +34,7 @@ function decodeAnswers(value: unknown): OnboardingAnswers {
     riskMoments: decodeRiskMoments(value.riskMoments),
     plan: decodePlan(value.plan),
     start: decodeStart(value.start),
+    protection: decodeProtection(value.protection),
   };
 }
 
@@ -64,6 +66,12 @@ function decodeStart(value: unknown): StartChoice {
     return { kind: 'past', at: value.at };
   }
   return { kind: 'now' };
+}
+
+// Drafts saved before this step existed have no protection: both stay off.
+function decodeProtection(value: unknown): Protection {
+  if (!isRecord(value)) return EMPTY_DRAFT.answers.protection;
+  return { lock: value.lock === true, checkInReminder: value.checkInReminder === true };
 }
 
 function isTimestamp(value: unknown): value is number {

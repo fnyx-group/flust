@@ -3,6 +3,13 @@ import { useCallback, useRef, useState } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { DEFAULT_REMINDER_SETTINGS, type ReminderSettings } from '@/domain/reminders';
+import { lockValue } from '@/features/lock/labels';
+import { useLock } from '@/features/lock/lock-context';
+import { remindersValue } from '@/features/reminders/labels';
+import { notifier } from '@/features/reminders/notifier';
+import { requestReminderSync } from '@/features/reminders/sync-requests';
+import { deviceCalendar } from '@/features/shared/device-time';
 import { appVersion } from '@/features/settings/app-version';
 import { chooseLanguage } from '@/features/settings/language-choice';
 import { LanguageRow } from '@/features/settings/language-row';
@@ -23,12 +30,14 @@ import { ScreenTitle } from '@/ui/screen-title';
 import { ScrollView } from '@/ui/scroll-view';
 import { colors, spacing, typography } from '@/ui/theme';
 
-// Only what works in this version: the filter, reminders and the lock come with their features.
-// The plan count and the language are read again each time the tab comes into focus, since the
-// reasons and plans screen can change the first.
+// Only what works in this version: the filter comes with its feature. The values are read again
+// each time the tab comes into focus, since the screens behind the rows change them.
 export function SettingsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n: translation } = useTranslation();
   const storage = useStorage();
+  const lock = useLock();
+  const [reminders, setReminders] = useState<ReminderSettings | null>(null);
+  const [{ hour12 }] = useState(deviceCalendar);
   const [planCount, setPlanCount] = useState<number | null>(null);
   const [preference, setPreference] = useState<LanguagePreference | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
@@ -43,6 +52,16 @@ export function SettingsScreen() {
       void storage.profile.loadEntries().then((result) => {
         if (active && result.ok) setPlanCount(result.value.plans.length);
       });
+      // Reminders read as off while notifications are not allowed, as on their screen.
+      void Promise.all([storage.reminders.load(), notifier.getPermission()]).then(
+        ([result, permission]) => {
+          if (!active) return;
+          const settings = result.ok ? result.value : null;
+          setReminders(
+            settings !== null && !permission.granted ? DEFAULT_REMINDER_SETTINGS : settings,
+          );
+        },
+      );
       void storage.settings.loadLanguage().then((result) => {
         if (active && started === choice.current) {
           setPreference(toPreference(result.ok ? result.value : null));
@@ -63,6 +82,7 @@ export function SettingsScreen() {
         apply: async (preference) => {
           setPreference(preference);
           await i18n.changeLanguage(languageOf(preference, getDeviceLanguage()));
+          requestReminderSync();
         },
         isLatest: () => current === choice.current,
       },
@@ -84,6 +104,20 @@ export function SettingsScreen() {
             label={t('settings.reasonsAndPlans')}
             value={planCount === null ? undefined : planCountLabel(t, planCount)}
             onPress={() => router.push('/reasons-and-plans')}
+          />
+          <NavRow
+            label={t('settings.reminders')}
+            value={
+              reminders === null
+                ? undefined
+                : remindersValue(t, reminders, translation.language, hour12)
+            }
+            onPress={() => router.push('/reminders')}
+          />
+          <NavRow
+            label={t('settings.lock')}
+            value={lockValue(t, lock.settings, lock.security, Platform.OS)}
+            onPress={() => router.push('/lock-settings')}
           />
           <LanguageRow preference={preference} onChoose={(next) => void choose(next)} />
           <NavRow label={t('settings.about')} onPress={() => router.push('/about')} />

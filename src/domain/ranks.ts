@@ -1,6 +1,6 @@
 import type { Journey } from '@/domain/journey';
-import { currentStreakMs, totalCleanDays } from '@/domain/streak';
-import { MS_PER_DAY, type Timestamp } from '@/domain/time';
+import { currentStreakMs, streakStart, totalCleanDays } from '@/domain/streak';
+import { MS_PER_DAY, wholeDays, type Timestamp } from '@/domain/time';
 
 type RankDefinition = {
   readonly id: string;
@@ -155,6 +155,20 @@ export function pendingUnlock(
   const total = totalCleanDays(journey, now);
   const { unlock } = rankProgress(storedRanks, total);
   return unlock ? { unlock, totalCleanDays: total } : null;
+}
+
+// The instant the next rank is reached if the current streak goes on, or null once every rank is
+// unlocked. Days of earlier streaks are already counted, so the rest comes from the current one.
+export function nextRankAt(
+  journey: Journey,
+  unlockedRanks: readonly RankId[],
+  now: Timestamp,
+): Timestamp | null {
+  const total = totalCleanDays(journey, now);
+  const next = rankProgress(unlockedRanks, total).next;
+  if (next === null) return null;
+  const earlierDays = total - wholeDays(currentStreakMs(journey, now));
+  return streakStart(journey) + (next.rank.threshold - earlierDays) * MS_PER_DAY;
 }
 
 // Rebuilds an unlock from ids that crossed a boundary as text, such as route parameters, so

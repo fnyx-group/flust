@@ -5,6 +5,7 @@ import type { OnboardingResult, Plan } from '@/domain/onboarding';
 import { err, ok } from '@/domain/result';
 import { journeyOf, unwrap } from '@test/arbitraries';
 import { createFakeStorage } from '@test/fakes/fake-storage';
+import { NO_PROTECTION_SETTINGS } from '@test/protection';
 
 const MINE = unwrap(parseCustomText('Be free'));
 const CALL = unwrap(parseCustomText('Call Sam'));
@@ -21,6 +22,7 @@ const ANSWERS: OnboardingResult = {
     { trigger: 'stress', action: { kind: 'custom', text: CALL } },
     { trigger: 'urge', action: { kind: 'preset', id: 'guided-breathing' } },
   ],
+  ...NO_PROTECTION_SETTINGS,
 };
 
 async function setUp() {

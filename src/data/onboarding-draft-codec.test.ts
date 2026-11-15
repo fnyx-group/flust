@@ -17,6 +17,7 @@ describe('draft codec', () => {
         riskMoments: ['boredom'],
         plan: { trigger: 'urge', action: { kind: 'preset', id: 'walk-ten-minutes' } },
         start: { kind: 'past', at: 1_700_000_000_000 },
+        protection: { lock: true, checkInReminder: false },
       },
     } as OnboardingDraft;
     const { step, answers } = encodeDraft(draft);

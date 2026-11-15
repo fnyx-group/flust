@@ -217,7 +217,9 @@
     "erase": "Tout effacer",
     "eraseHint": "Explique ce qui sera effacé avant de demander confirmation",
     "footer": "flust {{version}} · Open source, chiffré sur ton téléphone",
-    "languageSaveFailed": "La langue n'a pas pu être enregistrée."
+    "languageSaveFailed": "La langue n'a pas pu être enregistrée.",
+    "reminders": "Rappels",
+    "lock": "Verrouillage"
   },
   "about": {
     "title": "À propos",
@@ -406,17 +408,23 @@
     },
     "start": {
       "title": "Dernière étape",
-      "subtitle": "Choisis ton point de départ.",
+      "subtitle": "Protège ton espace et choisis ton point de départ.",
       "label": "Point de départ",
       "now": "Maintenant",
       "pickDate": "Choisir une date",
       "selected": "Point de départ : {{date}}",
       "finish": "C'est parti",
-      "footer": "Tu pourras modifier tes raisons et tes plans plus tard.",
+      "footer": "Tu pourras tout changer dans les réglages.",
       "errors": {
         "start-in-future": "Ce point de départ est dans le futur. Vérifie la date et l'heure de ton téléphone, ou choisis un autre moment.",
         "invalid-timestamp": "Ce point de départ ne peut pas être utilisé. Choisis un autre moment.",
         "save-failed": "Tes réponses n'ont pas pu être enregistrées. Rien n'est perdu. Réessaie."
+      },
+      "protection": {
+        "label": "Protection",
+        "checkInSubtitle": "Un rappel discret à {{time}}",
+        "lockUnavailable": "Ajoute un code de verrouillage à ton téléphone pour activer cette protection.",
+        "lockNotConfirmed": "Le déverrouillage n'a pas été confirmé. Le verrouillage reste désactivé."
       }
     }
   },
@@ -579,5 +587,107 @@
     "epictetus": "Épictète",
     "seneca": "Sénèque",
     "marcus-aurelius": "Marc Aurèle"
+  },
+  "reminders": {
+    "title": "Rappels",
+    "checkIn": {
+      "title": "Check-in du soir",
+      "subtitle": "Faire le point en dix secondes"
+    },
+    "thought": {
+      "title": "Mot du jour",
+      "subtitle": "Une citation chaque matin"
+    },
+    "riskHours": {
+      "title": "Heures à risque",
+      "subtitle": "Un rappel avant tes moments sensibles",
+      "unavailable": "Pour l'activer, choisis « {{night}} » ou « {{weekend}} » dans tes moments à risque."
+    },
+    "ranks": {
+      "title": "Rangs et paliers",
+      "subtitle": "Quand tu débloques un rang"
+    },
+    "time": "Heure du rappel, {{time}}",
+    "timeHint": "Ouvre le choix de l'heure",
+    "sheet": {
+      "hour": "Heures",
+      "minute": "Minutes",
+      "earlierHour": "Une heure plus tôt",
+      "laterHour": "Une heure plus tard",
+      "earlierMinute": "Cinq minutes plus tôt",
+      "laterMinute": "Cinq minutes plus tard",
+      "save": "Enregistrer",
+      "cancel": "Annuler"
+    },
+    "preview": "Aperçu",
+    "previewLabel": "Aperçu d'une notification de flust : {{text}}",
+    "footer": "Les notifications restent neutres. Personne ne peut deviner de quoi parle l'app en voyant ton écran.",
+    "iosPreviews": "Pour masquer aussi leur texte sur l'écran verrouillé, va dans Réglages, Notifications, Afficher les aperçus.",
+    "denied": "Les notifications sont désactivées pour flust. Tu peux les autoriser dans les réglages du téléphone.",
+    "openSettings": "Ouvrir les réglages",
+    "saveFailed": "Le rappel n'a pas pu être enregistré. Réessaie.",
+    "loadFailed": "Les rappels n'ont pas pu être lus. Réessaie plus tard.",
+    "off": "Désactivés",
+    "notifications": {
+      "check-in": "Comment s'est passée ta journée ?",
+      "thought": "Ta pensée du jour est là.",
+      "risk-hours": "Un moment pour toi, si tu en as besoin.",
+      "rank": "Un nouveau palier t'attend.",
+      "return": "flust est là quand tu veux, sans pression.",
+      "channelName": "Rappels",
+      "channelDescription": "Les rappels que tu as activés dans flust",
+      "previewPlaceholder": "Rappel"
+    },
+    "back": "Retour"
+  },
+  "lock": {
+    "locked": "Verrouillé",
+    "unlock": "Déverrouiller",
+    "usePasscode": "Entrer le code",
+    "prompt": "Déverrouiller flust",
+    "cancel": "Annuler",
+    "wait": "Nouvel essai possible dans {{time}}.",
+    "waitSeconds": "{{count}} s",
+    "waitMinutes": "{{count}} min",
+    "lockout": "Trop d'essais. Déverrouille ton téléphone, puis réessaie.",
+    "cover": "flust est masqué",
+    "settings": {
+      "title": "Verrouillage",
+      "toggle": "Verrouiller flust",
+      "toggleWith": "Verrouiller avec {{method}}",
+      "toggleSubtitle": "Avec le code du téléphone en secours",
+      "delay": "Demander à nouveau",
+      "noDeviceLock": "Ajoute un code de verrouillage à ton téléphone pour activer cette protection.",
+      "paused": "Verrouillage en pause : ton téléphone n'a plus de code de verrouillage.",
+      "note": "Le verrouillage protège l'accès à flust sur ce téléphone. Tes données restent chiffrées dans tous les cas.",
+      "notConfirmed": "Le déverrouillage n'a pas été confirmé. Le verrouillage reste désactivé.",
+      "saveFailed": "Le réglage n'a pas pu être enregistré. Réessaie.",
+      "back": "Retour"
+    },
+    "delays": {
+      "0": "Immédiatement",
+      "60000": "Après 1 min",
+      "300000": "Après 5 min",
+      "900000": "Après 15 min",
+      "3600000": "Après 1 h"
+    },
+    "methods": {
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "face": "le visage",
+      "fingerprint": "l'empreinte",
+      "iris": "l'iris",
+      "passcode": "le code"
+    },
+    "values": {
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "face": "Visage",
+      "fingerprint": "Empreinte",
+      "iris": "Iris",
+      "passcode": "Code",
+      "off": "Désactivé",
+      "paused": "En pause"
+    }
   }
 }

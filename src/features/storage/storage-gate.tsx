@@ -7,6 +7,7 @@ import { ResetScreen } from '@/features/storage/reset-screen';
 import { RetryScreen } from '@/features/storage/retry-screen';
 import { closeThenShow } from '@/features/storage/close-then-show';
 import { EraseFailedScreen } from '@/features/storage/erase-failed-screen';
+import { notifier } from '@/features/reminders/notifier';
 import { createErasedNotice, createEraseFlow, type EraseStep } from '@/features/storage/erase-flow';
 import { ErasingScreen } from '@/features/storage/erasing-screen';
 import {
@@ -37,6 +38,10 @@ export function StorageGate({ children }: { children: ReactNode }) {
       reset: () => storageService.reset(),
       applyDeviceLanguage: async () => {
         await i18n.changeLanguage(getDeviceLanguage());
+      },
+      clearReminders: async () => {
+        await notifier.replace([]);
+        await notifier.clearDelivered();
       },
       show: (step: EraseStep) => {
         if (step !== 'erased') {

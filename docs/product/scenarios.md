@@ -41,14 +41,14 @@ A clock set forwards can unlock ranks early. This is accepted: the app is person
 
 ## Unresponsive user
 
-| Case                               | Expected behavior                                                             |
-| ---------------------------------- | ----------------------------------------------------------------------------- |
-| Several reminders ignored in a row | Reminders space out automatically.                                            |
-| App not opened for 7 days          | One kind message is sent, then the app stays silent until it is opened again. |
-| Missed check-ins                   | Never shown as failures, in the check-in, the journal or the statistics.      |
-| Notification permission refused    | Everything works without it. Reminders are simply not delivered.              |
-| Onboarding interrupted             | The onboarding resumes at the same step on next launch.                       |
-| Onboarding steps skipped           | Skipped steps get default values, which can be changed later in the settings. |
+| Case                               | Expected behavior                                                                                                             |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Several reminders ignored in a row | Reminders space out automatically, then one a day at most from the third day without opening the app.                         |
+| App not opened for 7 days          | One kind message is sent, "flust is here whenever you like, no pressure", then the app stays silent until it is opened again. |
+| Missed check-ins                   | Never shown as failures, in the check-in, the journal or the statistics.                                                      |
+| Notification permission refused    | Everything works without it. The reminder stays off, and the reminders screen offers the system settings.                     |
+| Onboarding interrupted             | The onboarding resumes at the same step on next launch.                                                                       |
+| Onboarding steps skipped           | Skipped steps get default values, which can be changed later in the settings.                                                 |
 
 ## Journal
 
@@ -69,13 +69,17 @@ A clock set forwards can unlock ranks early. This is accepted: the app is person
 
 Notification text is always neutral and never reveals what the app is about.
 
-| Case                                  | Expected behavior                                                                                                |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Permission revoked later              | The app detects it on launch, shows reminders as inactive in the settings and explains how to enable them again. |
-| Focus mode                            | Notifications follow the system Focus settings. The app does not try to bypass them.                             |
-| Android reboot                        | Scheduled reminders are cleared by the system, so they are rescheduled after boot and on next launch.            |
-| Android exact alarm restrictions      | Reminders still work when exact alarms are not allowed, with a possible delay.                                   |
-| iOS limit of 64 pending notifications | The app never schedules more than 64 notifications. It schedules the nearest ones and tops up on each launch.    |
+| Case                                  | Expected behavior                                                                                                                                                            |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Permission revoked later              | Reminders show as off in the settings and on their screen, which explains how to allow them again. Nothing is planned until they are.                                        |
+| Focus mode                            | Notifications follow the system Focus settings. The app does not try to bypass them.                                                                                         |
+| Android reboot                        | Alarms are cleared by the system. flust sets them again after boot, after an update and on next launch.                                                                      |
+| Android exact alarm restrictions      | flust never asks for exact alarms. Reminders can arrive a few minutes late, and Doze can batch them.                                                                         |
+| Time zone change                      | Reminders keep their wall time, such as 21:00, in the new zone. On Android, flust converts them again when the zone or the clock changes. A rank reminder keeps its instant. |
+| Lapse logged                          | No reminder follows a lapse. A rank reached in the six hours after it is announced once they end, in the daytime.                                                            |
+| Notification tapped while locked      | The app asks to unlock first, then opens the reminder's screen.                                                                                                              |
+| Everything erased                     | Planned and delivered reminders are cancelled before the data is erased.                                                                                                     |
+| iOS limit of 64 pending notifications | A plan holds about twenty notifications at most, a week ahead, well under the limit.                                                                                         |
 
 ## Lock and encryption
 
@@ -83,10 +87,13 @@ Notification text is always neutral and never reveals what the app is about.
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Biometrics refused               | The passcode is used.                                                                                                                                                                                         |
 | Biometrics unavailable           | The passcode is used.                                                                                                                                                                                         |
-| Biometrics changed on the device | The passcode is required before biometrics are trusted again.                                                                                                                                                 |
-| Forgotten passcode               | The data cannot be recovered. This is stated during onboarding. A full wipe is offered.                                                                                                                       |
+| Biometrics changed on the device | The system decides whether biometrics are still trusted, and offers the device passcode otherwise. Data stays readable: the key is not bound to biometrics.                                                   |
+| Forgotten passcode               | flust has no passcode of its own. The device passcode is reset through the device, and flust data is not affected.                                                                                            |
 | Erase from the settings          | Two steps say what is erased and that it cannot be undone. Storage is closed, the database, its backup and the key are deleted, and the onboarding starts again. If erasing fails, trying again erases again. |
-| Failed unlock attempts           | A growing delay is applied after each failed attempt.                                                                                                                                                         |
+| Failed unlock attempts           | The first two are free. Then each one waits longer: 30 seconds, 1, 5 and 15 minutes, up to 1 hour. Changing the clock does not shorten it, and a restart resumes it. A system interruption does not count.    |
+| Device screen lock removed       | The lock is paused, and the settings say so. It works again once a screen lock is set.                                                                                                                        |
+| App sent to the background       | Its content is covered at once. Coming back within the chosen delay uncovers it; after it, the app asks again.                                                                                                |
+| Link opened while locked         | Nothing opens before the unlock. The link is followed after it.                                                                                                                                               |
 | Reinstall on iOS                 | The iOS keychain keeps keys after uninstall. On reinstall, the app detects a stale key with no matching data and replaces it.                                                                                 |
 | Phone restored without the key   | The data cannot be decrypted. The app offers a reset.                                                                                                                                                         |
 | Any write to storage             | Every write runs in a transaction, so an interrupted write never leaves partial data.                                                                                                                         |
@@ -96,7 +103,7 @@ Notification text is always neutral and never reveals what the app is about.
 
 | Case                             | Expected behavior                                                                                                                 |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Opened from a notification       | The app unlocks, then opens the emergency screen directly.                                                                        |
+| Opened from a notification       | The app asks to unlock first when the lock is on, then opens the emergency screen directly.                                       |
 | Phone call or app in background  | The timer counts the time elapsed since the screen opened, so it shows the correct remaining time when the user comes back.       |
 | Phone time changed on the screen | The timer and the breathing follow a monotonic clock in the foreground: changing the phone's time neither freezes nor skips them. |
 | Reduced motion enabled           | Breathing guidance and transitions use no large movement.                                                                         |

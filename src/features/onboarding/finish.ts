@@ -17,8 +17,9 @@ export async function finish(
   onboarding: Pick<OnboardingRepository, 'complete'>,
   answers: OnboardingAnswers,
   now: number,
+  today: number,
 ): Promise<Result<Journey, FinishError>> {
-  const result = finishOnboarding(answers, now);
+  const result = finishOnboarding(answers, now, today);
   if (!result.ok) return err(result.error);
   const saved = await onboarding.complete(result.value);
   return saved.ok ? ok(result.value.journey) : err('save-failed');

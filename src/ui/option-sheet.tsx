@@ -2,6 +2,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/ui/button';
+import { useOverlaysHidden } from '@/ui/overlays';
 import { RadioGroup, type RadioOption } from '@/ui/radio-group';
 import { ScrollView } from '@/ui/scroll-view';
 import { backdropOpacity, colors, radii, spacing, typography } from '@/ui/theme';
@@ -29,8 +30,9 @@ export function OptionSheet<K extends string>({
   onClose,
 }: OptionSheetProps<K>) {
   const insets = useSafeAreaInsets();
+  const hidden = useOverlaysHidden();
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={visible && !hidden} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.container}>
         <Pressable
           accessibilityRole="button"

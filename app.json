@@ -9,7 +9,10 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#111116",
     "ios": {
-      "bundleIdentifier": "org.fnyxgroup.flust"
+      "bundleIdentifier": "org.fnyxgroup.flust",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "flust uses Face ID to keep your space private."
+      }
     },
     "android": {
       "package": "org.fnyxgroup.flust",
@@ -19,7 +22,13 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "allowBackup": false
+      "allowBackup": false,
+      "blockedPermissions": [
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.DETECT_SCREEN_CAPTURE"
+      ]
     },
     "web": {
       "output": "server",
@@ -33,13 +42,35 @@
         {
           "backgroundColor": "#111116",
           "image": "./assets/brand/flust-lockup.png",
-          "imageWidth": 200
+          "imageWidth": 200,
+          "android": {
+            "image": "./assets/brand/flust-symbol.png",
+            "imageWidth": 96
+          }
         }
       ],
       "expo-font",
       "expo-localization",
-      ["expo-sqlite", { "useSQLCipher": true }],
-      ["expo-secure-store", { "configureAndroidBackup": false, "faceIDPermission": false }]
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": false,
+          "faceIDPermission": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "enableRemoteNotifications": false
+        }
+      ],
+      "expo-local-authentication"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -54,6 +85,10 @@
       "eas": {
         "projectId": "50f57776-c6c8-4194-9dd5-c5a0e74d24f8"
       }
+    },
+    "locales": {
+      "en": "./assets/native-strings/en.json",
+      "fr": "./assets/native-strings/fr.json"
     }
   }
 }
