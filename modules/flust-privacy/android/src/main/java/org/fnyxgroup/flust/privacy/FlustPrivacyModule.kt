@@ -10,7 +10,9 @@ import expo.modules.kotlin.modules.ModuleDefinition
 // crashes without DETECT_SCREEN_CAPTURE, a permission flust blocks since it detects nothing.
 class FlustPrivacyModule : Module() {
   // Applied again to each activity that comes to the foreground, so a recreated one is covered.
-  private var secure = false
+  // Null until setSecure is called, so a build that never calls it, such as the development
+  // build, never touches the window.
+  private var secure: Boolean? = null
 
   override fun definition() = ModuleDefinition {
     Name("FlustPrivacy")
@@ -27,12 +29,17 @@ class FlustPrivacyModule : Module() {
     OnActivityEntersForeground { applySecure() }
   }
 
+  // OnActivityEntersForeground can fire on the JS thread, and only the UI thread may touch the
+  // window.
   private fun applySecure() {
-    val window = appContext.currentActivity?.window ?: return
-    if (secure) {
-      window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-    } else {
-      window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+    val on = secure ?: return
+    val activity = appContext.currentActivity ?: return
+    activity.runOnUiThread {
+      if (on) {
+        activity.window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+      } else {
+        activity.window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+      }
     }
   }
 }
