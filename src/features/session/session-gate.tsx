@@ -1,12 +1,15 @@
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, type ReactNode } from 'react';
 
+import { withCheckIn, type CheckIn } from '@/domain/check-in';
 import type { Journey } from '@/domain/journey';
 import type { LapseRecord } from '@/domain/lapse';
+import { localDayNumber } from '@/domain/local-time';
 import { withUnlocked, type RankId } from '@/domain/ranks';
 import { createUnlockAnnouncer } from '@/features/ranks/unlock-announcer';
 import { loadSession, type SessionData } from '@/features/session/load-session';
 import { SessionContext } from '@/features/session/session-context';
+import { deviceOffsetAt } from '@/features/shared/device-time';
 import { useReportStorageFailure, useStorage } from '@/features/storage/storage-context';
 
 type SessionState = { status: 'loading' } | { status: 'ready'; data: SessionData };
@@ -27,7 +30,7 @@ export function SessionGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    loadSession(storage).then((result) => {
+    loadSession(storage, localDayNumber(Date.now(), deviceOffsetAt)).then((result) => {
       if (!active) return;
       if (result.ok) setState({ status: 'ready', data: result.value });
       else reportFailure(result.error);
@@ -49,16 +52,32 @@ export function SessionGate({ children }: { children: ReactNode }) {
     draft: data.draft,
     unlockedRanks: data.unlockedRanks,
     latestLapse: data.latestLapse,
+    checkIns: data.checkIns,
+    lowMoodDismissedDay: data.lowMoodDismissedDay,
     setJourney: (journey: Journey) => setState({ status: 'ready', data: { ...data, journey } }),
     setLapses: (journey: Journey, latestLapse: LapseRecord | null) =>
       setState({ status: 'ready', data: { ...data, journey, latestLapse } }),
     announceUnlock: announcer.announce,
+    setCheckIn: (checkIn: CheckIn) =>
+      setState((previous) =>
+        update(previous, (ready) => ({
+          checkIns: withCheckIn(ready.checkIns, checkIn),
+        })),
+      ),
+    dismissLowMood: (day: number) =>
+      setState((previous) => update(previous, () => ({ lowMoodDismissedDay: day }))),
   };
   return <SessionContext value={session}>{children}</SessionContext>;
 }
 
 function addUnlocked(state: SessionState, ids: readonly RankId[]): SessionState {
+  return update(state, (data) => ({ unlockedRanks: withUnlocked(data.unlockedRanks, ids) }));
+}
+
+function update(
+  state: SessionState,
+  change: (data: SessionData) => Partial<SessionData>,
+): SessionState {
   if (state.status !== 'ready') return state;
-  const unlockedRanks = withUnlocked(state.data.unlockedRanks, ids);
-  return { status: 'ready', data: { ...state.data, unlockedRanks } };
+  return { status: 'ready', data: { ...state.data, ...change(state.data) } };
 }

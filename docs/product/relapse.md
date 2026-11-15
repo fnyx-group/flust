@@ -47,7 +47,7 @@ Pattern detection is computed on the device only. Nothing is sent anywhere.
 ## Special cases
 
 - Frequent lapses over a long period lead to a gentle suggestion to talk to someone, with a link to the help page.
-- Several very low mood check-ins in a row show help and crisis resources.
+- When the three most recent check-ins of the last 14 local days all have a mood of 1 or 2, home shows a calm card. It suggests talking to someone you trust or a health professional, and reminds the user to call the local emergency number if they are in danger. It can be closed for the day. Country-specific numbers come with the help page. See [0018](../decisions/0018-daily-check-in.md).
 - The app never reads the journal. Pattern detection and suggestions use lapses and check-ins only.
 - A lapse logged by mistake can be undone from the "Lapse noted · Undo" line on the home screen, until local midnight and never less than an hour after it was logged. The previous streak, the answers and the plan are restored. See [0016](../decisions/0016-lapse-records-and-urge-events.md).
 

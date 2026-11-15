@@ -6,7 +6,8 @@ import { colors, fonts, radii, sizes, spacing, typography } from '@/ui/theme';
 type SegmentedControlProps<K extends string> = {
   accessibilityLabel: string;
   options: readonly RadioOption<K>[];
-  selected: K;
+  // Null until a first choice, when no answer must be suggested.
+  selected: K | null;
   onSelect: (key: K) => void;
 };
 

@@ -10,8 +10,10 @@ import { streakStart } from '@/domain/streak';
 import { ClockContext } from '@/features/clock/clock-context';
 import { createMinuteClock } from '@/features/clock/minute-clock';
 import { nativeClockDeps } from '@/features/clock/native-clock';
+import { CheckInLine } from '@/features/home/check-in-line';
 import { DailyQuote } from '@/features/home/daily-quote';
 import { SupportLine, UndoLine } from '@/features/home/lapse-lines';
+import { LowMoodCard } from '@/features/home/low-mood-card';
 import { RankBadge } from '@/features/home/rank-badge';
 import { StreakCounter } from '@/features/home/streak-counter';
 import { WeekStrip } from '@/features/home/week-strip';
@@ -36,9 +38,10 @@ type HomeProps = {
   latestLapse: LapseRecord | null;
 };
 
-// This component never reads the clock: only the badge, the counter, the week strip and the quote
-// subscribe to it, so a tick re-renders them and nothing else. A lapse moves the streak start,
-// which the clock's ticks are aligned to, so it gets a new clock.
+// This component never reads the clock: only the badge, the counter, the week strip, the quote, the
+// check-in line and the low mood card subscribe to it, so a tick re-renders them and nothing
+// else. A lapse moves the streak start, which the clock's ticks are aligned to, so it gets a new
+// clock.
 function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
   const { t } = useTranslation();
   const anchor = streakStart(journey);
@@ -67,9 +70,11 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
             </View>
             <View style={styles.quote}>
               <DailyQuote start={journey.start} />
+              <CheckInLine />
             </View>
           </View>
           <View style={styles.actions}>
+            <LowMoodCard />
             <SupportLine latestLapse={latestLapse} />
             <Button label={t('home.urgeButton')} onPress={() => router.push('/emergency')} />
             <Button
@@ -112,6 +117,7 @@ const styles = StyleSheet.create({
   },
   quote: {
     marginTop: spacing.xxxl,
+    gap: spacing.s,
   },
   actions: {
     gap: spacing.s,

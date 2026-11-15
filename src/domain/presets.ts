@@ -60,3 +60,13 @@ export function isPlanTrigger(value: unknown): value is PlanTrigger {
 export const isActionId = isOneOf(ACTION_IDS);
 
 export const isPlaceId = isOneOf(PLACE_IDS);
+
+// Adds or removes a risk moment, keeping the preset order so a chosen context always reads the
+// same way.
+export function toggleRiskMoment(
+  selected: readonly RiskMomentId[],
+  id: RiskMomentId,
+): RiskMomentId[] {
+  const next = selected.includes(id) ? selected.filter((other) => other !== id) : [...selected, id];
+  return RISK_MOMENT_IDS.filter((moment) => next.includes(moment));
+}

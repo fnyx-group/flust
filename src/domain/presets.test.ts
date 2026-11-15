@@ -8,6 +8,7 @@ import {
   PLACE_IDS,
   REASON_IDS,
   RISK_MOMENT_IDS,
+  toggleRiskMoment,
   URGE_TRIGGER,
 } from '@/domain/presets';
 
@@ -37,5 +38,18 @@ describe('presets', () => {
     }
     expect(isReasonId('stress')).toBe(false);
     expect(isActionId('sleep')).toBe(false);
+  });
+});
+
+describe('toggleRiskMoment', () => {
+  it('adds and removes a moment, in the preset order', () => {
+    expect(toggleRiskMoment([], 'weekend')).toEqual(['weekend']);
+    expect(toggleRiskMoment(['weekend'], 'in-bed-at-night')).toEqual([
+      'in-bed-at-night',
+      'weekend',
+    ]);
+    expect(toggleRiskMoment(['in-bed-at-night', 'weekend'], 'weekend')).toEqual([
+      'in-bed-at-night',
+    ]);
   });
 });
