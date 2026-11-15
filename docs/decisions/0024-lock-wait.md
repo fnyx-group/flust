@@ -8,7 +8,7 @@ The system prompt limits biometric attempts, but cancelling it costs nothing, so
 
 - Failed and cancelled attempts count. Interruptions by the system, such as a call, do not, nor does a system lockout, which already has its own wait.
 - The first two attempts are free. Then the wait grows: 30 seconds, 1, 5 and 15 minutes, then 1 hour at most (`waitAfter`, `src/domain/lock.ts`).
-- The wait counts down on a clock that keeps running while the phone sleeps and that the date and time settings do not move: `SystemClock.elapsedRealtime` on Android, `CLOCK_MONOTONIC_RAW` on iOS, read through `modules/flust-clock`. Changing the time, in the foreground or while the app is away, does not shorten it. `performance.now()` stops while the phone sleeps, which would have needed the wall clock to catch up. It is stored every ten seconds, and at each attempt, with the wall time it was saved at.
+- The wait counts down on a clock that keeps running while the phone sleeps and that the date and time settings do not move: `SystemClock.elapsedRealtime` on Android, `CLOCK_MONOTONIC_RAW` on iOS, read through `modules/flust-privacy`. Changing the time, in the foreground or while the app is away, does not shorten it. `performance.now()` stops while the phone sleeps, which would have needed the wall clock to catch up. It is stored every ten seconds, and at each attempt, with the wall time it was saved at.
 - After a restart, the wall time since it was saved is taken off. A clock set back gives no credit.
 - A successful unlock clears the attempts. A stored value that cannot be read counts as no attempts.
 

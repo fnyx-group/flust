@@ -75,7 +75,8 @@
       "android": {
         "exclude": [
           "expo-notifications",
-          "expo-application"
+          "expo-application",
+          "expo-screen-capture"
         ]
       }
     }

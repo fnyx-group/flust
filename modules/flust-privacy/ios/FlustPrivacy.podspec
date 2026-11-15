@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name           = 'FlustClock'
+  s.name           = 'FlustPrivacy'
   s.version        = '0.1.0'
   s.summary        = 'A clock that keeps running while the phone sleeps.'
   s.description    = 'A clock that keeps running while the phone sleeps and ignores the date and time settings.'

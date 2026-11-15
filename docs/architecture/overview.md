@@ -37,7 +37,7 @@ Content blocking needs platform APIs that Expo does not expose:
 
 Reminders on Android use `modules/flust-reminders`, a Kotlin module that sets local alarms and shows notifications, so the app links no Firebase code ([0021](../decisions/0021-local-notifications.md)). iOS uses `expo-notifications`.
 
-`modules/flust-clock`, in Swift and Kotlin, reads a clock that keeps running while the phone sleeps, for the wait between unlock attempts ([0024](../decisions/0024-lock-wait.md)).
+`modules/flust-privacy`, in Swift and Kotlin, reads a clock that keeps running while the phone sleeps, for the wait between unlock attempts ([0024](../decisions/0024-lock-wait.md)). On Android, it also sets `FLAG_SECURE` on the app's window, in place of `expo-screen-capture`, which is not linked there ([0025](../decisions/0025-screen-privacy.md)).
 
 They live in `modules/` as local Expo modules. Any native code requires a development build, Expo Go cannot load it.
 

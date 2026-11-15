@@ -1,6 +1,0 @@
-{
-  "name": "flust-clock",
-  "version": "0.1.0",
-  "private": true,
-  "description": "A clock that keeps running while the phone sleeps and ignores the date and time settings."
-}

@@ -71,7 +71,7 @@ const nativeScrollViews = {
 const ownedPackages = [
   { name: 'expo-notifications', owner: 'src/features/reminders/notifier.ios.ts' },
   { name: 'expo-local-authentication', owner: 'src/features/lock/local-auth.ts' },
-  { name: 'expo-screen-capture', owner: 'src/features/lock/privacy-screen.ts' },
+  { name: 'expo-screen-capture', owner: 'src/features/lock/privacy-screen.ios.ts' },
 ];
 
 // Local notifications only: nothing that registers the device with a push service.

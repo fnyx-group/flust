@@ -7,7 +7,7 @@ group = 'org.fnyxgroup.flust'
 version = '0.1.0'
 
 android {
-  namespace "org.fnyxgroup.flust.clock"
+  namespace "org.fnyxgroup.flust.privacy"
   defaultConfig {
     versionCode 1
     versionName '0.1.0'
