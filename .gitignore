@@ -48,3 +48,4 @@ example
 
 # test coverage
 coverage/
+modules/*/android/build/
