@@ -3,6 +3,7 @@ import * as fc from 'fast-check';
 import { localDayNumber, utcToLocal, weekdayOf } from '@/domain/local-time';
 import { RISK_MOMENT_IDS } from '@/domain/presets';
 import {
+  allRemindersOff,
   anyReminderOn,
   DEFAULT_REMINDER_SETTINGS,
   hasTimedRiskMoment,
@@ -122,6 +123,18 @@ describe('planReminders', () => {
     expect(daysOf(plan, 'check-in')).toEqual([1, 2, 3, 5]);
   });
 
+  it('starts the check-in spacing again once it ran out, so an open reminds again', () => {
+    const settings = only({ checkIn: { on: true, minute: 21 * 60 }, checkInSince: TODAY - 30 });
+    const plan = planReminders(input({ settings, checkInDays: [TODAY - 10] }), NOW, paris);
+    expect(daysOf(plan, 'check-in')).toEqual([0, 1, 2, 4, 6]);
+  });
+
+  it('keeps the spacing from the last check-in while it still has days to come', () => {
+    const settings = only({ checkIn: { on: true, minute: 21 * 60 }, checkInSince: TODAY - 30 });
+    const plan = planReminders(input({ settings, checkInDays: [TODAY - 6] }), NOW, paris);
+    expect(daysOf(plan, 'check-in')).toEqual([1]);
+  });
+
   it('sends the return message at 19:00 without the check-in reminder', () => {
     const plan = planReminders(input({ settings: only({ ranks: true }) }), NOW, paris);
     expect(plan).toHaveLength(1);
@@ -173,11 +186,22 @@ describe('planReminders', () => {
     const settings = only({
       checkIn: { on: true, minute: 21 * 60 },
       thought: { on: true, minute: 21 * 60 + 30 },
+    });
+    const plan = planReminders(input({ settings }), NOW, paris);
+    const today = plan.filter((reminder) => localDayNumber(reminder.at, paris) === TODAY);
+    expect(today.map((reminder) => reminder.kind)).toEqual(['check-in']);
+  });
+
+  it('reminds before the night even right after the check-in, on its own spacing', () => {
+    const settings = only({
+      checkIn: { on: true, minute: 21 * 60 },
+      thought: { on: true, minute: 20 * 60 },
       riskHours: true,
     });
     const plan = planReminders(input({ settings, riskMoments: ['in-bed-at-night'] }), NOW, paris);
+    expect(daysOf(plan, 'risk-hours')).toEqual([0, 1, 2, 4]);
     const today = plan.filter((reminder) => localDayNumber(reminder.at, paris) === TODAY);
-    expect(today.map((reminder) => reminder.kind)).toEqual(['check-in']);
+    expect(today.map((reminder) => reminder.kind)).toEqual(['check-in', 'risk-hours']);
   });
 
   it('times the rank reminder for when it is reached, in the daytime', () => {
@@ -250,9 +274,7 @@ describe('planReminders', () => {
       fc.assert(
         fc.property(planArb, (arb) => {
           const { plan, offsetAt, today } = planFrom(arb);
-          const routine = plan.filter(
-            (r) => r.kind === 'check-in' || r.kind === 'thought' || r.kind === 'risk-hours',
-          );
+          const routine = plan.filter((r) => r.kind === 'check-in' || r.kind === 'thought');
           const byDay = new Map<number, PlannedReminder[]>();
           for (const reminder of routine) {
             const day = localDayNumber(reminder.at, offsetAt);
@@ -265,6 +287,26 @@ describe('planReminders', () => {
               expect(Math.abs((a?.at ?? 0) - (b?.at ?? 0))).toBeGreaterThanOrEqual(2 * MS_PER_HOUR);
             }
           }
+        }),
+      );
+    });
+
+    it('reminds of each timed risk moment on its own spacing, whatever else is planned', () => {
+      fc.assert(
+        fc.property(planArb, (arb) => {
+          const { plan, offsetAt, today } = planFrom(arb);
+          const night = plan.filter(
+            (r) => r.kind === 'risk-hours' && r.local.hour * 60 + r.local.minute === 22 * 60 + 30,
+          );
+          const expected =
+            arb.settings.riskHours && arb.riskMoments.includes('in-bed-at-night')
+              ? [0, 1, 2, 4].filter((gap) => {
+                  const local = utcToLocal(arb.now, offsetAt);
+                  const passed = local.hour * 60 + local.minute >= 22 * 60 + 30;
+                  return gap > 0 || !passed;
+                })
+              : [];
+          expect(night.map((r) => localDayNumber(r.at, offsetAt) - today)).toEqual(expected);
         }),
       );
     });
@@ -328,6 +370,22 @@ describe('setCheckInReminder', () => {
     const off = setCheckInReminder(on, false, 106);
     expect(off).toMatchObject({ checkIn: { on: false }, checkInSince: 100 });
     expect(setCheckInReminder(off, true, 110).checkInSince).toBe(110);
+  });
+});
+
+describe('allRemindersOff', () => {
+  it('turns every reminder off and keeps the chosen times', () => {
+    const on: ReminderSettings = {
+      checkIn: { on: true, minute: 20 * 60 },
+      thought: { on: true, minute: 7 * 60 },
+      riskHours: true,
+      ranks: true,
+      checkInSince: 100,
+    };
+    const off = allRemindersOff(on);
+    expect(anyReminderOn(off)).toBe(false);
+    expect(off).toMatchObject({ checkIn: { minute: 20 * 60 }, thought: { minute: 7 * 60 } });
+    expect(setCheckInReminder(off, true, 120).checkInSince).toBe(120);
   });
 });
 

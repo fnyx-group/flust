@@ -4,7 +4,11 @@ import { AppState } from 'react-native';
 import { notificationLabels, notificationText } from '@/features/reminders/labels';
 import { notifier } from '@/features/reminders/notifier';
 import { createSerialRunner, syncReminders } from '@/features/reminders/reminder-sync';
-import { onReminderSyncRequest } from '@/features/reminders/sync-requests';
+import {
+  onReminderSyncIdle,
+  onReminderSyncRequest,
+  reminderSyncPaused,
+} from '@/features/reminders/sync-requests';
 import { useSession } from '@/features/session/session-context';
 import { deviceOffsetAt } from '@/features/shared/device-time';
 import { useStorage } from '@/features/storage/storage-context';
@@ -21,6 +25,7 @@ function createSync(storage: Storage) {
       offsetAt: deviceOffsetAt,
       labels: notificationLabels(i18n.t),
       bodyOf: (kind) => notificationText(i18n.t, kind),
+      paused: reminderSyncPaused,
     }),
   );
 }
@@ -30,9 +35,11 @@ function createSync(storage: Storage) {
 export function useReminderSync(): void {
   const storage = useStorage();
   const { journey, latestLapse, checkIns, unlockedRanks } = useSession();
-  const sync = useMemo(() => createSync(storage), [storage]);
+  const runner = useMemo(() => createSync(storage), [storage]);
+  const sync = runner.run;
 
   useEffect(() => onReminderSyncRequest(() => void sync()), [sync]);
+  useEffect(() => onReminderSyncIdle(runner.idle), [runner]);
 
   useEffect(() => {
     void notifier.clearDelivered();

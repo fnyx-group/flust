@@ -16,6 +16,7 @@ import {
 } from '@/domain/local-time';
 import { err, ok } from '@/domain/result';
 import { MS_PER_DAY, MS_PER_MINUTE } from '@/domain/time';
+import { localToUtcCases } from '@test/local-to-utc-cases';
 import { fixedOffset, zoneOffsetAt } from '@test/zones';
 
 function local(year: number, month: number, day: number, hour = 0, minute = 0): LocalDateTime {
@@ -202,6 +203,12 @@ describe('localToUtc', () => {
         }),
       );
     });
+  });
+});
+
+describe('localToUtc and the Android WallTime', () => {
+  it.each(localToUtcCases())('resolves $local in $zone like WallTime', ({ zone, local, utc }) => {
+    expect(localToUtc(local, zoneOffsetAt(zone))).toEqual(ok(utc));
   });
 });
 

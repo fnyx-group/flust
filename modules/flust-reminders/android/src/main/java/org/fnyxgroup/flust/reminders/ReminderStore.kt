@@ -4,10 +4,13 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.IOException
 
 // The planned list and the channel's name, kept in the no-backup directory so they never reach a
 // backup. The text is the neutral notification wording, nothing from the user's data. The file
 // is written whole to a temporary file and renamed, so an interrupted write never leaves half.
+// Every instance shares one lock: the module, the alarm receiver and the reschedule receiver each
+// make their own, from different threads.
 class ReminderStore(context: Context) {
   private val file = File(context.noBackupFilesDir, FILE_NAME)
 
@@ -17,23 +20,22 @@ class ReminderStore(context: Context) {
     val channelDescription: String,
   )
 
-  @Synchronized
-  fun read(): Contents {
+  fun read(): Contents = synchronized(LOCK) {
     if (!file.exists()) return EMPTY
-    return try {
+    try {
       decode(JSONObject(file.readText()))
     } catch (error: Exception) {
       EMPTY
     }
   }
 
-  @Synchronized
-  fun write(contents: Contents) {
-    val temporary = File(file.parentFile, "$FILE_NAME.tmp")
-    temporary.writeText(encode(contents).toString())
-    if (!temporary.renameTo(file)) {
-      file.delete()
-      temporary.renameTo(file)
+  fun write(contents: Contents) = synchronized(LOCK) {
+    val temporary = File.createTempFile(FILE_NAME, ".tmp", file.parentFile)
+    try {
+      temporary.writeText(encode(contents).toString())
+      if (!temporary.renameTo(file)) throw IOException("Could not replace $FILE_NAME")
+    } finally {
+      temporary.delete()
     }
   }
 
@@ -87,6 +89,9 @@ class ReminderStore(context: Context) {
   }
 
   companion object {
+    // Held across a read and the write that follows it, so no update is lost between threads.
+    val LOCK = Any()
+
     private const val FILE_NAME = "flust-reminders.json"
 
     // Until the app has named the channel in the user's language.

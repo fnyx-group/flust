@@ -71,7 +71,7 @@ Notification text is always neutral and never reveals what the app is about.
 
 | Case                                  | Expected behavior                                                                                                                                                            |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Permission revoked later              | Reminders show as off in the settings and on their screen, which explains how to allow them again. Nothing is planned until they are.                                        |
+| Permission revoked later              | Every reminder is turned off, in the settings and on their screen, which explains how to allow them again. Allowing them again turns none back on by itself.                 |
 | Focus mode                            | Notifications follow the system Focus settings. The app does not try to bypass them.                                                                                         |
 | Android reboot                        | Alarms are cleared by the system. flust sets them again after boot, after an update and on next launch.                                                                      |
 | Android exact alarm restrictions      | flust never asks for exact alarms. Reminders can arrive a few minutes late, and Doze can batch them.                                                                         |

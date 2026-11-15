@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import type { Attempts } from '@/domain/lock';
 import { MS_PER_SECOND } from '@/domain/time';
 import { createElapsedClock } from '@/features/clock/elapsed-clock';
-import { nativeElapsedClockDeps } from '@/features/clock/native-clock';
+import { continuousClockDeps } from '@/features/clock/continuous-clock';
 
 const SAVE_EVERY_MS = 10 * MS_PER_SECOND;
 
@@ -18,11 +18,12 @@ type Countdown = {
   onEnd(): void;
 };
 
-// The wait left, counted on a monotonic clock so changing the phone's time does not shorten it.
+// The wait left, counted on a clock that keeps running while the phone sleeps, so changing the
+// phone's time does not shorten it, in the foreground or away.
 // It is saved every ten seconds while it runs.
 export function useWaitCountdown(attempts: Attempts, { save, onEnd }: Countdown): number {
   const clock = useMemo(
-    () => (attempts.waitMs > 0 ? createElapsedClock(nativeElapsedClockDeps) : NO_CLOCK),
+    () => (attempts.waitMs > 0 ? createElapsedClock(continuousClockDeps) : NO_CLOCK),
     [attempts.waitMs],
   );
   const elapsed = useSyncExternalStore(clock.subscribe, clock.now);

@@ -4,13 +4,15 @@ import { createTickClock, type ClockDeps, type TickClock } from '@/features/cloc
 export type ElapsedClockDeps = ClockDeps & {
   // Only moves forward, whatever is done to the phone's date and time.
   monotonicNow(): number;
+  // The monotonic clock keeps running while the phone sleeps, so the wall clock is never read.
+  readonly monotonicCountsSleep?: boolean;
 };
 
 // A clock whose `now()` is the time elapsed since it was created, ticking on its whole periods.
 // In the foreground it follows the monotonic clock, so setting the phone's time neither freezes
 // nor skips it. The monotonic clock can stop while the phone sleeps, so the first reading after a
 // return from the background counts the wall clock's gap when it is longer; a wall clock moved
-// back meanwhile leaves the monotonic gap.
+// back meanwhile leaves the monotonic gap. A monotonic clock that counts sleep needs neither.
 export function createElapsedClock(
   deps: ElapsedClockDeps,
   periodMs: number = MS_PER_SECOND,
@@ -25,7 +27,8 @@ export function createElapsedClock(
     const monotonic = deps.monotonicNow();
     const wall = deps.now();
     const monotonicGap = Math.max(0, monotonic - lastMonotonic);
-    elapsed += resumed ? Math.max(monotonicGap, wall - lastWall) : monotonicGap;
+    const wallGap = resumed && deps.monotonicCountsSleep !== true ? wall - lastWall : 0;
+    elapsed += Math.max(monotonicGap, wallGap);
     resumed = false;
     lastMonotonic = monotonic;
     lastWall = wall;

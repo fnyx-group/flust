@@ -1,6 +1,6 @@
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
-import { Keyboard, StyleSheet, View } from 'react-native';
+import { BackHandler, Keyboard, StyleSheet, View } from 'react-native';
 
 import type { Storage } from '@/data/open-storage';
 import {
@@ -104,6 +104,13 @@ function Gate({ loaded, children }: GateProps) {
     if (hidden) Keyboard.dismiss();
   }, [hidden]);
 
+  // The screens below stay mounted under the cover: the back button must not reach them.
+  useEffect(() => {
+    if (!hidden) return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => true);
+    return () => subscription.remove();
+  }, [hidden]);
+
   // With the lock off, SessionGate hides the splash once the first screen is loaded.
   useEffect(() => {
     if (!everUnlocked) SplashScreen.hideAsync();
@@ -113,6 +120,7 @@ function Gate({ loaded, children }: GateProps) {
     settings,
     security,
     paused: settings.enabled && security.kind === 'none',
+    locked: hidden,
     applySettings(next) {
       latest.current = { ...latest.current, settings: next };
       controller.setSettings(effective(next, latest.current.security));
@@ -127,6 +135,17 @@ function Gate({ loaded, children }: GateProps) {
     },
     withSystemScreen: (task) => controller.withSystemScreen(task),
   };
+
+  // The screen lock may have been added or removed while the app was away: read it again before
+  // deciding whether to ask.
+  const refreshSecurity = useRef(api.refreshSecurity);
+  useEffect(() => {
+    refreshSecurity.current = api.refreshSecurity;
+  });
+  useEffect(() => {
+    controller.beforeDeciding(() => refreshSecurity.current());
+    return () => controller.beforeDeciding(null);
+  }, [controller]);
 
   const lockScreen = (
     <LockScreen

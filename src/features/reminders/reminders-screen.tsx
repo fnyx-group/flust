@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { localDayNumber } from '@/domain/local-time';
 import type { RiskMomentId } from '@/domain/presets';
 import {
+  allRemindersOff,
   hasTimedRiskMoment,
   setCheckInReminder,
   stepMinute,
@@ -46,8 +47,8 @@ type Loaded = {
 };
 
 // Every reminder is off until it is turned on here. The permission is asked only then, and a
-// refusal leaves the reminder off with a way to the system settings. Reminders read as off while
-// notifications are not allowed, even if they were turned on before.
+// refusal leaves the reminder off with a way to the system settings. Without the permission,
+// every reminder is off, as the sync stores them, so turning one on never brings back the others.
 export function RemindersScreen() {
   const { t, i18n } = useTranslation();
   const storage = useStorage();
@@ -102,8 +103,9 @@ export function RemindersScreen() {
     );
   }
 
-  const { settings, riskMoments } = loaded;
   const granted = permission?.granted === true;
+  const riskMoments = loaded.riskMoments;
+  const settings = granted ? loaded.settings : allRemindersOff(loaded.settings);
   const denied = permission !== null && !granted;
   const timedMoments = hasTimedRiskMoment(riskMoments);
 
@@ -136,8 +138,6 @@ export function RemindersScreen() {
     await save(change(on));
   }
 
-  const shown = (on: boolean) => on && granted;
-
   function timeChip(kind: Timed) {
     const minute = settings[kind].minute;
     const time = formatReminderTime(i18n.language, minute, hour12);
@@ -162,7 +162,7 @@ export function RemindersScreen() {
           <SwitchRow
             title={t('reminders.checkIn.title')}
             subtitle={t('reminders.checkIn.subtitle')}
-            value={shown(settings.checkIn.on)}
+            value={settings.checkIn.on}
             onChange={(on) =>
               void toggle(
                 (value) =>
@@ -171,12 +171,12 @@ export function RemindersScreen() {
               )
             }
           >
-            {shown(settings.checkIn.on) && timeChip('checkIn')}
+            {settings.checkIn.on && timeChip('checkIn')}
           </SwitchRow>
           <SwitchRow
             title={t('reminders.thought.title')}
             subtitle={t('reminders.thought.subtitle')}
-            value={shown(settings.thought.on)}
+            value={settings.thought.on}
             onChange={(on) =>
               void toggle(
                 (value) => ({ ...settings, thought: { ...settings.thought, on: value } }),
@@ -184,19 +184,19 @@ export function RemindersScreen() {
               )
             }
           >
-            {shown(settings.thought.on) && timeChip('thought')}
+            {settings.thought.on && timeChip('thought')}
           </SwitchRow>
           <SwitchRow
             title={t('reminders.riskHours.title')}
             subtitle={t('reminders.riskHours.subtitle')}
-            value={shown(settings.riskHours)}
+            value={settings.riskHours}
             disabled={!timedMoments && !settings.riskHours}
             onChange={(on) => void toggle((value) => ({ ...settings, riskHours: value }), on)}
           />
           <SwitchRow
             title={t('reminders.ranks.title')}
             subtitle={t('reminders.ranks.subtitle')}
-            value={shown(settings.ranks)}
+            value={settings.ranks}
             onChange={(on) => void toggle((value) => ({ ...settings, ranks: value }), on)}
           />
         </RowGroup>

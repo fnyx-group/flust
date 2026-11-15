@@ -12,6 +12,10 @@ android {
     versionCode 1
     versionName '0.1.0'
   }
+  sourceSets {
+    // The wall time cases shared with the JS tests.
+    test.resources.srcDir "$projectDir/../../../test/fixtures"
+  }
 }
 
 dependencies {

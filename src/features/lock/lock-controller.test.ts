@@ -116,6 +116,57 @@ describe('lock controller', () => {
     expect(controller.status()).toBe('unlocked');
   });
 
+  it('decides only once the task run on return is done, with the settings it set', async () => {
+    const { controller, leave, back, pass } = setUp({ enabled: false, delay: MS_PER_MINUTE });
+    let finish: () => void = () => undefined;
+    controller.beforeDeciding(
+      () =>
+        new Promise<void>((done) => {
+          finish = () => {
+            controller.setSettings({ enabled: true, delay: MS_PER_MINUTE });
+            done();
+          };
+        }),
+    );
+    leave();
+    pass(2 * MS_PER_MINUTE);
+    back();
+    expect(controller.status()).toBe('unlocked');
+    finish();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(controller.status()).toBe('locked');
+  });
+
+  it('stays covered while the task runs, and leaves the decision to a later return', async () => {
+    const { controller, leave, back } = setUp();
+    let finish: () => void = () => undefined;
+    controller.beforeDeciding(
+      () =>
+        new Promise<void>((done) => {
+          finish = done;
+        }),
+    );
+    leave();
+    back();
+    expect(controller.status()).toBe('covered');
+    leave();
+    finish();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(controller.status()).toBe('covered');
+  });
+
+  it('decides even when the task fails', async () => {
+    const { controller, leave, back } = setUp();
+    controller.beforeDeciding(() => Promise.reject(new Error('unreadable')));
+    leave();
+    back();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(controller.status()).toBe('unlocked');
+  });
+
   it('stops watching the app once stopped', () => {
     const { controller, stop, leave } = setUp();
     stop();

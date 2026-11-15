@@ -14,4 +14,4 @@ Screenshots and the app switcher's preview can show what flust holds to someone 
 ## Consequences
 
 - People cannot screenshot their own progress in production, to share it or keep it. That is the price of the protection, and may be revisited with an explicit share feature.
-- The lock cover ([0023](0023-app-lock.md)) also hides content while the app is in the background, on both platforms.
+- The lock cover ([0023](0023-app-lock.md)) is drawn by the app after it leaves the foreground, too late for the iOS snapshot and the Android recents thumbnail. Only this protection hides those, so the development build shows its content there.

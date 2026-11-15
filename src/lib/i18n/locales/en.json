@@ -595,7 +595,7 @@
       "subtitle": "Take stock in ten seconds"
     },
     "thought": {
-      "title": "Thought for the day",
+      "title": "Quote of the day",
       "subtitle": "A quote every morning"
     },
     "riskHours": {
@@ -630,7 +630,7 @@
     "off": "Off",
     "notifications": {
       "check-in": "How was your day?",
-      "thought": "Your thought for today is here.",
+      "thought": "Your quote for today is here.",
       "risk-hours": "A moment for yourself, if you need it.",
       "rank": "A new milestone is waiting for you.",
       "return": "flust is here whenever you like, no pressure.",

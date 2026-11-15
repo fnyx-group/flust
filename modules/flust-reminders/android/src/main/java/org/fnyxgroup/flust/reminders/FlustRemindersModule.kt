@@ -78,10 +78,13 @@ class FlustRemindersModule : Module() {
     }
   }
 
-  // Removed once read, so a recreated activity does not open the same screen again.
+  // Removed once read, so a recreated activity does not open the same screen again. Reopened from
+  // recents after the process was killed, the activity gets its original intent back: that tap
+  // was already followed.
   private fun takeRoute(intent: Intent): String? {
     val route = intent.getStringExtra(ReminderNotifier.EXTRA_ROUTE) ?: return null
     intent.removeExtra(ReminderNotifier.EXTRA_ROUTE)
+    if ((intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) return null
     return route
   }
 

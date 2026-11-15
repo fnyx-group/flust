@@ -30,7 +30,6 @@ export function takeHeld(): HeldNavigation | null {
   return navigation;
 }
 
-// Called when the app is unlocked with something held.
 export function onReleased(listener: () => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);

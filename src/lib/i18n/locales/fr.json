@@ -596,7 +596,7 @@
     },
     "thought": {
       "title": "Mot du jour",
-      "subtitle": "Une citation chaque matin"
+      "subtitle": "Un mot chaque matin"
     },
     "riskHours": {
       "title": "Heures à risque",
@@ -630,7 +630,7 @@
     "off": "Désactivés",
     "notifications": {
       "check-in": "Comment s'est passée ta journée ?",
-      "thought": "Ta pensée du jour est là.",
+      "thought": "Ton mot du jour est là.",
       "risk-hours": "Un moment pour toi, si tu en as besoin.",
       "rank": "Un nouveau palier t'attend.",
       "return": "flust est là quand tu veux, sans pression.",

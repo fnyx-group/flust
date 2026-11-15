@@ -1,6 +1,6 @@
 import { openStorage, type Storage } from '@/data/open-storage';
 import { localDayNumber } from '@/domain/local-time';
-import { DEFAULT_REMINDER_SETTINGS } from '@/domain/reminders';
+import { anyReminderOn, DEFAULT_REMINDER_SETTINGS } from '@/domain/reminders';
 import { MS_PER_DAY } from '@/domain/time';
 import type { Notifier, ScheduledNotification } from '@/features/reminders/notifier-types';
 import { createSerialRunner, syncReminders } from '@/features/reminders/reminder-sync';
@@ -42,6 +42,7 @@ async function setUp(started = true) {
 function sync(
   storage: Storage,
   notifier: Pick<Notifier, 'getPermission' | 'describe' | 'replace'>,
+  paused: () => boolean = () => false,
 ) {
   return syncReminders({
     storage,
@@ -50,6 +51,7 @@ function sync(
     offsetAt: paris,
     labels: LABELS,
     bodyOf: (kind) => `text ${kind}`,
+    paused,
   });
 }
 
@@ -73,6 +75,37 @@ describe('syncReminders', () => {
     const { notifier, planned } = fakeNotifier(false);
     expect(await sync(storage, notifier)).toBe('not-allowed');
     expect(planned).toEqual([[]]);
+  });
+
+  it('stores every reminder as off once notifications are no longer allowed', async () => {
+    const storage = await setUp();
+    unwrap(await storage.reminders.save({ ...CHECK_IN_ON, ranks: true }));
+    await sync(storage, fakeNotifier(false).notifier);
+
+    const stored = unwrap(await storage.reminders.load());
+    expect(anyReminderOn(stored)).toBe(false);
+    expect(stored.checkIn.minute).toBe(21 * 60);
+
+    const { notifier, planned } = fakeNotifier(true);
+    expect(await sync(storage, notifier)).toBe('off');
+    expect(planned).toEqual([[]]);
+  });
+
+  it('plans nothing while paused for an erase, even from data read before', async () => {
+    const storage = await setUp();
+    unwrap(await storage.reminders.save(CHECK_IN_ON));
+    const { notifier, planned } = fakeNotifier();
+    let paused = false;
+    const pausingNotifier = {
+      ...notifier,
+      getPermission: async () => {
+        paused = true;
+        return notifier.getPermission();
+      },
+    };
+    expect(await sync(storage, pausingNotifier, () => paused)).toBe('paused');
+    expect(planned).toEqual([]);
+    expect(notifier.describe).not.toHaveBeenCalled();
   });
 
   it('plans every reminder with its text and screen, and names the channel', async () => {
@@ -125,7 +158,7 @@ describe('createSerialRunner', () => {
   it('runs one at a time, then once more for the requests made meanwhile', async () => {
     const gates = [deferred(), deferred()];
     let runs = 0;
-    const run = createSerialRunner(async () => {
+    const { run } = createSerialRunner(async () => {
       const gate = gates[runs];
       runs += 1;
       await gate?.promise;
@@ -148,12 +181,35 @@ describe('createSerialRunner', () => {
 
   it('keeps running after a task fails', async () => {
     let runs = 0;
-    const run = createSerialRunner(async () => {
+    const { run } = createSerialRunner(async () => {
       runs += 1;
       throw new Error('boom');
     });
     await run();
     await run();
+    expect(runs).toBe(2);
+  });
+
+  it('is idle once every run, including the ones asked meanwhile, is over', async () => {
+    const gate = deferred();
+    let runs = 0;
+    const runner = createSerialRunner(async () => {
+      runs += 1;
+      await gate.promise;
+    });
+    await runner.idle();
+
+    void runner.run();
+    void runner.run();
+    let idle = false;
+    void runner.idle().then(() => {
+      idle = true;
+    });
+    await new Promise((done) => setTimeout(done, 0));
+    expect(idle).toBe(false);
+    gate.resolve();
+    await runner.idle();
+    expect(idle).toBe(true);
     expect(runs).toBe(2);
   });
 });

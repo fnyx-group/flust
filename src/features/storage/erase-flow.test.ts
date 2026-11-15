@@ -9,6 +9,10 @@ function setUp(resets: ('ok' | 'fail')[], clearReminders: 'ok' | 'fail' = 'ok') 
       return resets.shift() === 'fail' ? err('reset-failed') : ok(undefined);
     },
     applyDeviceLanguage: async () => void events.push('device language'),
+    pauseReminders: async () => {
+      events.push('pause');
+      return () => void events.push('resume');
+    },
     clearReminders: async () => {
       events.push('reminders');
       if (clearReminders === 'fail') throw new Error('notifications unavailable');
@@ -20,11 +24,21 @@ function setUp(resets: ('ok' | 'fail')[], clearReminders: 'ok' | 'fail' = 'ok') 
 }
 
 describe('createEraseFlow', () => {
-  it('hides every screen, cancels reminders, closes, erases, goes back to the device language, then reopens', async () => {
+  it('hides every screen, pauses and cancels reminders, erases, cancels them again, then reopens', async () => {
     const { events, flow, storage } = setUp(['ok']);
 
     await flow.eraseAll(storage);
-    expect(events).toEqual(['erasing', 'reminders', 'close', 'reset', 'device language', 'erased']);
+    expect(events).toEqual([
+      'erasing',
+      'pause',
+      'reminders',
+      'close',
+      'reset',
+      'reminders',
+      'device language',
+      'erased',
+      'resume',
+    ]);
   });
 
   it('still erases when reminders cannot be cancelled', async () => {
@@ -38,7 +52,16 @@ describe('createEraseFlow', () => {
     const { events, flow, storage } = setUp(['fail']);
 
     await flow.eraseAll(storage);
-    expect(events).toEqual(['erasing', 'reminders', 'close', 'reset', 'erase-failed']);
+    expect(events).toEqual([
+      'erasing',
+      'pause',
+      'reminders',
+      'close',
+      'reset',
+      'reminders',
+      'erase-failed',
+      'resume',
+    ]);
   });
 
   it('erases again on retry, and never opens what is left', async () => {
@@ -47,7 +70,16 @@ describe('createEraseFlow', () => {
     events.length = 0;
 
     await flow.retry();
-    expect(events).toEqual(['erasing', 'reminders', 'reset', 'device language', 'erased']);
+    expect(events).toEqual([
+      'erasing',
+      'pause',
+      'reminders',
+      'reset',
+      'reminders',
+      'device language',
+      'erased',
+      'resume',
+    ]);
   });
 
   it('ignores a second request while one runs', async () => {

@@ -37,7 +37,7 @@ export function lockToggleLabel(
   security: DeviceSecurity,
   platform: Platform,
 ): string {
-  if (security.kind === 'none') return t('lock.settings.toggle');
+  if (security.kind === 'none' || security.kind === 'unknown') return t('lock.settings.toggle');
   return t('lock.settings.toggleWith', {
     method: t(`lock.methods.${methodKey(security, platform)}`),
   });

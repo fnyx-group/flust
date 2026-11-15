@@ -11,9 +11,11 @@ import { outcomeOf, type AuthOutcome } from '@/features/lock/auth-outcome';
 export type Biometric = 'face' | 'fingerprint' | 'iris';
 
 // What the device can unlock with. The lock needs at least a passcode: with no screen lock,
-// anyone holding the phone could pass it.
+// anyone holding the phone could pass it. 'unknown' is a read that failed: the lock stays on and
+// offers the passcode, since only a confirmed 'none' may open the app without asking.
 export type DeviceSecurity =
   | { readonly kind: 'none' }
+  | { readonly kind: 'unknown' }
   | { readonly kind: 'passcode' }
   | { readonly kind: 'biometric'; readonly biometric: Biometric };
 
@@ -32,7 +34,7 @@ export async function deviceSecurity(): Promise<DeviceSecurity> {
     const biometric = BIOMETRICS.find(([type]) => types.includes(type))?.[1];
     return biometric === undefined ? { kind: 'passcode' } : { kind: 'biometric', biometric };
   } catch {
-    return { kind: 'none' };
+    return { kind: 'unknown' };
   }
 }
 

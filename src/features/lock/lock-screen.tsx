@@ -48,23 +48,25 @@ export function LockScreen({ security, attempts, onAttempts, onUnlock }: LockScr
     if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(message);
   }
 
+  // The screen lock is read again at each attempt. Only a read that confirms there is none opens
+  // without asking, so a device without a passcode is never locked out, and a read that fails
+  // never opens the app.
   async function unlock() {
     if (busy || waiting) return;
     setBusy(true);
     setLockout(false);
+    if ((await lock.refreshSecurity()).kind === 'none') {
+      setBusy(false);
+      open();
+      return;
+    }
     const outcome = await lock.withSystemScreen(() =>
       authenticate({ prompt: t('lock.prompt'), cancel: t('lock.cancel') }),
     );
+    const removed = outcome === 'unavailable' && (await lock.refreshSecurity()).kind === 'none';
     setBusy(false);
-    // A device whose screen lock was removed cannot ask; anything else unavailable is treated as
-    // an interruption, so a passing error never opens the app.
-    const open =
-      outcome === 'success' ||
-      (outcome === 'unavailable' && (await lock.refreshSecurity()).kind === 'none');
-    if (open) {
-      onAttempts(NO_ATTEMPTS);
-      store(NO_ATTEMPTS);
-      onUnlock();
+    if (outcome === 'success' || removed) {
+      open();
       return;
     }
     if (outcome === 'lockout') {
@@ -77,6 +79,12 @@ export function LockScreen({ security, attempts, onAttempts, onUnlock }: LockScr
       store(next);
       if (next.waitMs > 0) announce(waitLabel(t, next.waitMs));
     }
+  }
+
+  function open() {
+    onAttempts(NO_ATTEMPTS);
+    store(NO_ATTEMPTS);
+    onUnlock();
   }
 
   const biometric = security.kind === 'biometric';

@@ -25,6 +25,9 @@ export type LockController = {
   unlock(): void;
   // Runs a task that shows a system screen, such as the authentication prompt.
   withSystemScreen<T>(task: () => Promise<T>): Promise<T>;
+  // A task run on each return before deciding, such as reading the device's screen lock again,
+  // which may change the settings. The app stays covered meanwhile.
+  beforeDeciding(task: (() => Promise<unknown>) | null): void;
   // Starts watching the app going to the background. Returns a function that stops.
   start(): () => void;
 };
@@ -40,6 +43,7 @@ export function createLockController(
   let current: LockStatus = initial.locked && settings.enabled ? 'locked' : 'unlocked';
   let away: Away | null = null;
   let systemScreens = 0;
+  let beforeDeciding: (() => Promise<unknown>) | null = null;
 
   function set(next: LockStatus) {
     if (next === current) return;
@@ -47,25 +51,32 @@ export function createLockController(
     for (const listener of listeners) listener();
   }
 
+  // Time away is kept even while the lock is off or paused, since a screen lock added meanwhile
+  // turns it back on before the decision.
   function leave() {
-    if (!settings.enabled) return;
     away = {
       monotonic: deps.monotonicNow(),
       wall: deps.now(),
       fromSystemScreen: systemScreens > 0,
     };
-    if (current === 'unlocked' && systemScreens === 0) set('covered');
+    if (settings.enabled && current === 'unlocked' && systemScreens === 0) set('covered');
   }
 
   function comeBack() {
     if (away === null) return;
     const gone = timeAway(deps.monotonicNow() - away.monotonic, deps.now() - away.wall);
-    const threshold = away.fromSystemScreen
-      ? { ...settings, delay: Math.max(settings.delay, SYSTEM_SCREEN_GRACE_MS) }
-      : settings;
+    const fromSystemScreen = away.fromSystemScreen;
     away = null;
-    if (current === 'locked') return;
-    set(shouldRelock(threshold, gone) ? 'locked' : 'unlocked');
+    // Left again while the task ran: the next return decides.
+    const decide = () => {
+      if (away !== null || current === 'locked') return;
+      const threshold = fromSystemScreen
+        ? { ...settings, delay: Math.max(settings.delay, SYSTEM_SCREEN_GRACE_MS) }
+        : settings;
+      set(shouldRelock(threshold, gone) ? 'locked' : 'unlocked');
+    };
+    if (beforeDeciding === null) decide();
+    else void beforeDeciding().then(decide, decide);
   }
 
   return {
@@ -83,6 +94,9 @@ export function createLockController(
     },
     unlock() {
       set('unlocked');
+    },
+    beforeDeciding(task) {
+      beforeDeciding = task;
     },
     async withSystemScreen(task) {
       systemScreens += 1;

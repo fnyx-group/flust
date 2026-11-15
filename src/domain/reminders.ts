@@ -50,6 +50,18 @@ export function anyReminderOn(settings: ReminderSettings): boolean {
   return settings.checkIn.on || settings.thought.on || settings.riskHours || settings.ranks;
 }
 
+// Every reminder off, kept that way until each is turned on again, such as when notifications
+// are no longer allowed. The check-in counts from the day it is turned on again.
+export function allRemindersOff(settings: ReminderSettings): ReminderSettings {
+  return {
+    checkIn: { ...settings.checkIn, on: false },
+    thought: { ...settings.thought, on: false },
+    riskHours: false,
+    ranks: false,
+    checkInSince: null,
+  };
+}
+
 export function setCheckInReminder(
   settings: ReminderSettings,
   on: boolean,
@@ -99,6 +111,7 @@ export type ReminderPlanInput = {
 // Gaps in local days. Check-ins count from the last check-in; the others from today, the day
 // the plan is made, which is a day the app was opened.
 const CHECK_IN_GAPS = [1, 2, 3, 5, 7];
+const LAST_CHECK_IN_GAP = 7;
 const OPENED_GAPS = [0, 1, 2, 4];
 export const RETURN_GAP_DAYS = 7;
 // From this many days after the app was last opened, one routine reminder a day at most.
@@ -111,8 +124,9 @@ const RANK_EARLIEST: MinuteOfDay = 9 * 60;
 const RANK_LATEST: MinuteOfDay = 22 * 60;
 const HOURS_AFTER_LAPSE_MS = 6 * MS_PER_HOUR;
 
-// Routine reminders in priority order, when a day has room for fewer than were planned.
-const ROUTINE_PRIORITY: readonly ReminderKind[] = ['check-in', 'risk-hours', 'thought'];
+// Routine reminders in priority order, when a day has room for fewer than were planned. Risk
+// reminders are not capped: the person turned them on for that exact moment.
+const ROUTINE_PRIORITY: readonly ReminderKind[] = ['check-in', 'thought'];
 
 // Every reminder until the return message, planned at once. Nothing runs in the background, so
 // the list already holds the spacing: if the app is never opened again it runs out, ends with
@@ -129,18 +143,19 @@ export function planReminders(
   const returnMinute = settings.checkIn.on ? settings.checkIn.minute : RETURN_MINUTE;
   const back = at(returnDay, returnMinute, 'return', true, offsetAt);
   if (back === null) return [];
+  const beforeReturn = (reminder: PlannedReminder) => reminder.at > now && reminder.at < back.at;
   const routine = capRoutine(
     [
       ...checkInReminders(input, today, offsetAt),
       ...thoughtReminders(settings, today, offsetAt),
-      ...riskReminders(input, today, offsetAt),
-    ].filter((reminder) => reminder.at > now && reminder.at < back.at),
+    ].filter(beforeReturn),
     today,
     offsetAt,
   );
+  const risk = riskReminders(input, today, offsetAt).filter(beforeReturn);
   const rank = rankReminder(input, now, offsetAt);
   const extra = rank !== null && rank.at < back.at ? [rank] : [];
-  return [...routine, ...extra, back].sort((a, b) => a.at - b.at);
+  return [...routine, ...risk, ...extra, back].sort((a, b) => a.at - b.at);
 }
 
 function checkInReminders(
@@ -150,7 +165,10 @@ function checkInReminders(
 ): PlannedReminder[] {
   if (!settings.checkIn.on) return [];
   const since = (settings.checkInSince ?? today) - 1;
-  const anchor = Math.max(since, ...checkInDays.filter((day) => day <= today));
+  const latest = Math.max(since, ...checkInDays.filter((day) => day <= today));
+  // Once the spacing from the last check-in has run out, an open starts it again from today, so
+  // someone who opens the app without checking in still gets the evening reminder.
+  const anchor = latest + LAST_CHECK_IN_GAP < today ? today - 1 : latest;
   return CHECK_IN_GAPS.map((gap) => anchor + gap)
     .filter((day) => day >= today && !checkInDays.includes(day))
     .flatMap((day) => present(at(day, settings.checkIn.minute, 'check-in', true, offsetAt)));
@@ -167,8 +185,9 @@ function thoughtReminders(
   );
 }
 
-// A daily moment follows the same spacing as the thought. A weekly one is already sparse: it
-// comes once, on its next day before the return message.
+// A daily moment follows the same spacing as the thought, without the daily cap or the two hours
+// between routine reminders. A weekly one is already sparse: it comes once, on its next day
+// before the return message.
 function riskReminders(
   { settings, riskMoments }: ReminderPlanInput,
   today: number,
@@ -204,7 +223,7 @@ function rankReminder(
   const reached = nextRankAt(journey, unlockedRanks, now);
   if (reached === null) return null;
   const held =
-    latestLapse?.recordedAt == null
+    latestLapse === null || latestLapse.recordedAt === null
       ? reached
       : Math.max(reached, latestLapse.recordedAt + HOURS_AFTER_LAPSE_MS);
   const moment = awake(held, offsetAt);
@@ -221,7 +240,7 @@ function awake(moment: Timestamp, offsetAt: UtcOffsetAt): Timestamp | null {
 }
 
 // Up to two routine reminders a day while the app was opened recently, two hours apart at
-// least, then one a day. The higher priority wins a day that has too many.
+// least, then one a day. The check-in wins a day that has too many.
 function capRoutine(
   reminders: readonly PlannedReminder[],
   today: number,

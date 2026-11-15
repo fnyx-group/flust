@@ -90,13 +90,13 @@ The filter joins the settings with its feature.
 Local reminders, all off until turned on, each with a switch:
 
 - Evening check-in, at a chosen time (21:00 by default). Opens the check-in.
-- Thought for the day, at a chosen time (08:00 by default).
-- Risk hours: before "In bed at night" (22:30) and on "The weekend" (Saturday 10:00), when those risk moments are chosen. Other risk moments have no time.
+- Quote of the day, at a chosen time (08:00 by default).
+- Risk hours: before "In bed at night" (22:30) and on "The weekend" (Saturday 10:00), when those risk moments are chosen. Other risk moments have no time. They come at their moment even on a day that already has other reminders.
 - Ranks and milestones: when the next rank is reached, in the daytime, never in the six hours after a lapse is logged.
 
 Reminders thin out when the app is not opened, and stop after a week with one last message: "flust is here whenever you like, no pressure." There is no reminder after a lapse. See [0022](../decisions/0022-reminder-schedule.md).
 
-Notification text is always neutral and never reveals what the app is about. The permission is asked only when a reminder is turned on. A refusal leaves it off, with a way to the system settings. On Android the lock screen shows only that flust sent something; on iOS a note explains how to hide previews.
+Notification text is always neutral and never reveals what the app is about. It may show on the lock screen, depending on the device's settings: on Android, when sensitive content is shown on the lock screen, which most devices do by default; on iOS, when previews are shown, and a note explains how to hide them. The permission is asked only when a reminder is turned on. A refusal leaves it off, with a way to the system settings. When notifications are no longer allowed, every reminder is turned off, and allowing them again turns none back on by itself.
 
 ### App lock
 

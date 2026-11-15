@@ -21,6 +21,10 @@ describe('lockToggleLabel', () => {
     expect(lockToggleLabel(english, passcode, 'android')).toBe('Lock with passcode');
     expect(lockToggleLabel(english, none, 'ios')).toBe('Lock flust');
   });
+
+  it('names no method when the device could not be read', () => {
+    expect(lockToggleLabel(english, { kind: 'unknown' }, 'ios')).toBe('Lock flust');
+  });
 });
 
 describe('lockValue', () => {
@@ -29,6 +33,12 @@ describe('lockValue', () => {
     expect(lockValue(french, { enabled: true, delay: 0 }, none, 'android')).toBe('En pause');
     expect(lockValue(english, { enabled: true, delay: 0 }, face, 'ios')).toBe('Face ID');
     expect(lockValue(english, { enabled: true, delay: 0 }, face, 'android')).toBe('Face');
+  });
+
+  it('never reads as paused when the device could not be read', () => {
+    expect(lockValue(english, { enabled: true, delay: 0 }, { kind: 'unknown' }, 'ios')).toBe(
+      'Passcode',
+    );
   });
 });
 

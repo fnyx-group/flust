@@ -11,6 +11,8 @@ type EraseFlowDeps = Pick<StorageService, 'reset'> & {
   // which the next launch would choose too.
   applyDeviceLanguage: () => Promise<void>;
   // Planned reminders live outside storage, with the system, so they are cancelled on their own.
+  // Planning is paused first and waits for a plan being made, so none lands after the erase.
+  pauseReminders: () => Promise<() => void>;
   clearReminders: () => Promise<void>;
   show: (step: EraseStep) => void;
 };
@@ -25,10 +27,13 @@ export function createEraseFlow(deps: EraseFlowDeps) {
   async function run(erase: () => Promise<Result<void, ResetStorageError>>): Promise<void> {
     if (running) return;
     running = true;
+    let resumeReminders: () => void = () => undefined;
     try {
       deps.show('erasing');
+      resumeReminders = await deps.pauseReminders();
       await deps.clearReminders().catch(() => undefined);
       const result = await erase();
+      await deps.clearReminders().catch(() => undefined);
       if (!result.ok) {
         deps.show('erase-failed');
         return;
@@ -36,6 +41,7 @@ export function createEraseFlow(deps: EraseFlowDeps) {
       await deps.applyDeviceLanguage();
       deps.show('erased');
     } finally {
+      resumeReminders();
       running = false;
     }
   }

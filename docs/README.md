@@ -46,7 +46,7 @@
 - [0021 Local notifications](decisions/0021-local-notifications.md): expo-notifications on iOS without push, a local Kotlin module on Android, no Firebase.
 - [0022 Reminder schedule](decisions/0022-reminder-schedule.md): a week planned ahead, spacing that thins out, a cap per day, one return message, then silence.
 - [0023 App lock](decisions/0023-app-lock.md): device authentication as a UI gate, a cover in the background, held links, a pause without a screen lock.
-- [0024 Lock wait](decisions/0024-lock-wait.md): a growing wait between attempts, on a monotonic clock, resumed after a restart.
+- [0024 Lock wait](decisions/0024-lock-wait.md): a growing wait between attempts, on a clock that counts sleep and ignores the date, resumed after a restart.
 - [0025 Screen privacy](decisions/0025-screen-privacy.md): screenshots and app switcher previews blocked in production, allowed in development.
 - [0026 Android splash symbol](decisions/0026-android-splash-symbol.md): the symbol alone, sized for the Android 12 splash mask.
 
@@ -55,3 +55,4 @@
 - [Setup](development/setup.md): local environment, first run and development builds.
 - [Conventions](development/conventions.md): code style, layers, lint rules, commits, branches, pull requests.
 - [Testing](development/testing.md): what to test, where, and how.
+- [Release](development/release.md): the checks before each store release.

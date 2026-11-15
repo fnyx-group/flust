@@ -13,37 +13,38 @@ class ReminderScheduler(private val context: Context) {
   private val store = ReminderStore(context)
   private val alarms = context.getSystemService(AlarmManager::class.java)
 
-  // Replaces every planned reminder with a new list.
-  fun replace(reminders: List<Reminder>) {
+  // The new list is stored before any alarm changes, so a failed write leaves the previous plan
+  // whole, alarms included.
+  fun replace(reminders: List<Reminder>) = synchronized(ReminderStore.LOCK) {
     val previous = store.read()
-    previous.reminders.forEach { cancel(it.id) }
     store.write(previous.copy(reminders = reminders))
+    previous.reminders.forEach { cancel(it.id) }
     schedule(reminders)
   }
 
   // After a reboot, an update, or a time zone or clock change: floating reminders are converted
-  // again with the current zone and everything is set again. Reminders already past are dropped.
-  fun restore() {
+  // again with the zone in effect and everything is set again. Reminders already past are dropped.
+  fun restore(zone: TimeZone = TimeZone.getDefault()) = synchronized(ReminderStore.LOCK) {
     val contents = store.read()
-    contents.reminders.forEach { cancel(it.id) }
-    val kept = upcoming(contents.reminders, System.currentTimeMillis(), currentOffsets())
+    val kept = upcoming(contents.reminders, System.currentTimeMillis(), offsetsOf(zone))
     store.write(contents.copy(reminders = kept.map { it.first }))
+    contents.reminders.forEach { cancel(it.id) }
     kept.forEach { (reminder, instant) -> set(reminder.id, instant) }
   }
 
-  fun setChannel(name: String, description: String) {
+  fun setChannel(name: String, description: String) = synchronized(ReminderStore.LOCK) {
     store.write(store.read().copy(channelName = name, channelDescription = description))
   }
 
   fun channel(): Pair<String, String> = store.read().let { it.channelName to it.channelDescription }
 
-  // Removes a delivered reminder and returns it, or null if it is no longer planned.
-  fun takeDelivered(id: Int): Reminder? {
+  // Null when the reminder is no longer planned, such as after a new plan replaced it.
+  fun takeDelivered(id: Int): Reminder? = synchronized(ReminderStore.LOCK) {
     val contents = store.read()
     val reminder = contents.reminders.find { it.id == id } ?: return null
     val rest = afterDelivery(contents.reminders, id, System.currentTimeMillis(), currentOffsets())
     store.write(contents.copy(reminders = rest))
-    return reminder
+    reminder
   }
 
   private fun schedule(reminders: List<Reminder>) {

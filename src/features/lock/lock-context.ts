@@ -8,6 +8,8 @@ export type LockApi = {
   readonly security: DeviceSecurity;
   // The lock is on, but the device has no screen lock any more, so it cannot ask.
   readonly paused: boolean;
+  // The app is covered or asks to be unlocked: nothing should open or be recorded meanwhile.
+  readonly locked: boolean;
   // Applies settings already stored, such as by the end of the onboarding.
   applySettings(settings: LockSettings): void;
   // Reads the device's screen lock again, after the person may have changed it.
