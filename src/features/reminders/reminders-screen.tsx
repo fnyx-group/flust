@@ -18,7 +18,6 @@ import {
   allRemindersOff,
   hasTimedRiskMoment,
   setCheckInReminder,
-  stepMinute,
   type MinuteOfDay,
   type ReminderSettings,
 } from '@/domain/reminders';
@@ -28,6 +27,7 @@ import { notifier } from '@/features/reminders/notifier';
 import type { NotificationPermission } from '@/features/reminders/notifier-types';
 import { NotificationPreview } from '@/features/reminders/notification-preview';
 import { requestReminderSync } from '@/features/reminders/sync-requests';
+import { TimeWheelSheet } from '@/features/reminders/time-wheel-sheet';
 import { deviceCalendar, deviceOffsetAt } from '@/features/shared/device-time';
 import { useStorage } from '@/features/storage/storage-context';
 import { BackHeader } from '@/ui/back-header';
@@ -37,7 +37,6 @@ import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
 import { SwitchRow } from '@/ui/switch-row';
 import { colors, pressedOpacity, radii, spacing, typography } from '@/ui/theme';
-import { TimeSheet } from '@/ui/time-sheet';
 
 type Timed = 'checkIn' | 'thought';
 
@@ -240,31 +239,22 @@ export function RemindersScreen() {
         </View>
       </ScrollView>
       {editing !== null && (
-        <TimeSheet
-          visible
+        <TimeWheelSheet
           title={t(
             editing.kind === 'checkIn' ? 'reminders.checkIn.title' : 'reminders.thought.title',
           )}
-          hour={{
-            label: t('reminders.sheet.hour'),
-            value: formatReminderTime(i18n.language, editing.minute, hour12),
-            decrementLabel: t('reminders.sheet.earlierHour'),
-            incrementLabel: t('reminders.sheet.laterHour'),
-            onDecrement: () => setEditing({ ...editing, minute: stepMinute(editing.minute, -12) }),
-            onIncrement: () => setEditing({ ...editing, minute: stepMinute(editing.minute, 12) }),
+          minute={editing.minute}
+          language={i18n.language}
+          hour12={hour12}
+          labels={{
+            hours: t('reminders.sheet.hours'),
+            minutes: t('reminders.sheet.minutes'),
+            period: t('reminders.sheet.period'),
+            save: t('reminders.sheet.save'),
+            cancel: t('reminders.sheet.cancel'),
           }}
-          minute={{
-            label: t('reminders.sheet.minute'),
-            value: formatReminderTime(i18n.language, editing.minute, hour12),
-            decrementLabel: t('reminders.sheet.earlierMinute'),
-            incrementLabel: t('reminders.sheet.laterMinute'),
-            onDecrement: () => setEditing({ ...editing, minute: stepMinute(editing.minute, -1) }),
-            onIncrement: () => setEditing({ ...editing, minute: stepMinute(editing.minute, 1) }),
-          }}
-          saveLabel={t('reminders.sheet.save')}
-          cancelLabel={t('reminders.sheet.cancel')}
-          onSave={() => {
-            const { kind, minute } = editing;
+          onSave={(minute) => {
+            const { kind } = editing;
             setEditing(null);
             void save({ ...settings, [kind]: { ...settings[kind], minute } });
           }}

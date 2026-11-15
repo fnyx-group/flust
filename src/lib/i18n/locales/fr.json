@@ -610,12 +610,9 @@
     "time": "Heure du rappel, {{time}}",
     "timeHint": "Ouvre le choix de l'heure",
     "sheet": {
-      "hour": "Heures",
-      "minute": "Minutes",
-      "earlierHour": "Une heure plus tôt",
-      "laterHour": "Une heure plus tard",
-      "earlierMinute": "Cinq minutes plus tôt",
-      "laterMinute": "Cinq minutes plus tard",
+      "hours": "Heures",
+      "minutes": "Minutes",
+      "period": "Matin ou après-midi",
       "save": "Enregistrer",
       "cancel": "Annuler"
     },

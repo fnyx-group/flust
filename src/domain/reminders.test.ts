@@ -13,10 +13,8 @@ import {
   MINUTES_PER_DAY,
   planReminders,
   REMINDER_KINDS,
-  REMINDER_MINUTE_STEP,
   RETURN_GAP_DAYS,
   setCheckInReminder,
-  stepMinute,
   type PlannedReminder,
   type ReminderPlanInput,
   type ReminderSettings,
@@ -413,26 +411,5 @@ describe('reminder settings', () => {
     expect(hasTimedRiskMoment(['stress', 'boredom'])).toBe(false);
     expect(hasTimedRiskMoment(['stress', 'weekend'])).toBe(true);
     expect(hasTimedRiskMoment(['in-bed-at-night'])).toBe(true);
-  });
-});
-
-describe('stepMinute', () => {
-  it('moves by five minutes and wraps around midnight', () => {
-    expect(REMINDER_MINUTE_STEP).toBe(5);
-    expect(stepMinute(0, -1)).toBe(MINUTES_PER_DAY - 5);
-    expect(stepMinute(23 * 60 + 55, 1)).toBe(0);
-    expect(stepMinute(21 * 60, -12)).toBe(20 * 60);
-  });
-
-  it('always lands on a minute of the day', () => {
-    fc.assert(
-      fc.property(
-        fc.nat({ max: MINUTES_PER_DAY - 1 }),
-        fc.integer({ min: -1000, max: 1000 }),
-        (minute, steps) => {
-          expect(isMinuteOfDay(stepMinute(minute, steps))).toBe(true);
-        },
-      ),
-    );
   });
 });

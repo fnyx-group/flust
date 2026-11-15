@@ -53,6 +53,8 @@ export const typography = {
   breathingPhase: { fontFamily: fonts.semiBold, fontSize: 20 },
   stepperValue: { fontFamily: fonts.numberSemiBold, fontSize: 32, fontVariant: ['tabular-nums'] },
   calendarDay: { fontFamily: fonts.numberMedium, fontSize: 18, fontVariant: ['tabular-nums'] },
+  wheelSelected: { fontFamily: fonts.numberSemiBold, fontSize: 30, fontVariant: ['tabular-nums'] },
+  wheelRow: { fontFamily: fonts.numberMedium, fontSize: 22, fontVariant: ['tabular-nums'] },
   scaleValue: { fontFamily: fonts.semiBold, fontSize: 22 },
   row: { fontFamily: fonts.semiBold, fontSize: 15 },
   badgeName: { fontFamily: fonts.extraBold, fontSize: 15 },

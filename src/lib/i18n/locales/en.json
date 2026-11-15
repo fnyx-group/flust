@@ -610,12 +610,9 @@
     "time": "Reminder time, {{time}}",
     "timeHint": "Opens the time picker",
     "sheet": {
-      "hour": "Hours",
-      "minute": "Minutes",
-      "earlierHour": "One hour earlier",
-      "laterHour": "One hour later",
-      "earlierMinute": "Five minutes earlier",
-      "laterMinute": "Five minutes later",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "period": "AM or PM",
       "save": "Save",
       "cancel": "Cancel"
     },

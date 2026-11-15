@@ -43,6 +43,8 @@ Counters use tabular numbers so digits do not shift as they change.
 | Breathing count                   | 56    | 600    | Barlow Condensed      |
 | Lapse summary number              | 48    | 600    | Barlow Condensed      |
 | Stepper value                     | 32    | 600    | Barlow Condensed      |
+| Wheel, selected row               | 30    | 600    | Barlow Condensed      |
+| Wheel, other rows                 | 22    | 500    | Barlow Condensed      |
 | Countdown                         | 22    | 600    | Barlow Condensed      |
 | Breathing phase                   | 20    | 600    |                       |
 | Screen title                      | 28    | 800    |                       |
@@ -270,7 +272,14 @@ A screen pushed over the tabs: the back button and "Tout effacer" title, then wh
 
 A screen pushed over the tabs: the back button and "Rappels" title, then, scrolling, with 32 points between blocks:
 
-1. A card of four switch rows: "Check-in du soir", "Mot du jour", "Heures à risque" and "Rangs et paliers", each with its subtitle in secondary body text. A switch row is one element for screen readers. The check-in and the thought show their time as a chip (radius 10, separator color) under the subtitle when on; the chip opens a sheet with hour and minute steppers, "Enregistrer" and "Annuler". Minutes move by five and both wrap around midnight.
+1. A card of four switch rows: "Check-in du soir", "Mot du jour", "Heures à risque" and "Rangs et paliers", each with its subtitle in secondary body text. A switch row is one element for screen readers. The check-in and the thought show their time as a chip (radius 10, separator color) under the subtitle when on. The chip opens a sheet built like the confirmation sheet, the same on Android and iOS: the reminder's name as title, the time wheels, then "Enregistrer" (primary) and "Annuler" (text button).
+
+   - Two wheels, hours and minutes, in five minute steps. With a 12 hour clock on the device, hours run 12, 1 to 11, with a third wheel for the period, in the language's own words ("AM", "PM"); otherwise 00 to 23.
+   - Each wheel shows five rows, 44 points high, and snaps to one with momentum. The middle row sits in a band (surface color, radius 12); the rows above and below fade out (0.5, then 0.2).
+   - Numbers use Barlow Condensed with tabular figures: the selected row 30/600 in the text color, the others 22/500 in secondary text.
+   - A time that is not on the wheels, such as 21:07, shows as the nearest five minutes and is kept as it is until a wheel moves.
+   - For screen readers, each wheel is one adjustable element ("Heures", "Minutes", "Matin ou après-midi"), moved row by row, with its row as value. With Reduce Motion, the wheels move without animation.
+
 2. Without "Le soir au lit" or "Le week-end" among the risk moments, "Heures à risque" is disabled and a line in secondary body text says which to choose.
 3. When notifications are not allowed: a line saying so and "Ouvrir les réglages" (secondary button).
 4. "Aperçu": a notification card (surface color, radius 22): the symbol, "flust", the time, and "Comment s'est passée ta journée ?".

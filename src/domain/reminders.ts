@@ -283,11 +283,3 @@ function present(reminder: PlannedReminder | null): PlannedReminder[] {
 export function hourAndMinute(minute: MinuteOfDay): { hour: number; minute: number } {
   return { hour: Math.floor(minute / 60), minute: minute % 60 };
 }
-
-export const REMINDER_MINUTE_STEP = 5;
-
-// Steps the chosen time by five minutes, wrapping around midnight.
-export function stepMinute(minute: MinuteOfDay, steps: number): MinuteOfDay {
-  const step = REMINDER_MINUTE_STEP * steps;
-  return (((minute + step) % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
-}

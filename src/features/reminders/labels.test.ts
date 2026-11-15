@@ -4,6 +4,7 @@ import {
   notificationLabels,
   notificationText,
   remindersValue,
+  wheelRowLabels,
 } from '@/features/reminders/labels';
 import { createI18n } from '@/lib/i18n';
 
@@ -41,6 +42,19 @@ describe('formatReminderTime', () => {
     expect(formatReminderTime('fr', 21 * 60, false)).toBe('21:00');
     expect(formatReminderTime('en', 8 * 60 + 5, false)).toBe('08:05');
     expect(formatReminderTime('en', 21 * 60, true)).toMatch(/^9:00\sPM$/);
+  });
+});
+
+describe('wheelRowLabels', () => {
+  it('lists the hours as the clock shows them, and the minutes on two digits', () => {
+    const clock24 = wheelRowLabels('fr', false);
+    expect(clock24.hours.slice(0, 3)).toEqual(['00', '01', '02']);
+    expect(clock24.hours.at(-1)).toBe('23');
+    expect(clock24.minutes.slice(0, 3)).toEqual(['00', '05', '10']);
+
+    const clock12 = wheelRowLabels('en', true);
+    expect(clock12.hours.slice(0, 3)).toEqual(['12', '1', '2']);
+    expect(clock12.periods).toEqual(['AM', 'PM']);
   });
 });
 
