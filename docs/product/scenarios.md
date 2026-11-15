@@ -6,18 +6,20 @@ This document lists edge cases and the expected behavior of flust for each of th
 
 Rule: store UTC timestamps and recompute durations on display. Never count with a running timer.
 
-| Case                           | Expected behavior                                                                                                   |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| Daylight saving time change    | The streak stays correct. Durations come from UTC timestamps, so no hour is gained or lost.                         |
-| Time zone travel               | The streak duration does not change. Dates and times are displayed in the current time zone.                        |
-| Leap years                     | February 29 counts as a normal day.                                                                                 |
-| Midnight                       | The day counter changes on elapsed time since the start point, not on calendar midnight.                            |
-| Clock moved backwards          | The counter is never negative and never jumps forward when the clock is corrected again.                            |
-| Clock moved forwards           | Ranks unlocked while the clock is ahead stay unlocked after it is corrected. See below.                             |
-| Lapse logged while clock ahead | The lapse keeps its recorded time. After the clock is corrected, the streak shows 0 until real time reaches it.     |
-| Start date in the future       | Refused. The date picker does not allow it and the value is validated before saving.                                |
-| App closed for weeks           | On next launch, the streak and total clean days are recomputed from timestamps, and pending rank unlocks are shown. |
-| Counter reaches 3 and 4 digits | The counter font shrinks so the number fits on one line.                                                            |
+| Case                           | Expected behavior                                                                                                      |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Daylight saving time change    | The streak stays correct. Durations come from UTC timestamps, so no hour is gained or lost.                            |
+| Time zone travel               | The streak duration does not change. Dates and times are displayed in the current time zone.                           |
+| Leap years                     | February 29 counts as a normal day.                                                                                    |
+| Midnight                       | The day counter changes on elapsed time since the start point, not on calendar midnight.                               |
+| Clock moved backwards          | The counter is never negative and never jumps forward when the clock is corrected again.                               |
+| Clock moved forwards           | Ranks unlocked while the clock is ahead stay unlocked after it is corrected. See below.                                |
+| Lapse logged while clock ahead | The lapse keeps its recorded time. After the clock is corrected, the streak shows 0 until real time reaches it.        |
+| Start date in the future       | Refused. The date picker does not allow it and the value is validated before saving.                                   |
+| App closed for weeks           | On next launch, the streak and total clean days are recomputed from timestamps, and pending rank unlocks are shown.    |
+| Counter reaches 3 and 4 digits | The counter font shrinks so the number fits on one line.                                                               |
+| Check-in and time zone travel  | A check-in stays on the local day it was first saved on. Today's check-in is the one stored for the current local day. |
+| Check-in open at midnight      | Saving after midnight stores a check-in for the new day. The previous day's check-in is not changed.                   |
 
 A clock set forwards can unlock ranks early. This is accepted: the app is personal, with no competition, and guarding against it by keeping the latest time ever seen would freeze or distort the counter once the clock is corrected.
 

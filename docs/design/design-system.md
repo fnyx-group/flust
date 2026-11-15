@@ -49,6 +49,7 @@ Counters use tabular numbers so digits do not shift as they change.
 | Rank name                         | 22    | 800    |                       |
 | Daily quote                       | 19    | 700    | Line height 26        |
 | Calendar day                      | 18    | 500    | Barlow Condensed      |
+| Mood value                        | 22    | 600    | Check-in mood scale   |
 | Select value                      | 17    | 800    | Value of a select row |
 | Row                               | 15    | 600    |                       |
 | Rank badge name                   | 15    | 800    |                       |
@@ -99,6 +100,10 @@ From top to bottom, with the screen padding of 20:
 1. A header row: the brand lockup on the left, the rank badge on the right.
 2. One block, without a card, centered vertically in the free space between the header and the button: the "Série en cours" label, the streak counter, the week strip, then the daily quote. The week strip and the quote are 40 points apart. The free space goes above and below the block, never between its parts.
 3. At the bottom: the "J'ai une envie" button, then the discreet "J'ai eu un écart" text button.
+
+Under the quote, 8 points below it and part of the same block, one line in secondary body text: "Check-in du jour · à faire", or "Check-in fait" once today's check-in is saved. It opens the check-in and is read as one button. It never uses the accent color, so a missed check-in never looks like a failure.
+
+After several low mood check-ins, a card sits above the "J'ai une envie" button, outside the centered block so the counter stays in place: surface color, radius 22, the suggestion in text color and the emergency line in secondary text (15/400, line height 22), and a close button on the right. No red, no accent, no animation. Closing it hides it until the next local day.
 
 For six hours after a lapse is logged, one supportive line in secondary text sits above the "J'ai une envie" button. Until local midnight after a lapse is logged, and at least an hour, a caption line "Écart noté · Annuler l'écart" sits under the text button; "Annuler l'écart" is a text button. Neither uses red, the record streak or an animation.
 
@@ -179,6 +184,18 @@ A full screen without the tab bar. A header row holds the back button on the lef
 4. "La prochaine fois": the plan editor of the onboarding, prefilled with the current plan.
 
 The "Enregistrer et repartir" primary button stays at the bottom, above any error message.
+
+## Check-in
+
+A screen pushed over the tabs, without the tab bar. A header row holds the back button on the left and the date on the right ("Jeudi 13 novembre", body, secondary text). Below it, scrolling, with 32 points between blocks:
+
+1. "Comment ça va ?" (screen title).
+2. "Humeur" (section label, text color): five tiles, 1 to 5, on the surface color (radius 16, at least 52 high, 8 apart), the chosen one in accent with its number in the on-accent color. "Pas bien" and "Très bien" sit under the ends in secondary body text. Screen readers read each tile as a radio button, such as "1 sur 5, pas bien".
+3. "Envie aujourd'hui": a segmented control, "Aucune", "Légère", "Forte", "Intense".
+4. "Contexte": the chips of the eight risk moments.
+5. "Note (facultatif)": a multiline field on the surface color, radius 22, with the placeholder "Une phrase, si tu veux".
+
+The "Enregistrer" primary button stays at the bottom, above "Reste sur ton téléphone, chiffré." (body, secondary text). Nothing is chosen when the screen opens, so no answer is suggested. The button is disabled until a mood and an urge level are chosen. The check-in never mentions a lapse.
 
 ## Notifications
 

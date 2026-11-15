@@ -58,6 +58,8 @@ The check-in records:
 - context chips,
 - an optional note.
 
+There is one check-in per local day, editable until local midnight. It never mentions a lapse. Home shows "Check-in du jour · à faire" or "Check-in fait" under the quote, and a calm card after several low mood check-ins (see [Relapse](relapse.md#special-cases)).
+
 ### Journal
 
 A text journal with writing prompts to help the user start an entry.

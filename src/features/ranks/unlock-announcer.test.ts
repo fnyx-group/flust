@@ -73,7 +73,7 @@ describe('createUnlockAnnouncer', () => {
     await storage.close();
 
     const reopened = unwrap(await openStorage(fake.deps));
-    const session = unwrap(await loadSession(reopened));
+    const session = unwrap(await loadSession(reopened, Math.floor(now / MS_PER_DAY)));
     expect(session.unlockedRanks).toEqual(['novice', 'apprentice', 'initiate', 'watcher']);
     expect(pendingUnlock(journeyOf(start), session.unlockedRanks, now)).toBeNull();
   });

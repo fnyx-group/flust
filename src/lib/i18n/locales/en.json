@@ -45,6 +45,17 @@
       "undoSpoken": "Undo the lapse you noted",
       "undoFailed": "The lapse could not be undone. Try again.",
       "support": "The next few hours matter. You've already done the hardest part by noting it."
+    },
+    "checkIn": {
+      "todo": "Today's check-in · to do",
+      "todoSpoken": "Today's check-in, to do",
+      "done": "Check-in done",
+      "hint": "Opens the check-in"
+    },
+    "lowMood": {
+      "text": "These last few days seem hard. Talking to someone you trust or to a health professional can really help.",
+      "emergency": "If you are in danger, call the emergency number where you are.",
+      "dismiss": "Hide this message for today"
     }
   },
   "emergency": {
@@ -97,6 +108,33 @@
       "invalid-timestamp": "This time can't be used. Choose another moment.",
       "clock-behind": "Your phone's date and time are earlier than your current streak. Check them, then try again.",
       "save-failed": "The lapse could not be saved. Nothing was lost. Try again."
+    }
+  },
+  "checkIn": {
+    "back": "Back",
+    "title": "How are you?",
+    "mood": "Mood",
+    "moodLow": "Not good",
+    "moodHigh": "Very good",
+    "moodValue": "{{value}} out of 5",
+    "moodValueWithLabel": "{{value}} out of 5, {{label}}",
+    "urge": "Urge today",
+    "urgeLevels": {
+      "none": "None",
+      "light": "Light",
+      "strong": "Strong",
+      "intense": "Intense"
+    },
+    "context": "Context",
+    "note": "Note",
+    "optional": "(optional)",
+    "noteSpoken": "Note, optional",
+    "notePlaceholder": "A sentence, if you like",
+    "save": "Save",
+    "private": "Stays on your phone, encrypted.",
+    "errors": {
+      "note-too-long": "This note is too long. Shorten it, then try again.",
+      "save-failed": "The check-in could not be saved. Nothing is lost. Try again."
     }
   },
   "units": {

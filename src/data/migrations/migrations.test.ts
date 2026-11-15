@@ -1,6 +1,7 @@
 import { MIGRATIONS } from '@/data/migrations';
 import { initial } from '@/data/migrations/0001-initial';
 import { onboarding } from '@/data/migrations/0002-onboarding';
+import { lapsesAndUrges } from '@/data/migrations/0003-lapses-and-urges';
 import { openStorage } from '@/data/open-storage';
 import { DATABASE_NAME } from '@/data/storage-deps';
 import { EMPTY_DRAFT } from '@/domain/onboarding';
@@ -25,6 +26,7 @@ describe('migrations', () => {
       .map((row) => row.name);
 
     expect(tables).toEqual([
+      'check_in',
       'journey',
       'lapse',
       'lapse_detail',
@@ -142,6 +144,63 @@ describe('migrations', () => {
     ])('refuse %s', async (_, sql) => {
       const db = await raw();
       await expect(db.run(sql)).rejects.toThrow();
+      await db.close();
+    });
+  });
+
+  describe('version 4', () => {
+    async function raw() {
+      const fake = createFakeStorage();
+      unwrap(await openStorage(fake.deps));
+      return fake.rawDatabase();
+    }
+
+    const insert = `INSERT INTO check_in
+      (local_day, recorded_at, updated_at, mood, urge_level, context) VALUES`;
+
+    it('keeps the lapses and urges of version 3', async () => {
+      const fake = createFakeStorage();
+      const before = unwrap(await openStorage(fake.deps, [initial, onboarding, lapsesAndUrges]));
+      await before.close();
+      await seedJourney(fake, journeyOf(Date.UTC(2026, 0, 1)));
+      const seeded = unwrap(await openStorage(fake.deps, [initial, onboarding, lapsesAndUrges]));
+      unwrap(
+        await seeded.lapses.record({
+          at: Date.UTC(2026, 0, 2),
+          recordedAt: Date.UTC(2026, 0, 2),
+          details: null,
+          plan: null,
+        }),
+      );
+      await seeded.close();
+
+      const after = unwrap(await openStorage(fake.deps));
+      expect(await after.journey.load()).toEqual(
+        ok(journeyOf(Date.UTC(2026, 0, 1), [Date.UTC(2026, 0, 2)])),
+      );
+      expect(await after.checkIns.since(0)).toEqual(ok([]));
+      await after.close();
+    });
+
+    it.each([
+      ['a mood of 0', `${insert} (1, 0, 0, 0, 'none', '[]')`],
+      ['a mood of 6', `${insert} (1, 0, 0, 6, 'none', '[]')`],
+      ['an unknown urge level', `${insert} (1, 0, 0, 3, 'extreme', '[]')`],
+      [
+        'a check-in without a context',
+        "INSERT INTO check_in (local_day, recorded_at, updated_at, mood, urge_level) VALUES (1, 0, 0, 3, 'none')",
+      ],
+      ['a mood stored as text', `${insert} (1, 0, 0, 'three', 'none', '[]')`],
+    ])('refuse %s', async (_, sql) => {
+      const db = await raw();
+      await expect(db.run(sql)).rejects.toThrow();
+      await db.close();
+    });
+
+    it('refuse two check-ins on the same day', async () => {
+      const db = await raw();
+      await db.run(`${insert} (1, 0, 0, 3, 'none', '[]')`);
+      await expect(db.run(`${insert} (1, 5, 5, 4, 'none', '[]')`)).rejects.toThrow();
       await db.close();
     });
   });

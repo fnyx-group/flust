@@ -45,6 +45,17 @@
       "undoSpoken": "Annuler l'écart noté",
       "undoFailed": "L'écart n'a pas pu être annulé. Réessaie.",
       "support": "Les prochaines heures comptent. Tu as déjà fait le plus dur en notant cet écart."
+    },
+    "checkIn": {
+      "todo": "Check-in du jour · à faire",
+      "todoSpoken": "Check-in du jour, à faire",
+      "done": "Check-in fait",
+      "hint": "Ouvre le check-in"
+    },
+    "lowMood": {
+      "text": "Ces derniers jours ont l'air difficiles. En parler à quelqu'un de confiance ou à un professionnel de santé peut vraiment aider.",
+      "emergency": "Si tu es en danger, appelle le numéro d'urgence de l'endroit où tu te trouves.",
+      "dismiss": "Masquer ce message pour aujourd'hui"
     }
   },
   "emergency": {
@@ -97,6 +108,33 @@
       "invalid-timestamp": "Ce moment ne peut pas être utilisé. Choisis un autre moment.",
       "clock-behind": "La date et l'heure de ton téléphone sont antérieures à ta série en cours. Vérifie-les, puis réessaie.",
       "save-failed": "L'écart n'a pas pu être enregistré. Rien n'est perdu. Réessaie."
+    }
+  },
+  "checkIn": {
+    "back": "Retour",
+    "title": "Comment ça va ?",
+    "mood": "Humeur",
+    "moodLow": "Pas bien",
+    "moodHigh": "Très bien",
+    "moodValue": "{{value}} sur 5",
+    "moodValueWithLabel": "{{value}} sur 5, {{label}}",
+    "urge": "Envie aujourd'hui",
+    "urgeLevels": {
+      "none": "Aucune",
+      "light": "Légère",
+      "strong": "Forte",
+      "intense": "Intense"
+    },
+    "context": "Contexte",
+    "note": "Note",
+    "optional": "(facultatif)",
+    "noteSpoken": "Note, facultatif",
+    "notePlaceholder": "Une phrase, si tu veux",
+    "save": "Enregistrer",
+    "private": "Reste sur ton téléphone, chiffré.",
+    "errors": {
+      "note-too-long": "Cette note est trop longue. Raccourcis-la, puis réessaie.",
+      "save-failed": "Le check-in n'a pas pu être enregistré. Rien n'est perdu. Réessaie."
     }
   },
   "units": {

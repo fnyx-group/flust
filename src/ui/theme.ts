@@ -53,6 +53,7 @@ export const typography = {
   breathingPhase: { fontFamily: fonts.semiBold, fontSize: 20 },
   stepperValue: { fontFamily: fonts.numberSemiBold, fontSize: 32, fontVariant: ['tabular-nums'] },
   calendarDay: { fontFamily: fonts.numberMedium, fontSize: 18, fontVariant: ['tabular-nums'] },
+  scaleValue: { fontFamily: fonts.semiBold, fontSize: 22 },
   row: { fontFamily: fonts.semiBold, fontSize: 15 },
   badgeName: { fontFamily: fonts.extraBold, fontSize: 15 },
   body: { fontFamily: fonts.regular, fontSize: 15 },
@@ -119,6 +120,7 @@ export const sizes = {
   // The minimum touch target on both platforms.
   touchTarget: 44,
   radio: 24,
+  scaleOption: 52,
   emblem: 48,
   badgeRing: 56,
   badgeRingStroke: 3,

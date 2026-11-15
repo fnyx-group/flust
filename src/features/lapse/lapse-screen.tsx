@@ -14,7 +14,13 @@ import type { Profile } from '@/data/profile-repository';
 import type { Journey } from '@/domain/journey';
 import { defaultEarlierLapse, lapseBounds } from '@/domain/lapse';
 import { DEFAULT_PLAN, type Plan } from '@/domain/onboarding';
-import { PLACE_IDS, RISK_MOMENT_IDS, type PlaceId, type RiskMomentId } from '@/domain/presets';
+import {
+  PLACE_IDS,
+  RISK_MOMENT_IDS,
+  toggleRiskMoment,
+  type PlaceId,
+  type RiskMomentId,
+} from '@/domain/presets';
 import { clampStart } from '@/domain/start-point';
 import { streakStart } from '@/domain/streak';
 import type { Timestamp } from '@/domain/time';
@@ -133,11 +139,6 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
     setLastEarlier(at);
   }
 
-  function toggleContext(id: RiskMomentId) {
-    const next = context.includes(id) ? context.filter((other) => other !== id) : [...context, id];
-    setContext(RISK_MOMENT_IDS.filter((moment) => next.includes(moment)));
-  }
-
   // Android reads the message through its live region; iOS has no live regions, so it is
   // announced there.
   function showError(failure: RecordLapseError) {
@@ -153,9 +154,11 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
     setBusy(true);
     setError(null);
     const result = await recordLapse(storage.lapses, journey, answers, Date.now());
+    // busy drives usePreventRemove: it turns false in the same handler as allowRemove, so the
+    // prop and the prevention state stay in sync. saving stays set, so no second save starts.
     if (result.ok) {
-      setBusy(false);
       const close = () => {
+        setBusy(false);
         allowRemove();
         router.back();
       };
@@ -232,7 +235,7 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
                     label: riskMomentLabel(t, id),
                     selected: context.includes(id),
                   }))}
-                  onToggle={toggleContext}
+                  onToggle={(id) => setContext(toggleRiskMoment(context, id))}
                 />
               </View>
             </View>
