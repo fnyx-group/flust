@@ -86,6 +86,8 @@ export const spacing = {
   screen: 20,
   screenTop: 60,
   card: 20,
+  chipHorizontal: 18,
+  chipVertical: 10,
   xxs: 2,
   xs: 4,
   s: 8,
@@ -97,6 +99,9 @@ export const spacing = {
 } as const;
 
 export const pressedOpacity = 0.8;
+
+// The background color under a sheet, so the screen behind stays faintly visible.
+export const backdropOpacity = 0.85;
 
 export const radii = {
   card: 20,

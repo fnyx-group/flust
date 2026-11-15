@@ -108,6 +108,34 @@ describe('journal repository', () => {
     expect(summary?.excerpt).toBe('é'.repeat(280));
   });
 
+  // SQLite cuts on code points, so an emoji outside the basic plane is never split in two.
+  it('cuts the start of a long note between characters, never inside an emoji', async () => {
+    const { storage } = await setUp();
+    unwrap(await storage.journal.create(origin, content(`a${'\u{1F642}'.repeat(4_000)}`)));
+
+    const [summary] = unwrap(await storage.journal.list());
+    expect(summary?.excerpt).toBe(`a${'\u{1F642}'.repeat(279)}`);
+  });
+
+  // A row the editor cannot open must not be listed: tapping it would lead nowhere.
+  it.each([
+    ['an invalid time of change', 'updated_at = -1'],
+    ['a text ending with a space', "body = body || ' '"],
+    ['a text starting with a line break', 'body = char(10) || body'],
+    ['a text with a carriage return', "body = 'One' || char(13) || char(10) || 'Two'"],
+    ['a text too long', "body = printf('%.*c', 10001, 'a')"],
+  ])('lists only notes that can be opened, leaving out %s', async (_, change) => {
+    const { storage, rawDatabase } = await setUp();
+    const kept = unwrap(await storage.journal.create(origin, content('Kept')));
+    const broken = unwrap(await storage.journal.create(origin, content('Broken')));
+    const raw = await rawDatabase();
+    await raw.run(`UPDATE journal_note SET ${change} WHERE id = ?`, [broken.id]);
+    await raw.close();
+
+    expect(await storage.journal.get(broken.id)).toEqual(ok(null));
+    expect(unwrap(await storage.journal.list()).map((note) => note.id)).toEqual([kept.id]);
+  });
+
   it('leaves out rows that fail validation', async () => {
     const { storage, rawDatabase } = await setUp();
     const valid = unwrap(await storage.journal.create(origin, content('Valid')));

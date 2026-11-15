@@ -159,10 +159,10 @@
       "save": "Enregistrer",
       "titlePlaceholder": "Titre (facultatif)",
       "titleSpoken": "Titre, facultatif",
-      "dateTime": "{{date}}, {{time}}",
+      "dateTime": "{{date}} à {{time}}",
       "bodyPlaceholder": "Écris ce que tu veux.",
       "bodySpoken": "Texte de la note",
-      "prompts": "Une piste",
+      "prompts": "Pour commencer",
       "promptLabels": {
         "helped": "Qu'est-ce qui t'a fait du bien ?",
         "proud": "Une fierté du jour ?",
@@ -184,17 +184,26 @@
       "leave": {
         "title": "Quitter sans enregistrer ?",
         "message": "Ce que tu as écrit depuis le dernier enregistrement sera perdu.",
+        "messageNew": "Ce que tu as écrit sera perdu.",
         "keep": "Continuer à écrire",
-        "discard": "Abandonner"
+        "discard": "Ne pas enregistrer"
       },
       "errors": {
         "empty": "Écris quelques mots avant d'enregistrer.",
         "title-too-long": "Ce titre est trop long. Raccourcis-le, puis réessaie.",
         "body-too-long": "Cette note est trop longue. Raccourcis-la, puis réessaie.",
         "save-failed": "La note n'a pas pu être enregistrée. Ton texte est toujours là. Réessaie.",
-        "delete-failed": "La note n'a pas pu être supprimée. Réessaie."
+        "delete-failed": "La note n'a pas pu être supprimée. Réessaie.",
+        "prompt-too-long": "Il ne reste plus assez de place dans la note pour cette phrase.",
+        "note-missing": "Cette note n'existe plus. Ton texte est toujours là, tu peux l'enregistrer comme nouvelle note."
+      },
+      "saveAsNew": "Enregistrer comme nouvelle note",
+      "unavailable": {
+        "missing": "Cette note n'existe plus.",
+        "failed": "La note n'a pas pu être lue. Rien n'est perdu."
       }
-    }
+    },
+    "refreshFailed": "Le journal n'a pas pu être actualisé."
   },
   "units": {
     "day_one": "{{count}} jour",

@@ -73,12 +73,21 @@ describe('saveNote', () => {
     expect(journal.update).not.toHaveBeenCalled();
   });
 
-  it('reports a storage failure or a note gone missing as a failed save', async () => {
+  it('reports a storage failure as a failed save', async () => {
     expect(await saveNote(repository(true), null, { title: '', body: 'T' }, 0, paris)).toEqual(
       err('save-failed'),
     );
-    expect(await saveNote(repository(), existing, { title: '', body: 'T' }, 0, paris)).toEqual(
+    const journal = repository();
+    journal.update.mockResolvedValueOnce(err('storage-failed'));
+    expect(await saveNote(journal, existing, { title: '', body: 'T' }, 0, paris)).toEqual(
       err('save-failed'),
+    );
+  });
+
+  // Trying again would fail the same way, so the editor offers to save the text as a new note.
+  it('reports an edited note that no longer exists apart from a failed save', async () => {
+    expect(await saveNote(repository(), existing, { title: '', body: 'T' }, 0, paris)).toEqual(
+      err('note-missing'),
     );
   });
 });

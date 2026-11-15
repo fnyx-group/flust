@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/ui/button';
 import { RadioGroup, type RadioOption } from '@/ui/radio-group';
 import { ScrollView } from '@/ui/scroll-view';
-import { colors, radii, spacing, typography } from '@/ui/theme';
+import { backdropOpacity, colors, radii, spacing, typography } from '@/ui/theme';
 
 type OptionSheetProps<K extends string> = {
   visible: boolean;
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFill,
     backgroundColor: colors.background,
-    opacity: 0.85,
+    opacity: backdropOpacity,
   },
   sheet: {
     maxHeight: '85%',

@@ -14,6 +14,7 @@ import { CountdownChip } from '@/features/emergency/countdown-chip';
 import { PlanCard, ReasonsCard } from '@/features/emergency/profile-cards';
 import { startUrgeVisit, type UrgeVisit } from '@/features/emergency/urge-visit';
 import { handOffVisit } from '@/features/emergency/visit-handoff';
+import { useWhenFocused } from '@/features/shared/use-when-focused';
 import { useStorage } from '@/features/storage/storage-context';
 import { Button } from '@/ui/button';
 import { IconButton } from '@/ui/icon-button';
@@ -38,6 +39,7 @@ export function EmergencyScreen() {
   const visit = useRef<UrgeVisit | null>(null);
   // Set once the lapse screen has taken the visit over: it ends the visit from then on.
   const handedOff = useRef(false);
+  const whenFocused = useWhenFocused();
 
   // Effects can run twice in development; the ref keeps a single visit per screen.
   useEffect(() => {
@@ -105,7 +107,10 @@ export function EmergencyScreen() {
           </View>
           <BreathingCircle />
           {plan !== undefined && (
-            <PlanCard plan={plan} onWrite={opensJournal(plan) ? writeNote : undefined} />
+            <PlanCard
+              plan={plan}
+              onWrite={opensJournal(plan) ? () => whenFocused(writeNote) : undefined}
+            />
           )}
           {reasons.length > 0 && <ReasonsCard reasons={reasons} />}
           <View style={styles.actions}>

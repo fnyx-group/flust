@@ -2,7 +2,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/ui/button';
-import { colors, radii, spacing, typography } from '@/ui/theme';
+import { backdropOpacity, colors, radii, spacing, typography } from '@/ui/theme';
 
 type ConfirmSheetProps = {
   visible: boolean;
@@ -16,6 +16,8 @@ type ConfirmSheetProps = {
 
 // Built like OptionSheet: a fade, a backdrop that cancels, and the escape gesture. Cancelling is
 // the safe choice, so it is the primary button and comes first; confirming is a plain button.
+// Screen readers skip the backdrop: the cancel button and the escape gesture already cancel, and
+// a second "Cancel" would read as another choice.
 export function ConfirmSheet({
   visible,
   title,
@@ -30,8 +32,9 @@ export function ConfirmSheet({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.container}>
         <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={cancelLabel}
+          accessible={false}
+          importantForAccessibility="no"
+          accessibilityElementsHidden
           onPress={onCancel}
           style={styles.backdrop}
         />
@@ -62,7 +65,7 @@ const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFill,
     backgroundColor: colors.background,
-    opacity: 0.85,
+    opacity: backdropOpacity,
   },
   sheet: {
     gap: spacing.l,

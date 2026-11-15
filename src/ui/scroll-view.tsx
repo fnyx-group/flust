@@ -1,13 +1,17 @@
+import type { Ref } from 'react';
 import {
   ScrollView as NativeScrollView,
   SectionList as NativeSectionList,
+  type ScrollViewInstance,
   type ScrollViewProps,
   type SectionListProps,
 } from 'react-native';
 
 // Android 12 and later stretch the content at the ends of a scroll, which does not fit the
 // design. overScrollMode only applies to Android, so iOS keeps its bounce.
-export function ScrollView(props: Omit<ScrollViewProps, 'overScrollMode'>) {
+export function ScrollView(
+  props: Omit<ScrollViewProps, 'overScrollMode'> & { ref?: Ref<ScrollViewInstance> },
+) {
   return <NativeScrollView {...props} overScrollMode="never" />;
 }
 

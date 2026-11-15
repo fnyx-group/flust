@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { BackHandler, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { StepProgress } from '@/domain/onboarding';
@@ -9,9 +9,8 @@ import { Button } from '@/ui/button';
 import { IconButton } from '@/ui/icon-button';
 import { BackIcon } from '@/ui/icons/back-icon';
 import { ProgressBar } from '@/ui/progress-bar';
-import { Screen } from '@/ui/screen';
+import { KeyboardScreen } from '@/ui/keyboard-screen';
 import { ScreenTitle } from '@/ui/screen-title';
-import { ScrollView } from '@/ui/scroll-view';
 import { colors, spacing, typography } from '@/ui/theme';
 
 type StepLayoutProps = {
@@ -46,11 +45,9 @@ export function StepLayout({
   }, [onBack, backDisabled]);
 
   return (
-    <Screen bottomInset>
-      <KeyboardAvoidingView
-        style={styles.fill}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+    <KeyboardScreen
+      contentContainerStyle={styles.content}
+      header={
         <View style={styles.header}>
           <IconButton
             accessibilityLabel={t('onboarding.back')}
@@ -65,30 +62,24 @@ export function StepLayout({
             accessibilityLabel={t('onboarding.progress', progress)}
           />
         </View>
-        <ScrollView
-          style={styles.fill}
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.intro}>
-            <ScreenTitle>{title}</ScreenTitle>
-            <Text style={styles.subtitle}>{subtitle}</Text>
-          </View>
-          {children}
-        </ScrollView>
+      }
+      footer={
         <View style={styles.footer}>
           <Button label={action.label} onPress={action.onPress} disabled={action.disabled} />
           {footer}
         </View>
-      </KeyboardAvoidingView>
-    </Screen>
+      }
+    >
+      <View style={styles.intro}>
+        <ScreenTitle>{title}</ScreenTitle>
+        <Text style={styles.subtitle}>{subtitle}</Text>
+      </View>
+      {children}
+    </KeyboardScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  fill: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

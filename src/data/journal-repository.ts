@@ -17,7 +17,8 @@ export type NoteOrigin = { readonly day: number; readonly at: Timestamp; readonl
 
 export type JournalRepository = {
   // Every note, the latest local day first, each with the start of its text only. Rows that fail
-  // validation are left out rather than shown with wrong values.
+  // validation are left out rather than shown with wrong values, with the same checks as get, so a
+  // listed note can be opened.
   list(): Promise<Result<readonly NoteSummary[], JournalStorageError>>;
   // Null when the note does not exist or fails validation.
   get(id: NoteId): Promise<Result<Note | null, JournalStorageError>>;
@@ -42,7 +43,9 @@ export function createJournalRepository(db: Database): JournalRepository {
     async list() {
       try {
         const rows = await db.all(
-          `SELECT id, local_day, created_at, title, substr(body, 1, ?) AS excerpt
+          `SELECT id, local_day, created_at, utc_offset, updated_at, title,
+             substr(body, 1, ?) AS excerpt, length(body) AS body_code_points,
+             substr(body, -1) AS body_end, instr(body, char(13)) AS body_cr
            FROM journal_note ORDER BY local_day DESC, created_at DESC, id DESC`,
           [EXCERPT_LENGTH],
         );
@@ -144,8 +147,13 @@ function toSummary(row: Row): NoteSummary | null {
     id: row.id,
     day: row.local_day,
     createdAt: row.created_at,
+    offset: row.utc_offset,
+    updatedAt: row.updated_at,
     title: row.title,
     excerpt: row.excerpt,
+    bodyCodePoints: row.body_code_points,
+    bodyEnd: row.body_end,
+    bodyHasCarriageReturn: typeof row.body_cr === 'number' ? row.body_cr > 0 : row.body_cr,
   });
   return parsed.ok ? parsed.value : null;
 }

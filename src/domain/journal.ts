@@ -1,4 +1,10 @@
-import { dateOfDay, startOfWeek, type Weekday } from '@/domain/local-time';
+import {
+  dateOfDay,
+  startOfWeek,
+  utcToLocal,
+  type LocalDateTime,
+  type Weekday,
+} from '@/domain/local-time';
 import { err, ok, type Result } from '@/domain/result';
 import { isValidTimestamp, type Timestamp } from '@/domain/time';
 
@@ -14,6 +20,8 @@ export type NoteTitle = string & { readonly [titleBrand]: true };
 // Trimmed, with its line breaks kept, never empty and within the length limit.
 export type NoteBody = string & { readonly [bodyBrand]: true };
 
+// In UTF-16 units, as string length and the text fields' maxLength count them, so typing stops
+// exactly where saving would refuse.
 export const NOTE_TITLE_MAX_LENGTH = 120;
 export const NOTE_BODY_MAX_LENGTH = 10_000;
 
@@ -46,7 +54,18 @@ export type NoteContentError = 'empty' | 'title-too-long' | 'body-too-long';
 
 type StoredFields<T> = { readonly [K in keyof T]: unknown };
 export type StoredNote = StoredFields<Note>;
-export type StoredNoteSummary = StoredFields<NoteSummary>;
+
+// The list reads only the start of the text, so it also reads what lets it check the rest as
+// parseNote would: the length of the text in code points, its last character and whether it holds
+// a carriage return.
+export type StoredNoteSummary = StoredFields<
+  NoteSummary &
+    Pick<Note, 'offset' | 'updatedAt'> & {
+      readonly bodyCodePoints: number;
+      readonly bodyEnd: string;
+      readonly bodyHasCarriageReturn: boolean;
+    }
+>;
 
 function normalizeTitle(raw: string): string {
   return raw.replace(/\s+/g, ' ').trim();
@@ -56,18 +75,13 @@ function normalizeBody(raw: string): string {
   return raw.replace(/\r\n?/g, '\n').trim();
 }
 
-// Code points, like CustomText, so a simple emoji counts once.
-function codePointLength(text: string): number {
-  return [...text].length;
-}
-
 // The text is required and the title optional: a note with only a title is empty.
 export function parseNoteContent(draft: NoteDraft): Result<NoteContent, NoteContentError> {
   const title = normalizeTitle(draft.title);
   const body = normalizeBody(draft.body);
   if (body.length === 0) return err('empty');
-  if (codePointLength(title) > NOTE_TITLE_MAX_LENGTH) return err('title-too-long');
-  if (codePointLength(body) > NOTE_BODY_MAX_LENGTH) return err('body-too-long');
+  if (title.length > NOTE_TITLE_MAX_LENGTH) return err('title-too-long');
+  if (body.length > NOTE_BODY_MAX_LENGTH) return err('body-too-long');
   return ok({
     title: title.length === 0 ? null : (title as NoteTitle),
     body: body as NoteBody,
@@ -87,12 +101,26 @@ export function hasUnsavedChanges(saved: NoteDraft, current: NoteDraft): boolean
   );
 }
 
+// A draft can be saved once it changed and has text. One too long can still be tried, so the
+// user learns why it is refused.
+export function canSaveDraft(saved: NoteDraft, current: NoteDraft): boolean {
+  if (!hasUnsavedChanges(saved, current)) return false;
+  const content = parseNoteContent(current);
+  return content.ok || content.error !== 'empty';
+}
+
+// The wall time a note was written at, read with the UTC offset stored then rather than the
+// device's current one, so it reads the same after travel.
+export function noteWrittenAt(note: Pick<Note, 'createdAt' | 'offset'>): LocalDateTime {
+  return utcToLocal(note.createdAt, () => note.offset);
+}
+
 // A starter goes on a new paragraph after the existing text. It is left out rather than cut when
 // the text would go over the limit.
 export function insertPrompt(body: string, starter: string): Result<string, 'too-long'> {
   const existing = body.trimEnd();
   const next = existing.length === 0 ? starter : `${existing}\n\n${starter}`;
-  return codePointLength(next) > NOTE_BODY_MAX_LENGTH ? err('too-long') : ok(next);
+  return next.length > NOTE_BODY_MAX_LENGTH ? err('too-long') : ok(next);
 }
 
 export function parseNote(stored: StoredNote): Result<Note, 'invalid-note'> {
@@ -111,20 +139,48 @@ export function parseNote(stored: StoredNote): Result<Note, 'invalid-note'> {
   return ok({ id, day, createdAt, offset, updatedAt, ...content });
 }
 
+// Checks every field parseNote checks, so that a note in the list always opens. The text length
+// is read in code points, which SQLite counts: a text within the limit in UTF-16 units is within
+// it in code points too, and the editor rejects the rare text over it as unreadable.
 export function parseNoteSummary(stored: StoredNoteSummary): Result<NoteSummary, 'invalid-note'> {
-  const { id, day, createdAt, title, excerpt } = stored;
+  const { id, day, createdAt, offset, updatedAt, title, excerpt } = stored;
   const parsedTitle = parseStoredTitle(title);
   if (
     !isNoteId(id) ||
     !isDay(day) ||
     !isTimestamp(createdAt) ||
+    !isOffset(offset) ||
+    !isTimestamp(updatedAt) ||
     parsedTitle === undefined ||
-    typeof excerpt !== 'string' ||
-    normalizeBody(excerpt).length === 0
+    !isStoredExcerpt(excerpt) ||
+    !isStoredBodyShape(stored)
   ) {
     return err('invalid-note');
   }
-  return ok({ id, day, createdAt, title: parsedTitle, excerpt: normalizeBody(excerpt) });
+  return ok({ id, day, createdAt, title: parsedTitle, excerpt: excerpt.trimEnd() });
+}
+
+// The start of a stored text: never empty and never starting with white space. Its end may fall
+// anywhere, even on white space, since the cut is not the end of the text.
+function isStoredExcerpt(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0 && value.trimStart() === value;
+}
+
+function isStoredBodyShape({
+  bodyCodePoints,
+  bodyEnd,
+  bodyHasCarriageReturn,
+}: StoredNoteSummary): boolean {
+  return (
+    typeof bodyCodePoints === 'number' &&
+    Number.isSafeInteger(bodyCodePoints) &&
+    bodyCodePoints > 0 &&
+    bodyCodePoints <= NOTE_BODY_MAX_LENGTH &&
+    typeof bodyEnd === 'string' &&
+    bodyEnd.length > 0 &&
+    bodyEnd.trimEnd() === bodyEnd &&
+    bodyHasCarriageReturn === false
+  );
 }
 
 // Stored values must already be normalized: one that would change on saving was not written by
@@ -141,8 +197,7 @@ function parseStoredTitle(value: unknown): NoteTitle | null | undefined {
   if (value === null) return null;
   if (typeof value !== 'string') return undefined;
   const title = normalizeTitle(value);
-  const valid =
-    title.length > 0 && title === value && codePointLength(title) <= NOTE_TITLE_MAX_LENGTH;
+  const valid = title.length > 0 && title === value && title.length <= NOTE_TITLE_MAX_LENGTH;
   return valid ? (title as NoteTitle) : undefined;
 }
 

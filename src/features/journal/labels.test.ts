@@ -1,16 +1,15 @@
 import { parseNoteContent, toNoteId, type NoteSummary } from '@/domain/journal';
-import { localDayNumber, utcToLocal } from '@/domain/local-time';
 import { MS_PER_DAY } from '@/domain/time';
 import { unwrap } from '@test/arbitraries';
 import {
   noteDateTime,
   noteGroupTitle,
   noteListDate,
+  noteListExcerpt,
   noteRowLabel,
   PROMPT_IDS,
 } from '@/features/journal/labels';
 import { createI18n } from '@/lib/i18n';
-import { zoneOffsetAt } from '@test/zones';
 
 jest.mock('expo-localization', () => ({ getLocales: () => [{ languageCode: 'en' }] }));
 
@@ -45,23 +44,15 @@ describe('noteDateTime', () => {
   const local = { year: 2026, month: 11, day: 13, hour: 22, minute: 14 };
 
   it('writes the date and the time, in 24 or 12 hours', () => {
-    expect(noteDateTime(french, 'fr', local, 2026, false)).toBe('Vendredi 13 novembre, 22:14');
-    expect(noteDateTime(english, 'en', local, 2026, true)).toBe('Friday, November 13, 10:14 PM');
-    expect(noteDateTime(english, 'en', local, 2026, false)).toBe('Friday, November 13, 22:14');
+    expect(noteDateTime(french, 'fr', local, 2026, false)).toBe('Vendredi 13 novembre à 22:14');
+    expect(noteDateTime(english, 'en', local, 2026, true)).toBe('Friday, November 13 at 10:14 PM');
+    expect(noteDateTime(english, 'en', local, 2026, false)).toBe('Friday, November 13 at 22:14');
   });
 
   it('adds the year of another year', () => {
-    expect(noteDateTime(french, 'fr', local, 2027, false)).toBe('Vendredi 13 novembre 2026, 22:14');
-  });
-
-  // A note shows the time it was written at, with the offset of that moment.
-  it('reads the same after travel when given the stored offset', () => {
-    const at = Date.UTC(2026, 10, 13, 21, 14);
-    const paris = zoneOffsetAt('Europe/Paris');
-    const offset = paris(at);
-    const written = utcToLocal(at, () => offset);
-    expect(noteDateTime(french, 'fr', written, 2026, false)).toBe('Vendredi 13 novembre, 22:14');
-    expect(localDayNumber(at, () => offset)).toBe(localDayNumber(at, paris));
+    expect(noteDateTime(french, 'fr', local, 2027, false)).toBe(
+      'Vendredi 13 novembre 2026 à 22:14',
+    );
   });
 });
 
@@ -74,6 +65,20 @@ describe('noteRowLabel', () => {
     expect(noteRowLabel('fr', note)).toBe('Mercredi 12 nov., Calm day.');
     const { title } = unwrap(parseNoteContent({ title: 'Un bon jour', body: 'Text' }));
     expect(noteRowLabel('fr', { ...note, title })).toBe('Mercredi 12 nov., Un bon jour, Calm day.');
+  });
+
+  it('reads the text on one line and stops after a word near 100 characters', () => {
+    const excerpt = `First line.\n\n${'word '.repeat(60).trim()}`;
+    const label = noteRowLabel('en', { ...note, excerpt });
+    expect(label.startsWith('Wednesday, Nov 12, First line. word word')).toBe(true);
+    expect(label.endsWith('word…')).toBe(true);
+    expect(label.length).toBeLessThanOrEqual('Wednesday, Nov 12, '.length + 101);
+  });
+});
+
+describe('noteListExcerpt', () => {
+  it('shrinks blank lines to one line break', () => {
+    expect(noteListExcerpt('One\n\n\nTwo\n \nThree\nFour')).toBe('One\nTwo\nThree\nFour');
   });
 });
 

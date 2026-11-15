@@ -3,7 +3,7 @@ import type { Migration } from '@/data/migrations/migration';
 // local_day and utc_offset are taken when a note is first saved and never recomputed, so a note
 // keeps the day and the time it was written at after travel. Editing a note only moves
 // updated_at. An empty title is stored as NULL and the text is never empty. Length limits are
-// checked in the domain, in code points.
+// checked in the domain, in UTF-16 units.
 export const journalNotes: Migration = {
   version: 5,
   async up(tx) {

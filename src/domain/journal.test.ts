@@ -1,11 +1,13 @@
 import * as fc from 'fast-check';
 
 import {
+  canSaveDraft,
   draftOf,
   EMPTY_NOTE_DRAFT,
   groupNotes,
   hasUnsavedChanges,
   insertPrompt,
+  noteWrittenAt,
   NOTE_BODY_MAX_LENGTH,
   NOTE_TITLE_MAX_LENGTH,
   parseNote,
@@ -17,6 +19,7 @@ import {
   type NoteId,
   type NoteSummary,
   type StoredNote,
+  type StoredNoteSummary,
 } from '@/domain/journal';
 import { weekdayOf, type Weekday } from '@/domain/local-time';
 import { err, ok } from '@/domain/result';
@@ -64,10 +67,15 @@ describe('parseNoteContent', () => {
     expect(parseNoteContent({ title, body: `${body}b` })).toEqual(err('body-too-long'));
   });
 
-  it('counts code points, so a simple emoji counts once', () => {
-    const body = '\u{1F642}'.repeat(NOTE_BODY_MAX_LENGTH);
-    expect(body.length).toBe(2 * NOTE_BODY_MAX_LENGTH);
-    expect(parseNoteContent({ title: '', body }).ok).toBe(true);
+  // The text fields' maxLength counts UTF-16 units, so the limits do too: an emoji outside the
+  // basic plane counts twice, and a text the field accepts is never refused on saving.
+  it('counts UTF-16 units, like the text fields', () => {
+    const emoji = '\u{1F642}';
+    const fits = emoji.repeat(NOTE_BODY_MAX_LENGTH / 2);
+    expect(parseNoteContent({ title: '', body: fits }).ok).toBe(true);
+    expect(parseNoteContent({ title: '', body: `${fits}a` })).toEqual(err('body-too-long'));
+    const title = emoji.repeat(NOTE_TITLE_MAX_LENGTH / 2);
+    expect(parseNoteContent({ title: `${title}a`, body: 'Text' })).toEqual(err('title-too-long'));
   });
 });
 
@@ -93,6 +101,38 @@ describe('hasUnsavedChanges', () => {
     const withPrompt = unwrap(insertPrompt(saved.body, 'Tomorrow, I '));
     expect(hasUnsavedChanges(saved, { ...saved, body: withPrompt })).toBe(true);
     expect(hasUnsavedChanges(saved, { ...saved, body: 'Text\n\n' })).toBe(false);
+  });
+});
+
+describe('canSaveDraft', () => {
+  const saved = { title: 'Title', body: 'Text' };
+
+  it('needs a change and some text', () => {
+    expect(canSaveDraft(saved, saved)).toBe(false);
+    expect(canSaveDraft(saved, { ...saved, body: ' Text ' })).toBe(false);
+    expect(canSaveDraft(saved, { ...saved, body: 'Other' })).toBe(true);
+    expect(canSaveDraft(saved, { ...saved, body: ' ' })).toBe(false);
+    expect(canSaveDraft(EMPTY_NOTE_DRAFT, { title: 'Only a title', body: '' })).toBe(false);
+  });
+
+  it('allows trying a text too long, so the refusal can be explained', () => {
+    const body = 'a'.repeat(NOTE_BODY_MAX_LENGTH + 1);
+    expect(canSaveDraft(saved, { ...saved, body })).toBe(true);
+  });
+});
+
+describe('noteWrittenAt', () => {
+  it('reads the stored offset, not the one where the note is read', () => {
+    // 22:14 in Paris in winter, 21:14 UTC; read in Tokyo it would be 06:14 the next day.
+    const note = { createdAt: Date.UTC(2026, 10, 13, 21, 14), offset: 60 };
+    expect(noteWrittenAt(note)).toEqual({ year: 2026, month: 11, day: 13, hour: 22, minute: 14 });
+    expect(noteWrittenAt({ ...note, offset: 9 * 60 })).toEqual({
+      year: 2026,
+      month: 11,
+      day: 14,
+      hour: 6,
+      minute: 14,
+    });
   });
 });
 
@@ -124,6 +164,14 @@ describe('insertPrompt', () => {
   it('leaves the text alone when the starter would not fit', () => {
     const full = 'a'.repeat(NOTE_BODY_MAX_LENGTH - 5);
     expect(insertPrompt(full, 'Tomorrow, I ')).toEqual(err('too-long'));
+  });
+
+  it('counts the starter in UTF-16 units, like the text field', () => {
+    const starter = 'Tomorrow, I ';
+    const room = NOTE_BODY_MAX_LENGTH - starter.length - 2;
+    const exact = '\u{1F642}'.repeat(room / 2);
+    expect(unwrap(insertPrompt(exact, starter)).length).toBe(NOTE_BODY_MAX_LENGTH);
+    expect(insertPrompt(`${exact}a`, starter)).toEqual(err('too-long'));
   });
 });
 
@@ -164,25 +212,47 @@ describe('parseNote', () => {
 });
 
 describe('parseNoteSummary', () => {
-  const stored = { id: 1, day: 10, createdAt: 10 * MS_PER_DAY, title: 'Title', excerpt: 'Text' };
+  const stored: StoredNoteSummary = {
+    id: 1,
+    day: 10,
+    createdAt: 10 * MS_PER_DAY,
+    offset: 60,
+    updatedAt: 11 * MS_PER_DAY,
+    title: 'Title',
+    excerpt: 'Text',
+    bodyCodePoints: 4,
+    bodyEnd: 't',
+    bodyHasCarriageReturn: false,
+  };
+  const summary = { id: 1, day: 10, createdAt: 10 * MS_PER_DAY, title: 'Title', excerpt: 'Text' };
 
   it('reads a stored summary, cut wherever the excerpt ends', () => {
-    expect(parseNoteSummary(stored)).toEqual(ok(stored));
+    expect(parseNoteSummary(stored)).toEqual(ok(summary));
     expect(parseNoteSummary({ ...stored, title: null, excerpt: 'Cut mid \n' })).toEqual(
-      ok({ ...stored, title: null, excerpt: 'Cut mid' }),
+      ok({ ...summary, title: null, excerpt: 'Cut mid' }),
     );
   });
 
-  it.each<[string, Record<string, unknown>]>([
+  // Every row parseNote refuses is refused here too, so a listed note always opens.
+  it.each<[string, Partial<StoredNoteSummary>]>([
     ['an invalid id', { id: -1 }],
     ['an invalid day', { day: Number.NaN }],
     ['an invalid time of creation', { createdAt: 1.5 }],
+    ['an offset beyond 18 hours', { offset: 18 * 60 + 1 }],
+    ['a missing offset', { offset: null }],
+    ['a missing time of change', { updatedAt: null }],
     ['an empty title', { title: '' }],
     ['a title not normalized', { title: ' Title' }],
     ['a title too long', { title: 'a'.repeat(NOTE_TITLE_MAX_LENGTH + 1) }],
     ['a title as a number', { title: 1 }],
-    ['an empty excerpt', { excerpt: ' ' }],
+    ['an empty excerpt', { excerpt: '' }],
+    ['a text starting with a space', { excerpt: ' Text' }],
     ['an excerpt that is not text', { excerpt: null }],
+    ['a text too long', { bodyCodePoints: NOTE_BODY_MAX_LENGTH + 1 }],
+    ['a text ending with a space', { bodyEnd: ' ' }],
+    ['a text ending with a line break', { bodyEnd: '\n' }],
+    ['a text with a carriage return', { bodyHasCarriageReturn: true }],
+    ['a missing text length', { bodyCodePoints: null }],
   ])('refuses %s', (_, change) => {
     expect(parseNoteSummary({ ...stored, ...change })).toEqual(err('invalid-note'));
   });

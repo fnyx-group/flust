@@ -2,14 +2,20 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { groupNotes, type NoteGroupKey, type NoteSummary } from '@/domain/journal';
-import { dateOfDay, type Weekday } from '@/domain/local-time';
-import { noteGroupTitle, noteListDate, noteRowLabel } from '@/features/journal/labels';
+import { dateOfDay, localDayNumber, type Weekday } from '@/domain/local-time';
+import { useClock } from '@/features/clock/clock-context';
+import {
+  noteGroupTitle,
+  noteListDate,
+  noteListExcerpt,
+  noteRowLabel,
+} from '@/features/journal/labels';
+import { deviceOffsetAt } from '@/features/shared/device-time';
 import { SectionList } from '@/ui/scroll-view';
 import { colors, pressedOpacity, spacing, typography } from '@/ui/theme';
 
 type NoteListProps = {
   notes: readonly NoteSummary[];
-  today: number;
   firstWeekday: Weekday;
   onOpen: (note: NoteSummary) => void;
 };
@@ -20,8 +26,10 @@ function sectionKey(key: NoteGroupKey): string {
   return key.kind === 'month' ? `${key.year}-${key.month}` : key.kind;
 }
 
-export function NoteList({ notes, today, firstWeekday, onOpen }: NoteListProps) {
+// Groups are relative to today, read from the clock, so they move at local midnight.
+export function NoteList({ notes, firstWeekday, onOpen }: NoteListProps) {
   const { t, i18n } = useTranslation();
+  const today = useClock((now) => localDayNumber(now, deviceOffsetAt));
   const currentYear = dateOfDay(today).year;
   const sections: Section[] = groupNotes(notes, today, firstWeekday).map((group) => ({
     key: sectionKey(group.key),
@@ -63,7 +71,7 @@ function NoteRow({ note, onOpen }: { note: NoteSummary; onOpen: (note: NoteSumma
           </Text>
         )}
         <Text numberOfLines={3} style={styles.excerpt}>
-          {note.excerpt}
+          {noteListExcerpt(note.excerpt)}
         </Text>
       </View>
     </Pressable>

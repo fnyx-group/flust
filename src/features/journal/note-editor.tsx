@@ -1,24 +1,25 @@
-import { router, usePreventRemove } from 'expo-router';
+import { usePreventRemove } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
   AccessibilityInfo,
-  KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
+  type ScrollViewInstance,
   type TextInputInstance,
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import {
+  canSaveDraft,
   draftOf,
   hasUnsavedChanges,
   insertPrompt,
   NOTE_BODY_MAX_LENGTH,
   NOTE_TITLE_MAX_LENGTH,
-  parseNoteContent,
+  noteWrittenAt,
   type Note,
   type NoteDraft,
 } from '@/domain/journal';
@@ -26,6 +27,7 @@ import { dateOfDay, localDayNumber, utcToLocal } from '@/domain/local-time';
 import { ClockContext, useClock } from '@/features/clock/clock-context';
 import { createMinuteClock } from '@/features/clock/minute-clock';
 import { nativeClockDeps } from '@/features/clock/native-clock';
+import { closeNote } from '@/features/journal/close-note';
 import { noteDateTime } from '@/features/journal/labels';
 import { NotePrompts } from '@/features/journal/note-prompts';
 import {
@@ -39,26 +41,27 @@ import { Button } from '@/ui/button';
 import { ConfirmSheet } from '@/ui/confirm-sheet';
 import { IconButton } from '@/ui/icon-button';
 import { CloseIcon } from '@/ui/icons/close-icon';
+import { KeyboardScreen, useFollowTextEnd } from '@/ui/keyboard-screen';
 import { PrivateLine } from '@/ui/private-line';
-import { Screen } from '@/ui/screen';
-import { ScrollView } from '@/ui/scroll-view';
 import { colors, spacing, typography } from '@/ui/theme';
 
 // Ticks fall on the minute.
 const CLOCK_ANCHOR = 0;
 
-type EditorError = SaveNoteError | 'delete-failed';
+type EditorError = SaveNoteError | 'delete-failed' | 'prompt-too-long';
 
 const ERROR_MESSAGES = {
   ...SAVE_NOTE_ERROR_MESSAGES,
   'delete-failed': 'journal.note.errors.delete-failed',
+  'prompt-too-long': 'journal.note.errors.prompt-too-long',
 } as const satisfies Record<EditorError, string>;
 
 type Sheet = { kind: 'leave'; leave: () => void } | { kind: 'delete' } | null;
 
 // `note` is null for a new note. Every way out, the close button, Android back or a gesture, asks
 // first when there are unsaved changes, and nothing can leave while a save or a delete runs. A new
-// note that is still empty leaves without asking and is never saved.
+// note that is still empty leaves without asking and is never saved. Only the prompts stay above
+// the keyboard; the rest scrolls with the text.
 export function NoteEditor({ note }: { note: Note | null }) {
   const { t } = useTranslation();
   const storage = useStorage();
@@ -72,13 +75,16 @@ export function NoteEditor({ note }: { note: Note | null }) {
   // State updates land one render later, so a second tap in the same frame still sees busy false.
   const working = useRef(false);
   const body = useRef<TextInputInstance>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
+  const followEnd = useFollowTextEnd(scroll, draft.body);
 
-  const dirty = hasUnsavedChanges(draftOf(note), draft);
-  const content = parseNoteContent(draft);
-  const canSave = dirty && (content.ok || content.error !== 'empty');
+  const saved = draftOf(note);
+  const dirty = hasUnsavedChanges(saved, draft);
+  const canSave = canSaveDraft(saved, draft);
 
+  // working, not busy: a way out taken in the same frame as Save would still see busy false.
   const allowRemove = usePreventRemove(busy || (dirty && !done), ({ repeat }) => {
-    if (!busy) setSheet({ kind: 'leave', leave: repeat });
+    if (!working.current) setSheet({ kind: 'leave', leave: repeat });
   });
 
   function change(next: Partial<NoteDraft>) {
@@ -101,15 +107,17 @@ export function NoteEditor({ note }: { note: Note | null }) {
     setBusy(false);
     setDone(true);
     allowRemove();
-    router.back();
+    closeNote();
   }
 
-  async function save() {
+  // `asNew` saves the text of a note deleted meanwhile as a new note.
+  async function save(asNew = false) {
     if (working.current || !canSave) return;
     working.current = true;
     setBusy(true);
     setError(null);
-    const result = await saveNote(storage.journal, note, draft, Date.now(), deviceOffsetAt);
+    const existing = asNew ? null : note;
+    const result = await saveNote(storage.journal, existing, draft, Date.now(), deviceOffsetAt);
     if (result.ok) {
       close();
       return;
@@ -145,7 +153,10 @@ export function NoteEditor({ note }: { note: Note | null }) {
   // next frame, so the selection waits for it.
   function insert(starter: string) {
     const next = insertPrompt(draft.body, starter);
-    if (!next.ok) return;
+    if (!next.ok) {
+      showError('prompt-too-long');
+      return;
+    }
     change({ body: next.value });
     const end = next.value.length;
     requestAnimationFrame(() => {
@@ -155,17 +166,16 @@ export function NoteEditor({ note }: { note: Note | null }) {
   }
 
   return (
-    <Screen bottomInset>
-      <ClockContext value={clock}>
-        <KeyboardAvoidingView
-          style={styles.fill}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
+    <ClockContext value={clock}>
+      <KeyboardScreen
+        scrollRef={scroll}
+        contentContainerStyle={styles.content}
+        header={
           <View style={styles.header}>
             <IconButton
               accessibilityLabel={t('journal.note.close')}
               disabled={busy}
-              onPress={() => router.back()}
+              onPress={closeNote}
             >
               <CloseIcon color={colors.text} />
             </IconButton>
@@ -175,80 +185,94 @@ export function NoteEditor({ note }: { note: Note | null }) {
               disabled={busy || !canSave}
             />
           </View>
-          <ScrollView
-            style={styles.fill}
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
-          >
-            {note === null ? <CurrentDateTime /> : <WrittenDateTime note={note} />}
-            <TextInput
-              accessibilityLabel={t('journal.note.titleSpoken')}
-              placeholder={t('journal.note.titlePlaceholder')}
-              placeholderTextColor={colors.locked}
-              value={draft.title}
-              maxLength={NOTE_TITLE_MAX_LENGTH}
-              onChangeText={(title) => change({ title })}
-              returnKeyType="next"
-              submitBehavior="submit"
-              onSubmitEditing={() => body.current?.focus()}
-              selectionColor={colors.accent}
-              style={styles.title}
-            />
-            <TextInput
-              ref={body}
-              accessibilityLabel={t('journal.note.bodySpoken')}
-              placeholder={t('journal.note.bodyPlaceholder')}
-              placeholderTextColor={colors.locked}
-              value={draft.body}
-              maxLength={NOTE_BODY_MAX_LENGTH}
-              onChangeText={(text) => change({ body: text })}
-              multiline
-              scrollEnabled={false}
-              textAlignVertical="top"
-              selectionColor={colors.accent}
-              style={styles.body}
-            />
-          </ScrollView>
+        }
+        footer={
           <View style={styles.footer}>
-            <NotePrompts onInsert={insert} />
             {error !== null && (
               <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>
                 {t(ERROR_MESSAGES[error])}
               </Text>
             )}
-            <PrivateLine text={t('journal.note.private')} />
-            {note !== null && (
+            {error === 'note-missing' && (
               <Button
-                variant="plain"
-                label={t('journal.note.delete')}
+                variant="secondary"
+                label={t('journal.note.saveAsNew')}
                 disabled={busy}
-                onPress={() => setSheet({ kind: 'delete' })}
+                onPress={() => void save(true)}
               />
             )}
+            <NotePrompts onInsert={insert} />
           </View>
-        </KeyboardAvoidingView>
-        <ConfirmSheet
-          visible={sheet?.kind === 'leave'}
-          title={t('journal.note.leave.title')}
-          message={t('journal.note.leave.message')}
-          cancelLabel={t('journal.note.leave.keep')}
-          confirmLabel={t('journal.note.leave.discard')}
-          onCancel={() => setSheet(null)}
-          onConfirm={() => {
-            if (sheet?.kind === 'leave') discard(sheet.leave);
-          }}
+        }
+        overlay={
+          <>
+            <ConfirmSheet
+              visible={sheet?.kind === 'leave'}
+              title={t('journal.note.leave.title')}
+              message={t(
+                note === null ? 'journal.note.leave.messageNew' : 'journal.note.leave.message',
+              )}
+              cancelLabel={t('journal.note.leave.keep')}
+              confirmLabel={t('journal.note.leave.discard')}
+              onCancel={() => setSheet(null)}
+              onConfirm={() => {
+                if (sheet?.kind === 'leave') discard(sheet.leave);
+              }}
+            />
+            <ConfirmSheet
+              visible={sheet?.kind === 'delete'}
+              title={t('journal.note.deleteConfirm.title')}
+              message={t('journal.note.deleteConfirm.message')}
+              cancelLabel={t('journal.note.deleteConfirm.cancel')}
+              confirmLabel={t('journal.note.deleteConfirm.confirm')}
+              onCancel={() => setSheet(null)}
+              onConfirm={() => void remove()}
+            />
+          </>
+        }
+      >
+        {note === null ? <CurrentDateTime /> : <WrittenDateTime note={note} />}
+        <TextInput
+          accessibilityLabel={t('journal.note.titleSpoken')}
+          placeholder={t('journal.note.titlePlaceholder')}
+          placeholderTextColor={colors.locked}
+          value={draft.title}
+          maxLength={NOTE_TITLE_MAX_LENGTH}
+          onChangeText={(title) => change({ title })}
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => body.current?.focus()}
+          selectionColor={colors.accent}
+          style={styles.title}
         />
-        <ConfirmSheet
-          visible={sheet?.kind === 'delete'}
-          title={t('journal.note.deleteConfirm.title')}
-          message={t('journal.note.deleteConfirm.message')}
-          cancelLabel={t('journal.note.deleteConfirm.cancel')}
-          confirmLabel={t('journal.note.deleteConfirm.confirm')}
-          onCancel={() => setSheet(null)}
-          onConfirm={() => void remove()}
+        <TextInput
+          ref={body}
+          accessibilityLabel={t('journal.note.bodySpoken')}
+          placeholder={t('journal.note.bodyPlaceholder')}
+          placeholderTextColor={colors.locked}
+          value={draft.body}
+          maxLength={NOTE_BODY_MAX_LENGTH}
+          onChangeText={(text) => change({ body: text })}
+          {...followEnd}
+          multiline
+          scrollEnabled={false}
+          textAlignVertical="top"
+          selectionColor={colors.accent}
+          style={styles.body}
         />
-      </ClockContext>
-    </Screen>
+        <View style={styles.after}>
+          <PrivateLine text={t('journal.note.private')} />
+          {note !== null && (
+            <Button
+              variant="plain"
+              label={t('journal.note.delete')}
+              disabled={busy}
+              onPress={() => setSheet({ kind: 'delete' })}
+            />
+          )}
+        </View>
+      </KeyboardScreen>
+    </ClockContext>
   );
 }
 
@@ -269,14 +293,14 @@ function WrittenDateTime({ note }: { note: Note }) {
   const { t, i18n } = useTranslation();
   const [{ hour12 }] = useState(deviceCalendar);
   const year = useClock((at) => dateOfDay(localDayNumber(at, deviceOffsetAt)).year);
-  const local = utcToLocal(note.createdAt, () => note.offset);
-  return <Text style={styles.date}>{noteDateTime(t, i18n.language, local, year, hour12)}</Text>;
+  return (
+    <Text style={styles.date}>
+      {noteDateTime(t, i18n.language, noteWrittenAt(note), year, hour12)}
+    </Text>
+  );
 }
 
 const styles = StyleSheet.create({
-  fill: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -302,6 +326,10 @@ const styles = StyleSheet.create({
     minHeight: 160,
     paddingVertical: 0,
     color: colors.text,
+  },
+  after: {
+    gap: spacing.m,
+    paddingTop: spacing.l,
   },
   footer: {
     gap: spacing.m,

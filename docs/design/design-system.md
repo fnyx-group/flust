@@ -204,9 +204,9 @@ A tab screen. A header row holds the "Journal" screen title on the left and the 
 - "Cette semaine", then "Semaine dernière", then one section per month, such as "Octobre", with the year when it is not the current one ("Octobre 2025"). Section titles use the section label style, 24 points above them.
 - Each note is a row: its date ("Mercredi 12 nov.", 16/400, secondary text), its title if it has one (22/800), then the start of its text on up to three lines (16/400, line height 24, text color). A separator line runs under each row. Screen readers read a row as one button: the date, the title, then the text.
 
-Notes belong to the week or month of the local day they were written on. Weeks start on the first weekday of the device's region.
+Notes belong to the week or month of the local day they were written on. Weeks start on the first weekday of the device's region. The groups follow the current day, so they move at midnight. Blank lines in a note's text do not show in its row.
 
-With no notes, the list gives way to a calm centered block: "Rien d'écrit pour l'instant." (row style), "Quelques lignes suffisent, quand tu veux." (16/400, secondary text) and an "Écrire une note" secondary button. If the journal cannot be read, the same place shows a calm message and a "Réessayer" secondary button.
+With no notes, the list gives way to a calm centered block: "Rien d'écrit pour l'instant." (row style), "Quelques lignes suffisent, quand tu veux." (16/400, secondary text) and an "Écrire une note" secondary button. If the journal cannot be read, the same place shows a calm message and a "Réessayer" secondary button. If reading it again fails while notes are on screen, they stay, under "Le journal n'a pas pu être actualisé." (body, secondary text) and a "Réessayer" text button.
 
 At the bottom, above the tab bar: a 16 point lock icon and "Chiffré, sur ton téléphone uniquement" (body, secondary text), centered.
 
@@ -216,13 +216,18 @@ The video button and the "Tout / Notes / Vidéos" filter of the mockup come with
 
 A full screen without the tab bar, for a new note and for editing one. A header row holds the close button on the left and the "Enregistrer" primary button on the right. Below it, scrolling:
 
-1. The date and time (row style, secondary text), such as "Jeudi 13 novembre, 22:14", with the year when it is not the current one. Times follow the device's 12 or 24 hour setting, like the time pickers. A new note shows the current time until it is saved; a saved note shows the time it was written at, with the UTC offset of that moment, so it reads the same after travel.
-2. The title field, "Titre (facultatif)" as placeholder, in the screen title style. One line, at most 120 characters.
-3. The text field (16/400, line height 24), at most 10,000 characters.
+1. The date and time (row style, secondary text), such as "Jeudi 13 novembre à 22:14", with the year when it is not the current one. Times follow the device's 12 or 24 hour setting, like the time pickers. A new note shows the current time until it is saved; a saved note shows the time it was written at, with the UTC offset of that moment, so it reads the same after travel.
+2. The title field, "Titre (facultatif)" as placeholder, in the screen title style. One line, at most 120 characters, counted in UTF-16 units like the field's `maxLength`, so an emoji can count twice.
+3. The text field (16/400, line height 24), at most 10,000 characters, counted the same way. While the cursor is at the end of the text, the screen scrolls so it stays above the keyboard.
+4. Under the text, a 16 point lock icon and "Chiffrée dès l'enregistrement" (body, secondary text), then, when editing, a "Supprimer la note" text button. Both scroll with the text, so the keyboard never covers them.
 
-At the bottom: "Une piste" (section label) over a row of chips that scrolls sideways to the screen edges: "Qu'est-ce qui t'a fait du bien ?", "Une fierté du jour ?" and "Demain, je…". Each chip is a button that adds a starter line on a new paragraph, such as "Ce qui m'a fait du bien : ", and puts the cursor after it. Under the chips, a 16 point lock icon and "Chiffrée dès l'enregistrement" (body, secondary text). When editing, a "Supprimer la note" text button comes last.
+At the bottom, the only part that stays above the keyboard: "Pour commencer" (section label) over a row of chips that scrolls sideways to the screen edges: "Qu'est-ce qui t'a fait du bien ?", "Une fierté du jour ?" and "Demain, je…". Each chip is a button that adds a starter line on a new paragraph, such as "Ce qui m'a fait du bien : ", and puts the cursor after it. A starter that no longer fits is not added, and a message says so. Error messages show above the chips.
 
-"Enregistrer" is disabled while nothing has changed or the note has no text: the title alone is not a note. Leaving with unsaved changes opens a sheet, "Quitter sans enregistrer ?", with "Continuer à écrire" (primary) and "Abandonner" (text button). Deleting opens a sheet, "Supprimer cette note ?", which says the note is erased from the phone for good, with "Annuler" (primary) and "Supprimer" (text button). Sheets use the background color with a separator border at the top, radius 22, and no red.
+"Enregistrer" is disabled while nothing has changed or the note has no text: the title alone is not a note. Leaving with unsaved changes opens a sheet, "Quitter sans enregistrer ?", which says "Ce que tu as écrit sera perdu." for a new note and "Ce que tu as écrit depuis le dernier enregistrement sera perdu." for an existing one, with "Continuer à écrire" (primary) and "Ne pas enregistrer" (text button). Deleting opens a sheet, "Supprimer cette note ?", which says the note is erased from the phone for good, with "Annuler" (primary) and "Supprimer" (text button). Sheets use the background color with a separator border at the top, radius 22, and no red.
+
+When an edited note was deleted meanwhile, saving says "Cette note n'existe plus. Ton texte est toujours là, tu peux l'enregistrer comme nouvelle note." with an "Enregistrer comme nouvelle note" secondary button.
+
+A note that cannot be opened shows the close button and a calm centered message instead of the editor: "Cette note n'existe plus." when it is gone, or "La note n'a pas pu être lue. Rien n'est perdu." with a "Réessayer" secondary button when storage fails. The close button returns to the previous screen, or to the journal when the note was opened with no screen under it.
 
 ## Notifications
 

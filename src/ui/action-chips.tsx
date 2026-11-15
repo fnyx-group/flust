@@ -46,8 +46,8 @@ const styles = StyleSheet.create({
   chip: {
     minHeight: sizes.touchTarget,
     justifyContent: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 10,
+    paddingHorizontal: spacing.chipHorizontal,
+    paddingVertical: spacing.chipVertical,
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.separator,
