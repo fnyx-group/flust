@@ -7,12 +7,20 @@ type ButtonProps = {
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'plain';
   disabled?: boolean;
+  accessibilityHint?: string;
 };
 
-export function Button({ label, onPress, variant = 'primary', disabled = false }: ButtonProps) {
+export function Button({
+  label,
+  onPress,
+  variant = 'primary',
+  disabled = false,
+  accessibilityHint,
+}: ButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}

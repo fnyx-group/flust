@@ -16,3 +16,17 @@ export function resolveLanguage(languageCode: string | null | undefined): Langua
 export function getDeviceLanguage(): Language {
   return resolveLanguage(getLocales()[0]?.languageCode);
 }
+
+// What the user chose in the settings: a language, or the device's, which follows it.
+export const DEVICE_LANGUAGE = 'device';
+export type LanguagePreference = Language | typeof DEVICE_LANGUAGE;
+
+// A stored value that is missing or unknown, including the device choice, means the device
+// language, so a damaged setting never blocks or confuses startup.
+export function toPreference(stored: string | null): LanguagePreference {
+  return isLanguage(stored) ? stored : DEVICE_LANGUAGE;
+}
+
+export function languageOf(preference: LanguagePreference, deviceLanguage: Language): Language {
+  return preference === DEVICE_LANGUAGE ? deviceLanguage : preference;
+}

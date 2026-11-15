@@ -3,6 +3,7 @@ import { initial } from '@/data/migrations/0001-initial';
 import { onboarding } from '@/data/migrations/0002-onboarding';
 import { lapsesAndUrges } from '@/data/migrations/0003-lapses-and-urges';
 import { checkIns } from '@/data/migrations/0004-check-ins';
+import { journalNotes } from '@/data/migrations/0005-journal-notes';
 import { openStorage } from '@/data/open-storage';
 import { DATABASE_NAME } from '@/data/storage-deps';
 import { EMPTY_DRAFT } from '@/domain/onboarding';
@@ -251,6 +252,62 @@ describe('migrations', () => {
       const db = await raw();
       await expect(db.run(sql)).rejects.toThrow();
       await db.close();
+    });
+  });
+
+  describe('version 6', () => {
+    const versions = [initial, onboarding, lapsesAndUrges, checkIns, journalNotes];
+    const START = Date.UTC(2026, 0, 1);
+    const LAPSE = Date.UTC(2026, 0, 2);
+
+    // A lapse of version 5 that changed the first plan, from the guided breathing to a walk.
+    async function seedVersion5() {
+      const fake = createFakeStorage();
+      const before = unwrap(await openStorage(fake.deps, versions));
+      await before.close();
+      await seedJourney(fake, journeyOf(START, [LAPSE]));
+      const raw = await fake.rawDatabase();
+      await raw.exec(`
+        INSERT INTO plan (position, trigger_id, action_preset_id) VALUES (0, 'stress', 'walk-ten-minutes');
+        INSERT INTO plan (position, trigger_id, action_preset_id) VALUES (1, 'urge', 'journal-three-lines');
+        INSERT INTO lapse_detail (lapse_id, context, previous_plan, new_plan) VALUES (
+          1,
+          '[]',
+          '{"trigger":"urge","action":{"kind":"preset","id":"guided-breathing"}}',
+          '{"trigger":"stress","action":{"kind":"preset","id":"walk-ten-minutes"}}'
+        );
+        INSERT INTO lapse (at) VALUES (${LAPSE + 1});
+        INSERT INTO lapse_detail (lapse_id, place_id, context) VALUES (2, 'work', '[]');
+      `);
+      await raw.close();
+      return fake;
+    }
+
+    it('points earlier plan changes at the first plan, and only those', async () => {
+      const fake = await seedVersion5();
+      unwrap(await openStorage(fake.deps));
+
+      expect(
+        fake.disk.query(
+          DATABASE_NAME,
+          'SELECT lapse_id, plan_id FROM lapse_detail ORDER BY lapse_id',
+        ),
+      ).toEqual([
+        { lapse_id: 1, plan_id: 1 },
+        { lapse_id: 2, plan_id: null },
+      ]);
+    });
+
+    it('lets an earlier lapse be undone with its previous plan', async () => {
+      const fake = await seedVersion5();
+      const after = unwrap(await openStorage(fake.deps));
+
+      unwrap(await after.lapses.undo(1));
+      expect(unwrap(await after.profile.load()).plans).toEqual([
+        { trigger: 'urge', action: { kind: 'preset', id: 'guided-breathing' } },
+        { trigger: 'urge', action: { kind: 'preset', id: 'journal-three-lines' } },
+      ]);
+      await after.close();
     });
   });
 });

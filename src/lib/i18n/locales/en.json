@@ -73,6 +73,7 @@
       "guide": "Breathing guide"
     },
     "plan": "Your plan",
+    "plans": "Your plans",
     "reasons": "Your reasons",
     "held": "I held on",
     "lapse": "I had a lapse",
@@ -205,6 +206,113 @@
     },
     "refreshFailed": "The journal could not be refreshed."
   },
+  "settings": {
+    "reasonsAndPlans": "Reasons and plans",
+    "planCount_one": "{{count}} plan",
+    "planCount_other": "{{count}} plans",
+    "language": "Language",
+    "languageHint": "Opens the list of languages",
+    "deviceLanguage": "Device language",
+    "about": "About",
+    "erase": "Erase everything",
+    "eraseHint": "Explains what will be erased before asking to confirm",
+    "footer": "flust {{version}} · Open source, encrypted on your phone",
+    "saveFailed": "The change could not be saved. Try again."
+  },
+  "about": {
+    "title": "About",
+    "back": "Back",
+    "version": "Version {{version}}",
+    "license": "flust is open source, under the MPL-2.0 license.",
+    "privacy": "No account, no ads, no tracking: everything stays encrypted on your phone.",
+    "website": "Website",
+    "source": "Source code",
+    "linkHint": "Opens in the browser",
+    "byline": "By fnyx-group"
+  },
+  "erase": {
+    "back": "Back",
+    "title": "Erase everything",
+    "what": "This deletes everything flust keeps on this phone: your journey and lapses, your ranks, your journal, your check-ins, your reasons, risk moments and plans, your urge history and your settings. The encryption key is deleted too.",
+    "noRecovery": "There is no other copy: flust has no account, no server and no backup. Nothing can be recovered.",
+    "after": "flust then starts again from the beginning.",
+    "lapseHint": "No need to erase everything to start again after a lapse: just note it, your clean days stay yours.",
+    "continue": "Erase my data",
+    "confirm": {
+      "title": "Erase for good?",
+      "message": "Everything described will be deleted from this phone. You won't be able to go back.",
+      "cancel": "Cancel",
+      "erase": "Erase everything"
+    },
+    "done": "Your data has been erased.",
+    "failed": {
+      "title": "Erasing did not finish",
+      "body": "Some of your data may still be on this phone. Try again to finish erasing it.",
+      "retry": "Try again"
+    }
+  },
+  "profile": {
+    "title": "Reasons and plans",
+    "back": "Back",
+    "save": "Save",
+    "reasons": "Why I'm quitting",
+    "addReason": "Add a reason",
+    "editReasonHint": "Edit or remove this reason",
+    "riskMoments": "My risk moments",
+    "plans": "My plans",
+    "addPlan": "Add a plan",
+    "editPlanHint": "Edit or delete this plan",
+    "footer": "They show on the emergency screen, when you need them.",
+    "reasonLimit": "You already have {{count}} reasons. Remove one to add another.",
+    "planLimit": "You already have {{count}} plans. Remove one to add another.",
+    "loadFailed": "Your reasons and plans could not be read. Nothing is lost.",
+    "retry": "Try again",
+    "saveFailed": "The change could not be saved. Try again.",
+    "leave": {
+      "title": "Leave without saving?",
+      "message": "Your changes will be lost.",
+      "keep": "Keep editing",
+      "discard": "Don't save"
+    },
+    "reason": {
+      "titleNew": "New reason",
+      "titleEdit": "Your reason",
+      "choices": "Reasons",
+      "custom": "Write my own",
+      "customHint": "Writing here chooses this reason.",
+      "remove": "Remove this reason",
+      "removeConfirm": {
+        "title": "Remove this reason?",
+        "message": "You can add it again whenever you want.",
+        "cancel": "Cancel",
+        "confirm": "Remove"
+      },
+      "errors": {
+        "same-reason": "This reason is already in your list.",
+        "not-found": "This reason no longer exists. Go back to the list to add one.",
+        "save-failed": "Saving did not work. Try again.",
+        "remove-failed": "The reason could not be removed. Try again."
+      }
+    },
+    "plan": {
+      "titleNew": "New plan",
+      "titleEdit": "Your plan",
+      "remove": "Delete this plan",
+      "lastPlan": "Keep at least one plan: the emergency screen always has one to show you.",
+      "removeConfirm": {
+        "title": "Delete this plan?",
+        "message": "You can create another one whenever you want.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
+      "errors": {
+        "same-plan": "This plan is already in your list.",
+        "not-found": "This plan no longer exists. Go back to the list to add one.",
+        "save-failed": "Saving did not work. Try again.",
+        "remove-failed": "The plan could not be deleted. Try again."
+      }
+    }
+  },
   "units": {
     "day_one": "{{count}} day",
     "day_other": "{{count}} days",
@@ -251,7 +359,7 @@
       "retry": "Try again",
       "confirm": {
         "title": "Erase everything?",
-        "body": "This permanently deletes your journey, your lapses, your ranks and every setting from this phone, and flust starts again from the beginning. This cannot be undone.",
+        "body": "This permanently deletes from this phone your journey and lapses, your ranks, your journal, your check-ins, your reasons, risk moments and plans, your urge history and your settings, and flust starts again from the beginning. This cannot be undone.",
         "erase": "Erase everything",
         "cancel": "Cancel"
       }
@@ -330,9 +438,6 @@
       "after-social-media": "After social media",
       "after-alcohol": "After alcohol",
       "weekend": "The weekend"
-    },
-    "triggers": {
-      "urge": "When an urge hits"
     },
     "actions": {
       "phone-out-of-room": "I put my phone outside the bedroom",

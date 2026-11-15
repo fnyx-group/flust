@@ -34,6 +34,7 @@ A clock set forwards can unlock ranks early. This is accepted: the app is person
 | Undo a lapse                        | The lapse is removed and the previous streak is restored. Total clean days are recomputed; the rank is left as it is.                                                                                     |
 | Undo after midnight                 | The undo is offered until local midnight after the lapse was logged, and never less than an hour after it.                                                                                                |
 | Undo after a plan change            | The plan in place before the lapse comes back, unless the plan was edited again since.                                                                                                                    |
+| Undo after plans were edited        | Only the plan the lapse changed comes back, and only if it was not edited or removed since. Other plans, including one that moved up to first, are never touched. The last plan is never removed.         |
 | Rank reached just after a lapse     | No unlock screen for six hours after the lapse was logged. The rank shows on the badge at once and is announced when the six hours end.                                                                   |
 | Two lapses on the same day          | Both are recorded. The streak restarts from the latest one. The rank is not lowered.                                                                                                                      |
 | Backdated lapse                     | The lapse is recorded at the chosen time, which cannot be in the future and comes at least a minute after the last lapse or the start point. The streak restarts from that time. The rank is not lowered. |
@@ -78,17 +79,18 @@ Notification text is always neutral and never reveals what the app is about.
 
 ## Lock and encryption
 
-| Case                             | Expected behavior                                                                                                             |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Biometrics refused               | The passcode is used.                                                                                                         |
-| Biometrics unavailable           | The passcode is used.                                                                                                         |
-| Biometrics changed on the device | The passcode is required before biometrics are trusted again.                                                                 |
-| Forgotten passcode               | The data cannot be recovered. This is stated during onboarding. A full wipe is offered.                                       |
-| Failed unlock attempts           | A growing delay is applied after each failed attempt.                                                                         |
-| Reinstall on iOS                 | The iOS keychain keeps keys after uninstall. On reinstall, the app detects a stale key with no matching data and replaces it. |
-| Phone restored without the key   | The data cannot be decrypted. The app offers a reset.                                                                         |
-| Any write to storage             | Every write runs in a transaction, so an interrupted write never leaves partial data.                                         |
-| Schema migration                 | A backup of the data is made on the device before every schema migration.                                                     |
+| Case                             | Expected behavior                                                                                                                                                                                             |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Biometrics refused               | The passcode is used.                                                                                                                                                                                         |
+| Biometrics unavailable           | The passcode is used.                                                                                                                                                                                         |
+| Biometrics changed on the device | The passcode is required before biometrics are trusted again.                                                                                                                                                 |
+| Forgotten passcode               | The data cannot be recovered. This is stated during onboarding. A full wipe is offered.                                                                                                                       |
+| Erase from the settings          | Two steps say what is erased and that it cannot be undone. Storage is closed, the database, its backup and the key are deleted, and the onboarding starts again. If erasing fails, trying again erases again. |
+| Failed unlock attempts           | A growing delay is applied after each failed attempt.                                                                                                                                                         |
+| Reinstall on iOS                 | The iOS keychain keeps keys after uninstall. On reinstall, the app detects a stale key with no matching data and replaces it.                                                                                 |
+| Phone restored without the key   | The data cannot be decrypted. The app offers a reset.                                                                                                                                                         |
+| Any write to storage             | Every write runs in a transaction, so an interrupted write never leaves partial data.                                                                                                                         |
+| Schema migration                 | A backup of the data is made on the device before every schema migration.                                                                                                                                     |
 
 ## Emergency screen
 
@@ -114,12 +116,14 @@ Notification text is always neutral and never reveals what the app is about.
 
 ## Languages
 
-| Case                           | Expected behavior                                              |
-| ------------------------------ | -------------------------------------------------------------- |
-| Unsupported system language    | The app falls back to English.                                 |
-| Plurals                        | Plural forms follow each language's rules ("1 day", "2 days"). |
-| 12 and 24 hour formats         | Times follow the device setting.                               |
-| Longer strings, such as German | Layouts allow longer strings without truncation.               |
+| Case                           | Expected behavior                                                             |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| Unsupported system language    | The app falls back to English.                                                |
+| Device language chosen         | The app follows the phone's language, also after a change made while it runs. |
+| Everything erased              | The app goes back to the device language.                                     |
+| Plurals                        | Plural forms follow each language's rules ("1 day", "2 days").                |
+| 12 and 24 hour formats         | Times follow the device setting.                                              |
+| Longer strings, such as German | Layouts allow longer strings without truncation.                              |
 
 ## Privacy
 

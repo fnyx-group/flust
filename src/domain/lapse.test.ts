@@ -232,23 +232,38 @@ describe('canUndo', () => {
 
 describe('planToRestore', () => {
   const walk: Plan = { trigger: 'stress', action: { kind: 'preset', id: 'walk-ten-minutes' } };
-  const change = { previous: DEFAULT_PLAN, next: walk };
+  const change = { previous: DEFAULT_PLAN, next: walk, planId: 7 };
 
-  it('puts the previous plan back while the plan is still the one the lapse set', () => {
-    expect(planToRestore(change, walk)).toEqual({ kind: 'write', plan: DEFAULT_PLAN });
+  it('puts the previous plan back into the row the lapse wrote', () => {
+    expect(planToRestore(change, { id: 7, plan: walk }, 1)).toEqual({
+      kind: 'write',
+      id: 7,
+      plan: DEFAULT_PLAN,
+    });
   });
 
-  it('removes the plan the lapse added when there was none before', () => {
-    expect(planToRestore({ previous: null, next: walk }, walk)).toEqual({ kind: 'remove' });
+  it('removes the plan the lapse added while another plan remains', () => {
+    const added = { previous: null, next: walk, planId: 7 };
+    expect(planToRestore(added, { id: 7, plan: walk }, 2)).toEqual({ kind: 'remove', id: 7 });
+  });
+
+  it('keeps the plan the lapse added when it is the only one', () => {
+    const added = { previous: null, next: walk, planId: 7 };
+    expect(planToRestore(added, { id: 7, plan: walk }, 1)).toBeNull();
   });
 
   it('keeps a plan edited since then', () => {
-    expect(planToRestore(change, { ...walk, trigger: 'boredom' })).toBeNull();
+    expect(planToRestore(change, { id: 7, plan: { ...walk, trigger: 'boredom' } }, 1)).toBeNull();
   });
 
-  it('does nothing without a plan change or without a plan', () => {
-    expect(planToRestore(null, walk)).toBeNull();
-    expect(planToRestore(change, null)).toBeNull();
+  it('never touches another row, even one holding the same plan', () => {
+    expect(planToRestore(change, { id: 8, plan: walk }, 1)).toBeNull();
+    expect(planToRestore({ ...change, planId: null }, { id: 7, plan: walk }, 1)).toBeNull();
+  });
+
+  it('does nothing without a plan change or once the row is gone', () => {
+    expect(planToRestore(null, { id: 7, plan: walk }, 1)).toBeNull();
+    expect(planToRestore(change, null, 1)).toBeNull();
   });
 });
 

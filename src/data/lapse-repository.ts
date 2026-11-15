@@ -1,6 +1,12 @@
 import type { Database, Executor } from '@/data/database';
 import { decodePlan, parseJson } from '@/data/json-codec';
-import { deleteFirstPlan, readFirstPlan, writeFirstPlan } from '@/data/profile-repository';
+import {
+  deletePlan,
+  readFirstPlan,
+  readPlanEntries,
+  updatePlan,
+  writeFirstPlan,
+} from '@/data/profile-repository';
 import {
   hasDetails,
   planToRestore,
@@ -80,14 +86,15 @@ async function insertLapse(tx: Executor, lapse: NewLapse): Promise<LapseRecord> 
   const planChange = await changePlan(tx, lapse.plan);
   if (details !== null || planChange !== null) {
     await tx.run(
-      `INSERT INTO lapse_detail (lapse_id, place_id, context, previous_plan, new_plan)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO lapse_detail (lapse_id, place_id, context, previous_plan, new_plan, plan_id)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [
         id,
         details?.place ?? null,
         JSON.stringify(details?.context ?? []),
         planChange?.previous ? JSON.stringify(planChange.previous) : null,
         planChange === null ? null : JSON.stringify(planChange.next),
+        planChange?.planId ?? null,
       ],
     );
   }
@@ -100,35 +107,37 @@ async function changePlan(tx: Executor, next: Plan | null): Promise<PlanChange |
   if (next === null) return null;
   const previous = (await readFirstPlan(tx))?.plan ?? null;
   if (previous !== null && samePlan(previous, next)) return null;
-  await writeFirstPlan(tx, next);
-  return { previous, next };
+  const planId = await writeFirstPlan(tx, next);
+  return { previous, next, planId };
 }
 
 async function deleteLapse(tx: Executor, id: number): Promise<boolean> {
   const lapses = await tx.all('SELECT id FROM lapse WHERE id = ?', [id]);
   if (lapses.length === 0) return false;
-  const restore = planToRestore(
-    await readPlanChange(tx, id),
-    (await readFirstPlan(tx))?.plan ?? null,
-  );
-  if (restore?.kind === 'write') await writeFirstPlan(tx, restore.plan);
-  if (restore?.kind === 'remove') await deleteFirstPlan(tx);
+  const change = await readPlanChange(tx, id);
+  const plans = await readPlanEntries(tx);
+  const target = plans.find((entry) => entry.id === change?.planId) ?? null;
+  const restore = planToRestore(change, target, plans.length);
+  if (restore?.kind === 'write') await updatePlan(tx, restore.id, restore.plan);
+  if (restore?.kind === 'remove') await deletePlan(tx, restore.id);
   await tx.run('DELETE FROM lapse_detail WHERE lapse_id = ?', [id]);
   await tx.run('DELETE FROM lapse WHERE id = ?', [id]);
   return true;
 }
 
 async function readPlanChange(tx: Executor, id: number): Promise<PlanChange | null> {
-  const rows = await tx.all('SELECT previous_plan, new_plan FROM lapse_detail WHERE lapse_id = ?', [
-    id,
-  ]);
+  const rows = await tx.all(
+    'SELECT previous_plan, new_plan, plan_id FROM lapse_detail WHERE lapse_id = ?',
+    [id],
+  );
   const row = rows[0];
   if (row === undefined) return null;
   const next = decodePlan(parseJson(row.new_plan));
   if (next === null) return null;
-  if (row.previous_plan === null) return { previous: null, next };
+  const planId = typeof row.plan_id === 'number' ? row.plan_id : null;
+  if (row.previous_plan === null) return { previous: null, next, planId };
   const previous = decodePlan(parseJson(row.previous_plan));
-  return previous === null ? null : { previous, next };
+  return previous === null ? null : { previous, next, planId };
 }
 
 function isTimestamp(value: unknown): value is number {

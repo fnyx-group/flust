@@ -1,13 +1,5 @@
-import { useTranslation } from 'react-i18next';
+import { SettingsScreen } from '@/features/settings/settings-screen';
 
-import { Screen } from '@/ui/screen';
-import { ScreenTitle } from '@/ui/screen-title';
-
-export default function SettingsScreen() {
-  const { t } = useTranslation();
-  return (
-    <Screen>
-      <ScreenTitle>{t('tabs.settings')}</ScreenTitle>
-    </Screen>
-  );
+export default function SettingsRoute() {
+  return <SettingsScreen />;
 }

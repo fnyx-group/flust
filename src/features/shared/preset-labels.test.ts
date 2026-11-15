@@ -10,10 +10,11 @@ import {
 import {
   actionLabel,
   placeLabel,
+  planAction,
+  planCondition,
   planSentence,
   reasonLabel,
   riskMomentLabel,
-  triggerLabel,
 } from '@/features/shared/preset-labels';
 import { createI18n } from '@/lib/i18n';
 import { unwrap } from '@test/arbitraries';
@@ -32,10 +33,8 @@ describe.each([
     for (const id of REASON_IDS) expect(reasonLabel(t, id)).toBe(locale.presets.reasons[id]);
     for (const id of RISK_MOMENT_IDS) {
       expect(riskMomentLabel(t, id)).toBe(locale.presets.riskMoments[id]);
-      expect(triggerLabel(t, id)).toBe(locale.presets.riskMoments[id]);
     }
     for (const id of ACTION_IDS) expect(actionLabel(t, id)).toBe(locale.presets.actions[id]);
-    expect(triggerLabel(t, URGE_TRIGGER)).toBe(locale.presets.triggers.urge);
   });
 
   it('have no unused translations', () => {
@@ -62,6 +61,30 @@ describe.each([
         expect(sentence).toContain(locale.presets.sentences.actions[id]);
       }
     }
+  });
+});
+
+describe('planCondition and planAction', () => {
+  const custom = unwrap(parseCustomText('Call Sam & Alex'));
+
+  it('use the words of the plan sentence, so they read on after "If" and "Then"', () => {
+    const french = createI18n('fr').t;
+    const english = createI18n('en').t;
+    expect(planCondition(french, 'urge')).toBe('une envie arrive');
+    expect(planCondition(french, 'in-bed-at-night')).toBe('je suis au lit le soir');
+    expect(planCondition(english, 'urge')).toBe('an urge hits');
+    expect(planAction(french, { kind: 'preset', id: 'phone-out-of-room' })).toBe(
+      'je pose le téléphone hors de la chambre',
+    );
+    expect(planAction(english, { kind: 'preset', id: 'guided-breathing' })).toBe(
+      'I start the guided breathing',
+    );
+  });
+
+  it("keep the user's own action exactly as written", () => {
+    expect(planAction(createI18n('fr').t, { kind: 'custom', text: custom })).toBe(
+      'Call Sam & Alex',
+    );
   });
 });
 

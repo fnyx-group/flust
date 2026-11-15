@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { CUSTOM_TEXT_MAX_LENGTH, parseCustomText } from '@/domain/custom-text';
 import { DEFAULT_PLAN, type Plan } from '@/domain/onboarding';
 import { ACTION_IDS, type PlanTrigger } from '@/domain/presets';
-import { actionLabel, triggerLabel } from '@/features/shared/preset-labels';
+import { actionLabel, planCondition } from '@/features/shared/preset-labels';
 import { OptionSheet } from '@/ui/option-sheet';
 import { RadioGroup } from '@/ui/radio-group';
 import { SelectRow } from '@/ui/select-row';
@@ -56,7 +56,7 @@ export function PlanFields({
     <>
       <SelectRow
         prefix={t('onboarding.plan.if')}
-        value={triggerLabel(t, plan.trigger)}
+        value={planCondition(t, plan.trigger)}
         accessibilityHint={t('onboarding.plan.triggerHint')}
         onPress={() => setChoosingTrigger(true)}
       />
@@ -86,7 +86,7 @@ export function PlanFields({
         visible={choosingTrigger}
         title={t('onboarding.plan.triggerTitle')}
         closeLabel={t('onboarding.close')}
-        options={triggers.map((trigger) => ({ key: trigger, label: triggerLabel(t, trigger) }))}
+        options={triggers.map((trigger) => ({ key: trigger, label: planCondition(t, trigger) }))}
         selected={plan.trigger}
         onSelect={(trigger) => update({ trigger })}
         onClose={() => setChoosingTrigger(false)}

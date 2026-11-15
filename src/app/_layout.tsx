@@ -72,6 +72,11 @@ function RootStack() {
         <Stack.Screen name="emergency" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="check-in" />
         <Stack.Screen name="note" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="reasons-and-plans" />
+        <Stack.Screen name="reason" />
+        <Stack.Screen name="plan" />
+        <Stack.Screen name="about" />
+        <Stack.Screen name="erase" />
         <Stack.Screen
           name="lapse"
           options={{ presentation: 'fullScreenModal', gestureEnabled: false }}

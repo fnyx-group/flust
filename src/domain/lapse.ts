@@ -2,6 +2,7 @@ import { addLapse, type AddLapseError, type Journey } from '@/domain/journey';
 import { localToUtc, utcToLocal, type UtcOffsetAt } from '@/domain/local-time';
 import { samePlan, type Plan } from '@/domain/onboarding';
 import type { PlaceId, RiskMomentId } from '@/domain/presets';
+import type { PlanEntry } from '@/domain/profile';
 import { rankProgress, type Rank, type RankId } from '@/domain/ranks';
 import { err, ok, type Result } from '@/domain/result';
 import { clampStart, type TimeBounds } from '@/domain/start-point';
@@ -25,10 +26,16 @@ export const NO_DETAILS: LapseDetails = { place: null, context: [] };
 
 // Kept with the lapse so that undoing it can put the previous plan back. `previous` is null when
 // no plan could be read before the lapse: undoing it then removes the plan the lapse added.
-export type PlanChange = { readonly previous: Plan | null; readonly next: Plan };
+// `planId` is the row the lapse wrote, null when it is unknown.
+export type PlanChange = {
+  readonly previous: Plan | null;
+  readonly next: Plan;
+  readonly planId: number | null;
+};
 
 export type PlanRestore =
-  { readonly kind: 'write'; readonly plan: Plan } | { readonly kind: 'remove' };
+  | { readonly kind: 'write'; readonly id: number; readonly plan: Plan }
+  | { readonly kind: 'remove'; readonly id: number };
 
 // A stored lapse. `recordedAt` is when it was logged, which can be later than `at` when it is
 // backdated; lapses stored before it existed have none.
@@ -131,11 +138,20 @@ export function canUndo(record: LapseRecord | null, now: Timestamp, offsetAt: Ut
   return withinWindow(record.recordedAt, undoDeadline(record.recordedAt, offsetAt), now);
 }
 
-// The plan in place before the lapse comes back only if the plan is still the one the lapse set:
-// a plan edited since then is the user's newer choice.
-export function planToRestore(change: PlanChange | null, current: Plan | null): PlanRestore | null {
-  if (change === null || current === null || !samePlan(change.next, current)) return null;
-  return change.previous === null ? { kind: 'remove' } : { kind: 'write', plan: change.previous };
+// `target` is the row the lapse wrote, as stored now, or null when it is gone or unreadable. The
+// plan in place before the lapse comes back only if that row still holds the plan the lapse set:
+// a plan edited or removed since then is the user's newer choice. The row is found by id, never
+// by position, so removing or adding other plans meanwhile changes nothing. A plan the lapse
+// added is only removed while another plan remains, so there is always one to show.
+export function planToRestore(
+  change: PlanChange | null,
+  target: PlanEntry | null,
+  planCount: number,
+): PlanRestore | null {
+  if (change === null || target === null || target.id !== change.planId) return null;
+  if (!samePlan(change.next, target.plan)) return null;
+  if (change.previous !== null) return { kind: 'write', id: target.id, plan: change.previous };
+  return planCount > 1 ? { kind: 'remove', id: target.id } : null;
 }
 
 // A clock set back by more than the window's length ends it, so a lapse logged while the clock

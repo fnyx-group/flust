@@ -11,7 +11,7 @@ import { EMPTY_DRAFT, type OnboardingDraft } from '@/domain/onboarding';
 import type { RankId } from '@/domain/ranks';
 import { err, ok, type Result } from '@/domain/result';
 import { i18n } from '@/lib/i18n';
-import { isLanguage } from '@/lib/i18n/language';
+import { getDeviceLanguage, languageOf, toPreference } from '@/lib/i18n/language';
 
 export type SessionData = {
   readonly journey: Journey | null;
@@ -31,8 +31,9 @@ export type LoadSessionError =
 
 const NO_CHECK_INS = { checkIns: [], lowMoodDismissedDay: null } as const;
 
-// A language that cannot be read, or that the app does not know, leaves the device language in
-// place: it never blocks startup. Journey errors are passed on unchanged, because a corrupted
+// A language that cannot be read, or that the app does not know, means the device language: it
+// never blocks startup. It is applied even when nothing is stored, so that after an erase the app
+// goes back to the device language rather than keeping the one erased. Journey errors are passed on unchanged, because a corrupted
 // journey and a storage failure lead to different screens. The draft is only read while there is
 // no journey, since the onboarding never shows again afterwards. Unlocked ranks are read with the
 // journey because a backdated lapse can lower the total below a rank that must be kept. The last
@@ -44,8 +45,9 @@ export async function loadSession(
   storage: Storage,
   today: number,
 ): Promise<Result<SessionData, LoadSessionError>> {
-  const language = await storage.settings.loadLanguage();
-  if (language.ok && isLanguage(language.value)) await i18n.changeLanguage(language.value);
+  const stored = await storage.settings.loadLanguage();
+  const preference = toPreference(stored.ok ? stored.value : null);
+  await i18n.changeLanguage(languageOf(preference, getDeviceLanguage()));
   const journey = await storage.journey.load();
   if (!journey.ok) return err(journey.error);
   if (journey.value !== null) {

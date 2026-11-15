@@ -68,7 +68,22 @@ When the user's if/then plan is to write in the journal, the emergency screen of
 
 ### Reasons and plans editor
 
-The user can edit their reasons and their if/then plans at any time after the onboarding.
+The user can edit their reasons, their risk moments and their if/then plans at any time after the onboarding, from the settings.
+
+- Reasons: add, edit and remove, from the presets or in their own words, like the onboarding. At most 10.
+- Risk moments: the chips of the onboarding.
+- Plans: several "If … then …" plans, with the plan editor of the onboarding. At most 5, and always at least one. The first plan is the one the lapse screen adjusts; the emergency screen shows them all.
+
+### Settings
+
+The settings show only what works in this version:
+
+- "Raisons et plans", with the number of plans.
+- "Langue": the device language, French or English, applied at once and stored.
+- "À propos": the version, the MPL-2.0 license, links to the website and the source code, and the privacy promise in one line.
+- "Tout effacer": erases every piece of data and the key after two confirmations, then returns to the onboarding.
+
+The filter, reminders and the lock join the settings with their features.
 
 ### Reminders
 
@@ -135,7 +150,7 @@ Help resources by country, available offline.
 
 ### About page
 
-A page about flust and fnyx-group.
+A fuller page about flust and fnyx-group, beyond the short "À propos" of V0.1.
 
 ### Yearly seals
 

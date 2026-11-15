@@ -7,12 +7,17 @@ import { planSentence, reasonLabel } from '@/features/shared/preset-labels';
 import { Button } from '@/ui/button';
 import { colors, radii, spacing, typography } from '@/ui/theme';
 
-// The card offers to start a note when the plan is to write in the journal.
-export function PlanCard({ plan, onWrite }: { plan: Plan; onWrite?: () => void }) {
+// One sentence per plan, in their order. The card offers to start a note when one of them is to
+// write in the journal.
+export function PlansCard({ plans, onWrite }: { plans: readonly Plan[]; onWrite?: () => void }) {
   const { t } = useTranslation();
   return (
-    <Card label={t('emergency.plan')}>
-      <Text style={styles.text}>{planSentence(t, plan)}</Text>
+    <Card label={t(plans.length > 1 ? 'emergency.plans' : 'emergency.plan')}>
+      {plans.map((plan) => (
+        <Text key={planSentence(t, plan)} style={styles.text}>
+          {planSentence(t, plan)}
+        </Text>
+      ))}
       {onWrite !== undefined && (
         <View style={styles.action}>
           <Button variant="secondary" label={t('emergency.writeNote')} onPress={onWrite} />

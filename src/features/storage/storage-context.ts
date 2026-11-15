@@ -9,6 +9,8 @@ export const StorageFailureContext = createContext<((failure: StorageFailure) =>
   null,
 );
 
+export const EraseAllContext = createContext<(() => void) | null>(null);
+
 // The opened storage and its repositories. Only available below StorageGate, which renders its
 // children once storage is open.
 export function useStorage(): Storage {
@@ -25,4 +27,12 @@ export function useReportStorageFailure(): (failure: StorageFailure) => void {
     throw new Error('useReportStorageFailure must be called below StorageGate.');
   }
   return report;
+}
+
+// Erases every piece of data and the key, then starts again from the onboarding. StorageGate does
+// the work, since storage must be closed and every screen using it gone first.
+export function useEraseAll(): () => void {
+  const erase = use(EraseAllContext);
+  if (erase === null) throw new Error('useEraseAll must be called below StorageGate.');
+  return erase;
 }
