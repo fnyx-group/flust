@@ -121,6 +121,11 @@ export function samePlan(a: Plan, b: Plan): boolean {
   return a.trigger === b.trigger && sameAction(a.action, b.action);
 }
 
+// The plan whose action is to write in the journal, which the emergency screen can open.
+export function opensJournal(plan: Plan): boolean {
+  return plan.action.kind === 'preset' && plan.action.id === 'journal-three-lines';
+}
+
 function sameAction(a: PlanAction, b: PlanAction): boolean {
   if (a.kind === 'preset') return b.kind === 'preset' && a.id === b.id;
   return b.kind === 'custom' && a.text === b.text;

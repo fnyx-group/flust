@@ -2,6 +2,7 @@ import { MIGRATIONS } from '@/data/migrations';
 import { initial } from '@/data/migrations/0001-initial';
 import { onboarding } from '@/data/migrations/0002-onboarding';
 import { lapsesAndUrges } from '@/data/migrations/0003-lapses-and-urges';
+import { checkIns } from '@/data/migrations/0004-check-ins';
 import { openStorage } from '@/data/open-storage';
 import { DATABASE_NAME } from '@/data/storage-deps';
 import { EMPTY_DRAFT } from '@/domain/onboarding';
@@ -27,6 +28,7 @@ describe('migrations', () => {
 
     expect(tables).toEqual([
       'check_in',
+      'journal_note',
       'journey',
       'lapse',
       'lapse_detail',
@@ -201,6 +203,53 @@ describe('migrations', () => {
       const db = await raw();
       await db.run(`${insert} (1, 0, 0, 3, 'none', '[]')`);
       await expect(db.run(`${insert} (1, 5, 5, 4, 'none', '[]')`)).rejects.toThrow();
+      await db.close();
+    });
+  });
+
+  describe('version 5', () => {
+    async function raw() {
+      const fake = createFakeStorage();
+      unwrap(await openStorage(fake.deps));
+      return fake.rawDatabase();
+    }
+
+    const insert = `INSERT INTO journal_note
+      (local_day, created_at, utc_offset, updated_at, title, body) VALUES`;
+
+    it('keeps the check-ins of version 4', async () => {
+      const fake = createFakeStorage();
+      const versions = [initial, onboarding, lapsesAndUrges, checkIns];
+      const before = unwrap(await openStorage(fake.deps, versions));
+      await before.close();
+      await seedJourney(fake, journeyOf(Date.UTC(2026, 0, 1)));
+      const seeded = unwrap(await openStorage(fake.deps, versions));
+      const checkIn = unwrap(
+        await seeded.checkIns.save(20_000, Date.UTC(2026, 0, 2), {
+          mood: 3,
+          urge: 'none',
+          context: [],
+          note: null,
+        }),
+      );
+      await seeded.close();
+
+      const after = unwrap(await openStorage(fake.deps));
+      expect(await after.checkIns.since(0)).toEqual(ok([checkIn]));
+      expect(await after.journal.list()).toEqual(ok([]));
+      await after.close();
+    });
+
+    it.each([
+      ['an empty title', `${insert} (1, 0, 0, 0, '', 'Text')`],
+      ['an empty text', `${insert} (1, 0, 0, 0, NULL, '')`],
+      ['a note without text', `${insert} (1, 0, 0, 0, NULL, NULL)`],
+      ['an offset beyond 18 hours', `${insert} (1, 0, 1081, 0, NULL, 'Text')`],
+      ['a note without an offset', `${insert} (1, 0, NULL, 0, NULL, 'Text')`],
+      ['a day stored as text', `${insert} ('one', 0, 0, 0, NULL, 'Text')`],
+    ])('refuse %s', async (_, sql) => {
+      const db = await raw();
+      await expect(db.run(sql)).rejects.toThrow();
       await db.close();
     });
   });

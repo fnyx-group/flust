@@ -1,5 +1,6 @@
 import { createCheckInRepository, type CheckInRepository } from '@/data/check-in-repository';
 import { createDatabase, type Database } from '@/data/database';
+import { createJournalRepository, type JournalRepository } from '@/data/journal-repository';
 import { createJourneyRepository, type JourneyRepository } from '@/data/journey-repository';
 import { createLapseRepository, type LapseRepository } from '@/data/lapse-repository';
 import { applyMigrations, latestVersion, readUserVersion } from '@/data/migrate';
@@ -27,6 +28,7 @@ export type Storage = {
   readonly lapses: LapseRepository;
   readonly urges: UrgeRepository;
   readonly checkIns: CheckInRepository;
+  readonly journal: JournalRepository;
   readonly profile: ProfileRepository;
   readonly ranks: RankRepository;
   readonly onboarding: OnboardingRepository;
@@ -99,7 +101,7 @@ async function openWithKey(
   const { db, version } = opened.value;
   const latest = latestVersion(migrations);
 
-  if (version === latest) return ok(toStorage(db));
+  if (version === latest) return ready(db);
   if (version > latest) {
     await closeQuietly(db);
     return err('schema-too-new');
@@ -153,7 +155,7 @@ async function migrateNew(
 ): Promise<StorageResult> {
   try {
     await applyMigrations(db, migrations, 0);
-    return ok(toStorage(db));
+    return await ready(db);
   } catch {
     await closeQuietly(db);
     await files.remove(DATABASE_NAME);
@@ -182,6 +184,20 @@ async function migrateWithBackup(
     await closeQuietly(db);
     return err('storage-unavailable');
   }
+  return ready(db);
+}
+
+// Deleted rows are overwritten with zeros instead of staying in free pages until reused, so a
+// deleted note cannot be read back from the file, even by someone holding the key. The setting
+// belongs to the connection, so the connection handed to the app sets it. It is set last, so
+// that a database refused or rolled back is left exactly as it was found.
+async function ready(db: Database): Promise<StorageResult> {
+  try {
+    await db.exec('PRAGMA secure_delete = ON');
+  } catch {
+    await closeQuietly(db);
+    return err('storage-unavailable');
+  }
   return ok(toStorage(db));
 }
 
@@ -191,6 +207,7 @@ function toStorage(db: Database): Storage {
     lapses: createLapseRepository(db),
     urges: createUrgeRepository(db),
     checkIns: createCheckInRepository(db),
+    journal: createJournalRepository(db),
     profile: createProfileRepository(db),
     ranks: createRankRepository(db),
     onboarding: createOnboardingRepository(db),

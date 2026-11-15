@@ -1,13 +1,6 @@
 import { router, usePreventRemove } from 'expo-router';
 import { useRef, useState } from 'react';
-import {
-  AccessibilityInfo,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { todaysCheckIn, URGE_LEVELS, type Mood, type UrgeLevel } from '@/domain/check-in';
@@ -35,9 +28,8 @@ import { ChipList } from '@/ui/chip-list';
 import { IconButton } from '@/ui/icon-button';
 import { BackIcon } from '@/ui/icons/back-icon';
 import { ScalePicker } from '@/ui/scale-picker';
-import { Screen } from '@/ui/screen';
+import { KeyboardScreen } from '@/ui/keyboard-screen';
 import { ScreenTitle } from '@/ui/screen-title';
-import { ScrollView } from '@/ui/scroll-view';
 import { SegmentedControl } from '@/ui/segmented-control';
 import { colors, spacing, typography } from '@/ui/theme';
 
@@ -96,12 +88,10 @@ export function CheckInScreen() {
   }
 
   return (
-    <Screen bottomInset>
-      <ClockContext value={clock}>
-        <KeyboardAvoidingView
-          style={styles.fill}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
+    <ClockContext value={clock}>
+      <KeyboardScreen
+        contentContainerStyle={styles.content}
+        header={
           <View style={styles.header}>
             <IconButton
               accessibilityLabel={t('checkIn.back')}
@@ -112,50 +102,8 @@ export function CheckInScreen() {
             </IconButton>
             <CheckInDate />
           </View>
-          <ScrollView
-            style={styles.fill}
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
-          >
-            <ScreenTitle>{t('checkIn.title')}</ScreenTitle>
-            <View style={styles.field}>
-              <Text style={styles.label}>{t('checkIn.mood')}</Text>
-              <ScalePicker
-                accessibilityLabel={t('checkIn.mood')}
-                options={moodOptions(t)}
-                selected={draft.mood}
-                onSelect={(mood: Mood) => change({ mood })}
-                lowLabel={t('checkIn.moodLow')}
-                highLabel={t('checkIn.moodHigh')}
-              />
-            </View>
-            <View style={styles.field}>
-              <Text style={styles.label}>{t('checkIn.urge')}</Text>
-              <SegmentedControl
-                accessibilityLabel={t('checkIn.urge')}
-                options={URGE_LEVELS.map((key) => ({
-                  key,
-                  label: t(`checkIn.urgeLevels.${key}`),
-                }))}
-                selected={draft.urge}
-                onSelect={(urge: UrgeLevel) => change({ urge })}
-              />
-            </View>
-            <View style={styles.field}>
-              <Text style={styles.label}>{t('checkIn.context')}</Text>
-              <ChipList
-                items={RISK_MOMENT_IDS.map((id) => ({
-                  key: id,
-                  label: riskMomentLabel(t, id),
-                  selected: draft.context.includes(id),
-                }))}
-                onToggle={(id: RiskMomentId) =>
-                  change({ context: toggleRiskMoment(draft.context, id) })
-                }
-              />
-            </View>
-            <NoteField value={draft.note} onChangeText={(note) => change({ note })} />
-          </ScrollView>
+        }
+        footer={
           <View style={styles.footer}>
             {error !== null && (
               <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>
@@ -169,9 +117,48 @@ export function CheckInScreen() {
             />
             <Text style={styles.private}>{t('checkIn.private')}</Text>
           </View>
-        </KeyboardAvoidingView>
-      </ClockContext>
-    </Screen>
+        }
+      >
+        <ScreenTitle>{t('checkIn.title')}</ScreenTitle>
+        <View style={styles.field}>
+          <Text style={styles.label}>{t('checkIn.mood')}</Text>
+          <ScalePicker
+            accessibilityLabel={t('checkIn.mood')}
+            options={moodOptions(t)}
+            selected={draft.mood}
+            onSelect={(mood: Mood) => change({ mood })}
+            lowLabel={t('checkIn.moodLow')}
+            highLabel={t('checkIn.moodHigh')}
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>{t('checkIn.urge')}</Text>
+          <SegmentedControl
+            accessibilityLabel={t('checkIn.urge')}
+            options={URGE_LEVELS.map((key) => ({
+              key,
+              label: t(`checkIn.urgeLevels.${key}`),
+            }))}
+            selected={draft.urge}
+            onSelect={(urge: UrgeLevel) => change({ urge })}
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>{t('checkIn.context')}</Text>
+          <ChipList
+            items={RISK_MOMENT_IDS.map((id) => ({
+              key: id,
+              label: riskMomentLabel(t, id),
+              selected: draft.context.includes(id),
+            }))}
+            onToggle={(id: RiskMomentId) =>
+              change({ context: toggleRiskMoment(draft.context, id) })
+            }
+          />
+        </View>
+        <NoteField value={draft.note} onChangeText={(note) => change({ note })} />
+      </KeyboardScreen>
+    </ClockContext>
   );
 }
 
@@ -183,9 +170,6 @@ function CheckInDate() {
 }
 
 const styles = StyleSheet.create({
-  fill: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

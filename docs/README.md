@@ -41,6 +41,7 @@
 - [0016 Lapse records and urge events](decisions/0016-lapse-records-and-urge-events.md): lapses stored and undone by id, with their details and plan change; each emergency visit recorded.
 - [0017 Emergency elapsed clock](decisions/0017-emergency-elapsed-clock.md): the countdown and the breathing follow a monotonic elapsed time, not the wall clock.
 - [0018 Daily check-in](decisions/0018-daily-check-in.md): one check-in per stored local day, editable until midnight, and the low mood rule.
+- [0019 Journal notes](decisions/0019-journal-notes.md): notes keep their stored local day and UTC offset, grouped by week and month, an excerpt-only list.
 
 ## Development
 

@@ -2,11 +2,15 @@ import * as fc from 'fast-check';
 
 import {
   addMonths,
+  dateOfDay,
   daysInMonth,
   localDayNumber,
   localToUtc,
   monthGrid,
+  startOfWeek,
   utcToLocal,
+  weekdayOf,
+  type Weekday,
   type LocalDateTime,
   type UtcOffsetAt,
 } from '@/domain/local-time';
@@ -281,5 +285,63 @@ describe('localDayNumber', () => {
     expect(
       localDayNumber(stJohnsMidnight, stJohns) - localDayNumber(stJohnsMidnight - 1, stJohns),
     ).toBe(1);
+  });
+});
+
+describe('weekdayOf', () => {
+  const dayOf = (year: number, month: number, day: number) =>
+    Date.UTC(year, month - 1, day) / MS_PER_DAY;
+
+  it('numbers days from 1 for Sunday, like expo-localization', () => {
+    expect(weekdayOf(0)).toBe(5);
+    expect(weekdayOf(dayOf(2026, 11, 15))).toBe(1);
+    expect(weekdayOf(dayOf(2026, 11, 16))).toBe(2);
+    expect(weekdayOf(dayOf(2026, 11, 21))).toBe(7);
+  });
+
+  it('works before 1970', () => {
+    expect(weekdayOf(-1)).toBe(4);
+    expect(weekdayOf(-7)).toBe(5);
+  });
+
+  it('matches the weekday of Date for any day', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: -100_000, max: 100_000 }), (day) => {
+        expect(weekdayOf(day)).toBe(new Date(day * MS_PER_DAY).getUTCDay() + 1);
+      }),
+    );
+  });
+});
+
+describe('startOfWeek', () => {
+  const weekday = fc.constantFrom<Weekday>(1, 2, 3, 4, 5, 6, 7);
+
+  it('goes back to Monday or Sunday', () => {
+    const sunday = Date.UTC(2026, 10, 15) / MS_PER_DAY;
+    expect(startOfWeek(sunday, 2)).toBe(sunday - 6);
+    expect(startOfWeek(sunday, 1)).toBe(sunday);
+    expect(startOfWeek(sunday + 1, 2)).toBe(sunday + 1);
+  });
+
+  it('falls on the first weekday, at most six days before', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: -100_000, max: 100_000 }), weekday, (day, first) => {
+        const start = startOfWeek(day, first);
+        expect(weekdayOf(start)).toBe(first);
+        expect(day - start).toBeGreaterThanOrEqual(0);
+        expect(day - start).toBeLessThanOrEqual(6);
+      }),
+    );
+  });
+});
+
+describe('dateOfDay', () => {
+  it('gives the calendar date of a local day number', () => {
+    expect(dateOfDay(0)).toEqual({ year: 1970, month: 1, day: 1 });
+    expect(dateOfDay(Date.UTC(2026, 1, 28) / MS_PER_DAY + 1)).toEqual({
+      year: 2026,
+      month: 3,
+      day: 1,
+    });
   });
 });

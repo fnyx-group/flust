@@ -20,6 +20,9 @@ Rule: store UTC timestamps and recompute durations on display. Never count with 
 | Counter reaches 3 and 4 digits | The counter font shrinks so the number fits on one line.                                                               |
 | Check-in and time zone travel  | A check-in stays on the local day it was first saved on. Today's check-in is the one stored for the current local day. |
 | Check-in open at midnight      | Saving after midnight stores a check-in for the new day. The previous day's check-in is not changed.                   |
+| Journal and time zone travel   | A note stays on the local day it was written on, and shows the time it was written at, with the offset of that moment. |
+| Journal week start             | "This week" and "Last week" start on the first weekday of the device's region, such as Monday in France.               |
+| Journal and clock set back     | A note dated after today shows under "This week". Editing a note never changes its date.                               |
 
 A clock set forwards can unlock ranks early. This is accepted: the app is personal, with no competition, and guarding against it by keeping the latest time ever seen would freeze or distort the counter once the clock is corrected.
 
@@ -45,6 +48,21 @@ A clock set forwards can unlock ranks early. This is accepted: the app is person
 | Notification permission refused    | Everything works without it. Reminders are simply not delivered.              |
 | Onboarding interrupted             | The onboarding resumes at the same step on next launch.                       |
 | Onboarding steps skipped           | Skipped steps get default values, which can be changed later in the settings. |
+
+## Journal
+
+| Case                         | Expected behavior                                                                                                                                                                               |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New note left empty          | The note is never saved and the screen closes without asking. A title without text is never saved, but leaving asks first, so the title is not lost by mistake.                                 |
+| Leaving with unsaved changes | The close button, Android back and gestures ask whether to keep writing or discard the changes.                                                                                                 |
+| Note too long                | Typing stops at the limit: 120 characters for the title, 10,000 for the text, in UTF-16 units, so an emoji can count twice. A prompt that would not fit is not inserted, and a message says so. |
+| Note deleted                 | Deleting asks for confirmation and says it is permanent. The note is removed from the encrypted database.                                                                                       |
+| Note deleted while edited    | Saving says the note no longer exists and offers to save the text as a new note.                                                                                                                |
+| Note cannot be opened        | A calm message replaces the editor: the note no longer exists, or it could not be read, with a retry.                                                                                           |
+| Note opened from a link      | Closing goes back to the journal when there is no screen to go back to.                                                                                                                         |
+| Save or delete fails         | A message says so, the text stays on screen and the user can try again.                                                                                                                         |
+| Journal cannot be read       | A calm message offers to try again. It never leads to a reset.                                                                                                                                  |
+| App closed while writing     | Unsaved text is lost: nothing is written outside the encrypted database before "Save".                                                                                                          |
 
 ## Notifications
 

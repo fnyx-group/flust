@@ -4,6 +4,7 @@ import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-nativ
 import { useTranslation } from 'react-i18next';
 
 import type { Profile } from '@/data/profile-repository';
+import { opensJournal } from '@/domain/onboarding';
 import { countdownMs } from '@/domain/urge';
 import { ClockContext, useClock } from '@/features/clock/clock-context';
 import { createElapsedClock } from '@/features/clock/elapsed-clock';
@@ -13,6 +14,7 @@ import { CountdownChip } from '@/features/emergency/countdown-chip';
 import { PlanCard, ReasonsCard } from '@/features/emergency/profile-cards';
 import { startUrgeVisit, type UrgeVisit } from '@/features/emergency/urge-visit';
 import { handOffVisit } from '@/features/emergency/visit-handoff';
+import { useWhenFocused } from '@/features/shared/use-when-focused';
 import { useStorage } from '@/features/storage/storage-context';
 import { Button } from '@/ui/button';
 import { IconButton } from '@/ui/icon-button';
@@ -37,6 +39,7 @@ export function EmergencyScreen() {
   const visit = useRef<UrgeVisit | null>(null);
   // Set once the lapse screen has taken the visit over: it ends the visit from then on.
   const handedOff = useRef(false);
+  const whenFocused = useWhenFocused();
 
   // Effects can run twice in development; the ref keeps a single visit per screen.
   useEffect(() => {
@@ -103,7 +106,12 @@ export function EmergencyScreen() {
             <WaveOver />
           </View>
           <BreathingCircle />
-          {plan !== undefined && <PlanCard plan={plan} />}
+          {plan !== undefined && (
+            <PlanCard
+              plan={plan}
+              onWrite={opensJournal(plan) ? () => whenFocused(writeNote) : undefined}
+            />
+          )}
           {reasons.length > 0 && <ReasonsCard reasons={reasons} />}
           <View style={styles.actions}>
             <Button label={t('emergency.held')} onPress={held} />
@@ -113,6 +121,11 @@ export function EmergencyScreen() {
       </ClockContext>
     </Screen>
   );
+}
+
+// The note opens over this screen, which stays open with its countdown running.
+function writeNote() {
+  router.push('/note');
 }
 
 function isWaveOver(elapsed: number): boolean {

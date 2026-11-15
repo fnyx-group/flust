@@ -75,7 +75,8 @@
     "plan": "Your plan",
     "reasons": "Your reasons",
     "held": "I held on",
-    "lapse": "I had a lapse"
+    "lapse": "I had a lapse",
+    "writeNote": "Write now"
   },
   "lapse": {
     "back": "Back",
@@ -136,6 +137,73 @@
       "note-too-long": "This note is too long. Shorten it, then try again.",
       "save-failed": "The check-in could not be saved. Nothing is lost. Try again."
     }
+  },
+  "journal": {
+    "title": "Journal",
+    "newNote": "New note",
+    "private": "Encrypted, only on your phone",
+    "groups": {
+      "thisWeek": "This week",
+      "lastWeek": "Last week"
+    },
+    "empty": {
+      "title": "Nothing written yet.",
+      "text": "A few lines are enough, whenever you like.",
+      "action": "Write a note"
+    },
+    "loadFailed": "The journal could not be read. Nothing is lost.",
+    "retry": "Try again",
+    "openHint": "Opens the note",
+    "note": {
+      "close": "Close",
+      "save": "Save",
+      "titlePlaceholder": "Title (optional)",
+      "titleSpoken": "Title, optional",
+      "dateTime": "{{date}} at {{time}}",
+      "bodyPlaceholder": "Write whatever you like.",
+      "bodySpoken": "Note text",
+      "prompts": "To get started",
+      "promptLabels": {
+        "helped": "What helped you today?",
+        "proud": "Something you're proud of today?",
+        "tomorrow": "Tomorrow, I…"
+      },
+      "promptStarters": {
+        "helped": "What helped: ",
+        "proud": "Today I'm proud of ",
+        "tomorrow": "Tomorrow, I "
+      },
+      "private": "Encrypted as soon as it's saved",
+      "delete": "Delete note",
+      "deleteConfirm": {
+        "title": "Delete this note?",
+        "message": "It will be erased from your phone. You won't be able to get it back.",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+      },
+      "leave": {
+        "title": "Leave without saving?",
+        "message": "What you wrote since the last save will be lost.",
+        "messageNew": "What you wrote will be lost.",
+        "keep": "Keep writing",
+        "discard": "Don't save"
+      },
+      "errors": {
+        "empty": "Write a few words before saving.",
+        "title-too-long": "This title is too long. Shorten it, then try again.",
+        "body-too-long": "This note is too long. Shorten it, then try again.",
+        "save-failed": "The note could not be saved. Your text is still here. Try again.",
+        "delete-failed": "The note could not be deleted. Try again.",
+        "prompt-too-long": "There is not enough room left in this note for this line.",
+        "note-missing": "This note no longer exists. Your text is still here, and you can save it as a new note."
+      },
+      "saveAsNew": "Save as a new note",
+      "unavailable": {
+        "missing": "This note no longer exists.",
+        "failed": "The note could not be read. Nothing is lost."
+      }
+    },
+    "refreshFailed": "The journal could not be refreshed."
   },
   "units": {
     "day_one": "{{count}} day",

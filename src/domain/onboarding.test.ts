@@ -8,6 +8,7 @@ import {
   isOnboardingStep,
   nextStep,
   ONBOARDING_STEPS,
+  opensJournal,
   previousStep,
   QUESTION_STEPS,
   samePlan,
@@ -169,6 +170,20 @@ describe('samePlan', () => {
   it('tells a preset action from a custom one', () => {
     expect(samePlan(DEFAULT_PLAN, { ...DEFAULT_PLAN, action: custom.action })).toBe(false);
     expect(samePlan({ ...DEFAULT_PLAN, action: custom.action }, DEFAULT_PLAN)).toBe(false);
+  });
+});
+
+describe('opensJournal', () => {
+  it('is true only for the preset action that writes in the journal', () => {
+    const journal = { kind: 'preset', id: 'journal-three-lines' } as const;
+    expect(opensJournal({ ...DEFAULT_PLAN, action: journal })).toBe(true);
+    expect(opensJournal(DEFAULT_PLAN)).toBe(false);
+    expect(
+      opensJournal({
+        ...DEFAULT_PLAN,
+        action: { kind: 'custom', text: text('journal-three-lines') },
+      }),
+    ).toBe(false);
   });
 });
 

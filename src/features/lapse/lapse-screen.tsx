@@ -1,13 +1,6 @@
 import { router, useLocalSearchParams, useNavigation, usePreventRemove } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import {
-  AccessibilityInfo,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Profile } from '@/data/profile-repository';
@@ -48,9 +41,8 @@ import { ChipList } from '@/ui/chip-list';
 import { IconButton } from '@/ui/icon-button';
 import { BackIcon } from '@/ui/icons/back-icon';
 import { OptionSheet } from '@/ui/option-sheet';
-import { Screen } from '@/ui/screen';
+import { KeyboardScreen } from '@/ui/keyboard-screen';
 import { ScreenTitle } from '@/ui/screen-title';
-import { ScrollView } from '@/ui/scroll-view';
 import { SelectRow } from '@/ui/select-row';
 import { colors, spacing, typography } from '@/ui/theme';
 
@@ -179,12 +171,10 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
   }
 
   return (
-    <Screen bottomInset>
-      <ClockContext value={clock}>
-        <KeyboardAvoidingView
-          style={styles.fill}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
+    <ClockContext value={clock}>
+      <KeyboardScreen
+        contentContainerStyle={styles.content}
+        header={
           <View style={styles.header}>
             <IconButton
               accessibilityLabel={t('lapse.back')}
@@ -202,54 +192,8 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
               />
             </View>
           </View>
-          <ScrollView
-            style={styles.fill}
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.intro}>
-              <ScreenTitle>{t('lapse.title')}</ScreenTitle>
-              <Text style={styles.subtitle}>{t('lapse.subtitle')}</Text>
-            </View>
-            <LapseSummaryCards journey={journey} at={earlier} unlockedRanks={unlockedRanks} />
-            <View style={styles.section}>
-              <Text style={styles.sectionLabel}>{t('lapse.whatHappened')}</Text>
-              <SelectRow
-                prefix={t('lapse.where')}
-                value={place === null ? t('lapse.notSet') : placeLabel(t, place)}
-                accessibilityHint={t('lapse.whereHint')}
-                onPress={() => setChoosingPlace(true)}
-              />
-              <WhenField
-                earlier={earlier}
-                bounds={bounds}
-                onChooseNow={chooseNow}
-                onChooseEarlier={chooseEarlier}
-                onSelect={selectEarlier}
-              />
-              <View style={styles.field}>
-                <Text style={styles.label}>{t('lapse.context')}</Text>
-                <ChipList
-                  items={RISK_MOMENT_IDS.map((id) => ({
-                    key: id,
-                    label: riskMomentLabel(t, id),
-                    selected: context.includes(id),
-                  }))}
-                  onToggle={(id) => setContext(toggleRiskMoment(context, id))}
-                />
-              </View>
-            </View>
-            {profile !== null && plan !== null && (
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>{t('lapse.nextTime')}</Text>
-                <PlanFields
-                  plan={plan}
-                  triggers={lapseTriggers(profile.riskMoments, currentPlan.trigger)}
-                  onChange={setPlan}
-                />
-              </View>
-            )}
-          </ScrollView>
+        }
+        footer={
           <View style={styles.footer}>
             {error !== null && (
               <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>
@@ -258,25 +202,67 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
             )}
             <Button label={t('lapse.save')} onPress={saveAnswers} disabled={busy} />
           </View>
-        </KeyboardAvoidingView>
-      </ClockContext>
-      <OptionSheet
-        visible={choosingPlace}
-        title={t('lapse.whereTitle')}
-        closeLabel={t('onboarding.close')}
-        options={PLACE_IDS.map((id) => ({ key: id, label: placeLabel(t, id) }))}
-        selected={place}
-        onSelect={setPlace}
-        onClose={() => setChoosingPlace(false)}
-      />
-    </Screen>
+        }
+        overlay={
+          <OptionSheet
+            visible={choosingPlace}
+            title={t('lapse.whereTitle')}
+            closeLabel={t('onboarding.close')}
+            options={PLACE_IDS.map((id) => ({ key: id, label: placeLabel(t, id) }))}
+            selected={place}
+            onSelect={setPlace}
+            onClose={() => setChoosingPlace(false)}
+          />
+        }
+      >
+        <View style={styles.intro}>
+          <ScreenTitle>{t('lapse.title')}</ScreenTitle>
+          <Text style={styles.subtitle}>{t('lapse.subtitle')}</Text>
+        </View>
+        <LapseSummaryCards journey={journey} at={earlier} unlockedRanks={unlockedRanks} />
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>{t('lapse.whatHappened')}</Text>
+          <SelectRow
+            prefix={t('lapse.where')}
+            value={place === null ? t('lapse.notSet') : placeLabel(t, place)}
+            accessibilityHint={t('lapse.whereHint')}
+            onPress={() => setChoosingPlace(true)}
+          />
+          <WhenField
+            earlier={earlier}
+            bounds={bounds}
+            onChooseNow={chooseNow}
+            onChooseEarlier={chooseEarlier}
+            onSelect={selectEarlier}
+          />
+          <View style={styles.field}>
+            <Text style={styles.label}>{t('lapse.context')}</Text>
+            <ChipList
+              items={RISK_MOMENT_IDS.map((id) => ({
+                key: id,
+                label: riskMomentLabel(t, id),
+                selected: context.includes(id),
+              }))}
+              onToggle={(id) => setContext(toggleRiskMoment(context, id))}
+            />
+          </View>
+        </View>
+        {profile !== null && plan !== null && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>{t('lapse.nextTime')}</Text>
+            <PlanFields
+              plan={plan}
+              triggers={lapseTriggers(profile.riskMoments, currentPlan.trigger)}
+              onChange={setPlan}
+            />
+          </View>
+        )}
+      </KeyboardScreen>
+    </ClockContext>
   );
 }
 
 const styles = StyleSheet.create({
-  fill: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

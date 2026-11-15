@@ -75,7 +75,8 @@
     "plan": "Ton plan",
     "reasons": "Tes raisons",
     "held": "J'ai tenu",
-    "lapse": "J'ai eu un écart"
+    "lapse": "J'ai eu un écart",
+    "writeNote": "Écrire maintenant"
   },
   "lapse": {
     "back": "Retour",
@@ -136,6 +137,73 @@
       "note-too-long": "Cette note est trop longue. Raccourcis-la, puis réessaie.",
       "save-failed": "Le check-in n'a pas pu être enregistré. Rien n'est perdu. Réessaie."
     }
+  },
+  "journal": {
+    "title": "Journal",
+    "newNote": "Nouvelle note",
+    "private": "Chiffré, sur ton téléphone uniquement",
+    "groups": {
+      "thisWeek": "Cette semaine",
+      "lastWeek": "Semaine dernière"
+    },
+    "empty": {
+      "title": "Rien d'écrit pour l'instant.",
+      "text": "Quelques lignes suffisent, quand tu veux.",
+      "action": "Écrire une note"
+    },
+    "loadFailed": "Le journal n'a pas pu être lu. Rien n'est perdu.",
+    "retry": "Réessayer",
+    "openHint": "Ouvre la note",
+    "note": {
+      "close": "Fermer",
+      "save": "Enregistrer",
+      "titlePlaceholder": "Titre (facultatif)",
+      "titleSpoken": "Titre, facultatif",
+      "dateTime": "{{date}} à {{time}}",
+      "bodyPlaceholder": "Écris ce que tu veux.",
+      "bodySpoken": "Texte de la note",
+      "prompts": "Pour commencer",
+      "promptLabels": {
+        "helped": "Qu'est-ce qui t'a fait du bien ?",
+        "proud": "Une fierté du jour ?",
+        "tomorrow": "Demain, je…"
+      },
+      "promptStarters": {
+        "helped": "Ce qui m'a fait du bien : ",
+        "proud": "Ma fierté du jour : ",
+        "tomorrow": "Demain, je "
+      },
+      "private": "Chiffrée dès l'enregistrement",
+      "delete": "Supprimer la note",
+      "deleteConfirm": {
+        "title": "Supprimer cette note ?",
+        "message": "Elle sera effacée de ton téléphone. Tu ne pourras pas la retrouver.",
+        "confirm": "Supprimer",
+        "cancel": "Annuler"
+      },
+      "leave": {
+        "title": "Quitter sans enregistrer ?",
+        "message": "Ce que tu as écrit depuis le dernier enregistrement sera perdu.",
+        "messageNew": "Ce que tu as écrit sera perdu.",
+        "keep": "Continuer à écrire",
+        "discard": "Ne pas enregistrer"
+      },
+      "errors": {
+        "empty": "Écris quelques mots avant d'enregistrer.",
+        "title-too-long": "Ce titre est trop long. Raccourcis-le, puis réessaie.",
+        "body-too-long": "Cette note est trop longue. Raccourcis-la, puis réessaie.",
+        "save-failed": "La note n'a pas pu être enregistrée. Ton texte est toujours là. Réessaie.",
+        "delete-failed": "La note n'a pas pu être supprimée. Réessaie.",
+        "prompt-too-long": "Il ne reste plus assez de place dans la note pour cette phrase.",
+        "note-missing": "Cette note n'existe plus. Ton texte est toujours là, tu peux l'enregistrer comme nouvelle note."
+      },
+      "saveAsNew": "Enregistrer comme nouvelle note",
+      "unavailable": {
+        "missing": "Cette note n'existe plus.",
+        "failed": "La note n'a pas pu être lue. Rien n'est perdu."
+      }
+    },
+    "refreshFailed": "Le journal n'a pas pu être actualisé."
   },
   "units": {
     "day_one": "{{count}} jour",

@@ -2,6 +2,7 @@ import { MIGRATIONS } from '@/data/migrations';
 import type { Migration } from '@/data/migrations/migration';
 import { openStorage } from '@/data/open-storage';
 import { BACKUP_NAME, DATABASE_NAME } from '@/data/storage-deps';
+import { parseNoteContent } from '@/domain/journal';
 import { err } from '@/domain/result';
 import { journeyOf, unwrap } from '@test/arbitraries';
 import { createFakeStorage } from '@test/fakes/fake-storage';
@@ -296,6 +297,48 @@ describe('openStorage', () => {
       const storage = unwrap(await openStorage(fake.deps, migrations));
       expect(userVersion(fake)).toBe(NEXT);
       expect(unwrap(await storage.journey.load())).toEqual(journeyOf(START, [START + 1000]));
+    });
+  });
+
+  // Deleted text must not stay readable in free pages, even encrypted: the delete sheet says the
+  // note is erased from the phone.
+  describe('secure delete', () => {
+    const SECRET = 'a-private-sentence-to-erase';
+
+    function fileHolds(fake: ReturnType<typeof createFakeStorage>, text: string): boolean {
+      const bytes = fake.disk.stored.get(DATABASE_NAME)?.bytes ?? new Uint8Array();
+      return Buffer.from(bytes).includes(text);
+    }
+
+    async function writeThenDelete(storage: Awaited<ReturnType<typeof openStorage>>) {
+      const opened = unwrap(storage);
+      const content = unwrap(parseNoteContent({ title: '', body: SECRET.repeat(20) }));
+      const note = unwrap(await opened.journal.create({ day: 0, at: START, offset: 0 }, content));
+      unwrap(await opened.journal.remove(note.id));
+      return opened;
+    }
+
+    it('erases deleted rows from a new database', async () => {
+      const fake = createFakeStorage();
+      const storage = await writeThenDelete(await openStorage(fake.deps));
+      expect(fileHolds(fake, SECRET)).toBe(false);
+      await storage.close();
+    });
+
+    it('erases deleted rows from a database opened again', async () => {
+      const fake = await installed();
+      const storage = await writeThenDelete(await openStorage(fake.deps));
+      expect(fileHolds(fake, SECRET)).toBe(false);
+      await storage.close();
+    });
+
+    it('erases deleted rows from a database just migrated', async () => {
+      const fake = await installed();
+      const storage = await writeThenDelete(
+        await openStorage(fake.deps, [...MIGRATIONS, addExtraTable]),
+      );
+      expect(fileHolds(fake, SECRET)).toBe(false);
+      await storage.close();
     });
   });
 });
