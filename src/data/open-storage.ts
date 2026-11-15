@@ -1,5 +1,6 @@
 import { createCheckInRepository, type CheckInRepository } from '@/data/check-in-repository';
 import { createDatabase, type Database } from '@/data/database';
+import { createJournalRepository, type JournalRepository } from '@/data/journal-repository';
 import { createJourneyRepository, type JourneyRepository } from '@/data/journey-repository';
 import { createLapseRepository, type LapseRepository } from '@/data/lapse-repository';
 import { applyMigrations, latestVersion, readUserVersion } from '@/data/migrate';
@@ -27,6 +28,7 @@ export type Storage = {
   readonly lapses: LapseRepository;
   readonly urges: UrgeRepository;
   readonly checkIns: CheckInRepository;
+  readonly journal: JournalRepository;
   readonly profile: ProfileRepository;
   readonly ranks: RankRepository;
   readonly onboarding: OnboardingRepository;
@@ -191,6 +193,7 @@ function toStorage(db: Database): Storage {
     lapses: createLapseRepository(db),
     urges: createUrgeRepository(db),
     checkIns: createCheckInRepository(db),
+    journal: createJournalRepository(db),
     profile: createProfileRepository(db),
     ranks: createRankRepository(db),
     onboarding: createOnboardingRepository(db),

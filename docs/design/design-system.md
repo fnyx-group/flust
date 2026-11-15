@@ -83,7 +83,7 @@ The counter, digits and units together, does not grow with the system text size,
 
 ### Scrolling
 
-Scrolling content never stretches at its ends on Android: the over-scroll effect of Android 12 and later is turned off on every scroll view and list. iOS keeps its default bounce. Every scrolling container uses `ScrollView` from `src/ui/scroll-view.tsx`, which sets this once; ESLint rejects `ScrollView`, `FlatList`, `SectionList` and `VirtualizedList` imported from `react-native` elsewhere. A list needed later gets its own wrapper in that file.
+Scrolling content never stretches at its ends on Android: the over-scroll effect of Android 12 and later is turned off on every scroll view and list. iOS keeps its default bounce. Every scrolling container uses `ScrollView` from `src/ui/scroll-view.tsx`, which sets this once; ESLint rejects `ScrollView`, `FlatList`, `SectionList` and `VirtualizedList` imported from `react-native` elsewhere. The same file holds `SectionList`, for long lists in sections such as the journal. A list needed later gets its own wrapper in that file.
 
 ## Navigation
 
@@ -171,7 +171,7 @@ A full screen without the tab bar, in a scrolling column with 24 points between 
 1. A header row: the close button on the left, the countdown chip on the right (a pill on the surface color, 22/600 Barlow Condensed, from 20:00 to 00:00). Screen readers read it in words, such as "Encore 19 minutes 42 secondes".
 2. "Laisse passer la vague." (screen title) and the explanation (16/400, line height 24, secondary text). Once the countdown reaches zero, "La vague est passée ?" (row style) appears under it and is announced once.
 3. The breathing guide: a 220 point ring in the separator color around a 170 point circle on the surface color with a 3 point accent stroke. The circle grows from 70 to 100 percent on the inhale, stays on the hold and shrinks on the exhale. The phase name (20/600) and the seconds left in the phase (56/600 Barlow Condensed) sit in the middle and do not scale. The rhythm is written under it in secondary body text. With reduce motion on, the circle keeps its size and only the text changes. Screen readers hear the rhythm once when the screen opens. The ring is one element, "Guide de respiration", whose value is the phase name; screen readers read the phase again as it changes only while that element has focus, and never the seconds.
-4. The plan card ("Ton plan", then the plan as one sentence) and the reasons card ("Tes raisons", one line per reason), on the surface color with radius 22. Each card only shows when it has content.
+4. The plan card ("Ton plan", then the plan as one sentence, and an "Écrire maintenant" secondary button when the plan is to write in the journal, which opens a new note over the screen) and the reasons card ("Tes raisons", one line per reason), on the surface color with radius 22. Each card only shows when it has content.
 5. At the bottom: "J'ai tenu" (primary) and "J'ai eu un écart" (text button).
 
 ## Lapse screen
@@ -196,6 +196,33 @@ A screen pushed over the tabs, without the tab bar. A header row holds the back 
 5. "Note (facultatif)": a multiline field on the surface color, radius 22, with the placeholder "Une phrase, si tu veux".
 
 The "Enregistrer" primary button stays at the bottom, above "Reste sur ton téléphone, chiffré." (body, secondary text). Nothing is chosen when the screen opens, so no answer is suggested. The button is disabled until a mood and an urge level are chosen. The check-in never mentions a lapse.
+
+## Journal
+
+A tab screen. A header row holds the "Journal" screen title on the left and the new note icon button (a pencil, on the surface color) on the right. Below it, a scrolling list of notes in sections:
+
+- "Cette semaine", then "Semaine dernière", then one section per month, such as "Octobre", with the year when it is not the current one ("Octobre 2025"). Section titles use the section label style, 24 points above them.
+- Each note is a row: its date ("Mercredi 12 nov.", 16/400, secondary text), its title if it has one (22/800), then the start of its text on up to three lines (16/400, line height 24, text color). A separator line runs under each row. Screen readers read a row as one button: the date, the title, then the text.
+
+Notes belong to the week or month of the local day they were written on. Weeks start on the first weekday of the device's region.
+
+With no notes, the list gives way to a calm centered block: "Rien d'écrit pour l'instant." (row style), "Quelques lignes suffisent, quand tu veux." (16/400, secondary text) and an "Écrire une note" secondary button. If the journal cannot be read, the same place shows a calm message and a "Réessayer" secondary button.
+
+At the bottom, above the tab bar: a 16 point lock icon and "Chiffré, sur ton téléphone uniquement" (body, secondary text), centered.
+
+The video button and the "Tout / Notes / Vidéos" filter of the mockup come with the video journal in V0.3.
+
+## Note
+
+A full screen without the tab bar, for a new note and for editing one. A header row holds the close button on the left and the "Enregistrer" primary button on the right. Below it, scrolling:
+
+1. The date and time (row style, secondary text), such as "Jeudi 13 novembre, 22:14", with the year when it is not the current one. Times follow the device's 12 or 24 hour setting, like the time pickers. A new note shows the current time until it is saved; a saved note shows the time it was written at, with the UTC offset of that moment, so it reads the same after travel.
+2. The title field, "Titre (facultatif)" as placeholder, in the screen title style. One line, at most 120 characters.
+3. The text field (16/400, line height 24), at most 10,000 characters.
+
+At the bottom: "Une piste" (section label) over a row of chips that scrolls sideways to the screen edges: "Qu'est-ce qui t'a fait du bien ?", "Une fierté du jour ?" and "Demain, je…". Each chip is a button that adds a starter line on a new paragraph, such as "Ce qui m'a fait du bien : ", and puts the cursor after it. Under the chips, a 16 point lock icon and "Chiffrée dès l'enregistrement" (body, secondary text). When editing, a "Supprimer la note" text button comes last.
+
+"Enregistrer" is disabled while nothing has changed or the note has no text: the title alone is not a note. Leaving with unsaved changes opens a sheet, "Quitter sans enregistrer ?", with "Continuer à écrire" (primary) and "Abandonner" (text button). Deleting opens a sheet, "Supprimer cette note ?", which says the note is erased from the phone for good, with "Annuler" (primary) and "Supprimer" (text button). Sheets use the background color with a separator border at the top, radius 22, and no red.
 
 ## Notifications
 

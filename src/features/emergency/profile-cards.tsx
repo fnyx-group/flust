@@ -4,13 +4,20 @@ import { useTranslation } from 'react-i18next';
 
 import type { Plan, Reason } from '@/domain/onboarding';
 import { planSentence, reasonLabel } from '@/features/shared/preset-labels';
+import { Button } from '@/ui/button';
 import { colors, radii, spacing, typography } from '@/ui/theme';
 
-export function PlanCard({ plan }: { plan: Plan }) {
+// The card offers to start a note when the plan is to write in the journal.
+export function PlanCard({ plan, onWrite }: { plan: Plan; onWrite?: () => void }) {
   const { t } = useTranslation();
   return (
     <Card label={t('emergency.plan')}>
       <Text style={styles.text}>{planSentence(t, plan)}</Text>
+      {onWrite !== undefined && (
+        <View style={styles.action}>
+          <Button variant="secondary" label={t('emergency.writeNote')} onPress={onWrite} />
+        </View>
+      )}
     </Card>
   );
 }
@@ -53,5 +60,8 @@ const styles = StyleSheet.create({
   text: {
     ...typography.paragraph,
     color: colors.text,
+  },
+  action: {
+    paddingTop: spacing.s,
   },
 });

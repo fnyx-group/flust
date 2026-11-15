@@ -99,3 +99,21 @@ function wallAsUtc({ year, month, day, hour, minute }: LocalDateTime): number {
 export function localDayNumber(utc: Timestamp, offsetAt: UtcOffsetAt): number {
   return Math.floor((utc + offsetAt(utc) * MS_PER_MINUTE) / MS_PER_DAY);
 }
+
+// Local day 0, 1970-01-01, was a Thursday, so the list starts there.
+const WEEKDAYS_FROM_DAY_ZERO: readonly Weekday[] = [5, 6, 7, 1, 2, 3, 4];
+
+export function weekdayOf(day: number): Weekday {
+  return WEEKDAYS_FROM_DAY_ZERO[((day % 7) + 7) % 7] ?? 5;
+}
+
+// The local day number of the first day of the week that holds `day`.
+export function startOfWeek(day: number, firstWeekday: Weekday): number {
+  return day - ((weekdayOf(day) - firstWeekday + 7) % 7);
+}
+
+// Local day numbers count days from 1970-01-01, so their start read in UTC gives their date.
+export function dateOfDay(day: number): { year: number; month: number; day: number } {
+  const date = new Date(day * MS_PER_DAY);
+  return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() };
+}

@@ -62,7 +62,9 @@ There is one check-in per local day, editable until local midnight. It never men
 
 ### Journal
 
-A text journal with writing prompts to help the user start an entry.
+A text journal. Each note has an optional title and its text, and keeps the day and the time it was written at. The journal tab lists notes under "Cette semaine", "Semaine dernière", then by month, and opens a note to edit or delete it. Writing prompts insert a starter line, such as "Ce qui m'a fait du bien : ". Notes are stored in the encrypted database.
+
+When the user's if/then plan is to write in the journal, the emergency screen offers to open a new note.
 
 ### Reasons and plans editor
 

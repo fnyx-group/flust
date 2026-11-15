@@ -1,13 +1,5 @@
-import { useTranslation } from 'react-i18next';
+import { JournalScreen } from '@/features/journal/journal-screen';
 
-import { Screen } from '@/ui/screen';
-import { ScreenTitle } from '@/ui/screen-title';
-
-export default function JournalScreen() {
-  const { t } = useTranslation();
-  return (
-    <Screen>
-      <ScreenTitle>{t('tabs.journal')}</ScreenTitle>
-    </Screen>
-  );
+export default function JournalRoute() {
+  return <JournalScreen />;
 }
