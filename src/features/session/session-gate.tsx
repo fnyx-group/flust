@@ -9,6 +9,7 @@ import { withUnlocked, type RankId } from '@/domain/ranks';
 import { createUnlockAnnouncer } from '@/features/ranks/unlock-announcer';
 import { loadSession, type SessionData } from '@/features/session/load-session';
 import { SessionContext } from '@/features/session/session-context';
+import { useFollowDeviceLanguage } from '@/features/session/use-follow-device-language';
 import { deviceOffsetAt } from '@/features/shared/device-time';
 import { useReportStorageFailure, useStorage } from '@/features/storage/storage-context';
 
@@ -27,6 +28,8 @@ export function SessionGate({ children }: { children: ReactNode }) {
       addToSession: (ids) => setState((previous) => addUnlocked(previous, ids)),
     }),
   );
+
+  useFollowDeviceLanguage(storage.settings);
 
   useEffect(() => {
     let active = true;

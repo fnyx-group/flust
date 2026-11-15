@@ -11,7 +11,7 @@ import { createElapsedClock } from '@/features/clock/elapsed-clock';
 import { nativeElapsedClockDeps } from '@/features/clock/native-clock';
 import { BreathingCircle } from '@/features/emergency/breathing-circle';
 import { CountdownChip } from '@/features/emergency/countdown-chip';
-import { PlanCard, ReasonsCard } from '@/features/emergency/profile-cards';
+import { PlansCard, ReasonsCard } from '@/features/emergency/profile-cards';
 import { startUrgeVisit, type UrgeVisit } from '@/features/emergency/urge-visit';
 import { handOffVisit } from '@/features/emergency/visit-handoff';
 import { useWhenFocused } from '@/features/shared/use-when-focused';
@@ -83,7 +83,7 @@ export function EmergencyScreen() {
     router.replace({ pathname: '/lapse', params: { visit: handOffVisit(current) } });
   }
 
-  const plan = profile?.plans[0];
+  const plans = profile?.plans ?? [];
   const reasons = profile?.reasons ?? [];
 
   return (
@@ -106,10 +106,10 @@ export function EmergencyScreen() {
             <WaveOver />
           </View>
           <BreathingCircle />
-          {plan !== undefined && (
-            <PlanCard
-              plan={plan}
-              onWrite={opensJournal(plan) ? () => whenFocused(writeNote) : undefined}
+          {plans.length > 0 && (
+            <PlansCard
+              plans={plans}
+              onWrite={plans.some(opensJournal) ? () => whenFocused(writeNote) : undefined}
             />
           )}
           {reasons.length > 0 && <ReasonsCard reasons={reasons} />}

@@ -62,6 +62,7 @@ describe('lapse repository', () => {
           context: '["stress","tiredness"]',
           previous_plan: null,
           new_plan: null,
+          plan_id: null,
         },
       ]);
     });
@@ -78,11 +79,12 @@ describe('lapse repository', () => {
       unwrap(await storage.lapses.record(lapse({ plan: WALK })));
 
       expect(unwrap(await storage.profile.load()).plans).toEqual([WALK, CALL]);
-      expect(rows('SELECT context, previous_plan, new_plan FROM lapse_detail')).toEqual([
+      expect(rows('SELECT context, previous_plan, new_plan, plan_id FROM lapse_detail')).toEqual([
         {
           context: '[]',
           previous_plan: JSON.stringify(DEFAULT_PLAN),
           new_plan: JSON.stringify(WALK),
+          plan_id: 1,
         },
       ]);
     });
@@ -92,8 +94,8 @@ describe('lapse repository', () => {
       unwrap(await storage.lapses.record(lapse({ plan: CALL })));
 
       expect(unwrap(await storage.profile.load()).plans).toEqual([CALL]);
-      expect(rows('SELECT previous_plan, new_plan FROM lapse_detail')).toEqual([
-        { previous_plan: null, new_plan: JSON.stringify(CALL) },
+      expect(rows('SELECT previous_plan, new_plan, plan_id FROM lapse_detail')).toEqual([
+        { previous_plan: null, new_plan: JSON.stringify(CALL), plan_id: 1 },
       ]);
     });
 
@@ -177,9 +179,80 @@ describe('lapse repository', () => {
     it('removes the plan the lapse added when none was stored before', async () => {
       const { storage } = await setUp([]);
       const recorded = unwrap(await storage.lapses.record(lapse({ plan: CALL })));
+      unwrap(await storage.profile.savePlan(null, WALK));
 
       unwrap(await storage.lapses.undo(recorded.id));
-      expect(unwrap(await storage.profile.load()).plans).toEqual([]);
+      expect(unwrap(await storage.profile.load()).plans).toEqual([WALK]);
+    });
+
+    it('keeps the plan the lapse added when it is the only one left', async () => {
+      const { storage } = await setUp([]);
+      const recorded = unwrap(await storage.lapses.record(lapse({ plan: CALL })));
+
+      unwrap(await storage.lapses.undo(recorded.id));
+      expect(unwrap(await storage.profile.load()).plans).toEqual([CALL]);
+    });
+
+    it('removes the plan the lapse set when the previous one was added again since', async () => {
+      const { storage } = await setUp([DEFAULT_PLAN]);
+      const recorded = unwrap(await storage.lapses.record(lapse({ plan: WALK })));
+      unwrap(await storage.profile.savePlan(null, DEFAULT_PLAN));
+
+      unwrap(await storage.lapses.undo(recorded.id));
+      expect(unwrap(await storage.profile.load()).plans).toEqual([DEFAULT_PLAN]);
+    });
+
+    it('puts the previous plan back when other plans were edited or added', async () => {
+      const { storage } = await setUp([DEFAULT_PLAN, CALL]);
+      const recorded = unwrap(await storage.lapses.record(lapse({ plan: WALK })));
+      const [, second] = unwrap(await storage.profile.loadEntries()).plans;
+      unwrap(await storage.profile.savePlan(second?.id ?? null, { ...CALL, trigger: 'boredom' }));
+      const added: Plan = {
+        trigger: 'weekend',
+        action: { kind: 'preset', id: 'journal-three-lines' },
+      };
+      unwrap(await storage.profile.savePlan(null, added));
+
+      unwrap(await storage.lapses.undo(recorded.id));
+      expect(unwrap(await storage.profile.load()).plans).toEqual([
+        DEFAULT_PLAN,
+        { ...CALL, trigger: 'boredom' },
+        added,
+      ]);
+    });
+
+    it('keeps a plan removed after the lapse removed, and leaves the others alone', async () => {
+      const { storage } = await setUp([DEFAULT_PLAN, CALL]);
+      const recorded = unwrap(await storage.lapses.record(lapse({ plan: WALK })));
+      const [first] = unwrap(await storage.profile.loadEntries()).plans;
+      unwrap(await storage.profile.removePlan(first?.id ?? 0));
+
+      unwrap(await storage.lapses.undo(recorded.id));
+      expect(unwrap(await storage.profile.load()).plans).toEqual([CALL]);
+    });
+
+    // The plan that moves up once the first one is removed may hold the same plan the lapse set:
+    // it is still another plan, and must not be overwritten or removed.
+    it('never touches a plan that moved up and holds the same plan', async () => {
+      const { storage } = await setUp([DEFAULT_PLAN, WALK]);
+      const recorded = unwrap(await storage.lapses.record(lapse({ plan: WALK })));
+      const [first] = unwrap(await storage.profile.loadEntries()).plans;
+      unwrap(await storage.profile.removePlan(first?.id ?? 0));
+
+      unwrap(await storage.lapses.undo(recorded.id));
+      expect(unwrap(await storage.profile.load()).plans).toEqual([WALK]);
+    });
+
+    it('never removes a plan that moved up after the plan the lapse added', async () => {
+      const { storage } = await setUp([]);
+      const recorded = unwrap(await storage.lapses.record(lapse({ plan: CALL })));
+      unwrap(await storage.profile.savePlan(null, WALK));
+      const [first] = unwrap(await storage.profile.loadEntries()).plans;
+      unwrap(await storage.profile.removePlan(first?.id ?? 0));
+      unwrap(await storage.profile.savePlan(null, CALL));
+
+      unwrap(await storage.lapses.undo(recorded.id));
+      expect(unwrap(await storage.profile.load()).plans).toEqual([WALK, CALL]);
     });
 
     it('keeps a plan edited after the lapse', async () => {

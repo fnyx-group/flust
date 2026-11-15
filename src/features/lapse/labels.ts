@@ -1,8 +1,6 @@
 import type { TFunction } from 'i18next';
 
 import type { LapseSummary } from '@/domain/lapse';
-import { triggerOptions } from '@/domain/onboarding';
-import type { PlanTrigger, RiskMomentId } from '@/domain/presets';
 import { rankName } from '@/features/shared/rank-labels';
 import { spokenStreak } from '@/features/shared/streak-labels';
 
@@ -39,11 +37,4 @@ export function endedStreakCard(t: TFunction, { endedStreak }: LapseSummary): Su
 
 export function keptRank(t: TFunction, { rank }: LapseSummary): string | null {
   return rank === null ? null : t('lapse.rank', { name: rankName(t, rank) });
-}
-
-// The triggers the onboarding offers, plus the current one when its risk moment is no longer
-// chosen, so the plan shown is always one of the options.
-export function lapseTriggers(moments: readonly RiskMomentId[], current: PlanTrigger) {
-  const options = triggerOptions(moments);
-  return options.includes(current) ? options : [current, ...options];
 }

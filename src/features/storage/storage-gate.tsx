@@ -6,19 +6,49 @@ import type { Storage } from '@/data/open-storage';
 import { ResetScreen } from '@/features/storage/reset-screen';
 import { RetryScreen } from '@/features/storage/retry-screen';
 import { closeThenShow } from '@/features/storage/close-then-show';
-import { StorageContext, StorageFailureContext } from '@/features/storage/storage-context';
+import { EraseFailedScreen } from '@/features/storage/erase-failed-screen';
+import { createErasedNotice, createEraseFlow, type EraseStep } from '@/features/storage/erase-flow';
+import { ErasingScreen } from '@/features/storage/erasing-screen';
+import {
+  EraseAllContext,
+  ErasedNoticeContext,
+  StorageContext,
+  StorageFailureContext,
+} from '@/features/storage/storage-context';
 import { failureScreen, type StorageFailure } from '@/features/storage/storage-failure';
+import { i18n } from '@/lib/i18n';
+import { getDeviceLanguage } from '@/lib/i18n/language';
 
 type GateState =
   | { status: 'opening' }
   | { status: 'ready'; storage: Storage }
-  | { status: 'failed'; failure: StorageFailure };
+  | { status: 'failed'; failure: StorageFailure }
+  | { status: 'erasing' }
+  | { status: 'erase-failed' };
 
 // Renders its children only once storage is open. The splash screen stays up until then, and
 // after that until SessionGate has loaded the first screen; a failure here hides it at once.
 export function StorageGate({ children }: { children: ReactNode }) {
   const [state, setState] = useState<GateState>({ status: 'opening' });
   const [attempt, setAttempt] = useState(0);
+  const [erasedNotice] = useState(createErasedNotice);
+  const [eraseFlow] = useState(() =>
+    createEraseFlow({
+      reset: () => storageService.reset(),
+      applyDeviceLanguage: async () => {
+        await i18n.changeLanguage(getDeviceLanguage());
+      },
+      show: (step: EraseStep) => {
+        if (step !== 'erased') {
+          setState({ status: step });
+          return;
+        }
+        // The erasing screen stays until storage is open again, so nothing blank shows between.
+        erasedNotice.mark();
+        setAttempt((count) => count + 1);
+      },
+    }),
+  );
 
   useEffect(() => {
     let active = true;
@@ -36,7 +66,7 @@ export function StorageGate({ children }: { children: ReactNode }) {
   }, [attempt]);
 
   useEffect(() => {
-    if (state.status === 'failed') SplashScreen.hideAsync();
+    if (state.status === 'failed' || state.status === 'erase-failed') SplashScreen.hideAsync();
   }, [state.status]);
 
   function retry() {
@@ -61,10 +91,17 @@ export function StorageGate({ children }: { children: ReactNode }) {
     return (
       <StorageContext value={storage}>
         <StorageFailureContext value={(failure) => fail(storage, failure)}>
-          {children}
+          <EraseAllContext value={() => void eraseFlow.eraseAll(storage)}>
+            <ErasedNoticeContext value={erasedNotice}>{children}</ErasedNoticeContext>
+          </EraseAllContext>
         </StorageFailureContext>
       </StorageContext>
     );
+  }
+
+  if (state.status === 'erasing') return <ErasingScreen />;
+  if (state.status === 'erase-failed') {
+    return <EraseFailedScreen onRetry={() => void eraseFlow.retry()} />;
   }
 
   const screen = failureScreen(state.failure);

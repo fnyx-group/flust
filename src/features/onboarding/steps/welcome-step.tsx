@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { useStorage } from '@/features/storage/storage-context';
+import { useErasedNotice, useStorage } from '@/features/storage/storage-context';
 import {
   fallbackLanguage,
   isLanguage,
@@ -22,6 +22,15 @@ type WelcomeStepProps = {
 
 export function WelcomeStep({ onStart }: WelcomeStepProps) {
   const { t } = useTranslation();
+  const erasedNotice = useErasedNotice();
+
+  // Announced once this screen has mounted, so the focus moving to it does not cut it off.
+  useEffect(() => {
+    if (erasedNotice.take()) {
+      AccessibilityInfo.announceForAccessibilityWithOptions(t('erase.done'), { queue: true });
+    }
+  }, [erasedNotice, t]);
+
   return (
     <Screen bottomInset style={styles.screen}>
       <View style={styles.top}>

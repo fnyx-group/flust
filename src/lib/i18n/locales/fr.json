@@ -73,6 +73,7 @@
       "guide": "Guide de respiration"
     },
     "plan": "Ton plan",
+    "plans": "Tes plans",
     "reasons": "Tes raisons",
     "held": "J'ai tenu",
     "lapse": "J'ai eu un écart",
@@ -205,6 +206,114 @@
     },
     "refreshFailed": "Le journal n'a pas pu être actualisé."
   },
+  "settings": {
+    "reasonsAndPlans": "Raisons et plans",
+    "planCount_one": "{{count}} plan",
+    "planCount_other": "{{count}} plans",
+    "language": "Langue",
+    "languageHint": "Ouvre la liste des langues",
+    "deviceLanguage": "Langue de l'appareil",
+    "about": "À propos",
+    "erase": "Tout effacer",
+    "eraseHint": "Explique ce qui sera effacé avant de demander confirmation",
+    "footer": "flust {{version}} · Open source, chiffré sur ton téléphone",
+    "languageSaveFailed": "La langue n'a pas pu être enregistrée."
+  },
+  "about": {
+    "title": "À propos",
+    "back": "Retour",
+    "version": "Version {{version}}",
+    "license": "flust est open source, sous licence MPL-2.0.",
+    "privacy": "Pas de compte, pas de pub, pas de pistage : tout reste chiffré sur ton téléphone.",
+    "website": "Site web",
+    "source": "Code source",
+    "linkHint": "Ouvre en dehors de flust",
+    "byline": "Par fnyx-group"
+  },
+  "erase": {
+    "back": "Retour",
+    "title": "Tout effacer",
+    "what": "Cela supprime de ce téléphone tout ce que flust conserve : ton parcours et tes écarts, tes rangs, ton journal, tes check-ins, tes raisons, tes moments à risque et tes plans, l'historique de tes envies et tes réglages. La clé de chiffrement est supprimée elle aussi.",
+    "noRecovery": "Il n'en existe aucune autre copie : flust n'a ni compte, ni serveur, ni sauvegarde. Rien ne pourra être récupéré.",
+    "after": "flust recommencera ensuite depuis le début.",
+    "lapseHint": "Pas besoin de tout effacer pour repartir après un écart : il suffit de le noter. Tes jours propres restent acquis.",
+    "continue": "Effacer mes données",
+    "confirm": {
+      "title": "Effacer définitivement ?",
+      "message": "Tout ce qui est décrit sera supprimé de ce téléphone. Tu ne pourras pas revenir en arrière.",
+      "cancel": "Annuler",
+      "erase": "Tout effacer"
+    },
+    "erasing": "Effacement en cours…",
+    "done": "Tes données ont été effacées.",
+    "failed": {
+      "title": "L'effacement n'a pas abouti",
+      "body": "Une partie de tes données est peut-être encore sur ce téléphone. Réessaie pour terminer l'effacement.",
+      "retry": "Réessayer"
+    }
+  },
+  "profile": {
+    "title": "Raisons et plans",
+    "back": "Retour",
+    "save": "Enregistrer",
+    "reasons": "Pourquoi j'arrête",
+    "addReason": "Ajouter une raison",
+    "editReasonHint": "Modifie ou retire cette raison",
+    "riskMoments": "Mes moments à risque",
+    "plans": "Mes plans",
+    "addPlan": "Ajouter un plan",
+    "editPlanHint": "Modifie ou supprime ce plan",
+    "footer": "Ils s'affichent sur l'écran d'urgence, au moment où tu en as besoin.",
+    "reasonLimit": "Tu as déjà {{count}} raisons. Retires-en une pour en ajouter une autre.",
+    "planLimit": "Tu as déjà {{count}} plans. Supprimes-en un pour en ajouter un autre.",
+    "loadFailed": "Tes raisons et tes plans n'ont pas pu être lus. Rien n'est perdu.",
+    "retry": "Réessayer",
+    "saveFailed": "Le changement n'a pas pu être enregistré. Réessaie.",
+    "leave": {
+      "title": "Quitter sans enregistrer ?",
+      "message": "Tes changements seront perdus.",
+      "keep": "Continuer à modifier",
+      "discard": "Ne pas enregistrer"
+    },
+    "reason": {
+      "titleNew": "Nouvelle raison",
+      "titleEdit": "Ta raison",
+      "choices": "Raisons",
+      "custom": "Écrire la mienne",
+      "customHint": "Écrire ici choisit cette raison.",
+      "remove": "Retirer cette raison",
+      "removeConfirm": {
+        "title": "Retirer cette raison ?",
+        "message": "Tu pourras l'ajouter de nouveau quand tu veux.",
+        "cancel": "Annuler",
+        "confirm": "Retirer"
+      },
+      "errors": {
+        "same-reason": "Cette raison est déjà dans ta liste.",
+        "not-found": "Cette raison n'existe plus. Reviens à la liste pour en ajouter une.",
+        "save-failed": "L'enregistrement n'a pas abouti. Réessaie.",
+        "remove-failed": "La raison n'a pas pu être retirée. Réessaie."
+      }
+    },
+    "plan": {
+      "titleNew": "Nouveau plan",
+      "titleEdit": "Ton plan",
+      "remove": "Supprimer ce plan",
+      "lastPlan": "Garde au moins un plan : l'écran d'urgence en a toujours un à te montrer.",
+      "removeConfirm": {
+        "title": "Supprimer ce plan ?",
+        "message": "Tu pourras en créer un autre quand tu veux.",
+        "cancel": "Annuler",
+        "confirm": "Supprimer"
+      },
+      "errors": {
+        "same-plan": "Ce plan est déjà dans ta liste.",
+        "not-found": "Ce plan n'existe plus. Reviens à la liste pour en ajouter un.",
+        "save-failed": "L'enregistrement n'a pas abouti. Réessaie.",
+        "remove-failed": "Le plan n'a pas pu être supprimé. Réessaie."
+      }
+    }
+  },
   "units": {
     "day_one": "{{count}} jour",
     "day_other": "{{count}} jours",
@@ -251,7 +360,7 @@
       "retry": "Réessayer",
       "confirm": {
         "title": "Tout effacer ?",
-        "body": "Cela supprime définitivement ton parcours, tes écarts, tes rangs et tous tes réglages de ce téléphone, et flust recommence depuis le début. C'est irréversible.",
+        "body": "Cela supprime définitivement de ce téléphone ton parcours et tes écarts, tes rangs, ton journal, tes check-ins, tes raisons, tes moments à risque et tes plans, l'historique de tes envies et tes réglages, et flust recommence depuis le début. C'est irréversible.",
         "erase": "Tout effacer",
         "cancel": "Annuler"
       }
@@ -331,9 +440,6 @@
       "after-alcohol": "Après l'alcool",
       "weekend": "Le week-end"
     },
-    "triggers": {
-      "urge": "Quand une envie arrive"
-    },
     "actions": {
       "phone-out-of-room": "Je pose le téléphone hors de la chambre",
       "guided-breathing": "Je lance la respiration guidée",
@@ -354,7 +460,7 @@
       "conditions": {
         "urge": "une envie arrive",
         "in-bed-at-night": "je suis au lit le soir",
-        "alone-at-home": "il n'y a personne d'autre à la maison",
+        "alone-at-home": "personne d'autre n'est à la maison",
         "stress": "le stress monte",
         "tiredness": "la fatigue me gagne",
         "boredom": "l'ennui s'installe",

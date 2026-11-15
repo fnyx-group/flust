@@ -1,6 +1,7 @@
 import { createContext, use } from 'react';
 
 import type { Storage } from '@/data/open-storage';
+import type { ErasedNotice } from '@/features/storage/erase-flow';
 import type { StorageFailure } from '@/features/storage/storage-failure';
 
 export const StorageContext = createContext<Storage | null>(null);
@@ -8,6 +9,10 @@ export const StorageContext = createContext<Storage | null>(null);
 export const StorageFailureContext = createContext<((failure: StorageFailure) => void) | null>(
   null,
 );
+
+export const EraseAllContext = createContext<(() => void) | null>(null);
+
+export const ErasedNoticeContext = createContext<ErasedNotice | null>(null);
 
 // The opened storage and its repositories. Only available below StorageGate, which renders its
 // children once storage is open.
@@ -25,4 +30,19 @@ export function useReportStorageFailure(): (failure: StorageFailure) => void {
     throw new Error('useReportStorageFailure must be called below StorageGate.');
   }
   return report;
+}
+
+// Erases every piece of data and the key, then starts again from the onboarding. StorageGate does
+// the work, since storage must be closed and every screen using it gone first.
+export function useEraseAll(): () => void {
+  const erase = use(EraseAllContext);
+  if (erase === null) throw new Error('useEraseAll must be called below StorageGate.');
+  return erase;
+}
+
+// Whether the screen showing now follows an erase, true once.
+export function useErasedNotice(): ErasedNotice {
+  const notice = use(ErasedNoticeContext);
+  if (notice === null) throw new Error('useErasedNotice must be called below StorageGate.');
+  return notice;
 }

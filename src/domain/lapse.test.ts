@@ -232,23 +232,52 @@ describe('canUndo', () => {
 
 describe('planToRestore', () => {
   const walk: Plan = { trigger: 'stress', action: { kind: 'preset', id: 'walk-ten-minutes' } };
-  const change = { previous: DEFAULT_PLAN, next: walk };
+  const phone: Plan = { trigger: 'urge', action: { kind: 'preset', id: 'phone-out-of-room' } };
+  const change = { previous: DEFAULT_PLAN, next: walk, planId: 7 };
+  const added = { previous: null, next: walk, planId: 7 };
 
-  it('puts the previous plan back while the plan is still the one the lapse set', () => {
-    expect(planToRestore(change, walk)).toEqual({ kind: 'write', plan: DEFAULT_PLAN });
+  it('puts the previous plan back into the row the lapse wrote', () => {
+    expect(planToRestore(change, [{ id: 7, plan: walk }])).toEqual({
+      kind: 'write',
+      id: 7,
+      plan: DEFAULT_PLAN,
+    });
   });
 
-  it('removes the plan the lapse added when there was none before', () => {
-    expect(planToRestore({ previous: null, next: walk }, walk)).toEqual({ kind: 'remove' });
+  it('removes the plan the lapse added while another plan remains', () => {
+    expect(
+      planToRestore(added, [
+        { id: 3, plan: phone },
+        { id: 7, plan: walk },
+      ]),
+    ).toEqual({ kind: 'remove', id: 7 });
+  });
+
+  it('keeps the plan the lapse added when it is the only one', () => {
+    expect(planToRestore(added, [{ id: 7, plan: walk }])).toBeNull();
+  });
+
+  it('removes the row instead of listing the previous plan twice', () => {
+    expect(
+      planToRestore(change, [
+        { id: 7, plan: walk },
+        { id: 9, plan: DEFAULT_PLAN },
+      ]),
+    ).toEqual({ kind: 'remove', id: 7 });
   });
 
   it('keeps a plan edited since then', () => {
-    expect(planToRestore(change, { ...walk, trigger: 'boredom' })).toBeNull();
+    expect(planToRestore(change, [{ id: 7, plan: { ...walk, trigger: 'boredom' } }])).toBeNull();
   });
 
-  it('does nothing without a plan change or without a plan', () => {
-    expect(planToRestore(null, walk)).toBeNull();
-    expect(planToRestore(change, null)).toBeNull();
+  it('never touches another row, even one holding the same plan', () => {
+    expect(planToRestore(change, [{ id: 8, plan: walk }])).toBeNull();
+    expect(planToRestore({ ...change, planId: null }, [{ id: 7, plan: walk }])).toBeNull();
+  });
+
+  it('does nothing without a plan change or once the row is gone', () => {
+    expect(planToRestore(null, [{ id: 7, plan: walk }])).toBeNull();
+    expect(planToRestore(change, [])).toBeNull();
   });
 });
 

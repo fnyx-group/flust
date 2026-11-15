@@ -1,5 +1,5 @@
 import { RANKS } from '@/domain/ranks';
-import { endedStreakCard, keptRank, lapseTriggers, totalCard } from '@/features/lapse/labels';
+import { endedStreakCard, keptRank, totalCard } from '@/features/lapse/labels';
 import { createI18n } from '@/lib/i18n';
 
 jest.mock('expo-localization', () => ({ getLocales: () => [{ languageCode: 'en' }] }));
@@ -41,15 +41,5 @@ describe('summary cards', () => {
   it('name the rank kept, when there is one', () => {
     expect(keptRank(fr, summary)).toBe('Ton rang reste Sorcier.');
     expect(keptRank(en, { ...summary, rank: null })).toBeNull();
-  });
-});
-
-describe('lapseTriggers', () => {
-  it('offers the chosen risk moments and any urge', () => {
-    expect(lapseTriggers(['stress'], 'urge')).toEqual(['stress', 'urge']);
-  });
-
-  it('keeps the current trigger when its risk moment is no longer chosen', () => {
-    expect(lapseTriggers([], 'weekend')).toEqual(['weekend', 'urge']);
   });
 });

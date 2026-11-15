@@ -140,6 +140,23 @@ describe('loadSession', () => {
     expect(await loadSession(storage, TODAY)).toEqual(err('storage-failed'));
   });
 
+  it('goes back to the device language when none is stored, as after an erase', async () => {
+    const { storage } = await setUp();
+    await i18n.changeLanguage(initialLanguage === 'fr' ? 'en' : 'fr');
+
+    unwrap(await loadSession(storage, TODAY));
+    expect(i18n.language).toBe(initialLanguage);
+  });
+
+  it('follows the device language when it is the one chosen', async () => {
+    const { storage } = await setUp();
+    unwrap(await storage.settings.saveLanguage('device'));
+    await i18n.changeLanguage(initialLanguage === 'fr' ? 'en' : 'fr');
+
+    unwrap(await loadSession(storage, TODAY));
+    expect(i18n.language).toBe(initialLanguage);
+  });
+
   it('keeps the device language when the stored one is unknown', async () => {
     const { storage } = await setUp();
     unwrap(await storage.settings.saveLanguage('de'));

@@ -1,6 +1,7 @@
 import type { Database, Executor } from '@/data/database';
 import { insertJourney } from '@/data/journey-repository';
 import { decodeDraft, encodeDraft } from '@/data/onboarding-draft-codec';
+import { writeRiskMoments } from '@/data/profile-repository';
 import {
   EMPTY_DRAFT,
   type OnboardingDraft,
@@ -8,7 +9,6 @@ import {
   type Plan,
   type Reason,
 } from '@/domain/onboarding';
-import type { RiskMomentId } from '@/domain/presets';
 import { err, ok, type Result } from '@/domain/result';
 
 export type OnboardingStorageError = 'storage-failed';
@@ -78,13 +78,6 @@ async function writeReasons(tx: Executor, reasons: readonly Reason[]): Promise<v
       reason.kind === 'preset' ? reason.id : null,
       reason.kind === 'custom' ? reason.text : null,
     ]);
-  }
-}
-
-async function writeRiskMoments(tx: Executor, moments: readonly RiskMomentId[]): Promise<void> {
-  await tx.run('DELETE FROM risk_moment');
-  for (const [position, moment] of moments.entries()) {
-    await tx.run('INSERT INTO risk_moment (preset_id, position) VALUES (?, ?)', [moment, position]);
   }
 }
 

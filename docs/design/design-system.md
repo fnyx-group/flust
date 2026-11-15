@@ -171,7 +171,7 @@ A full screen without the tab bar, in a scrolling column with 24 points between 
 1. A header row: the close button on the left, the countdown chip on the right (a pill on the surface color, 22/600 Barlow Condensed, from 20:00 to 00:00). Screen readers read it in words, such as "Encore 19 minutes 42 secondes".
 2. "Laisse passer la vague." (screen title) and the explanation (16/400, line height 24, secondary text). Once the countdown reaches zero, "La vague est passée ?" (row style) appears under it and is announced once.
 3. The breathing guide: a 220 point ring in the separator color around a 170 point circle on the surface color with a 3 point accent stroke. The circle grows from 70 to 100 percent on the inhale, stays on the hold and shrinks on the exhale. The phase name (20/600) and the seconds left in the phase (56/600 Barlow Condensed) sit in the middle and do not scale. The rhythm is written under it in secondary body text. With reduce motion on, the circle keeps its size and only the text changes. Screen readers hear the rhythm once when the screen opens. The ring is one element, "Guide de respiration", whose value is the phase name; screen readers read the phase again as it changes only while that element has focus, and never the seconds.
-4. The plan card ("Ton plan", then the plan as one sentence, and an "Écrire maintenant" secondary button when the plan is to write in the journal, which opens a new note over the screen) and the reasons card ("Tes raisons", one line per reason), on the surface color with radius 22. Each card only shows when it has content.
+4. The plan card ("Ton plan", or "Tes plans" with several, then one sentence per plan, and an "Écrire maintenant" secondary button when a plan is to write in the journal, which opens a new note over the screen) and the reasons card ("Tes raisons", one line per reason), on the surface color with radius 22. Each card only shows when it has content.
 5. At the bottom: "J'ai tenu" (primary) and "J'ai eu un écart" (text button).
 
 ## Lapse screen
@@ -228,6 +228,39 @@ At the bottom, the only part that stays above the keyboard: "Pour commencer" (se
 When an edited note was deleted meanwhile, saving says "Cette note n'existe plus. Ton texte est toujours là, tu peux l'enregistrer comme nouvelle note." with an "Enregistrer comme nouvelle note" secondary button.
 
 A note that cannot be opened shows the close button and a calm centered message instead of the editor: "Cette note n'existe plus." when it is gone, or "La note n'a pas pu être lue. Rien n'est perdu." with a "Réessayer" secondary button when storage fails. The close button returns to the previous screen, or to the journal when the note was opened with no screen under it.
+
+## Settings
+
+A tab screen, scrolling, with 24 points between blocks: the "Réglages" screen title, then one card (surface color, radius 22) of rows separated by lines. Each row holds its label (row style), its value in secondary body text on the right when it has one, and a chevron:
+
+1. "Raisons et plans", with the number of plans ("2 plans").
+2. "Langue", with "Langue de l'appareil", "Français" or "English". It opens the language sheet; the choice applies at once. Each language is named in itself.
+3. "À propos".
+
+Under the card, a centered "Tout effacer" text button, in secondary text. No red. At the bottom of the screen, or after the rows when they fill it, a discreet footer in caption style and secondary text, centered: "flust 0.1.0 · Open source, chiffré sur ton téléphone" (a non-breaking space before the dot), with the version from the app config.
+
+The filter, reminders and lock rows of the mockup come with their features.
+
+## Reasons and plans
+
+A screen pushed over the tabs. A header row holds the back button and the "Raisons et plans" screen title. Below it, scrolling, with 32 points between sections, each under a section label:
+
+1. "Pourquoi j'arrête": a card with one row per reason and a chevron, then "Ajouter une raison" with a plus icon, in secondary text.
+2. "Mes moments à risque": the chips of the onboarding, saved as they are toggled.
+3. "Mes plans": a card with one row per plan, in two columns: "Si" and "Alors" in secondary body text on the left, then the condition (row style) and the action (16/400) worded exactly as in the plan sentence ("une envie arrive", "je pose le téléphone hors de la chambre"), then "Ajouter un plan". Above a text scale of 1.3, each label goes above its text instead, so "Alors" never breaks. Screen readers read each plan row as the full plan sentence.
+4. "Ils s'affichent sur l'écran d'urgence, au moment où tu en as besoin." (body, secondary text, centered).
+
+Adding beyond 10 reasons or 5 plans shows a calm line under that card instead of opening the editor.
+
+A reason or a plan opens its own screen: the back button and "Enregistrer" (primary) in the header, then the title ("Nouvelle raison", "Ta raison", "Nouveau plan", "Ton plan"). A reason is chosen in a radio card of the presets not already used, with "Écrire la mienne" as the last row. A plan uses the plan editor of the onboarding; a new one starts from the first moment and action pair no plan holds yet. Its "Si" row and the sheet of moments use the condition form of the plan sentence too, so "Si" reads on. Under it, "Retirer cette raison" or "Supprimer ce plan" (text button) asks for confirmation in a sheet. The only plan cannot be deleted; a line in secondary text says why instead. Leaving with unsaved changes asks first, like the note screen.
+
+## About
+
+A screen pushed over the tabs: the back button and "À propos" title, the version (row style), the license and the privacy promise (16/400, line height 24, secondary text), then a card with "Site web" and "Code source" rows, each showing its address as its value. The links open outside flust, in the browser or the app that handles the address, and screen readers announce them as links. "Par fnyx-group" closes the screen (body, secondary text, centered).
+
+## Erase everything
+
+A screen pushed over the tabs: the back button and "Tout effacer" title, then what is erased, that no copy exists and that flust starts again (16/400, line height 24, secondary text). At the bottom, a line reminding that a lapse only needs to be noted (15/400, line height 22, text color), then "Effacer mes données" (secondary button). It opens a sheet, "Effacer définitivement ?", with "Annuler" (primary) and "Tout effacer" (text button). No red. While erasing, and until the app has opened again, a screen shows "Effacement en cours…" (screen title). Once erased, the onboarding welcome screen appears and, once it shows, screen readers hear "Tes données ont été effacées." If erasing fails, a message screen offers to try again, which erases again.
 
 ## Notifications
 

@@ -59,11 +59,11 @@ export function TextEntryRow({
 
 const styles = StyleSheet.create({
   row: {
-    minHeight: sizes.touchTarget + 16,
+    minHeight: sizes.row,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.l,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.rowHorizontal,
     paddingVertical: spacing.s,
   },
   card: {

@@ -14,6 +14,7 @@ import {
   type PlaceId,
   type RiskMomentId,
 } from '@/domain/presets';
+import { planTriggerOptions } from '@/domain/profile';
 import { clampStart } from '@/domain/start-point';
 import { streakStart } from '@/domain/streak';
 import type { Timestamp } from '@/domain/time';
@@ -21,7 +22,6 @@ import { ClockContext } from '@/features/clock/clock-context';
 import { createMinuteClock } from '@/features/clock/minute-clock';
 import { nativeClockDeps } from '@/features/clock/native-clock';
 import { handedOffVisit } from '@/features/emergency/visit-handoff';
-import { lapseTriggers } from '@/features/lapse/labels';
 import { createLapseExit } from '@/features/lapse/lapse-exit';
 import {
   recordLapse,
@@ -252,7 +252,7 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
             <Text style={styles.sectionLabel}>{t('lapse.nextTime')}</Text>
             <PlanFields
               plan={plan}
-              triggers={lapseTriggers(profile.riskMoments, currentPlan.trigger)}
+              triggers={planTriggerOptions(profile.riskMoments, currentPlan.trigger)}
               onChange={setPlan}
             />
           </View>

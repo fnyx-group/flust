@@ -96,6 +96,9 @@ export const spacing = {
   xl: 24,
   xxl: 32,
   xxxl: 40,
+  // Inside a row of a card: select, radio, text entry and navigation rows.
+  rowHorizontal: 20,
+  rowVertical: 14,
 } as const;
 
 export const pressedOpacity = 0.8;
@@ -124,6 +127,9 @@ export const sizes = {
   switchHeight: 28,
   // The minimum touch target on both platforms.
   touchTarget: 44,
+  row: 60,
+  // Chevrons and the back arrow.
+  icon: 20,
   radio: 24,
   scaleOption: 52,
   emblem: 48,
