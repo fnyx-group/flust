@@ -193,6 +193,15 @@ describe('lapse repository', () => {
       expect(unwrap(await storage.profile.load()).plans).toEqual([CALL]);
     });
 
+    it('removes the plan the lapse set when the previous one was added again since', async () => {
+      const { storage } = await setUp([DEFAULT_PLAN]);
+      const recorded = unwrap(await storage.lapses.record(lapse({ plan: WALK })));
+      unwrap(await storage.profile.savePlan(null, DEFAULT_PLAN));
+
+      unwrap(await storage.lapses.undo(recorded.id));
+      expect(unwrap(await storage.profile.load()).plans).toEqual([DEFAULT_PLAN]);
+    });
+
     it('puts the previous plan back when other plans were edited or added', async () => {
       const { storage } = await setUp([DEFAULT_PLAN, CALL]);
       const recorded = unwrap(await storage.lapses.record(lapse({ plan: WALK })));

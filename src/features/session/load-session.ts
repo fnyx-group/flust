@@ -33,9 +33,9 @@ const NO_CHECK_INS = { checkIns: [], lowMoodDismissedDay: null } as const;
 
 // A language that cannot be read, or that the app does not know, means the device language: it
 // never blocks startup. It is applied even when nothing is stored, so that after an erase the app
-// goes back to the device language rather than keeping the one erased. Journey errors are passed on unchanged, because a corrupted
-// journey and a storage failure lead to different screens. The draft is only read while there is
-// no journey, since the onboarding never shows again afterwards. Unlocked ranks are read with the
+// goes back to the device language rather than keeping the one erased. Journey errors are passed
+// on unchanged, because a corrupted journey and a storage failure lead to different screens. The
+// draft is only read while there is no journey, since the onboarding never shows again afterwards. Unlocked ranks are read with the
 // journey because a backdated lapse can lower the total below a rank that must be kept. The last
 // lapse logged decides whether home offers to undo it and holds rank unlocks for a while.
 // Check-ins are read from the start of the low mood window of `today`, the local day at launch:

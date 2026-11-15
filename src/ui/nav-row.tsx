@@ -9,6 +9,8 @@ type NavRowProps = {
   // Read by screen readers. Defaults to the label and the value.
   accessibilityLabel?: string;
   accessibilityHint?: string;
+  // A row that leaves the app is a link.
+  accessibilityRole?: 'button' | 'link';
   onPress: () => void;
 } & ({ label: string; value?: string; children?: never } | { children: ReactNode; label?: never });
 
@@ -17,15 +19,18 @@ type NavRowProps = {
 export function NavRow({
   accessibilityLabel,
   accessibilityHint,
+  accessibilityRole = 'button',
   onPress,
   ...content
 }: NavRowProps) {
   const spoken =
     accessibilityLabel ??
-    (content.label === undefined ? undefined : [content.label, content.value].join(' '));
+    (content.label === undefined
+      ? undefined
+      : [content.label, content.value].filter(Boolean).join(', '));
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole}
       accessibilityLabel={spoken}
       accessibilityHint={accessibilityHint}
       onPress={onPress}
@@ -41,7 +46,7 @@ export function NavRow({
       {content.label !== undefined && content.value !== undefined && (
         <Text style={styles.value}>{content.value}</Text>
       )}
-      <ForwardIcon color={colors.textSecondary} size={20} />
+      <ForwardIcon color={colors.textSecondary} size={sizes.icon} />
     </Pressable>
   );
 }
@@ -71,12 +76,12 @@ export function AddRow({
 
 const styles = StyleSheet.create({
   row: {
-    minHeight: sizes.touchTarget + 16,
+    minHeight: sizes.row,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.m,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingHorizontal: spacing.rowHorizontal,
+    paddingVertical: spacing.rowVertical,
   },
   pressed: {
     opacity: pressedOpacity,

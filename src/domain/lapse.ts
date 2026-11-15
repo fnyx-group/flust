@@ -138,20 +138,25 @@ export function canUndo(record: LapseRecord | null, now: Timestamp, offsetAt: Ut
   return withinWindow(record.recordedAt, undoDeadline(record.recordedAt, offsetAt), now);
 }
 
-// `target` is the row the lapse wrote, as stored now, or null when it is gone or unreadable. The
-// plan in place before the lapse comes back only if that row still holds the plan the lapse set:
-// a plan edited or removed since then is the user's newer choice. The row is found by id, never
-// by position, so removing or adding other plans meanwhile changes nothing. A plan the lapse
-// added is only removed while another plan remains, so there is always one to show.
+// `plans` are the readable plans as stored now. The plan in place before the lapse comes back only
+// if the row the lapse wrote still holds the plan it set: a plan edited or removed since then is
+// the user's newer choice. The row is found by id, never by position, so removing or adding other
+// plans meanwhile changes nothing, and no other row is ever touched. A plan the lapse added is only
+// removed while another plan remains, so there is always one to show. When another plan already
+// holds the previous one, writing it back would list it twice, so the lapse's row goes instead.
 export function planToRestore(
   change: PlanChange | null,
-  target: PlanEntry | null,
-  planCount: number,
+  plans: readonly PlanEntry[],
 ): PlanRestore | null {
-  if (change === null || target === null || target.id !== change.planId) return null;
-  if (!samePlan(change.next, target.plan)) return null;
-  if (change.previous !== null) return { kind: 'write', id: target.id, plan: change.previous };
-  return planCount > 1 ? { kind: 'remove', id: target.id } : null;
+  if (change === null) return null;
+  const target = plans.find((entry) => entry.id === change.planId);
+  if (target === undefined || !samePlan(change.next, target.plan)) return null;
+  const others = plans.filter((entry) => entry.id !== target.id);
+  const { previous } = change;
+  if (previous !== null && !others.some((entry) => samePlan(entry.plan, previous))) {
+    return { kind: 'write', id: target.id, plan: previous };
+  }
+  return others.length > 0 ? { kind: 'remove', id: target.id } : null;
 }
 
 // A clock set back by more than the window's length ends it, so a lapse logged while the clock

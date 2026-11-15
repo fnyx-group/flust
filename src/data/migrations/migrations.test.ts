@@ -298,6 +298,27 @@ describe('migrations', () => {
       ]);
     });
 
+    // Version 5 skipped a damaged row and changed the first readable plan.
+    it('points earlier plan changes past a damaged first row', async () => {
+      const fake = await seedVersion5();
+      const raw = await fake.rawDatabase();
+      await raw.exec(
+        "INSERT INTO plan (position, trigger_id, action_preset_id) VALUES (-1, 'unknown', 'guided-breathing')",
+      );
+      await raw.close();
+      const after = unwrap(await openStorage(fake.deps));
+
+      expect(
+        fake.disk.query(DATABASE_NAME, 'SELECT plan_id FROM lapse_detail WHERE lapse_id = 1'),
+      ).toEqual([{ plan_id: 1 }]);
+      unwrap(await after.lapses.undo(1));
+      expect(unwrap(await after.profile.load()).plans[0]).toEqual({
+        trigger: 'urge',
+        action: { kind: 'preset', id: 'guided-breathing' },
+      });
+      await after.close();
+    });
+
     it('lets an earlier lapse be undone with its previous plan', async () => {
       const fake = await seedVersion5();
       const after = unwrap(await openStorage(fake.deps));

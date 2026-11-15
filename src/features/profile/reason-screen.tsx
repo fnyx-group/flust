@@ -60,7 +60,7 @@ function ReasonEditor({
   }
 
   async function save(): Promise<string | null> {
-    if (reason === null) return null;
+    if (reason === null) return reasonErrorMessage(t, 'save-failed');
     const saved = await storage.profile.saveReason(entry?.id ?? null, reason);
     return saved.ok ? null : reasonErrorMessage(t, reasonSaveError(saved.error));
   }

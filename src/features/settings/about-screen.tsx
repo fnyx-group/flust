@@ -11,7 +11,8 @@ import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
 import { colors, spacing, typography } from '@/ui/theme';
 
-// Links open in the system browser: flust itself sends nothing. The address shows next to each
+// Links open outside flust, in the browser or the app that handles the address: flust itself
+// sends nothing. The address shows next to each
 // link, so it can be checked first, or typed if no browser opens.
 export function AboutScreen() {
   const { t } = useTranslation();
@@ -26,7 +27,7 @@ export function AboutScreen() {
       <BackHeader
         backLabel={t('about.back')}
         title={t('about.title')}
-        onBack={() => router.back()}
+        onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
       />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.text}>
@@ -40,12 +41,14 @@ export function AboutScreen() {
           <NavRow
             label={t('about.website')}
             value={displayUrl(WEBSITE_URL)}
+            accessibilityRole="link"
             accessibilityHint={t('about.linkHint')}
             onPress={() => open(WEBSITE_URL)}
           />
           <NavRow
             label={t('about.source')}
             value={displayUrl(SOURCE_URL)}
+            accessibilityRole="link"
             accessibilityHint={t('about.linkHint')}
             onPress={() => open(SOURCE_URL)}
           />

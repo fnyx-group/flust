@@ -1,18 +1,17 @@
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, type ReactNode } from 'react';
-import { AccessibilityInfo } from 'react-native';
 
 import { storageService } from '@/data/native';
 import type { Storage } from '@/data/open-storage';
-import type { ResetStorageError } from '@/data/reset-storage';
-import type { Result } from '@/domain/result';
 import { ResetScreen } from '@/features/storage/reset-screen';
 import { RetryScreen } from '@/features/storage/retry-screen';
 import { closeThenShow } from '@/features/storage/close-then-show';
-import { eraseAll } from '@/features/storage/erase-all';
 import { EraseFailedScreen } from '@/features/storage/erase-failed-screen';
+import { createErasedNotice, createEraseFlow, type EraseStep } from '@/features/storage/erase-flow';
+import { ErasingScreen } from '@/features/storage/erasing-screen';
 import {
   EraseAllContext,
+  ErasedNoticeContext,
   StorageContext,
   StorageFailureContext,
 } from '@/features/storage/storage-context';
@@ -24,6 +23,7 @@ type GateState =
   | { status: 'opening' }
   | { status: 'ready'; storage: Storage }
   | { status: 'failed'; failure: StorageFailure }
+  | { status: 'erasing' }
   | { status: 'erase-failed' };
 
 // Renders its children only once storage is open. The splash screen stays up until then, and
@@ -31,6 +31,24 @@ type GateState =
 export function StorageGate({ children }: { children: ReactNode }) {
   const [state, setState] = useState<GateState>({ status: 'opening' });
   const [attempt, setAttempt] = useState(0);
+  const [erasedNotice] = useState(createErasedNotice);
+  const [eraseFlow] = useState(() =>
+    createEraseFlow({
+      reset: () => storageService.reset(),
+      applyDeviceLanguage: async () => {
+        await i18n.changeLanguage(getDeviceLanguage());
+      },
+      show: (step: EraseStep) => {
+        if (step !== 'erased') {
+          setState({ status: step });
+          return;
+        }
+        // The erasing screen stays until storage is open again, so nothing blank shows between.
+        erasedNotice.mark();
+        setAttempt((count) => count + 1);
+      },
+    }),
+  );
 
   useEffect(() => {
     let active = true;
@@ -67,37 +85,23 @@ export function StorageGate({ children }: { children: ReactNode }) {
     else setState({ status: 'failed', failure: result.error });
   }
 
-  // Every screen goes away first, so none reads storage while it closes. The stored language is
-  // erased with the rest, so the app goes back to the device language, which the next launch
-  // would choose too, and the welcome screen that follows is the visible confirmation.
-  async function erase(close: () => Promise<Result<void, ResetStorageError>>) {
-    setState({ status: 'opening' });
-    const result = await close();
-    if (!result.ok) {
-      setState({ status: 'erase-failed' });
-      return;
-    }
-    await i18n.changeLanguage(getDeviceLanguage());
-    AccessibilityInfo.announceForAccessibilityWithOptions(i18n.t('erase.done'), { queue: true });
-    setAttempt((count) => count + 1);
-  }
-
   if (state.status === 'opening') return null;
   if (state.status === 'ready') {
     const { storage } = state;
     return (
       <StorageContext value={storage}>
         <StorageFailureContext value={(failure) => fail(storage, failure)}>
-          <EraseAllContext value={() => void erase(() => eraseAll(storage, storageService))}>
-            {children}
+          <EraseAllContext value={() => void eraseFlow.eraseAll(storage)}>
+            <ErasedNoticeContext value={erasedNotice}>{children}</ErasedNoticeContext>
           </EraseAllContext>
         </StorageFailureContext>
       </StorageContext>
     );
   }
 
+  if (state.status === 'erasing') return <ErasingScreen />;
   if (state.status === 'erase-failed') {
-    return <EraseFailedScreen onRetry={() => void erase(() => storageService.reset())} />;
+    return <EraseFailedScreen onRetry={() => void eraseFlow.retry()} />;
   }
 
   const screen = failureScreen(state.failure);

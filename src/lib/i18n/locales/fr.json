@@ -216,8 +216,8 @@
     "about": "À propos",
     "erase": "Tout effacer",
     "eraseHint": "Explique ce qui sera effacé avant de demander confirmation",
-    "footer": "flust {{version}} · Open source, chiffré sur ton téléphone",
-    "saveFailed": "Le changement n'a pas pu être enregistré. Réessaie."
+    "footer": "flust {{version}} · Open source, chiffré sur ton téléphone",
+    "languageSaveFailed": "La langue n'a pas pu être enregistrée."
   },
   "about": {
     "title": "À propos",
@@ -227,7 +227,7 @@
     "privacy": "Pas de compte, pas de pub, pas de pistage : tout reste chiffré sur ton téléphone.",
     "website": "Site web",
     "source": "Code source",
-    "linkHint": "Ouvre dans le navigateur",
+    "linkHint": "Ouvre en dehors de flust",
     "byline": "Par fnyx-group"
   },
   "erase": {
@@ -236,7 +236,7 @@
     "what": "Cela supprime de ce téléphone tout ce que flust conserve : ton parcours et tes écarts, tes rangs, ton journal, tes check-ins, tes raisons, tes moments à risque et tes plans, l'historique de tes envies et tes réglages. La clé de chiffrement est supprimée elle aussi.",
     "noRecovery": "Il n'en existe aucune autre copie : flust n'a ni compte, ni serveur, ni sauvegarde. Rien ne pourra être récupéré.",
     "after": "flust recommencera ensuite depuis le début.",
-    "lapseHint": "Pas besoin de tout effacer pour repartir après un écart : il suffit de le noter, tes jours propres restent acquis.",
+    "lapseHint": "Pas besoin de tout effacer pour repartir après un écart : il suffit de le noter. Tes jours propres restent acquis.",
     "continue": "Effacer mes données",
     "confirm": {
       "title": "Effacer définitivement ?",
@@ -244,6 +244,7 @@
       "cancel": "Annuler",
       "erase": "Tout effacer"
     },
+    "erasing": "Effacement en cours…",
     "done": "Tes données ont été effacées.",
     "failed": {
       "title": "L'effacement n'a pas abouti",
@@ -262,9 +263,9 @@
     "plans": "Mes plans",
     "addPlan": "Ajouter un plan",
     "editPlanHint": "Modifie ou supprime ce plan",
-    "footer": "Ils s'affichent dans l'écran d'urgence, au moment où tu en as besoin.",
+    "footer": "Ils s'affichent sur l'écran d'urgence, au moment où tu en as besoin.",
     "reasonLimit": "Tu as déjà {{count}} raisons. Retires-en une pour en ajouter une autre.",
-    "planLimit": "Tu as déjà {{count}} plans. Retires-en un pour en ajouter un autre.",
+    "planLimit": "Tu as déjà {{count}} plans. Supprimes-en un pour en ajouter un autre.",
     "loadFailed": "Tes raisons et tes plans n'ont pas pu être lus. Rien n'est perdu.",
     "retry": "Réessayer",
     "saveFailed": "Le changement n'a pas pu être enregistré. Réessaie.",
@@ -459,7 +460,7 @@
       "conditions": {
         "urge": "une envie arrive",
         "in-bed-at-night": "je suis au lit le soir",
-        "alone-at-home": "il n'y a personne d'autre à la maison",
+        "alone-at-home": "personne d'autre n'est à la maison",
         "stress": "le stress monte",
         "tiredness": "la fatigue me gagne",
         "boredom": "l'ennui s'installe",

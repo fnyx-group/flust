@@ -115,9 +115,7 @@ async function deleteLapse(tx: Executor, id: number): Promise<boolean> {
   const lapses = await tx.all('SELECT id FROM lapse WHERE id = ?', [id]);
   if (lapses.length === 0) return false;
   const change = await readPlanChange(tx, id);
-  const plans = await readPlanEntries(tx);
-  const target = plans.find((entry) => entry.id === change?.planId) ?? null;
-  const restore = planToRestore(change, target, plans.length);
+  const restore = planToRestore(change, await readPlanEntries(tx));
   if (restore?.kind === 'write') await updatePlan(tx, restore.id, restore.plan);
   if (restore?.kind === 'remove') await deletePlan(tx, restore.id);
   await tx.run('DELETE FROM lapse_detail WHERE lapse_id = ?', [id]);

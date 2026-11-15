@@ -12,7 +12,7 @@ flust makes no network calls at all.
 - No over-the-air updates. Every update, including hotfixes, goes through a new store release.
 - Blocklists for the content filter are bundled with the app.
 - An automated test fails on any network request.
-- The links of the About screen, to the website and the source code, open in the system browser. The app itself sends nothing, and each link shows its address first.
+- The links of the About screen, to the website and the source code, open outside flust: in the browser, or in the app that handles the address, such as a code hosting app. Neither platform lets an app force the browser. flust itself sends nothing, and each link shows its address first.
 
 ## Consequences
 

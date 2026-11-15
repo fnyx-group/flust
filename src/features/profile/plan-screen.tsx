@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { ProfileEntries } from '@/data/profile-repository';
-import { DEFAULT_PLAN, samePlan } from '@/domain/onboarding';
-import { planTriggerOptions, type PlanEntry } from '@/domain/profile';
+import { samePlan } from '@/domain/onboarding';
+import { newPlanStart, planTriggerOptions, type PlanEntry } from '@/domain/profile';
 import { EditorShell } from '@/features/profile/editor-shell';
 import { planErrorMessage, planRemoveError, planSaveError } from '@/features/profile/editor-errors';
 import { EntriesUnavailable } from '@/features/profile/entries-unavailable';
@@ -31,12 +31,15 @@ export function PlanScreen({ idParam }: { idParam: string | string[] | undefined
   return <PlanEditor entries={state.entries} entry={entry} />;
 }
 
-// The plan editor of the onboarding and the lapse screen. A new plan starts from the default one.
+// The plan editor of the onboarding and the lapse screen. A new plan starts from a pair no plan
+// holds yet.
 // The only plan cannot be deleted, so the emergency screen always has one to show.
 function PlanEditor({ entries, entry }: { entries: ProfileEntries; entry: PlanEntry | null }) {
   const { t } = useTranslation();
   const storage = useStorage();
-  const original = entry?.plan ?? DEFAULT_PLAN;
+  const [original] = useState(
+    () => entry?.plan ?? newPlanStart(entries.plans, entries.riskMoments),
+  );
   const [plan, setPlan] = useState(original);
   const dirty = !samePlan(plan, original);
   const lastPlan = entry !== null && !entries.plans.some((other) => other.id !== entry.id);

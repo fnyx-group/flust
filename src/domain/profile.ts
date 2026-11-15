@@ -1,5 +1,17 @@
-import { samePlan, triggerOptions, type Plan, type Reason } from '@/domain/onboarding';
-import { REASON_IDS, type PlanTrigger, type ReasonId, type RiskMomentId } from '@/domain/presets';
+import {
+  DEFAULT_PLAN,
+  samePlan,
+  triggerOptions,
+  type Plan,
+  type Reason,
+} from '@/domain/onboarding';
+import {
+  ACTION_IDS,
+  REASON_IDS,
+  type PlanTrigger,
+  type ReasonId,
+  type RiskMomentId,
+} from '@/domain/presets';
 import { err, ok, type Result } from '@/domain/result';
 
 // The emergency screen lists every reason and every plan, so both stay short enough to read in
@@ -81,4 +93,17 @@ export function planTriggerOptions(
 ): PlanTrigger[] {
   const options = triggerOptions(moments);
   return options.includes(current) ? options : [current, ...options];
+}
+
+// Where a new plan starts: the first pair of an offered trigger and a preset action that no plan
+// holds yet, so saving it as it is works. With every pair taken, the default plan, which the
+// editor then asks to change.
+export function newPlanStart(plans: readonly PlanEntry[], moments: readonly RiskMomentId[]): Plan {
+  for (const trigger of triggerOptions(moments)) {
+    for (const id of ACTION_IDS) {
+      const plan: Plan = { trigger, action: { kind: 'preset', id } };
+      if (!plans.some((entry) => samePlan(entry.plan, plan))) return plan;
+    }
+  }
+  return DEFAULT_PLAN;
 }

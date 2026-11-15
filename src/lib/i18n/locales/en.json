@@ -216,8 +216,8 @@
     "about": "About",
     "erase": "Erase everything",
     "eraseHint": "Explains what will be erased before asking to confirm",
-    "footer": "flust {{version}} · Open source, encrypted on your phone",
-    "saveFailed": "The change could not be saved. Try again."
+    "footer": "flust {{version}} · Open source, encrypted on your phone",
+    "languageSaveFailed": "The language could not be saved."
   },
   "about": {
     "title": "About",
@@ -227,7 +227,7 @@
     "privacy": "No account, no ads, no tracking: everything stays encrypted on your phone.",
     "website": "Website",
     "source": "Source code",
-    "linkHint": "Opens in the browser",
+    "linkHint": "Opens outside flust",
     "byline": "By fnyx-group"
   },
   "erase": {
@@ -236,7 +236,7 @@
     "what": "This deletes everything flust keeps on this phone: your journey and lapses, your ranks, your journal, your check-ins, your reasons, risk moments and plans, your urge history and your settings. The encryption key is deleted too.",
     "noRecovery": "There is no other copy: flust has no account, no server and no backup. Nothing can be recovered.",
     "after": "flust then starts again from the beginning.",
-    "lapseHint": "No need to erase everything to start again after a lapse: just note it, your clean days stay yours.",
+    "lapseHint": "No need to erase everything to start again after a lapse: just note it. Your clean days stay yours.",
     "continue": "Erase my data",
     "confirm": {
       "title": "Erase for good?",
@@ -244,6 +244,7 @@
       "cancel": "Cancel",
       "erase": "Erase everything"
     },
+    "erasing": "Erasing…",
     "done": "Your data has been erased.",
     "failed": {
       "title": "Erasing did not finish",
@@ -264,7 +265,7 @@
     "editPlanHint": "Edit or delete this plan",
     "footer": "They show on the emergency screen, when you need them.",
     "reasonLimit": "You already have {{count}} reasons. Remove one to add another.",
-    "planLimit": "You already have {{count}} plans. Remove one to add another.",
+    "planLimit": "You already have {{count}} plans. Delete one to add another.",
     "loadFailed": "Your reasons and plans could not be read. Nothing is lost.",
     "retry": "Try again",
     "saveFailed": "The change could not be saved. Try again.",

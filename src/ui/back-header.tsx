@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { IconButton } from '@/ui/icon-button';
 import { BackIcon } from '@/ui/icons/back-icon';
 import { ScreenTitle } from '@/ui/screen-title';
-import { colors, spacing } from '@/ui/theme';
+import { colors, sizes, spacing } from '@/ui/theme';
 
 type BackHeaderProps = {
   backLabel: string;
@@ -19,7 +19,7 @@ export function BackHeader({ backLabel, onBack, title, disabled, action }: BackH
   return (
     <View style={styles.header}>
       <IconButton accessibilityLabel={backLabel} disabled={disabled} onPress={onBack}>
-        <BackIcon color={colors.text} size={20} />
+        <BackIcon color={colors.text} size={sizes.icon} />
       </IconButton>
       <View style={styles.title}>{title !== undefined && <ScreenTitle>{title}</ScreenTitle>}</View>
       {action}

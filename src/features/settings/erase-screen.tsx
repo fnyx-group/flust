@@ -23,7 +23,7 @@ export function EraseScreen() {
       <BackHeader
         backLabel={t('erase.back')}
         title={t('erase.title')}
-        onBack={() => router.back()}
+        onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
       />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.paragraph}>{t('erase.what')}</Text>

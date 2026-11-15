@@ -1,9 +1,10 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { appVersion } from '@/features/settings/app-version';
+import { chooseLanguage } from '@/features/settings/language-choice';
 import { LanguageRow } from '@/features/settings/language-row';
 import { planCountLabel } from '@/features/settings/labels';
 import { useStorage } from '@/features/storage/storage-context';
@@ -31,16 +32,21 @@ export function SettingsScreen() {
   const [planCount, setPlanCount] = useState<number | null>(null);
   const [preference, setPreference] = useState<LanguagePreference | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
+  // Bumped on each choice, so a read or a save started before a newer choice never lands.
+  const choice = useRef(0);
   const version = appVersion();
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
+      const started = choice.current;
       void storage.profile.loadEntries().then((result) => {
         if (active && result.ok) setPlanCount(result.value.plans.length);
       });
       void storage.settings.loadLanguage().then((result) => {
-        if (active) setPreference(toPreference(result.ok ? result.value : null));
+        if (active && started === choice.current) {
+          setPreference(toPreference(result.ok ? result.value : null));
+        }
       });
       return () => {
         active = false;
@@ -48,17 +54,24 @@ export function SettingsScreen() {
     }, [storage]),
   );
 
-  // Applied at once, then stored. If storing fails, the language stays for this run and the
-  // message says the choice was not kept.
-  async function chooseLanguage(next: LanguagePreference) {
+  async function choose(next: LanguagePreference) {
+    const current = ++choice.current;
     setSaveFailed(false);
-    setPreference(next);
-    await i18n.changeLanguage(languageOf(next, getDeviceLanguage()));
-    const saved = await storage.settings.saveLanguage(next);
-    if (saved.ok) return;
+    const outcome = await chooseLanguage(
+      {
+        save: (preference) => storage.settings.saveLanguage(preference),
+        apply: async (preference) => {
+          setPreference(preference);
+          await i18n.changeLanguage(languageOf(preference, getDeviceLanguage()));
+        },
+        isLatest: () => current === choice.current,
+      },
+      next,
+    );
+    if (outcome !== 'save-failed') return;
     setSaveFailed(true);
     if (Platform.OS === 'ios') {
-      AccessibilityInfo.announceForAccessibility(i18n.t('settings.saveFailed'));
+      AccessibilityInfo.announceForAccessibility(i18n.t('settings.languageSaveFailed'));
     }
   }
 
@@ -72,12 +85,12 @@ export function SettingsScreen() {
             value={planCount === null ? undefined : planCountLabel(t, planCount)}
             onPress={() => router.push('/reasons-and-plans')}
           />
-          <LanguageRow preference={preference} onChoose={(next) => void chooseLanguage(next)} />
+          <LanguageRow preference={preference} onChoose={(next) => void choose(next)} />
           <NavRow label={t('settings.about')} onPress={() => router.push('/about')} />
         </RowGroup>
         {saveFailed && (
           <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>
-            {t('settings.saveFailed')}
+            {t('settings.languageSaveFailed')}
           </Text>
         )}
         <View style={styles.erase}>

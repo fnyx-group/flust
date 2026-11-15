@@ -22,19 +22,19 @@ export function SelectRow({ prefix, value, accessibilityHint, onPress }: SelectR
     >
       <Text style={styles.prefix}>{prefix}</Text>
       <Text style={styles.value}>{value}</Text>
-      <ChevronDownIcon color={colors.textSecondary} size={20} />
+      <ChevronDownIcon color={colors.textSecondary} size={sizes.icon} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   row: {
-    minHeight: sizes.touchTarget + 16,
+    minHeight: sizes.row,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.l,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingHorizontal: spacing.rowHorizontal,
+    paddingVertical: spacing.rowVertical,
     borderRadius: radii.card,
     backgroundColor: colors.surface,
   },

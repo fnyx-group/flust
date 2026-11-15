@@ -81,6 +81,15 @@ describe('planCondition and planAction', () => {
     );
   });
 
+  // "Si" stands alone in the plan rows and the editor, so it cannot become "S'il".
+  it('never start a French condition with "il" or "ils"', () => {
+    const french = createI18n('fr').t;
+    const triggers: PlanTrigger[] = [...RISK_MOMENT_IDS, URGE_TRIGGER];
+    for (const trigger of triggers) {
+      expect(planCondition(french, trigger)).not.toMatch(/^ils?\b/i);
+    }
+  });
+
   it("keep the user's own action exactly as written", () => {
     expect(planAction(createI18n('fr').t, { kind: 'custom', text: custom })).toBe(
       'Call Sam & Alex',

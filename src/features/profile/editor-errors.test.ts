@@ -27,10 +27,10 @@ describe('editor errors', () => {
       'You already have 10 reasons. Remove one to add another.',
     );
     expect(planErrorMessage(english, 'too-many-plans')).toBe(
-      'You already have 5 plans. Remove one to add another.',
+      'You already have 5 plans. Delete one to add another.',
     );
     expect(planErrorMessage(french, 'too-many-plans')).toBe(
-      'Tu as déjà 5 plans. Retires-en un pour en ajouter un autre.',
+      'Tu as déjà 5 plans. Supprimes-en un pour en ajouter un autre.',
     );
   });
 

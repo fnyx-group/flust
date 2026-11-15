@@ -1,6 +1,6 @@
 import { parseCustomText } from '@/domain/custom-text';
 import { DEFAULT_PLAN, type Plan } from '@/domain/onboarding';
-import { REASON_IDS } from '@/domain/presets';
+import { ACTION_IDS, REASON_IDS } from '@/domain/presets';
 import {
   canAddPlan,
   canAddReason,
@@ -9,6 +9,7 @@ import {
   checkReason,
   MAX_PLANS,
   MAX_REASONS,
+  newPlanStart,
   planTriggerOptions,
   reasonPresetOptions,
   sameReason,
@@ -138,5 +139,35 @@ describe('planTriggerOptions', () => {
 
   it('keeps the current trigger first when its risk moment is no longer chosen', () => {
     expect(planTriggerOptions([], 'weekend')).toEqual(['weekend', 'urge']);
+  });
+});
+
+describe('newPlanStart', () => {
+  const entries = (plans: readonly Plan[]): PlanEntry[] =>
+    plans.map((plan, index) => ({ id: index + 1, plan }));
+
+  it('starts from the first offered trigger and preset action', () => {
+    expect(newPlanStart([], ['stress'])).toEqual({
+      trigger: 'stress',
+      action: { kind: 'preset', id: 'phone-out-of-room' },
+    });
+  });
+
+  it('skips every pair a plan already holds', () => {
+    const taken = entries([
+      { trigger: 'urge', action: { kind: 'preset', id: 'phone-out-of-room' } },
+      DEFAULT_PLAN,
+    ]);
+    expect(newPlanStart(taken, [])).toEqual({
+      trigger: 'urge',
+      action: { kind: 'preset', id: 'journal-three-lines' },
+    });
+  });
+
+  it('falls back to the default plan once every pair is taken', () => {
+    const taken = entries(
+      ACTION_IDS.map((id) => ({ trigger: 'urge', action: { kind: 'preset', id } })),
+    );
+    expect(newPlanStart(taken, [])).toEqual(DEFAULT_PLAN);
   });
 });

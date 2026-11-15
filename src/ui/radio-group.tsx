@@ -66,12 +66,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   row: {
-    minHeight: sizes.touchTarget + 16,
+    minHeight: sizes.row,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.l,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingHorizontal: spacing.rowHorizontal,
+    paddingVertical: spacing.rowVertical,
   },
   separated: {
     borderTopWidth: 1,

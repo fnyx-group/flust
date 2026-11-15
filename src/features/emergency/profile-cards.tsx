@@ -13,8 +13,9 @@ export function PlansCard({ plans, onWrite }: { plans: readonly Plan[]; onWrite?
   const { t } = useTranslation();
   return (
     <Card label={t(plans.length > 1 ? 'emergency.plans' : 'emergency.plan')}>
-      {plans.map((plan) => (
-        <Text key={planSentence(t, plan)} style={styles.text}>
+      {/* The list is only read here, and two plans can read the same, so the index is the key. */}
+      {plans.map((plan, index) => (
+        <Text key={index} style={styles.text}>
           {planSentence(t, plan)}
         </Text>
       ))}
