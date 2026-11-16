@@ -49,6 +49,31 @@ The development build targets real devices, not simulators. It only needs to be 
 
 5. Open `flust dev` on the phone and pick the server, or scan the QR code with the camera. Do not use Expo Go: it lacks the native code of the dev build.
 
+## Android build tools
+
+Only needed to build Android locally and to run the release check ([Release](release.md)); EAS builds without them. The container has its own home folder, but the host's home stays reachable at its usual path, so it uses the Android SDK and the JDK that Android Studio installed on the host.
+
+1. In Android Studio on the host, install the SDK, then in the SDK Manager, under SDK Tools, the Android SDK Command-line Tools.
+2. Export the JDK bundled with Android Studio (JBR) and the SDK in the container shell profile, with the paths of the host:
+
+       echo 'export JAVA_HOME=/home/<user>/<android-studio>/jbr' >> ~/.bashrc
+       echo 'export ANDROID_HOME=/home/<user>/Android/Sdk' >> ~/.bashrc
+
+   Gradle reads the SDK from `ANDROID_HOME`, since the generated project has no `local.properties`.
+
+3. Accept the SDK licenses once, so that Gradle can download the NDK and CMake it needs:
+
+       "$ANDROID_HOME"/cmdline-tools/latest/bin/sdkmanager --licenses
+
+4. The release check reads a bundle with bundletool. Download its jar from the [GitHub releases](https://github.com/google/bundletool/releases), check it against the SHA-256 that GitHub shows next to the file on the release page, and export its path:
+
+       mkdir -p ~/tools
+       curl -fL -o ~/tools/bundletool-all-1.18.3.jar https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
+       echo "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29  $HOME/tools/bundletool-all-1.18.3.jar" | sha256sum -c
+       echo 'export BUNDLETOOL="$HOME/tools/bundletool-all-1.18.3.jar"' >> ~/.bashrc
+
+   For a newer version, take the SHA-256 from its release page. A mismatch means the file is not the one Google published: delete it.
+
 ## Dependencies
 
 - Add dependencies with `pnpm expo install <pkg>`, dev dependencies with `pnpm expo install <pkg> -- -D`.

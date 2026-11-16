@@ -23,6 +23,17 @@ export const PRODUCTION_BLOCKED_PERMISSIONS = [
   'android.permission.ACCESS_LOCAL_NETWORK',
 ];
 
+// Everything a production build requests, the other half of the policy above. The config does not
+// apply it: scripts/check-android-release.sh fails on any other permission, so a dependency that
+// adds one is noticed before the release.
+export const PRODUCTION_ANDROID_PERMISSIONS = [
+  'android.permission.POST_NOTIFICATIONS',
+  'android.permission.RECEIVE_BOOT_COMPLETED',
+  'android.permission.USE_BIOMETRIC',
+  'android.permission.VIBRATE',
+  `${production.identifier}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`,
+];
+
 export default ({ config }: ConfigContext): ExpoConfig => {
   const name = process.env.APP_VARIANT || 'production';
   const variant = variants[name];
