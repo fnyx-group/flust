@@ -1,0 +1,4 @@
+# Run with scripts/e2e-android.sh, which sets the environment Maestro needs. Flows under common/
+# are only run from other flows.
+flows:
+  - flows/*

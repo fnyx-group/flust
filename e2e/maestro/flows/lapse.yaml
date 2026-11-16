@@ -1,0 +1,12 @@
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- tapOn: I had a lapse
+- assertVisible: A lapse, not a reset.
+- scrollUntilVisible:
+    element: Save and start again
+- tapOn: Save and start again
+- assertVisible: Lapse noted
+- tapOn: Undo the lapse you noted
+- assertNotVisible: Lapse noted
+- assertVisible: I had a lapse

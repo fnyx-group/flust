@@ -1,0 +1,6 @@
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- assertVisible: Current streak.*
+- assertVisible: I had a lapse
+- assertVisible: Today's check-in.*

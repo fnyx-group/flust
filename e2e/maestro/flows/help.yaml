@@ -1,0 +1,14 @@
+# Nothing is dialed: the flow only reads the numbers.
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- tapOn: Settings
+- tapOn: Need help
+- assertVisible: Talking to someone can ease a hard moment.
+- tapOn: Country.*
+- tapOn: France
+- assertVisible: Call 3 1 1 4, Suicide prevention.*
+- tapOn: Country.*
+- tapOn: Another country
+- scrollUntilVisible:
+    element: Find a helpline.*

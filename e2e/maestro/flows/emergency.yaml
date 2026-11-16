@@ -1,0 +1,13 @@
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- tapOn: I have an urge
+- assertVisible: Let the wave pass.
+- assertVisible: Breathing guide
+- scrollUntilVisible:
+    element: Your plan
+- assertVisible: Your reasons
+- scrollUntilVisible:
+    element: I held on
+- tapOn: I held on
+- assertVisible: I have an urge

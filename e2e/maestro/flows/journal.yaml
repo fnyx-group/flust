@@ -1,0 +1,33 @@
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- tapOn: Journal
+- tapOn: Write a note
+- tapOn: Title \(optional\)
+- inputText: Maestro title
+- tapOn: What helped you today\?
+- inputText: a walk
+- hideKeyboard
+- tapOn: Save
+- assertVisible: .*Maestro title.*a walk.*
+
+# Edit: the title is replaced and the list shows the new one. The short title leaves the cursor
+# at its end when the wide field is tapped.
+- tapOn: .*Maestro title.*
+- tapOn: Maestro title
+- eraseText: 20
+- inputText: Edited title
+- hideKeyboard
+- tapOn: Save
+- assertVisible: .*Edited title.*a walk.*
+- assertNotVisible: .*Maestro title.*
+
+# Delete, after the confirmation sheet.
+- tapOn: .*Edited title.*
+- hideKeyboard
+- scrollUntilVisible:
+    element: Delete note
+- tapOn: Delete note
+- assertVisible: Delete this note\?
+- tapOn: Delete
+- assertVisible: Nothing written yet.
