@@ -55,7 +55,9 @@
     "lowMood": {
       "text": "These last few days seem hard. Talking to someone you trust or to a health professional can really help.",
       "emergency": "If you are in danger, call the emergency number where you are.",
-      "dismiss": "Hide this message for today"
+      "dismiss": "Hide this message for today",
+      "help": "See help numbers",
+      "helpHint": "Opens help numbers"
     }
   },
   "emergency": {
@@ -77,7 +79,9 @@
     "reasons": "Your reasons",
     "held": "I held on",
     "lapse": "I had a lapse",
-    "writeNote": "Write now"
+    "writeNote": "Write now",
+    "darkThoughts": "Dark thoughts? Talk to someone",
+    "darkThoughtsHint": "Opens help numbers"
   },
   "lapse": {
     "back": "Back",
@@ -219,7 +223,8 @@
     "footer": "flust {{version}} · Open source, encrypted on your phone",
     "languageSaveFailed": "The language could not be saved.",
     "reminders": "Reminders",
-    "lock": "App lock"
+    "lock": "App lock",
+    "help": "Need help"
   },
   "about": {
     "title": "About",
@@ -686,5 +691,134 @@
       "off": "Off",
       "paused": "Paused"
     }
+  },
+  "help": {
+    "back": "Back",
+    "title": "Need help",
+    "intro": "Talking to someone can ease a hard moment.",
+    "country": "Country",
+    "countryHint": "Opens the list of countries",
+    "regions": {
+      "FR": "France",
+      "BE": "Belgium",
+      "CH": "Switzerland",
+      "CA": "Canada",
+      "US": "United States",
+      "GB": "United Kingdom",
+      "IE": "Ireland",
+      "other": "Another country"
+    },
+    "listen": "Someone to talk to",
+    "emergencies": "Emergencies",
+    "entries": {
+      "fr3114": {
+        "name": "Suicide prevention",
+        "detail": "National line, free, 24/7"
+      },
+      "fr15": {
+        "name": "SAMU",
+        "detail": "Medical emergency, free"
+      },
+      "fr112": {
+        "name": "European emergency number",
+        "detail": "Free, everywhere in the European Union"
+      },
+      "fr114": {
+        "name": "Emergencies by text",
+        "detail": "Free text message, 24/7, for deaf or hard of hearing people, or if you cannot speak safely"
+      },
+      "be0800": {
+        "name": "Centre de Prévention du Suicide",
+        "detail": "For French-speaking Belgium, free, 24/7"
+      },
+      "be1813": {
+        "name": "Zelfmoordlijn 1813",
+        "detail": "Free, 24/7"
+      },
+      "be112": {
+        "name": "Emergency services",
+        "detail": "Ambulance and fire service"
+      },
+      "be101": {
+        "name": "Police",
+        "detail": "Urgent police help"
+      },
+      "ch143": {
+        "name": "La Main Tendue",
+        "detail": "Anonymous, day and night. The call may cost a few cents depending on the operator."
+      },
+      "ch144": {
+        "name": "Ambulance",
+        "detail": "Medical emergency"
+      },
+      "ch117": {
+        "name": "Police",
+        "detail": "Police emergency"
+      },
+      "ch112": {
+        "name": "European emergency number",
+        "detail": "The most important one in an emergency"
+      },
+      "ca988": {
+        "name": "Suicide Crisis Helpline",
+        "detail": "Call or text, 24/7, in English and French. Calls are free."
+      },
+      "ca911": {
+        "name": "Emergency services",
+        "detail": "For any emergency. Where 911 is not available, dial the local police or emergency number."
+      },
+      "us988": {
+        "name": "988 Suicide & Crisis Lifeline",
+        "detail": "Call or text, 24/7. Conversations are free."
+      },
+      "us911": {
+        "name": "Emergency services",
+        "detail": "For any emergency"
+      },
+      "gbSamaritans": {
+        "name": "Samaritans",
+        "detail": "Free, 24/7, whatever you're going through"
+      },
+      "gb999": {
+        "name": "Emergency services",
+        "detail": "National emergency number"
+      },
+      "gb112": {
+        "name": "Emergency services",
+        "detail": "European equivalent of 999"
+      },
+      "ieSamaritans": {
+        "name": "Samaritans",
+        "detail": "Free, 24/7, whatever you're going through"
+      },
+      "ie112": {
+        "name": "Emergency services",
+        "detail": "Same as 999"
+      },
+      "ie999": {
+        "name": "Emergency services",
+        "detail": "Same as 112"
+      },
+      "eu112": {
+        "name": "European emergency number",
+        "detail": "Free, everywhere in the European Union"
+      },
+      "fallback112": {
+        "name": "Emergency services",
+        "detail": "If 112 does not connect, dial the local emergency number."
+      }
+    },
+    "textRow": "Or text {{number}}",
+    "callSpoken": "Call {{number}}, {{name}}. {{detail}}",
+    "textSpoken": "Text {{number}}, {{name}}. {{detail}}",
+    "callHint": "Opens the phone app with this number",
+    "textHint": "Opens messages with this number",
+    "directoryIntro": "An online directory lists helplines in many countries. The link opens outside flust.",
+    "directory": "Find a helpline",
+    "callFailed": "The phone app could not open. You can dial {{number}} yourself.",
+    "textFailed": "Messages could not open. You can text {{number}} yourself.",
+    "linkFailed": "The link could not open. The address is {{address}}.",
+    "footer": "flust sends nothing: the call or message goes from your phone. Each service sets out its own confidentiality.",
+    "checked": "Numbers checked in {{month}}"
   }
 }

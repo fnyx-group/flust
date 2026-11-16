@@ -55,7 +55,9 @@
     "lowMood": {
       "text": "Ces derniers jours ont l'air difficiles. En parler à quelqu'un de confiance ou à un professionnel de santé peut vraiment aider.",
       "emergency": "Si tu es en danger, appelle le numéro d'urgence de l'endroit où tu te trouves.",
-      "dismiss": "Masquer ce message pour aujourd'hui"
+      "dismiss": "Masquer ce message pour aujourd'hui",
+      "help": "Voir les numéros d'aide",
+      "helpHint": "Ouvre les numéros d'aide"
     }
   },
   "emergency": {
@@ -77,7 +79,9 @@
     "reasons": "Tes raisons",
     "held": "J'ai tenu",
     "lapse": "J'ai eu un écart",
-    "writeNote": "Écrire maintenant"
+    "writeNote": "Écrire maintenant",
+    "darkThoughts": "Des idées noires ? Parler à quelqu'un",
+    "darkThoughtsHint": "Ouvre les numéros d'aide"
   },
   "lapse": {
     "back": "Retour",
@@ -219,7 +223,8 @@
     "footer": "flust {{version}} · Open source, chiffré sur ton téléphone",
     "languageSaveFailed": "La langue n'a pas pu être enregistrée.",
     "reminders": "Rappels",
-    "lock": "Verrouillage"
+    "lock": "Verrouillage",
+    "help": "Besoin d'aide"
   },
   "about": {
     "title": "À propos",
@@ -686,5 +691,134 @@
       "off": "Désactivé",
       "paused": "En pause"
     }
+  },
+  "help": {
+    "back": "Retour",
+    "title": "Besoin d'aide",
+    "intro": "Parler à quelqu'un peut alléger un moment difficile.",
+    "country": "Pays",
+    "countryHint": "Ouvre la liste des pays",
+    "regions": {
+      "FR": "France",
+      "BE": "Belgique",
+      "CH": "Suisse",
+      "CA": "Canada",
+      "US": "États-Unis",
+      "GB": "Royaume-Uni",
+      "IE": "Irlande",
+      "other": "Autre pays"
+    },
+    "listen": "Écoute",
+    "emergencies": "Urgences",
+    "entries": {
+      "fr3114": {
+        "name": "Prévention du suicide",
+        "detail": "Numéro national, gratuit, 24 h/24 et 7 j/7"
+      },
+      "fr15": {
+        "name": "SAMU",
+        "detail": "Urgence médicale, gratuit"
+      },
+      "fr112": {
+        "name": "Numéro d'urgence européen",
+        "detail": "Gratuit, dans toute l'Union européenne"
+      },
+      "fr114": {
+        "name": "Urgences par SMS",
+        "detail": "SMS gratuit, 24 h/24 et 7 j/7, en cas de surdité ou de malentendance, ou si tu ne peux pas parler sans danger"
+      },
+      "be0800": {
+        "name": "Centre de Prévention du Suicide",
+        "detail": "Pour la Belgique francophone, gratuit, 24 h/24 et 7 j/7"
+      },
+      "be1813": {
+        "name": "Zelfmoordlijn 1813",
+        "detail": "Gratuit, 24 h/24 et 7 j/7"
+      },
+      "be112": {
+        "name": "Urgences",
+        "detail": "Ambulance et pompiers"
+      },
+      "be101": {
+        "name": "Police",
+        "detail": "Aide policière urgente"
+      },
+      "ch143": {
+        "name": "La Main Tendue",
+        "detail": "Anonyme, de jour comme de nuit. L'appel peut coûter quelques centimes selon l'opérateur."
+      },
+      "ch144": {
+        "name": "Ambulance",
+        "detail": "Urgence médicale"
+      },
+      "ch117": {
+        "name": "Police",
+        "detail": "Urgence policière"
+      },
+      "ch112": {
+        "name": "Numéro d'urgence européen",
+        "detail": "Le plus important en cas d'urgence"
+      },
+      "ca988": {
+        "name": "Ligne d'aide en cas de crise de suicide",
+        "detail": "Appel ou SMS, 24 h/24 et 7 j/7, en français et en anglais. L'appel est gratuit."
+      },
+      "ca911": {
+        "name": "Urgences",
+        "detail": "Pour toute urgence. Là où le 911 n'existe pas, compose le numéro local de la police ou des secours."
+      },
+      "us988": {
+        "name": "988 Suicide & Crisis Lifeline",
+        "detail": "Appel ou SMS, 24 h/24 et 7 j/7. Les échanges sont gratuits."
+      },
+      "us911": {
+        "name": "Urgences",
+        "detail": "Pour toute urgence"
+      },
+      "gbSamaritans": {
+        "name": "Samaritans",
+        "detail": "Gratuit, 24 h/24 et 7 j/7, quoi que tu traverses"
+      },
+      "gb999": {
+        "name": "Urgences",
+        "detail": "Numéro national d'urgence"
+      },
+      "gb112": {
+        "name": "Urgences",
+        "detail": "Équivalent européen du 999"
+      },
+      "ieSamaritans": {
+        "name": "Samaritans",
+        "detail": "Gratuit, 24 h/24 et 7 j/7, quoi que tu traverses"
+      },
+      "ie112": {
+        "name": "Urgences",
+        "detail": "Comme le 999"
+      },
+      "ie999": {
+        "name": "Urgences",
+        "detail": "Comme le 112"
+      },
+      "eu112": {
+        "name": "Numéro d'urgence européen",
+        "detail": "Gratuit, dans toute l'Union européenne"
+      },
+      "fallback112": {
+        "name": "Urgences",
+        "detail": "Si le 112 n'aboutit pas, compose le numéro d'urgence local."
+      }
+    },
+    "textRow": "Ou par SMS au {{number}}",
+    "callSpoken": "Appeler le {{number}}, {{name}}. {{detail}}",
+    "textSpoken": "Envoyer un SMS au {{number}}, {{name}}. {{detail}}",
+    "callHint": "Ouvre le téléphone avec ce numéro",
+    "textHint": "Ouvre les messages avec ce numéro",
+    "directoryIntro": "Un annuaire en ligne recense des lignes d'écoute dans de nombreux pays. Le lien s'ouvre hors de flust.",
+    "directory": "Trouver une ligne d'écoute",
+    "callFailed": "Le téléphone n'a pas pu s'ouvrir. Tu peux composer le {{number}} toi-même.",
+    "textFailed": "Les messages n'ont pas pu s'ouvrir. Tu peux écrire au {{number}} toi-même.",
+    "linkFailed": "Le lien n'a pas pu s'ouvrir. L'adresse est {{address}}.",
+    "footer": "flust n'envoie rien : l'appel ou le message part de ton téléphone. Chaque service présente ses propres règles de confidentialité.",
+    "checked": "Numéros vérifiés en {{month}}"
   }
 }

@@ -116,6 +116,12 @@ export function EmergencyScreen() {
           <View style={styles.actions}>
             <Button label={t('emergency.held')} onPress={held} />
             <Button variant="plain" label={t('emergency.lapse')} onPress={lapse} />
+            <Button
+              variant="plain"
+              label={t('emergency.darkThoughts')}
+              accessibilityHint={t('emergency.darkThoughtsHint')}
+              onPress={() => whenFocused(openHelp)}
+            />
           </View>
         </ScrollView>
       </ClockContext>
@@ -126,6 +132,12 @@ export function EmergencyScreen() {
 // The note opens over this screen, which stays open with its countdown running.
 function writeNote() {
   router.push('/note');
+}
+
+// Help opens over this screen too, so the visit and the countdown keep running underneath. Opening
+// it is not recorded.
+function openHelp() {
+  router.push('/help');
 }
 
 function isWaveOver(elapsed: number): boolean {

@@ -110,6 +110,24 @@ Notification text is always neutral and never reveals what the app is about.
 | Countdown reaches zero           | The countdown stays at 00:00 and a calm line asks whether the wave has passed.                                                    |
 | App killed on the screen         | The visit stays recorded with its start, without an end or an outcome.                                                            |
 
+## Help resources
+
+| Case                                                              | Expected behavior                                                                                                               |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| No region on the device                                           | "Another country": 112, with the advice to dial the local number if it does not connect, and the findahelpline.com link.        |
+| Region not in the list                                            | The same. When the device is set to an unlisted EU country, 112 is named as the official number.                                |
+| Canada, where 911 is not available                                | The 911 row says to dial the local police or emergency number instead.                                                          |
+| French overseas department                                        | The French numbers an official page confirms there: all four, except in Mayotte, which shows 3114 and 112.                      |
+| Abroad, or a region setting that differs from where the person is | The "Country" row shows another country's numbers. The choice is not stored and the screen opens on the device region again.    |
+| App language and region differ                                    | The numbers follow the region, the text follows the language.                                                                   |
+| No phone or messages app, such as a tablet                        | A calm line gives the number to dial or text by hand.                                                                           |
+| Call or text started                                              | The phone or messages app opens with the number filled in. Nothing is dialed or sent without the person. flust records nothing. |
+| Back from a call with the lock on                                 | The chosen lock delay applies, as after any other app.                                                                          |
+| Opened from the emergency screen                                  | Help opens over it. The countdown and the visit keep running, and going back returns to them.                                   |
+| After a lapse                                                     | The lapse screen shows no help numbers: a lapse is not a crisis.                                                                |
+| A number checked over 400 days ago                                | A unit test fails, which blocks CI and the release until the entry is checked against its official source again.                |
+| Network                                                           | No request. The findahelpline.com link opens outside flust and carries no country.                                              |
+
 ## Devices
 
 | Case                            | Expected behavior                                                           |

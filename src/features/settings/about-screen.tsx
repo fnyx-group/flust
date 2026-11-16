@@ -3,7 +3,8 @@ import { Linking, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { appVersion } from '@/features/settings/app-version';
-import { displayUrl, SOURCE_URL, WEBSITE_URL } from '@/features/settings/labels';
+import { SOURCE_URL, WEBSITE_URL } from '@/features/settings/labels';
+import { displayUrl } from '@/features/shared/display-url';
 import { BackHeader } from '@/ui/back-header';
 import { NavRow } from '@/ui/nav-row';
 import { RowGroup } from '@/ui/row-group';

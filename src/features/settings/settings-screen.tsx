@@ -100,6 +100,9 @@ export function SettingsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ScreenTitle>{t('tabs.settings')}</ScreenTitle>
         <RowGroup>
+          <NavRow label={t('settings.help')} onPress={() => router.push('/help')} />
+        </RowGroup>
+        <RowGroup>
           <NavRow
             label={t('settings.reasonsAndPlans')}
             value={planCount === null ? undefined : planCountLabel(t, planCount)}
