@@ -107,7 +107,7 @@ From top to bottom, with the screen padding of 20:
 
 Under the quote, 8 points below it and part of the same block, one line in secondary body text: "Check-in du jour · à faire", or "Check-in fait" once today's check-in is saved. It opens the check-in and is read as one button. It never uses the accent color, so a missed check-in never looks like a failure.
 
-After several low mood check-ins, a card sits above the "J'ai une envie" button, outside the centered block so the counter stays in place: surface color, radius 22, the suggestion in text color and the emergency line in secondary text (15/400, line height 22), and a close button on the right. No red, no accent, no animation. Closing it hides it until the next local day.
+After several low mood check-ins, a card sits above the "J'ai une envie" button, outside the centered block so the counter stays in place: surface color, radius 22, the suggestion in text color and the emergency line in secondary text (15/400, line height 22), then "Voir les numéros d'aide", a text button (15/600, text color) that opens the help screen, and a close button on the right. No red, no accent, no animation. Closing it hides it until the next local day.
 
 For six hours after a lapse is logged, one supportive line in secondary text sits above the "J'ai une envie" button. Until local midnight after a lapse is logged, and at least an hour, a caption line "Écart noté · Annuler l'écart" sits under the text button; "Annuler l'écart" is a text button. Neither uses red, the record streak or an animation.
 
@@ -176,7 +176,7 @@ A full screen without the tab bar, in a scrolling column with 24 points between 
 2. "Laisse passer la vague." (screen title) and the explanation (16/400, line height 24, secondary text). Once the countdown reaches zero, "La vague est passée ?" (row style) appears under it and is announced once.
 3. The breathing guide: a 220 point ring in the separator color around a 170 point circle on the surface color with a 3 point accent stroke. The circle grows from 70 to 100 percent on the inhale, stays on the hold and shrinks on the exhale. The phase name (20/600) and the seconds left in the phase (56/600 Barlow Condensed) sit in the middle and do not scale. The rhythm is written under it in secondary body text. With reduce motion on, the circle keeps its size and only the text changes. Screen readers hear the rhythm once when the screen opens. The ring is one element, "Guide de respiration", whose value is the phase name; screen readers read the phase again as it changes only while that element has focus, and never the seconds.
 4. The plan card ("Ton plan", or "Tes plans" with several, then one sentence per plan, and an "Écrire maintenant" secondary button when a plan is to write in the journal, which opens a new note over the screen) and the reasons card ("Tes raisons", one line per reason), on the surface color with radius 22. Each card only shows when it has content.
-5. At the bottom: "J'ai tenu" (primary) and "J'ai eu un écart" (text button).
+5. At the bottom: "J'ai tenu" (primary), "J'ai eu un écart" (text button), then "Des idées noires ? Parler à quelqu'un" (text button), for dark thoughts rather than urges. It opens the help screen over the emergency screen, which keeps running underneath.
 
 ## Lapse screen
 
@@ -235,7 +235,7 @@ A note that cannot be opened shows the close button and a calm centered message 
 
 ## Settings
 
-A tab screen, scrolling, with 24 points between blocks: the "Réglages" screen title, then one card (surface color, radius 22) of rows separated by lines. Each row holds its label (row style), its value in secondary body text on the right when it has one, and a chevron:
+A tab screen, scrolling, with 24 points between blocks: the "Réglages" screen title, a card holding only the "Besoin d'aide" row, which opens the help screen, then one card (surface color, radius 22) of rows separated by lines. Each row holds its label (row style), its value in secondary body text on the right when it has one, and a chevron:
 
 1. "Raisons et plans", with the number of plans ("2 plans").
 2. "Rappels", with the check-in time ("21:00"), else the thought time, else nothing when another reminder is on, else "Désactivés". Reminders read as off while notifications are not allowed.
@@ -263,6 +263,19 @@ A reason or a plan opens its own screen: the back button and "Enregistrer" (prim
 ## About
 
 A screen pushed over the tabs: the back button and "À propos" title, the version (row style), the license and the privacy promise (16/400, line height 24, secondary text), then a card with "Site web" and "Code source" rows, each showing its address as its value. The links open outside flust, in the browser or the app that handles the address, and screen readers announce them as links. "Par fnyx-group" closes the screen (body, secondary text, centered).
+
+## Help
+
+A screen pushed over the others: the back button and "Besoin d'aide" title, then, scrolling, with 24 points between blocks:
+
+1. "Parler à quelqu'un peut alléger un moment difficile." (16/400, line height 24, secondary text).
+2. A card with the "Pays" row, showing the country, which opens the option sheet of countries: France, Belgique, Suisse, Canada, États-Unis, Royaume-Uni, Irlande, Autre pays. It opens on the device region.
+3. "Écoute" (section label) over a card of the listening lines, then "Urgences" over a card of the emergency numbers. Each row holds the service name (row style) and its detail (15/400, line height 22, secondary text) on the left, and the number on the right (22/600 Barlow Condensed, tabular figures, text color). The whole row is one button that opens the phone app, or the messages app for a text-only service such as the 114. A service that also takes text messages has a second, short row under it, "Ou par SMS au 988" (row style, secondary text). Screen readers read each row as its action, the number digit by digit and the service: "Appeler le 3 1 1 4, Prévention du suicide".
+4. For "Autre pays", the "Écoute" card holds the "Trouver une ligne d'écoute" link row with "findahelpline.com" as its value, under a line saying it opens outside flust, and "Urgences" holds 112.
+5. If the phone, the messages or the link cannot open, a line in text color under the cards gives the number or the address to use by hand.
+6. A centered footer: "flust n'envoie rien : l'appel ou le message part de ton téléphone. Chaque service présente ses propres règles de confidentialité." (body, secondary text), then "Numéros vérifiés en novembre 2026" (caption, secondary text), the month of the oldest check of the list shown.
+
+No red, no accent, no animation. Nothing on the screen promises confidentiality beyond what each service states.
 
 ## Erase everything
 

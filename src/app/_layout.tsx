@@ -89,6 +89,7 @@ function RootStack() {
         <Stack.Screen name="reason" />
         <Stack.Screen name="plan" />
         <Stack.Screen name="about" />
+        <Stack.Screen name="help" />
         <Stack.Screen name="erase" />
         <Stack.Screen name="reminders" />
         <Stack.Screen name="lock-settings" />

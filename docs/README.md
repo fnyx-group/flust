@@ -49,6 +49,7 @@
 - [0024 Lock wait](decisions/0024-lock-wait.md): a growing wait between attempts, on a clock that counts sleep and ignores the date, resumed after a restart.
 - [0025 Screen privacy](decisions/0025-screen-privacy.md): screenshots and app switcher previews blocked in production, allowed in development.
 - [0026 Android splash symbol](decisions/0026-android-splash-symbol.md): the symbol alone, sized for the Android 12 splash mask.
+- [0027 Offline help resources](decisions/0027-offline-help-resources.md): a bundled list by device region, official sources checked every year, calls through the phone app.
 
 ## Development
 

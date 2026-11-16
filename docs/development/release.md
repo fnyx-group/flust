@@ -10,4 +10,5 @@ The checks before each store release, in order. A release that fails one is not 
 
    It exits with an error and lists what it found.
 
-4. The release goes out as a phased rollout on both stores ([Scenarios](../product/scenarios.md#production-incidents)).
+4. Every help number was checked against its official source less than a year ago. The review test fails after 400 days; check the entries before that ([0027](../decisions/0027-offline-help-resources.md)).
+5. The release goes out as a phased rollout on both stores ([Scenarios](../product/scenarios.md#production-incidents)).

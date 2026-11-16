@@ -41,7 +41,7 @@ The emergency screen helps the user get through an urge. It contains:
 - the user's if/then plan and reasons,
 - two exits: "I held on" and "I had a lapse".
 
-Each visit is recorded with its start, end and outcome, for future statistics. Help actions, such as a video from a good day, writing to someone or help resources, are added with the features they open.
+Each visit is recorded with its start, end and outcome, for future statistics. A discreet line at the bottom, for dark thoughts rather than urges, opens the help resources over the screen. Other help actions, such as a video from a good day or writing to someone, are added with the features they open.
 
 ### Lapse screen
 
@@ -56,7 +56,7 @@ The check-in records:
 - context chips,
 - an optional note.
 
-There is one check-in per local day, editable until local midnight. It never mentions a lapse. Home shows "Check-in du jour · à faire" or "Check-in fait" under the quote, and a calm card after several low mood check-ins (see [Relapse](relapse.md#special-cases)).
+There is one check-in per local day, editable until local midnight. It never mentions a lapse. Home shows "Check-in du jour · à faire" or "Check-in fait" under the quote, and a calm card after several low mood check-ins, which opens the help resources (see [Relapse](relapse.md#special-cases)).
 
 ### Journal
 
@@ -76,6 +76,7 @@ The user can edit their reasons, their risk moments and their if/then plans at a
 
 The settings show only what works in this version:
 
+- "Besoin d'aide", on its own above the others, which opens the help resources.
 - "Raisons et plans", with the number of plans.
 - "Rappels": the check-in time, else the thought time, else "Désactivés" when none is on.
 - "Verrouillage": the method, "Désactivé" or "En pause".
@@ -103,6 +104,21 @@ Notification text is always neutral and never reveals what the app is about. It 
 The app is locked with the device's own authentication: biometrics, with the device passcode as fallback. flust has no passcode of its own. The lock asks again after a chosen delay in the background: immediately, after 1, 5 or 15 minutes, or after 1 hour (1 minute by default). Attempts after the first two wait longer each time, up to an hour. Without a screen lock on the device, the lock is paused. See [0023](../decisions/0023-app-lock.md) and [0024](../decisions/0024-lock-wait.md).
 
 In production builds, screenshots are blocked and the app switcher preview is hidden ([0025](../decisions/0025-screen-privacy.md)).
+
+### Help resources
+
+A small list of help numbers, bundled with the app, chosen by the device region, with a row to see another country:
+
+- France: 3114 (suicide prevention, free, 24/7), 15 (SAMU), 112, and 114, a free text message line, 24/7, for anyone who cannot speak out loud or hear. Also in the overseas departments.
+- Belgium: the Centre de Prévention du Suicide (0800 32 123), the Zelfmoordlijn (1813), 112 and 101.
+- Switzerland: La Main Tendue (143, day and night, anonymous; the call may cost a few centimes depending on the operator), 144, 117 and 112.
+- Canada: 988 (call or text) and 911.
+- United States: 988 (call or text) and 911.
+- United Kingdom: Samaritans (116 123), 999 and 112.
+- Ireland: Samaritans (116 123), 112 and 999.
+- Any other region: 112, named as the official number in the European Union, otherwise with the advice to dial the local number, and a link to findahelpline.com that opens outside flust.
+
+Buttons open the phone app or the messages app with the number filled in. flust sends nothing and records nothing. Each number keeps its official source and the day it was checked, and is checked again every year ([0027](../decisions/0027-offline-help-resources.md)). The help resources open from the settings, from the emergency screen and from the low mood card, never from the lapse screen.
 
 ### Encrypted storage
 
@@ -157,7 +173,7 @@ An alternative app icon and name, and neutral notifications.
 
 ### Help resources
 
-Help resources by country, available offline.
+The full list of help resources by country, available offline. V0.1 has a minimal list.
 
 ### About page
 
