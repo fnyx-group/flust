@@ -9,6 +9,7 @@ flust is developed in French and English. Adding languages later is easier if no
 - French and English are available at launch.
 - All user-facing strings are externalized, including notifications, rank names and daily quotes.
 - Unsupported system languages fall back to English.
+- Texts the system shows for flust, such as the Face ID prompt on iOS, are translated in `assets/native-strings/<language>.json`, referenced by `locales` in `app.json`. Each string sits under `ios` or `android`: Expo copies top-level keys to both platforms, and an iOS key in Android's `strings.xml` fails the release lint (`ExtraTranslation`). A test checks it.
 - Plurals follow each language's rules. Dates and times follow the device locale, including 12 and 24 hour formats.
 
 ## Consequences
