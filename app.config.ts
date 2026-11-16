@@ -10,6 +10,19 @@ const variants: Record<string, typeof production> = {
   production,
 };
 
+// Permissions merged by the Expo template, expo-file-system and debug-only manifests, which the
+// development build needs to reach Metro and the production app never uses. Blocked in production
+// only. scripts/check-android-release.sh fails on a build that still has one. See
+// docs/decisions/0030-production-android-permissions.md.
+export const PRODUCTION_BLOCKED_PERMISSIONS = [
+  'android.permission.INTERNET',
+  'android.permission.SYSTEM_ALERT_WINDOW',
+  'android.permission.WRITE_EXTERNAL_STORAGE',
+  'android.permission.ACCESS_NETWORK_STATE',
+  'android.permission.CHANGE_WIFI_MULTICAST_STATE',
+  'android.permission.ACCESS_LOCAL_NETWORK',
+];
+
 export default ({ config }: ConfigContext): ExpoConfig => {
   const name = process.env.APP_VARIANT || 'production';
   const variant = variants[name];
@@ -24,7 +37,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     scheme: variant.scheme,
     slug: config.slug ?? 'flust',
     ios: { ...config.ios, bundleIdentifier: variant.identifier },
-    android: { ...config.android, package: variant.identifier },
+    android: {
+      ...config.android,
+      package: variant.identifier,
+      blockedPermissions: [
+        ...(config.android?.blockedPermissions ?? []),
+        ...(name === 'production' ? PRODUCTION_BLOCKED_PERMISSIONS : []),
+      ],
+    },
     // Hides the app from screenshots and the app switcher, except in the development build,
     // where screenshots are part of the work. See docs/decisions/0025-screen-privacy.md.
     extra: { ...config.extra, screenPrivacy: name !== 'development' },

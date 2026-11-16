@@ -52,10 +52,11 @@
 - [0027 Offline help resources](decisions/0027-offline-help-resources.md): a bundled list by device region, official sources checked every year, calls through the phone app.
 - [0028 Error boundaries and safe mode](decisions/0028-error-boundaries-and-safe-mode.md): a boundary per route and at the root, a launch counter, safe mode outside the lock.
 - [0029 Local error log](decisions/0029-local-error-log.md): no messages, 50 entries, AES-GCM with its own key, shown in full before the share sheet.
+- [0030 Production Android permissions](decisions/0030-production-android-permissions.md): network and storage permissions blocked in production only, checked in the source and in the release build.
 
 ## Development
 
 - [Setup](development/setup.md): local environment, first run and development builds.
 - [Conventions](development/conventions.md): code style, layers, lint rules, commits, branches, pull requests.
 - [Testing](development/testing.md): what to test, where, and how.
-- [Release](development/release.md): the checks before each store release.
+- [Release](development/release.md): the checks before each store release, and a local production build.

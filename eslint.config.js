@@ -168,6 +168,14 @@ module.exports = defineConfig([
   {
     files: sourceFiles,
     rules: {
+      // test/no-network-apis.test.ts also catches them through globalThis and in native code.
+      'no-restricted-globals': [
+        'error',
+        ...['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource'].map((name) => ({
+          name,
+          message: 'flust makes no network calls. See docs/decisions/0006-no-network-access.md.',
+        })),
+      ],
       'react-hooks/exhaustive-deps': 'error',
       'react-hooks/incompatible-library': 'error',
       'react-hooks/unsupported-syntax': 'error',

@@ -1,4 +1,4 @@
-export const networkApis = ['fetch', 'XMLHttpRequest', 'WebSocket'] as const;
+export const networkApis = ['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource'] as const;
 
 type NetworkApi = (typeof networkApis)[number];
 

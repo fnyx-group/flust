@@ -51,7 +51,7 @@ The React Compiler is enabled by `experiments.reactCompiler` in `app.json`; `bab
 
 ## Tests
 
-- `test/setup.ts` makes `fetch`, `XMLHttpRequest` and `WebSocket` throw, and fails the test even if the error is caught. Tests cannot replace these globals.
+- `test/setup.ts` makes `fetch`, `XMLHttpRequest`, `WebSocket` and `EventSource` throw, and fails the test even if the error is caught. Tests cannot replace these globals. ESLint rejects them in `src/`, and `test/no-network-apis.test.ts` fails on any reference to them, or to a Kotlin or Swift network API, outside the test setup.
 - `src/domain/` and `src/data/` must keep 90 percent line and branch coverage (`pnpm test:coverage`). Each threshold applies once its folder contains code. There is no global threshold.
 
 See [Testing](testing.md) for what to test.

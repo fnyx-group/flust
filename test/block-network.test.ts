@@ -15,6 +15,7 @@ describe('blockNetwork', () => {
     ['fetch', false],
     ['XMLHttpRequest', true],
     ['WebSocket', true],
+    ['EventSource', true],
   ] as const)('makes %s throw', (api, asConstructor) => {
     const { target } = blockedTarget();
     expect(() => call(target[api], asConstructor)).toThrow(networkError(api));
