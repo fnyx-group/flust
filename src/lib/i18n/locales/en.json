@@ -234,13 +234,14 @@
     "privacy": "No account, no ads, no tracking: everything stays encrypted on your phone.",
     "website": "Website",
     "source": "Source code",
+    "errorReport": "Error report",
     "linkHint": "Opens outside flust",
     "byline": "By fnyx-group"
   },
   "erase": {
     "back": "Back",
     "title": "Erase everything",
-    "what": "This deletes everything flust keeps on this phone: your journey and lapses, your ranks, your journal, your check-ins, your reasons, risk moments and plans, your urge history and your settings. The encryption key is deleted too.",
+    "what": "This deletes everything flust keeps on this phone: your journey and lapses, your ranks, your journal, your check-ins, your reasons, risk moments and plans, your urge history, your settings and the error report. The encryption keys are deleted too.",
     "noRecovery": "There is no other copy: flust has no account, no server and no backup. Nothing can be recovered.",
     "after": "flust then starts again from the beginning.",
     "lapseHint": "No need to erase everything to start again after a lapse: just note it. Your clean days stay yours.",
@@ -820,5 +821,45 @@
     "linkFailed": "The link could not open. The address is {{address}}.",
     "footer": "flust sends nothing: the call or message goes from your phone. Each service sets out its own confidentiality.",
     "checked": "Numbers checked in {{month}}"
+  },
+  "errors": {
+    "fallback": {
+      "title": "This screen could not be shown",
+      "body": "Something went wrong while showing it. Your data has not been changed. You can try again.",
+      "retry": "Try again",
+      "home": "Back to home"
+    },
+    "root": {
+      "title": "flust ran into a problem",
+      "body": "Your data has not been changed. Try again. If this keeps happening when flust starts, it will open in safe mode.",
+      "retry": "Try again"
+    },
+    "safeMode": {
+      "title": "Safe mode",
+      "stopped": "flust closed twice in a row while starting, so it opened this minimal screen. Nothing has been read or changed.",
+      "choices": "You can try again, look at the error report and share it to report the problem, or erase everything and start over.",
+      "retry": "Try again",
+      "report": "See the error report",
+      "erase": "Erase everything"
+    },
+    "report": {
+      "title": "Error report",
+      "back": "Back",
+      "intro": "flust keeps a list of its last technical errors on this phone, encrypted. It holds no journal, check-in, reason or plan: only when each error happened, on which screen, its type and where in the code.",
+      "preview": "This is exactly what will be shared:",
+      "empty": "No error has been recorded.",
+      "share": "Share this report",
+      "shareHint": "Opens the share sheet. You choose where the report goes.",
+      "shareFailed": "The share sheet could not open. You can select the text above and copy it.",
+      "nothingSent": "flust sends nothing by itself: the report only leaves if you share it.",
+      "clear": "Clear the report",
+      "clearFailed": "The report could not be cleared. Try again.",
+      "confirm": {
+        "title": "Clear the report?",
+        "message": "The recorded errors will be deleted from this phone.",
+        "cancel": "Cancel",
+        "clear": "Clear"
+      }
+    }
   }
 }

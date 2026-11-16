@@ -52,6 +52,8 @@ The adapters in `src/data/native/` only forward to Expo modules and are excluded
 8. Backup, Android: `adb shell bmgr backupnow org.fnyxgroup.flust.dev` reports the app as not eligible, and the merged manifest has `allowBackup="false"` and `@xml/data_extraction_rules`.
 9. Keystore before first unlock, iOS (real device): restart the phone, and launch the app before unlocking it, once a background launch exists. The retry screen appears, never the reset screen.
 10. In airplane mode: a first launch and a relaunch work.
+11. Error log: after an error, pull `files/diagnostics.bin` through `run-as`. `strings` must show nothing readable.
+12. Safe mode: start the app and force-stop it during the splash screen twice (`adb shell am start -n org.fnyxgroup.flust.dev/.MainActivity`, then `adb shell am force-stop org.fnyxgroup.flust.dev`). The third launch opens safe mode. "Try again" starts normally; the report shows its text before the share sheet; erasing starts the onboarding.
 
 ## Where
 

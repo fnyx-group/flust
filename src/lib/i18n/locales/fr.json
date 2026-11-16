@@ -234,13 +234,14 @@
     "privacy": "Pas de compte, pas de pub, pas de pistage : tout reste chiffré sur ton téléphone.",
     "website": "Site web",
     "source": "Code source",
+    "errorReport": "Rapport d'erreurs",
     "linkHint": "Ouvre en dehors de flust",
     "byline": "Par fnyx-group"
   },
   "erase": {
     "back": "Retour",
     "title": "Tout effacer",
-    "what": "Cela supprime de ce téléphone tout ce que flust conserve : ton parcours et tes écarts, tes rangs, ton journal, tes check-ins, tes raisons, tes moments à risque et tes plans, l'historique de tes envies et tes réglages. La clé de chiffrement est supprimée elle aussi.",
+    "what": "Cela supprime de ce téléphone tout ce que flust conserve : ton parcours et tes écarts, tes rangs, ton journal, tes check-ins, tes raisons, tes moments à risque et tes plans, l'historique de tes envies, tes réglages et le rapport d'erreurs. Les clés de chiffrement sont supprimées elles aussi.",
     "noRecovery": "Il n'en existe aucune autre copie : flust n'a ni compte, ni serveur, ni sauvegarde. Rien ne pourra être récupéré.",
     "after": "flust recommencera ensuite depuis le début.",
     "lapseHint": "Pas besoin de tout effacer pour repartir après un écart : il suffit de le noter. Tes jours propres restent acquis.",
@@ -820,5 +821,45 @@
     "linkFailed": "Le lien n'a pas pu s'ouvrir. L'adresse est {{address}}.",
     "footer": "flust n'envoie rien : l'appel ou le message part de ton téléphone. Chaque service présente ses propres règles de confidentialité.",
     "checked": "Numéros vérifiés en {{month}}"
+  },
+  "errors": {
+    "fallback": {
+      "title": "Cet écran n'a pas pu s'afficher",
+      "body": "Un problème est survenu en l'affichant. Tes données n'ont pas été modifiées. Tu peux réessayer.",
+      "retry": "Réessayer",
+      "home": "Retour à l'accueil"
+    },
+    "root": {
+      "title": "flust a rencontré un problème",
+      "body": "Tes données n'ont pas été modifiées. Réessaie. Si cela se reproduit au démarrage, flust s'ouvrira en mode sans échec.",
+      "retry": "Réessayer"
+    },
+    "safeMode": {
+      "title": "Mode sans échec",
+      "stopped": "flust s'est fermé deux fois de suite au démarrage, alors il s'est ouvert sur cet écran minimal. Rien n'a été lu ni modifié.",
+      "choices": "Tu peux réessayer, consulter le rapport d'erreurs et le partager pour signaler le problème, ou tout effacer et recommencer.",
+      "retry": "Réessayer",
+      "report": "Voir le rapport d'erreurs",
+      "erase": "Tout effacer"
+    },
+    "report": {
+      "title": "Rapport d'erreurs",
+      "back": "Retour",
+      "intro": "flust garde sur ce téléphone, chiffrée, la liste de ses dernières erreurs techniques. Elle ne contient ni journal, ni check-in, ni raison, ni plan : seulement quand chaque erreur est survenue, sur quel écran, son type et où dans le code.",
+      "preview": "Voici exactement ce qui sera partagé :",
+      "empty": "Aucune erreur enregistrée.",
+      "share": "Partager ce rapport",
+      "shareHint": "Ouvre le menu de partage. Tu choisis où part le rapport.",
+      "shareFailed": "Le menu de partage n'a pas pu s'ouvrir. Tu peux sélectionner le texte ci-dessus et le copier.",
+      "nothingSent": "flust n'envoie rien de lui-même : le rapport ne part que si tu le partages.",
+      "clear": "Effacer le rapport",
+      "clearFailed": "Le rapport n'a pas pu être effacé. Réessaie.",
+      "confirm": {
+        "title": "Effacer le rapport ?",
+        "message": "Les erreurs enregistrées seront supprimées de ce téléphone.",
+        "cancel": "Annuler",
+        "clear": "Effacer"
+      }
+    }
   }
 }

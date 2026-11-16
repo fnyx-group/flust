@@ -1,16 +1,16 @@
-import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { storageService } from '@/data/native';
 import type { Storage } from '@/data/open-storage';
-import { ResetScreen } from '@/features/storage/reset-screen';
-import { RetryScreen } from '@/features/storage/retry-screen';
+import { useFirstScreenShown, useLaunchErasedNotice } from '@/features/errors/launch-context';
+import { recordError } from '@/features/errors/report-error';
+import { createAppEraseFlow } from '@/features/storage/app-erase-flow';
 import { closeThenShow } from '@/features/storage/close-then-show';
 import { EraseFailedScreen } from '@/features/storage/erase-failed-screen';
-import { notifier } from '@/features/reminders/notifier';
-import { pauseReminderSync } from '@/features/reminders/sync-requests';
-import { createErasedNotice, createEraseFlow, type EraseStep } from '@/features/storage/erase-flow';
+import type { EraseStep } from '@/features/storage/erase-flow';
 import { ErasingScreen } from '@/features/storage/erasing-screen';
+import { ResetScreen } from '@/features/storage/reset-screen';
+import { RetryScreen } from '@/features/storage/retry-screen';
 import {
   EraseAllContext,
   ErasedNoticeContext,
@@ -18,8 +18,6 @@ import {
   StorageFailureContext,
 } from '@/features/storage/storage-context';
 import { failureScreen, type StorageFailure } from '@/features/storage/storage-failure';
-import { i18n } from '@/lib/i18n';
-import { getDeviceLanguage } from '@/lib/i18n/language';
 
 type GateState =
   | { status: 'opening' }
@@ -33,27 +31,17 @@ type GateState =
 export function StorageGate({ children }: { children: ReactNode }) {
   const [state, setState] = useState<GateState>({ status: 'opening' });
   const [attempt, setAttempt] = useState(0);
-  const [erasedNotice] = useState(createErasedNotice);
+  const erasedNotice = useLaunchErasedNotice();
+  const firstScreenShown = useFirstScreenShown();
   const [eraseFlow] = useState(() =>
-    createEraseFlow({
-      reset: () => storageService.reset(),
-      applyDeviceLanguage: async () => {
-        await i18n.changeLanguage(getDeviceLanguage());
-      },
-      pauseReminders: pauseReminderSync,
-      clearReminders: async () => {
-        await notifier.replace([]);
-        await notifier.clearDelivered();
-      },
-      show: (step: EraseStep) => {
-        if (step !== 'erased') {
-          setState({ status: step });
-          return;
-        }
-        // The erasing screen stays until storage is open again, so nothing blank shows between.
-        erasedNotice.mark();
-        setAttempt((count) => count + 1);
-      },
+    createAppEraseFlow((step: EraseStep) => {
+      if (step !== 'erased') {
+        setState({ status: step });
+        return;
+      }
+      // The erasing screen stays until storage is open again, so nothing blank shows between.
+      erasedNotice.mark();
+      setAttempt((count) => count + 1);
     }),
   );
 
@@ -72,9 +60,16 @@ export function StorageGate({ children }: { children: ReactNode }) {
     };
   }, [attempt]);
 
+  // A failure screen is a first screen too: the launch went as far as it could.
   useEffect(() => {
-    if (state.status === 'failed' || state.status === 'erase-failed') SplashScreen.hideAsync();
-  }, [state.status]);
+    if (state.status === 'failed' || state.status === 'erase-failed') firstScreenShown();
+  }, [state.status, firstScreenShown]);
+
+  useEffect(() => {
+    if (state.status === 'failed') {
+      void recordError(undefined, { kind: 'storage-failure', code: state.failure });
+    }
+  }, [state]);
 
   function retry() {
     setState({ status: 'opening' });
@@ -108,7 +103,7 @@ export function StorageGate({ children }: { children: ReactNode }) {
 
   if (state.status === 'erasing') return <ErasingScreen />;
   if (state.status === 'erase-failed') {
-    return <EraseFailedScreen onRetry={() => void eraseFlow.retry()} />;
+    return <EraseFailedScreen onRetry={() => void eraseFlow.eraseWithoutStorage()} />;
   }
 
   const screen = failureScreen(state.failure);

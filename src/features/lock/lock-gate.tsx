@@ -1,4 +1,3 @@
-import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { BackHandler, Keyboard, StyleSheet, View } from 'react-native';
 
@@ -10,6 +9,7 @@ import {
   type LockSettings,
 } from '@/domain/lock';
 import { nativeElapsedClockDeps } from '@/features/clock/native-clock';
+import { useFirstScreenShown } from '@/features/errors/launch-context';
 import { setLocked } from '@/features/lock/held-navigation';
 import { deviceSecurity, type DeviceSecurity } from '@/features/lock/local-auth';
 import { LockContext, type LockApi } from '@/features/lock/lock-context';
@@ -94,6 +94,7 @@ function Gate({ loaded, children }: GateProps) {
   const latest = useRef({ settings: loaded.settings, security: loaded.security });
   const status = useSyncExternalStore(controller.subscribe, controller.status);
   const [everUnlocked, setEverUnlocked] = useState(status === 'unlocked');
+  const firstScreenShown = useFirstScreenShown();
   const [attempts, setAttempts] = useState(loaded.attempts);
   const hidden = status !== 'unlocked';
 
@@ -113,8 +114,8 @@ function Gate({ loaded, children }: GateProps) {
 
   // With the lock off, SessionGate hides the splash once the first screen is loaded.
   useEffect(() => {
-    if (!everUnlocked) SplashScreen.hideAsync();
-  }, [everUnlocked]);
+    if (!everUnlocked) firstScreenShown();
+  }, [everUnlocked, firstScreenShown]);
 
   const api: LockApi = {
     settings,

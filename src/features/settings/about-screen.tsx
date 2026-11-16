@@ -54,6 +54,9 @@ export function AboutScreen() {
             onPress={() => open(SOURCE_URL)}
           />
         </RowGroup>
+        <RowGroup>
+          <NavRow label={t('about.errorReport')} onPress={() => router.push('/error-report')} />
+        </RowGroup>
         <Text style={styles.byline}>{t('about.byline')}</Text>
       </ScrollView>
     </Screen>

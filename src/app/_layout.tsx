@@ -11,6 +11,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { I18nextProvider } from 'react-i18next';
 
+import { LaunchGate } from '@/features/errors/launch-gate';
+import { installErrorHandlers } from '@/features/errors/report-error';
 import { LockGate } from '@/features/lock/lock-gate';
 import { useHeldNavigation } from '@/features/lock/use-held-navigation';
 import { useNotificationTaps } from '@/features/reminders/use-notification-taps';
@@ -22,6 +24,9 @@ import { i18n } from '@/lib/i18n';
 import { colors, fonts } from '@/ui/theme';
 
 SplashScreen.preventAutoHideAsync();
+installErrorHandlers();
+
+export { RootErrorBoundary as ErrorBoundary } from '@/features/errors/root-error-boundary';
 
 const navigationTheme: Theme = {
   ...DarkTheme,
@@ -47,20 +52,23 @@ export default function RootLayout() {
   });
   const ready = fontsLoaded || fontError !== null;
 
-  // The splash screen stays up until StorageGate has opened storage or has a failure to show.
+  // The splash screen stays up until a gate shows a first screen: safe mode, a storage failure,
+  // the lock or the first screen of the session.
   if (!ready) return null;
 
   return (
     <I18nextProvider i18n={i18n}>
       <ThemeProvider value={navigationTheme}>
         <StatusBar style="light" />
-        <StorageGate>
-          <LockGate>
-            <SessionGate>
-              <RootStack />
-            </SessionGate>
-          </LockGate>
-        </StorageGate>
+        <LaunchGate>
+          <StorageGate>
+            <LockGate>
+              <SessionGate>
+                <RootStack />
+              </SessionGate>
+            </LockGate>
+          </StorageGate>
+        </LaunchGate>
       </ThemeProvider>
     </I18nextProvider>
   );
@@ -89,6 +97,7 @@ function RootStack() {
         <Stack.Screen name="reason" />
         <Stack.Screen name="plan" />
         <Stack.Screen name="about" />
+        <Stack.Screen name="error-report" />
         <Stack.Screen name="help" />
         <Stack.Screen name="erase" />
         <Stack.Screen name="reminders" />

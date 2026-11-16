@@ -1,7 +1,11 @@
 import { err, ok } from '@/domain/result';
 import { createErasedNotice, createEraseFlow } from '@/features/storage/erase-flow';
 
-function setUp(resets: ('ok' | 'fail')[], clearReminders: 'ok' | 'fail' = 'ok') {
+function setUp(
+  resets: ('ok' | 'fail')[],
+  clearReminders: 'ok' | 'fail' = 'ok',
+  diagnostics: ('ok' | 'fail')[] = [],
+) {
   const events: string[] = [];
   const flow = createEraseFlow({
     reset: async () => {
@@ -16,6 +20,10 @@ function setUp(resets: ('ok' | 'fail')[], clearReminders: 'ok' | 'fail' = 'ok') 
     clearReminders: async () => {
       events.push('reminders');
       if (clearReminders === 'fail') throw new Error('notifications unavailable');
+    },
+    eraseDiagnostics: async () => {
+      events.push('diagnostics');
+      return diagnostics.shift() !== 'fail';
     },
     show: (step) => void events.push(step),
   });
@@ -35,6 +43,7 @@ describe('createEraseFlow', () => {
       'close',
       'reset',
       'reminders',
+      'diagnostics',
       'device language',
       'erased',
       'resume',
@@ -64,36 +73,66 @@ describe('createEraseFlow', () => {
     ]);
   });
 
-  it('erases again on retry, and never opens what is left', async () => {
+  it('erases again without storage on retry, and never opens what is left', async () => {
     const { events, flow, storage } = setUp(['fail', 'ok']);
     await flow.eraseAll(storage);
     events.length = 0;
 
-    await flow.retry();
+    await flow.eraseWithoutStorage();
     expect(events).toEqual([
       'erasing',
       'pause',
       'reminders',
       'reset',
       'reminders',
+      'diagnostics',
       'device language',
       'erased',
       'resume',
     ]);
   });
 
+  it('shows the failure when the error log or the launch counter cannot be erased', async () => {
+    const { events, flow, storage } = setUp(['ok', 'ok'], 'ok', ['fail']);
+
+    await flow.eraseAll(storage);
+    expect(events).toContain('erase-failed');
+    expect(events).not.toContain('erased');
+
+    events.length = 0;
+    await flow.eraseWithoutStorage();
+    expect(events).toEqual([
+      'erasing',
+      'pause',
+      'reminders',
+      'reset',
+      'reminders',
+      'diagnostics',
+      'device language',
+      'erased',
+      'resume',
+    ]);
+  });
+
+  it('never erases the error log when the data could not be erased', async () => {
+    const { events, flow, storage } = setUp(['fail']);
+
+    await flow.eraseAll(storage);
+    expect(events).not.toContain('diagnostics');
+  });
+
   it('ignores a second request while one runs', async () => {
     const { events, flow, storage } = setUp(['ok', 'ok']);
 
-    await Promise.all([flow.eraseAll(storage), flow.retry()]);
+    await Promise.all([flow.eraseAll(storage), flow.eraseWithoutStorage()]);
     expect(events.filter((event) => event === 'reset')).toHaveLength(1);
   });
 
   it('can run again once the previous one is done', async () => {
     const { events, flow } = setUp(['fail', 'fail']);
 
-    await flow.retry();
-    await flow.retry();
+    await flow.eraseWithoutStorage();
+    await flow.eraseWithoutStorage();
     expect(events.filter((event) => event === 'reset')).toHaveLength(2);
   });
 });

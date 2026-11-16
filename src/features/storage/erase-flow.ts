@@ -14,13 +14,16 @@ type EraseFlowDeps = Pick<StorageService, 'reset'> & {
   // Planning is paused first and waits for a plan being made, so none lands after the erase.
   pauseReminders: () => Promise<() => void>;
   clearReminders: () => Promise<void>;
+  // The error log and the launch counter live outside storage too. They hold no personal data,
+  // but erasing everything leaves nothing behind. Resolves to false when they could not go.
+  eraseDiagnostics: () => Promise<boolean>;
   show: (step: EraseStep) => void;
 };
 
 // Every screen goes away first ("erasing"), so none reads storage while it closes. Storage is
 // opened again only once everything is gone ("erased"). After a failure, part of the data may
-// already be gone, so trying again erases again and never opens what is left. A second request
-// while one runs is ignored.
+// already be gone, so trying again erases again and never opens what is left. Safe mode, where
+// storage was never opened, erases the same way. A second request while one runs is ignored.
 export function createEraseFlow(deps: EraseFlowDeps) {
   let running = false;
 
@@ -34,7 +37,7 @@ export function createEraseFlow(deps: EraseFlowDeps) {
       await deps.clearReminders().catch(() => undefined);
       const result = await erase();
       await deps.clearReminders().catch(() => undefined);
-      if (!result.ok) {
+      if (!result.ok || !(await deps.eraseDiagnostics())) {
         deps.show('erase-failed');
         return;
       }
@@ -48,7 +51,7 @@ export function createEraseFlow(deps: EraseFlowDeps) {
 
   return {
     eraseAll: (storage: Pick<Storage, 'close'>) => run(() => eraseAll(storage, deps)),
-    retry: () => run(() => deps.reset()),
+    eraseWithoutStorage: () => run(() => deps.reset()),
   };
 }
 

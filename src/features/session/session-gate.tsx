@@ -1,4 +1,3 @@
-import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { withCheckIn, type CheckIn } from '@/domain/check-in';
@@ -6,6 +5,7 @@ import type { Journey } from '@/domain/journey';
 import type { LapseRecord } from '@/domain/lapse';
 import { localDayNumber } from '@/domain/local-time';
 import { withUnlocked, type RankId } from '@/domain/ranks';
+import { useFirstScreenShown } from '@/features/errors/launch-context';
 import { createUnlockAnnouncer } from '@/features/ranks/unlock-announcer';
 import { loadSession, type SessionData } from '@/features/session/load-session';
 import { SessionContext } from '@/features/session/session-context';
@@ -21,6 +21,7 @@ type SessionState = { status: 'loading' } | { status: 'ready'; data: SessionData
 export function SessionGate({ children }: { children: ReactNode }) {
   const storage = useStorage();
   const reportFailure = useReportStorageFailure();
+  const firstScreenShown = useFirstScreenShown();
   const [state, setState] = useState<SessionState>({ status: 'loading' });
   const [announcer] = useState(() =>
     createUnlockAnnouncer({
@@ -44,8 +45,8 @@ export function SessionGate({ children }: { children: ReactNode }) {
   }, [storage, reportFailure]);
 
   useEffect(() => {
-    if (state.status === 'ready') SplashScreen.hideAsync();
-  }, [state.status]);
+    if (state.status === 'ready') firstScreenShown();
+  }, [state.status, firstScreenShown]);
 
   if (state.status === 'loading') return null;
 

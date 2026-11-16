@@ -50,6 +50,8 @@
 - [0025 Screen privacy](decisions/0025-screen-privacy.md): screenshots and app switcher previews blocked in production, allowed in development.
 - [0026 Android splash symbol](decisions/0026-android-splash-symbol.md): the symbol alone, sized for the Android 12 splash mask.
 - [0027 Offline help resources](decisions/0027-offline-help-resources.md): a bundled list by device region, official sources checked every year, calls through the phone app.
+- [0028 Error boundaries and safe mode](decisions/0028-error-boundaries-and-safe-mode.md): a boundary per route and at the root, a launch counter, safe mode outside the lock.
+- [0029 Local error log](decisions/0029-local-error-log.md): no messages, 50 entries, AES-GCM with its own key, shown in full before the share sheet.
 
 ## Development
 
