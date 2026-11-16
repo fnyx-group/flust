@@ -116,8 +116,10 @@ export const largeTextScale = 1.3;
 export const maxFontScale = {
   // Already the largest text on screen, sized to fit one line across the screen.
   streakCounter: 1,
-  // Inside the 220 point ring, whose circle shrinks to 70 percent.
-  breathing: 1,
+  // Inside the 220 point ring, whose circle shrinks to 70 percent. The phase name is a word or
+  // two and may cross the circle's edge without clipping; the 56 point seconds count may not.
+  breathingPhase: 1.5,
+  breathingCount: 1,
   // Two 48 point numbers side by side.
   lapseSummary: 1.2,
   // In the header row, next to the close button.
@@ -132,6 +134,12 @@ export const pressedOpacity = 0.8;
 
 // Clearly fainter than a pressed control, so a disabled button never looks available.
 export const disabledOpacity = 0.4;
+
+// The wheel rows next to the selected one: secondary text still at 4.5:1 on the background.
+export const wheelNearOpacity = 0.7;
+
+// Today's bar in the week strip, while the day is in progress: the accent still at 3:1.
+export const todayBarOpacity = 0.71;
 
 // The background color under a sheet, so the screen behind stays faintly visible.
 export const backdropOpacity = 0.85;

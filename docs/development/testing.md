@@ -67,11 +67,12 @@ The adapters in `src/data/native/` only forward to Expo modules and are excluded
 
 ## Accessibility
 
-`src/ui/theme.test.ts` checks the contrast of each text color on each background it is used on, and ESLint requires a role on every `Pressable` and a label on every `TextInput` ([0032](../decisions/0032-accessibility-pass.md)). Layout at large text sizes and what a screen reader says are checked by hand, on Android with TalkBack and on iOS with VoiceOver:
+`src/ui/theme.test.ts` checks the contrast of each listed text pair and shape, faded colors included, `src/ui/control-opacity.test.ts` that a disabled control stays faint, and ESLint requires a role on every `Pressable` and a label on every `TextInput` ([0032](../decisions/0032-accessibility-pass.md)). Layout at large text sizes and what a screen reader says are checked by hand, on Android with TalkBack and on iOS with VoiceOver:
 
-1. Text scale 2.0: the urge segmented control stacks, wheel rows and tab labels fit, the rank grid shows two columns, the lock buttons can be reached, the reminder time chip keeps its padding, a long note title wraps, and the capped texts of the decision stay inside their places.
-2. Screen reader: each control is announced with its role and label, disabled buttons as disabled, the calendar days with their full date.
-3. Reduce Motion (Remove animations on Android): screens fade instead of sliding, and the breathing circle keeps its size.
+1. Text scale 1.3, the largest before layouts change: the urge segmented control keeps its labels whole on one row, the rank names fit three columns, and the help and plan rows fit side by side.
+2. Text scale 2.0: the urge segmented control stacks, wheel rows and tab labels fit, the rank grid shows two columns, the lock buttons can be reached, the reminder time chip keeps its padding, a long note title wraps, and the capped texts of the decision stay inside their places, the breathing phase name inside its ring.
+3. Screen reader: each control is announced with its role and label, disabled buttons as disabled, the calendar days with their full date. Disabled buttons, the lapse undo button while it works included, look clearly fainter than available ones.
+4. Reduce Motion (Remove animations on Android): screens fade instead of sliding, and the breathing circle keeps its size.
 
 ## Where
 

@@ -13,9 +13,6 @@ import {
 import { colors, pressedOpacity, sizes, spacing, typography } from '@/ui/theme';
 import { useLargeText } from '@/ui/use-large-text';
 
-// With large text, a long number such as "0800 32 123" leaves too little room beside it for the
-// name and the detail, so the number goes under them.
-
 type HelpRowsProps = {
   entry: HelpEntry;
   onOpen: (entry: HelpEntry, action: HelpAction) => void;
@@ -27,6 +24,8 @@ type HelpRowsProps = {
 // failure to open shows right under the entry that was tapped, where the eye already is.
 export function HelpRows({ entry, onOpen, failure }: HelpRowsProps) {
   const { t } = useTranslation();
+  // With large text, a long number such as "0800 32 123" leaves too little room beside it for
+  // the name and the detail, so the number goes under them.
   const stacked = useLargeText();
   const [first, ...others] = entry.actions;
   if (first === undefined) return null;

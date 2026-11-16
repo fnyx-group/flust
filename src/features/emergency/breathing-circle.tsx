@@ -105,13 +105,13 @@ export function BreathingCircle() {
       >
         <Animated.View style={[styles.circle, { transform: [{ scale }] }]} />
         <View style={styles.center}>
-          <Text maxFontSizeMultiplier={maxFontScale.breathing} style={styles.phase}>
+          <Text maxFontSizeMultiplier={maxFontScale.breathingPhase} style={styles.phase}>
             {label}
           </Text>
           <Text
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
-            maxFontSizeMultiplier={maxFontScale.breathing}
+            maxFontSizeMultiplier={maxFontScale.breathingCount}
             style={styles.count}
           >
             {shown.secondsLeft}

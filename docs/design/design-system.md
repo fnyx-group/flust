@@ -9,7 +9,7 @@ This document defines the visual language of flust: colors, typography, layout, 
 | Background     | `#111116` | Screen background                                              |
 | Surface        | `#1A1A21` | Cards                                                          |
 | Separator      | `#2A2A33` | Separators                                                     |
-| Locked         | `#5C5B66` | Shapes only: locked emblems and stars, borders                 |
+| Locked         | `#5C5B66` | Shapes only: locked emblems and stars                          |
 | Muted          | `#8A8994` | Dimmed text: locked rank names, placeholders, unavailable days |
 | Secondary text | `#B9B8C2` | Labels and secondary text                                      |
 | Text           | `#FFFFFF` | Primary text                                                   |
@@ -17,7 +17,7 @@ This document defines the visual language of flust: colors, typography, layout, 
 
 Text on the accent color is always `#111116`.
 
-Every text color reaches 4.5:1 on the backgrounds it is used on, and the accent 3:1 as a shape; `src/ui/theme.test.ts` checks it. The locked color is too dark for text, so dimmed text uses the muted color.
+Every text color reaches 4.5:1 on the backgrounds it is used on, faded wheel rows included, and the shapes that carry information 3:1: the accent, the ring of an unchecked radio button (muted) and today's bar in the week strip. `src/ui/theme.test.ts` checks each pair. The locked color is too dark for text or for a control's outline, so dimmed text and the radio ring use the muted color.
 
 The accent is reserved for primary actions, progress, unlocked emblems, the active tab, the clean days of the home week strip and the bar beside the daily quote. It is not used otherwise for decoration.
 
@@ -74,7 +74,7 @@ The counter, digits and units together, does not grow with the system text size,
 
 ### Text size
 
-Text grows with the system text size. Above a text scale of 1.3, layouts change instead of clipping: segmented controls stack their segments, the rank grid shows 2 columns, a note title in the journal takes up to three lines, and the help and plan rows stack. A few texts sit in places of fixed size and grow only up to a cap: the streak counter and the breathing guide (1, no growth), the lapse summary values and the wheel rows (1.2), the tab labels (1.3; on iOS a long press shows them large) and the emergency countdown (1.5). [Decision 0032](../decisions/0032-accessibility-pass.md) gives the reason for each.
+Text grows with the system text size. Above a text scale of 1.3, layouts change instead of clipping: segmented controls stack their segments, the rank grid shows 2 columns, a note title in the journal takes up to three lines, and the help and plan rows stack. A few texts sit in places of fixed size and grow only up to a cap: the streak counter and the breathing seconds (1, no growth), the lapse summary values and the wheel rows (1.2), the tab labels (1.3; on iOS a long press shows them large), the breathing phase name and the emergency countdown (1.5). [Decision 0032](../decisions/0032-accessibility-pass.md) gives the reason for each.
 
 ## Layout
 
@@ -138,11 +138,11 @@ The last 7 local days, today on the right. Each day is a bar (height 6, radius 3
 | Day                | Bar                   | Initial        |
 | ------------------ | --------------------- | -------------- |
 | Clean              | Accent                | Secondary text |
-| Today, in progress | Accent at 50% opacity | Secondary text |
+| Today, in progress | Accent at 71% opacity | Secondary text |
 | With a lapse       | Separator             | Secondary text |
 | Before the start   | None                  | Muted          |
 
-Days before the journey start show no bar, only their initial, so the first week fills up day by day instead of starting with grey bars. A day with a lapse keeps a neutral separator bar: the strip never uses red or crosses. Today turns to the separator color once a lapse is logged. Days change at local midnight, like the daily quote. Screen readers read the strip as one summary, such as "6 jours propres sur les 7 derniers".
+Days before the journey start show no bar, only their initial, so the first week fills up day by day instead of starting with grey bars. A day with a lapse keeps a neutral separator bar: the strip never uses red or crosses. The bar is faint on purpose, 1.32:1 on the background: a lapse is not singled out, and only clean days stand out, in the accent. Today's bar keeps 3:1 so that it reads as a day under way. Today turns to the separator color once a lapse is logged. Days change at local midnight, like the daily quote. Screen readers read the strip as one summary, such as "6 jours propres sur les 7 derniers".
 
 ### Daily quote
 
@@ -308,7 +308,7 @@ A screen pushed over the tabs: the back button and "Rappels" title, then, scroll
 1. A card of four switch rows: "Check-in du soir", "Mot du jour", "Heures à risque" and "Rangs et paliers", each with its subtitle in secondary body text. A switch row is one element for screen readers. The check-in and the thought show their time as a chip (radius 10, separator color) under the subtitle when on. The chip opens a sheet built like the confirmation sheet, the same on Android and iOS: the reminder's name as title, the time wheels, then "Enregistrer" (primary) and "Annuler" (text button).
 
    - Two wheels, hours and minutes, in five minute steps. With a 12 hour clock on the device, hours run 12, 1 to 11, with a third wheel for the period, in the language's own words ("AM", "PM"); otherwise 00 to 23.
-   - Each wheel shows five rows, 44 points high, and snaps to one with momentum. The middle row sits in a band (surface color, radius 12); the rows above and below fade out (0.5, then 0.2).
+   - Each wheel shows five rows, 44 points high, and snaps to one with momentum. The middle row sits in a band (surface color, radius 12); the selected row is in the text color, the rows next to it in secondary text at 0.7 opacity, and the outer rows in the muted color, each at 4.5:1 or more.
    - Numbers use Barlow Condensed with tabular figures: the selected row 30/600 in the text color, the others 22/500 in secondary text.
    - A time that is not on the wheels, such as 21:07, shows as the nearest five minutes and is kept as it is until a wheel moves.
    - For screen readers, each wheel is one adjustable element ("Heures", "Minutes", "Matin ou après-midi"), moved row by row, with its row as value. With Reduce Motion, the wheels move without animation.

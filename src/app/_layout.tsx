@@ -86,7 +86,7 @@ const COVERING_STILL = { animation: 'fade', gestureEnabled: false } as const;
 function RootStack() {
   const { journey } = useSession();
   const started = journey !== null;
-  const reduceMotion = useReduceMotion() === true;
+  const reduceMotion = useReduceMotion() !== false;
   const covering = reduceMotion ? COVERING_STILL : COVERING;
   useReminderSync();
   useNotificationTaps();

@@ -1,14 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import {
-  colors,
-  disabledOpacity,
-  pressedOpacity,
-  radii,
-  sizes,
-  spacing,
-  typography,
-} from '@/ui/theme';
+import { controlOpacity } from '@/ui/control-opacity';
+import { colors, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type ButtonProps = {
   label: string;
@@ -32,11 +25,7 @@ export function Button({
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [
-        CONTAINERS[variant],
-        pressed && styles.pressed,
-        disabled && styles.disabled,
-      ]}
+      style={({ pressed }) => [CONTAINERS[variant], controlOpacity(pressed, disabled)]}
     >
       <Text style={[LABELS[variant], styles.label]}>{label}</Text>
     </Pressable>
@@ -70,12 +59,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.l,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  pressed: {
-    opacity: pressedOpacity,
-  },
-  disabled: {
-    opacity: disabledOpacity,
   },
   label: {
     textAlign: 'center',

@@ -24,7 +24,7 @@ export function RankCell({ cell }: { cell: Cell }) {
         size={sizes.gridEmblem}
       />
       <Text style={[styles.name, NAME_COLORS[cell.state]]}>{text.name}</Text>
-      <RankStars circle={cell.rank.circle} color={unlocked ? colors.text : colors.locked} />
+      <RankStars circle={cell.rank.circle} unlocked={unlocked} />
       <Text style={styles.days}>{t('units.day', { count: cell.rank.threshold })}</Text>
     </View>
   );

@@ -68,6 +68,7 @@ type FollowEndHandlers = {
 export function useFollowTextEnd(
   scrollRef: RefObject<ScrollViewInstance | null>,
   value: string,
+  reduceMotion: boolean,
 ): FollowEndHandlers {
   const focused = useRef(false);
   const atEnd = useRef(false);
@@ -79,10 +80,12 @@ export function useFollowTextEnd(
 
   useEffect(() => {
     const subscription = Keyboard.addListener('keyboardDidShow', () => {
-      if (focused.current && atEnd.current) scrollRef.current?.scrollToEnd({ animated: true });
+      if (focused.current && atEnd.current) {
+        scrollRef.current?.scrollToEnd({ animated: !reduceMotion });
+      }
     });
     return () => subscription.remove();
-  }, [scrollRef]);
+  }, [scrollRef, reduceMotion]);
 
   return {
     onFocus: () => {
