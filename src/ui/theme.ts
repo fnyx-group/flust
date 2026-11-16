@@ -6,7 +6,11 @@ export const colors = {
   background: '#111116',
   surface: '#1A1A21',
   separator: '#2A2A33',
+  // Locked emblems, stars, bars and borders. Too dark for text: see muted.
   locked: '#5C5B66',
+  // Text that must read as dimmed, such as locked rank names, placeholders and unavailable days.
+  // At least 4.5:1 on the background and on the surface, unlike locked.
+  muted: '#8A8994',
   textSecondary: '#B9B8C2',
   text: '#FFFFFF',
   accent: '#7B6BFF',
@@ -103,7 +107,31 @@ export const spacing = {
   rowVertical: 14,
 } as const;
 
+// Above this text scale, rows that put two texts side by side stack them, and grids lose a column.
+export const largeTextScale = 1.3;
+
+// The only texts that do not grow freely with the system text size, each capped because its
+// place has a fixed size. Screen readers read each of them in full. See
+// docs/decisions/0032-accessibility-pass.md.
+export const maxFontScale = {
+  // Already the largest text on screen, sized to fit one line across the screen.
+  streakCounter: 1,
+  // Inside the 220 point ring, whose circle shrinks to 70 percent.
+  breathing: 1,
+  // Two 48 point numbers side by side.
+  lapseSummary: 1.2,
+  // In the header row, next to the close button.
+  countdown: 1.5,
+  // Rows are 44 points high, the interval the wheel snaps to.
+  wheel: 1.2,
+  // The tab bar has a fixed height. iOS shows the label large on a long press.
+  tabLabel: 1.3,
+} as const;
+
 export const pressedOpacity = 0.8;
+
+// Clearly fainter than a pressed control, so a disabled button never looks available.
+export const disabledOpacity = 0.4;
 
 // The background color under a sheet, so the screen behind stays faintly visible.
 export const backdropOpacity = 0.85;

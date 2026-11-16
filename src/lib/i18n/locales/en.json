@@ -158,7 +158,6 @@
     },
     "loadFailed": "The journal could not be read. Nothing is lost.",
     "retry": "Try again",
-    "openHint": "Opens the note",
     "note": {
       "close": "Close",
       "save": "Save",

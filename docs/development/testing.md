@@ -65,6 +65,14 @@ The adapters in `src/data/native/` only forward to Expo modules and are excluded
 11. Error log: after an error, pull `files/diagnostics.bin` through `run-as`. `strings` must show nothing readable.
 12. Safe mode: start the app and force-stop it during the splash screen twice (`adb shell am start -n org.fnyxgroup.flust.dev/.MainActivity`, then `adb shell am force-stop org.fnyxgroup.flust.dev`). The third launch opens safe mode. "Try again" starts normally; the report asks for the phone's authentication, then shows its text before the share sheet; erasing starts the onboarding. Then, with a screen error shown on the journal tab, switch tabs and open the report: the error is listed once, on the journal.
 
+## Accessibility
+
+`src/ui/theme.test.ts` checks the contrast of each text color on each background it is used on, and ESLint requires a role on every `Pressable` and a label on every `TextInput` ([0032](../decisions/0032-accessibility-pass.md)). Layout at large text sizes and what a screen reader says are checked by hand, on Android with TalkBack and on iOS with VoiceOver:
+
+1. Text scale 2.0: the urge segmented control stacks, wheel rows and tab labels fit, the rank grid shows two columns, the lock buttons can be reached, the reminder time chip keeps its padding, a long note title wraps, and the capped texts of the decision stay inside their places.
+2. Screen reader: each control is announced with its role and label, disabled buttons as disabled, the calendar days with their full date.
+3. Reduce Motion (Remove animations on Android): screens fade instead of sliding, and the breathing circle keeps its size.
+
 ## Where
 
 Test files live next to the code they test: `streak.ts` -> `streak.test.ts`.

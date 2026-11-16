@@ -158,7 +158,6 @@
     },
     "loadFailed": "Le journal n'a pas pu être lu. Rien n'est perdu.",
     "retry": "Réessayer",
-    "openHint": "Ouvre la note",
     "note": {
       "close": "Fermer",
       "save": "Enregistrer",

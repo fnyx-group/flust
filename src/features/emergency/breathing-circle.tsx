@@ -16,7 +16,7 @@ import { sameFields } from '@/features/clock/minute-clock';
 import { nativeClockDeps } from '@/features/clock/native-clock';
 import { breathingLabel } from '@/features/emergency/labels';
 import { useReduceMotion } from '@/features/shared/use-reduce-motion';
-import { colors, sizes, spacing, typography } from '@/ui/theme';
+import { colors, maxFontScale, sizes, spacing, typography } from '@/ui/theme';
 
 const SMALL = 0.7;
 
@@ -105,11 +105,13 @@ export function BreathingCircle() {
       >
         <Animated.View style={[styles.circle, { transform: [{ scale }] }]} />
         <View style={styles.center}>
-          <Text style={styles.phase}>{label}</Text>
+          <Text maxFontSizeMultiplier={maxFontScale.breathing} style={styles.phase}>
+            {label}
+          </Text>
           <Text
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
-            maxFontSizeMultiplier={1}
+            maxFontSizeMultiplier={maxFontScale.breathing}
             style={styles.count}
           >
             {shown.secondsLeft}

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 import { ScrollView } from '@/ui/scroll-view';
-import { colors, radii, typography } from '@/ui/theme';
+import { colors, maxFontScale, radii, typography } from '@/ui/theme';
 
 const ROW_HEIGHT = 44;
 const VISIBLE_ROWS = 5;
@@ -108,7 +108,10 @@ export function Wheel({ rows, selectedIndex, onChange, label, reduceMotion, widt
           const selected = index === centered;
           return (
             <View key={row} style={styles.row}>
-              <Text style={[selected ? styles.selected : styles.other, { opacity: fade }]}>
+              <Text
+                maxFontSizeMultiplier={maxFontScale.wheel}
+                style={[selected ? styles.selected : styles.other, { opacity: fade }]}
+              >
                 {row}
               </Text>
             </View>

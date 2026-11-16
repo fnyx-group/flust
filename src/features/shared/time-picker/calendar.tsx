@@ -127,9 +127,12 @@ function chunk<T>(items: readonly T[], size: number): T[][] {
 }
 
 const styles = StyleSheet.create({
+  // Seven cells of 44 points need 308: a 360 point screen leaves 320 inside its padding, so the
+  // card keeps only a thin side padding.
   calendar: {
     gap: spacing.xs,
-    padding: spacing.m,
+    paddingVertical: spacing.m,
+    paddingHorizontal: spacing.xxs,
     borderRadius: radii.card,
     backgroundColor: colors.surface,
   },
@@ -138,6 +141,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: spacing.s,
+    paddingHorizontal: spacing.s,
   },
   month: {
     ...typography.row,
@@ -161,8 +165,8 @@ const styles = StyleSheet.create({
   },
   // Grows with the text size instead of clipping the day number.
   day: {
-    minWidth: sizes.touchTarget - 4,
-    minHeight: sizes.touchTarget - 4,
+    minWidth: sizes.touchTarget,
+    minHeight: sizes.touchTarget,
     aspectRatio: 1,
     paddingHorizontal: spacing.xxs,
     borderRadius: radii.pill,
@@ -177,7 +181,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   disabledLabel: {
-    color: colors.locked,
+    color: colors.muted,
   },
   selectedLabel: {
     fontFamily: fonts.numberSemiBold,

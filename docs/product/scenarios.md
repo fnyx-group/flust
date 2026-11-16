@@ -130,14 +130,14 @@ Notification text is always neutral and never reveals what the app is about.
 
 ## Devices
 
-| Case                            | Expected behavior                                                           |
-| ------------------------------- | --------------------------------------------------------------------------- |
-| Small screens (iPhone SE)       | Every screen fits or scrolls. No text or button is cut off.                 |
-| Large text sizes                | Text scales with the system setting. Layouts wrap instead of truncating.    |
-| Screen readers                  | Every interactive element and every emblem has a label.                     |
-| Orientation                     | Portrait only.                                                              |
-| Low memory and background kills | No data is lost. Drafts and onboarding progress are saved as the user goes. |
-| App update with existing data   | Existing data is migrated and kept.                                         |
+| Case                            | Expected behavior                                                                                                                                                                   |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Small screens (iPhone SE)       | Every screen fits or scrolls. No text or button is cut off.                                                                                                                         |
+| Large text sizes                | Text scales with the system setting. Layouts wrap or stack instead of truncating; a few texts in places of fixed size are capped ([0032](../decisions/0032-accessibility-pass.md)). |
+| Screen readers                  | Every interactive element and every emblem has a label.                                                                                                                             |
+| Orientation                     | Portrait only.                                                                                                                                                                      |
+| Low memory and background kills | No data is lost. Drafts and onboarding progress are saved as the user goes.                                                                                                         |
+| App update with existing data   | Existing data is migrated and kept.                                                                                                                                                 |
 
 ## Languages
 

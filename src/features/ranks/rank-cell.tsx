@@ -61,5 +61,5 @@ const NAME_COLORS = StyleSheet.create({
   unlocked: { color: colors.text },
   current: { color: colors.text },
   next: { color: colors.textSecondary },
-  locked: { color: colors.locked },
+  locked: { color: colors.muted },
 });

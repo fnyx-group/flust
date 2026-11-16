@@ -12,6 +12,7 @@ import { useStorage } from '@/features/storage/storage-context';
 import { BrandLockup } from '@/ui/brand/brand-lockup';
 import { Button } from '@/ui/button';
 import { Screen } from '@/ui/screen';
+import { ScrollView } from '@/ui/scroll-view';
 import { colors, spacing, typography } from '@/ui/theme';
 
 type LockScreenProps = {
@@ -88,32 +89,35 @@ export function LockScreen({ security, attempts, onAttempts, onUnlock }: LockScr
   }
 
   const biometric = security.kind === 'biometric';
+  // Scrolls only when large text no longer fits, so the buttons are never pushed off screen.
   return (
     <Screen bottomInset>
-      <View style={styles.center}>
-        <BrandLockup />
-        <Text style={styles.status}>{t('lock.locked')}</Text>
-      </View>
-      <View style={styles.bottom}>
-        {(waiting || lockout) && (
-          <Text accessibilityLiveRegion="polite" style={styles.message}>
-            {waiting ? waitLabel(t, remaining) : t('lock.lockout')}
-          </Text>
-        )}
-        <Button
-          label={biometric ? t('lock.unlock') : t('lock.usePasscode')}
-          onPress={() => void unlock()}
-          disabled={busy || waiting}
-        />
-        {biometric && (
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <View style={styles.center}>
+          <BrandLockup />
+          <Text style={styles.status}>{t('lock.locked')}</Text>
+        </View>
+        <View style={styles.bottom}>
+          {(waiting || lockout) && (
+            <Text accessibilityLiveRegion="polite" style={styles.message}>
+              {waiting ? waitLabel(t, remaining) : t('lock.lockout')}
+            </Text>
+          )}
           <Button
-            variant="plain"
-            label={t('lock.usePasscode')}
+            label={biometric ? t('lock.unlock') : t('lock.usePasscode')}
             onPress={() => void unlock()}
             disabled={busy || waiting}
           />
-        )}
-      </View>
+          {biometric && (
+            <Button
+              variant="plain"
+              label={t('lock.usePasscode')}
+              onPress={() => void unlock()}
+              disabled={busy || waiting}
+            />
+          )}
+        </View>
+      </ScrollView>
     </Screen>
   );
 }
@@ -133,6 +137,9 @@ export function LockCover() {
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    flexGrow: 1,
+  },
   center: {
     flex: 1,
     alignItems: 'center',

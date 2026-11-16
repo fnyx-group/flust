@@ -1,20 +1,19 @@
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Plan } from '@/domain/onboarding';
 import { planColumns } from '@/features/profile/labels';
 import { colors, spacing, typography } from '@/ui/theme';
+import { useLargeText } from '@/ui/use-large-text';
 
-// Above this text scale, "Alors" no longer fits its column and a single word cannot wrap, so each
-// label goes above its text instead.
-const STACKED_FONT_SCALE = 1.3;
+// With large text, "Alors" no longer fits its column and a single word cannot wrap, so each label
+// goes above its text instead.
 
 // "If / Then" in two columns. Screen readers read the row as the whole plan sentence instead, set
 // on the row that holds it.
 export function PlanRow({ plan }: { plan: Plan }) {
   const { t } = useTranslation();
-  const { fontScale } = useWindowDimensions();
-  const stacked = fontScale > STACKED_FONT_SCALE;
+  const stacked = useLargeText();
   const columns = planColumns(t, plan);
   const line = stacked ? styles.stackedLine : styles.line;
   const label = stacked ? styles.label : [styles.label, styles.column];

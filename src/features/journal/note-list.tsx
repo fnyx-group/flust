@@ -13,6 +13,7 @@ import {
 import { deviceOffsetAt } from '@/features/shared/device-time';
 import { SectionList } from '@/ui/scroll-view';
 import { colors, pressedOpacity, spacing, typography } from '@/ui/theme';
+import { useLargeText } from '@/ui/use-large-text';
 
 type NoteListProps = {
   notes: readonly NoteSummary[];
@@ -53,20 +54,28 @@ export function NoteList({ notes, firstWeekday, onOpen }: NoteListProps) {
   );
 }
 
+// A title fits one line at the usual text sizes. With large text, one line would hold a word or
+// two, so the title gets up to three. The excerpt keeps its three lines: the note opens in full.
+const TITLE_LINES = 1;
+const TITLE_LINES_LARGE_TEXT = 3;
+
 function NoteRow({ note, onOpen }: { note: NoteSummary; onOpen: (note: NoteSummary) => void }) {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
+  const largeText = useLargeText();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={noteRowLabel(i18n.language, note)}
-      accessibilityHint={t('journal.openHint')}
       onPress={() => onOpen(note)}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
       <Text style={styles.date}>{noteListDate(i18n.language, note.day)}</Text>
       <View style={styles.content}>
         {note.title !== null && (
-          <Text numberOfLines={1} style={styles.title}>
+          <Text
+            numberOfLines={largeText ? TITLE_LINES_LARGE_TEXT : TITLE_LINES}
+            style={styles.title}
+          >
             {note.title}
           </Text>
         )}

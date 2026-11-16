@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   beforeStartInitial: {
-    color: colors.locked,
+    color: colors.muted,
   },
 });
 

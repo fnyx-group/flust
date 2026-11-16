@@ -5,7 +5,7 @@ import { countdownMs, countdownParts, type MinutesAndSeconds } from '@/domain/ur
 import { useClock } from '@/features/clock/clock-context';
 import { sameFields } from '@/features/clock/minute-clock';
 import { countdownText, spokenCountdown } from '@/features/emergency/labels';
-import { colors, radii, spacing, typography } from '@/ui/theme';
+import { colors, maxFontScale, radii, spacing, typography } from '@/ui/theme';
 
 function countdownAt(elapsed: number): MinutesAndSeconds {
   return countdownParts(countdownMs(elapsed));
@@ -22,7 +22,7 @@ export function CountdownChip() {
       accessibilityLabel={spokenCountdown(t, parts)}
       style={styles.chip}
     >
-      <Text maxFontSizeMultiplier={1.5} style={styles.text}>
+      <Text maxFontSizeMultiplier={maxFontScale.countdown} style={styles.text}>
         {countdownText(parts)}
       </Text>
     </View>

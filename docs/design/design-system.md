@@ -4,17 +4,20 @@ This document defines the visual language of flust: colors, typography, layout, 
 
 ## Colors
 
-| Token          | Value     | Use                                                               |
-| -------------- | --------- | ----------------------------------------------------------------- |
-| Background     | `#111116` | Screen background                                                 |
-| Surface        | `#1A1A21` | Cards                                                             |
-| Separator      | `#2A2A33` | Separators                                                        |
-| Locked         | `#5C5B66` | Locked ranks and emblems, days before the start in the week strip |
-| Secondary text | `#B9B8C2` | Labels and secondary text                                         |
-| Text           | `#FFFFFF` | Primary text                                                      |
-| Accent         | `#7B6BFF` | See below                                                         |
+| Token          | Value     | Use                                                            |
+| -------------- | --------- | -------------------------------------------------------------- |
+| Background     | `#111116` | Screen background                                              |
+| Surface        | `#1A1A21` | Cards                                                          |
+| Separator      | `#2A2A33` | Separators                                                     |
+| Locked         | `#5C5B66` | Shapes only: locked emblems and stars, borders                 |
+| Muted          | `#8A8994` | Dimmed text: locked rank names, placeholders, unavailable days |
+| Secondary text | `#B9B8C2` | Labels and secondary text                                      |
+| Text           | `#FFFFFF` | Primary text                                                   |
+| Accent         | `#7B6BFF` | See below                                                      |
 
 Text on the accent color is always `#111116`.
+
+Every text color reaches 4.5:1 on the backgrounds it is used on, and the accent 3:1 as a shape; `src/ui/theme.test.ts` checks it. The locked color is too dark for text, so dimmed text uses the muted color.
 
 The accent is reserved for primary actions, progress, unlocked emblems, the active tab, the clean days of the home week strip and the bar beside the daily quote. It is not used otherwise for decoration.
 
@@ -29,45 +32,49 @@ Two typefaces, bundled with the app:
 
 Counters use tabular numbers so digits do not shift as they change.
 
-| Style                             | Size  | Weight | Notes                 |
-| --------------------------------- | ----- | ------ | --------------------- |
-| Streak counter, 1 or 2-digit days | 226   | 600    | Barlow Condensed      |
-| Streak counter, 3-digit days      | 150   | 600    | Barlow Condensed      |
-| Streak counter, 4-digit days      | 113   | 600    | Barlow Condensed      |
-| Streak counter, 1-digit hours     | 141   | 600    | Barlow Condensed      |
-| Streak counter, 2-digit hours     | 105   | 600    | Barlow Condensed      |
-| Streak counter unit               | 40    | 600    | Secondary text color  |
-| Welcome title                     | 40    | 800    | Onboarding welcome    |
-| Brand lockup                      | 36    | 800    | Onboarding welcome    |
-| Unlocked rank name                | 40    | 800    | Rank unlock screen    |
-| Breathing count                   | 56    | 600    | Barlow Condensed      |
-| Lapse summary number              | 48    | 600    | Barlow Condensed      |
-| Stepper value                     | 32    | 600    | Barlow Condensed      |
-| Wheel, selected row               | 30    | 600    | Barlow Condensed      |
-| Wheel, other rows                 | 22    | 500    | Barlow Condensed      |
-| Countdown                         | 22    | 600    | Barlow Condensed      |
-| Breathing phase                   | 20    | 600    |                       |
-| Screen title                      | 28    | 800    |                       |
-| Rank name                         | 22    | 800    |                       |
-| Daily quote                       | 19    | 700    | Line height 26        |
-| Calendar day                      | 18    | 500    | Barlow Condensed      |
-| Mood value                        | 22    | 600    | Check-in mood scale   |
-| Select value                      | 17    | 800    | Value of a select row |
-| Row                               | 15    | 600    |                       |
-| Rank badge name                   | 15    | 800    |                       |
-| Primary button                    | 17    | 800    | Text on accent        |
-| Secondary button                  | 15    | 600    |                       |
-| Body                              | 15-16 | 400    |                       |
-| Section label                     | 16    | 600    | Secondary text color  |
-| Unlock label                      | 14    | 700    | Accent, uppercase     |
-| Label                             | 13    | 600    | Secondary text color  |
-| Caption                           | 12    | 400    |                       |
-| Rank badge detail                 | 12    | 600    | Secondary text color  |
-| Weekday initial                   | 11    | 600    | Secondary text color  |
+| Style                             | Size  | Weight | Notes                                                       |
+| --------------------------------- | ----- | ------ | ----------------------------------------------------------- |
+| Streak counter, 1 or 2-digit days | 226   | 600    | Barlow Condensed                                            |
+| Streak counter, 3-digit days      | 150   | 600    | Barlow Condensed                                            |
+| Streak counter, 4-digit days      | 113   | 600    | Barlow Condensed                                            |
+| Streak counter, 1-digit hours     | 141   | 600    | Barlow Condensed                                            |
+| Streak counter, 2-digit hours     | 105   | 600    | Barlow Condensed                                            |
+| Streak counter unit               | 40    | 600    | Secondary text color                                        |
+| Welcome title                     | 40    | 800    | Onboarding welcome                                          |
+| Brand lockup                      | 36    | 800    | Onboarding welcome                                          |
+| Unlocked rank name                | 40    | 800    | Rank unlock screen                                          |
+| Breathing count                   | 56    | 600    | Barlow Condensed                                            |
+| Lapse summary number              | 48    | 600    | Barlow Condensed                                            |
+| Stepper value                     | 32    | 600    | Barlow Condensed                                            |
+| Wheel, selected row               | 30    | 600    | Barlow Condensed                                            |
+| Wheel, other rows                 | 22    | 500    | Barlow Condensed                                            |
+| Countdown                         | 22    | 600    | Barlow Condensed                                            |
+| Breathing phase                   | 20    | 600    |                                                             |
+| Screen title                      | 28    | 800    |                                                             |
+| Rank name                         | 22    | 800    |                                                             |
+| Daily quote                       | 19    | 700    | Line height 26                                              |
+| Calendar day                      | 18    | 500    | Barlow Condensed, in 44 by 44 cells; unavailable days muted |
+| Mood value                        | 22    | 600    | Check-in mood scale                                         |
+| Select value                      | 17    | 800    | Value of a select row                                       |
+| Row                               | 15    | 600    |                                                             |
+| Rank badge name                   | 15    | 800    |                                                             |
+| Primary button                    | 17    | 800    | Text on accent                                              |
+| Secondary button                  | 15    | 600    |                                                             |
+| Body                              | 15-16 | 400    |                                                             |
+| Section label                     | 16    | 600    | Secondary text color                                        |
+| Unlock label                      | 14    | 700    | Accent, uppercase                                           |
+| Label                             | 13    | 600    | Secondary text color                                        |
+| Caption                           | 12    | 400    |                                                             |
+| Rank badge detail                 | 12    | 600    | Secondary text color                                        |
+| Weekday initial                   | 11    | 600    | Secondary text color                                        |
 
 The streak counter is not in a card: it spans the screen width minus the screen padding, 320 points on a 360 point wide screen and 350 on a 390 point one. Its size is the largest that keeps it on one line, units included, at 320 points in both languages. Days use 226 up to 99, 150 up to 999, then 113. Hours have their own sizes, since " h " and " min" take more room than " jours": 141 for "7 h 40 min" and 105 for "12 h 05 min", with minutes always shown on two digits. A test measures the widest counter of each size with the fonts' glyph widths, and checks that one point more would no longer fit. Only screens narrower than 360 points shrink the counter further to fit.
 
-The counter, digits and units together, does not grow with the system text size, since it is already the largest text on screen. Screen readers read it as one sentence, such as "Série en cours : 7 heures 40 minutes". Every other text grows with the system text size.
+The counter, digits and units together, does not grow with the system text size, since it is already the largest text on screen. Screen readers read it as one sentence, such as "Série en cours : 7 heures 40 minutes".
+
+### Text size
+
+Text grows with the system text size. Above a text scale of 1.3, layouts change instead of clipping: segmented controls stack their segments, the rank grid shows 2 columns, a note title in the journal takes up to three lines, and the help and plan rows stack. A few texts sit in places of fixed size and grow only up to a cap: the streak counter and the breathing guide (1, no growth), the lapse summary values and the wheel rows (1.2), the tab labels (1.3; on iOS a long press shows them large) and the emergency countdown (1.5). [Decision 0032](../decisions/0032-accessibility-pass.md) gives the reason for each.
 
 ## Layout
 
@@ -82,6 +89,7 @@ The counter, digits and units together, does not grow with the system text size,
 | Segmented controls | Radius 16, segments radius 12 |
 | Switches           | 48 by 28                      |
 | Touch targets      | At least 44 by 44             |
+| Disabled controls  | Opacity 0.4 (pressed: 0.8)    |
 
 ### Scrolling
 
@@ -95,7 +103,7 @@ The emergency screen is not a tab. It is reached from the emergency button on th
 
 The home header shows the flust symbol with the name next to it. The lock screen shows the same symbol and name, larger and centered.
 
-Full screens shown over the others (emergency, note, lapse, rank unlocked) slide up from the bottom as cards, without the swipe to dismiss. They are not native modals, which would sit above the lock cover.
+Full screens shown over the others (emergency, note, lapse, rank unlocked) slide up from the bottom as cards, without the swipe to dismiss. They are not native modals, which would sit above the lock cover. With Reduce Motion on, every screen fades in instead of sliding.
 
 ## Home
 
@@ -132,7 +140,7 @@ The last 7 local days, today on the right. Each day is a bar (height 6, radius 3
 | Clean              | Accent                | Secondary text |
 | Today, in progress | Accent at 50% opacity | Secondary text |
 | With a lapse       | Separator             | Secondary text |
-| Before the start   | None                  | Locked         |
+| Before the start   | None                  | Muted          |
 
 Days before the journey start show no bar, only their initial, so the first week fills up day by day instead of starting with grey bars. A day with a lapse keeps a neutral separator bar: the strip never uses red or crosses. Today turns to the separator color once a lapse is logged. Days change at local midnight, like the daily quote. Screen readers read the strip as one summary, such as "6 jours propres sur les 7 derniers".
 
@@ -147,14 +155,14 @@ From top to bottom, in a scrolling screen with the screen padding of 20 and 24 p
 1. The "Rangs" screen title.
 2. A card (radius 22, padding 20) with the 64 point emblem of the current rank on the left. On the right: the circle label, such as "Cercle II · Ombre" (section label), followed by the rarity stars, then the rank name (22/800) and "Prochain rang dans 13 jours" (body, secondary text). Before day one it shows "Premier rang" and the time left to Novice, with the emblem and stars in the locked color.
 3. The rule, "Ton rang suit tes jours propres au total. Un écart ne te fait jamais redescendre." (16/400, line height 24, secondary text).
-4. The twelve ranks in 3 columns, 8 points apart. Each cell is a card (radius 20) with the 36 point emblem, the name (15/800), the stars and the threshold (body, secondary text).
+4. The twelve ranks in 3 columns, 8 points apart (2 above a text scale of 1.3). Each cell is a card (radius 20) with the 36 point emblem, the name (15/800), the stars and the threshold (body, secondary text).
 
 | Rank         | Emblem | Name                 | Stars  | Outline |
 | ------------ | ------ | -------------------- | ------ | ------- |
 | Unlocked     | Accent | Its name, text color | Text   | None    |
 | Current      | Accent | Its name, text color | Text   | Accent  |
 | Next         | Locked | Its name, secondary  | Locked | None    |
-| Other locked | Locked | "???", locked color  | Locked | None    |
+| Other locked | Locked | "???", muted color   | Locked | None    |
 
 ### Rarity stars
 
@@ -206,7 +214,7 @@ The "Enregistrer" primary button stays at the bottom, above "Reste sur ton tél�
 A tab screen. A header row holds the "Journal" screen title on the left and the new note icon button (a pencil, on the surface color) on the right. Below it, a scrolling list of notes in sections:
 
 - "Cette semaine", then "Semaine dernière", then one section per month, such as "Octobre", with the year when it is not the current one ("Octobre 2025"). Section titles use the section label style, 24 points above them.
-- Each note is a row: its date ("Mercredi 12 nov.", 16/400, secondary text), its title if it has one (22/800), then the start of its text on up to three lines (16/400, line height 24, text color). A separator line runs under each row. Screen readers read a row as one button: the date, the title, then the text.
+- Each note is a row: its date ("Mercredi 12 nov.", 16/400, secondary text), its title if it has one (22/800, one line, up to three above a text scale of 1.3), then the start of its text on up to three lines (16/400, line height 24, text color). A separator line runs under each row. Screen readers read a row as one button: the date, the title, then the text.
 
 Notes belong to the week or month of the local day they were written on. Weeks start on the first weekday of the device's region. The groups follow the current day, so they move at midnight. Blank lines in a note's text do not show in its row.
 
@@ -312,7 +320,7 @@ A screen pushed over the tabs: the back button and "Rappels" title, then, scroll
 
 ## Lock
 
-The lock screen shows the flust lockup centered, with "Verrouillé" under it in secondary text. At the bottom, "Déverrouiller" (primary) and "Entrer le code" (text button) when biometrics are enrolled; "Entrer le code" alone, as primary, otherwise. While a wait runs, a line above the buttons reads "Nouvel essai possible dans 30 s." and the buttons are disabled.
+The lock screen shows the flust lockup centered, with "Verrouillé" under it in secondary text. The screen scrolls when large text no longer fits it. At the bottom, "Déverrouiller" (primary) and "Entrer le code" (text button) when biometrics are enrolled; "Entrer le code" alone, as primary, otherwise. While a wait runs, a line above the buttons reads "Nouvel essai possible dans 30 s." and the buttons are disabled.
 
 When the app leaves the foreground, a cover with the same lockup, at the same place and without buttons, hides its content until it comes back.
 

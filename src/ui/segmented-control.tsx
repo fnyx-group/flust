@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { RadioOption } from '@/ui/radio-group';
 import { colors, fonts, radii, sizes, spacing, typography } from '@/ui/theme';
+import { useLargeText } from '@/ui/use-large-text';
 
 type SegmentedControlProps<K extends string> = {
   accessibilityLabel: string;
@@ -11,18 +12,20 @@ type SegmentedControlProps<K extends string> = {
   onSelect: (key: K) => void;
 };
 
-// Only one segment can be chosen, so screen readers announce the segments as radio buttons.
+// Only one segment can be chosen, so screen readers announce the segments as radio buttons. With
+// large text, four labels side by side would break mid-word, so the segments stack.
 export function SegmentedControl<K extends string>({
   accessibilityLabel,
   options,
   selected,
   onSelect,
 }: SegmentedControlProps<K>) {
+  const stacked = useLargeText();
   return (
     <View
       accessibilityRole="radiogroup"
       accessibilityLabel={accessibilityLabel}
-      style={styles.control}
+      style={[styles.control, stacked && styles.stacked]}
     >
       {options.map((option) => {
         const checked = option.key === selected;
@@ -32,7 +35,7 @@ export function SegmentedControl<K extends string>({
             accessibilityRole="radio"
             accessibilityState={{ checked }}
             onPress={() => onSelect(option.key)}
-            style={[styles.segment, checked && styles.checked]}
+            style={[styles.segment, stacked && styles.stackedSegment, checked && styles.checked]}
           >
             <Text style={[styles.label, checked && styles.checkedLabel]}>{option.label}</Text>
           </Pressable>
@@ -50,6 +53,9 @@ const styles = StyleSheet.create({
     borderRadius: radii.segmentedControl,
     backgroundColor: colors.surface,
   },
+  stacked: {
+    flexDirection: 'column',
+  },
   segment: {
     flex: 1,
     minHeight: sizes.touchTarget + 4,
@@ -57,6 +63,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.s,
     borderRadius: radii.segment,
+  },
+  stackedSegment: {
+    flex: 0,
+    paddingVertical: spacing.s,
   },
   checked: {
     backgroundColor: colors.separator,

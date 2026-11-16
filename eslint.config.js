@@ -45,6 +45,34 @@ const literalTextSyntax = [
   { selector: `${userFacingAttribute} > JSXExpressionContainer > ${literalText}`, message },
 ];
 
+// Screen readers announce a control by its role and a field by its label. TabBarButton passes
+// the navigator's `role` on, which React Native maps to the same thing. A sheet backdrop is
+// hidden from screen readers with accessible={false}, its sheet having a Cancel button.
+const hiddenFromScreenReaders =
+  "JSXAttribute[name.name='accessible'][value.expression.value=false]";
+
+function requiredAttribute(element, attributes, message) {
+  const exempt = [
+    ...attributes.map((name) => `JSXAttribute[name.name='${name}']`),
+    hiddenFromScreenReaders,
+  ];
+  const present = exempt.map((attribute) => `:has(> ${attribute})`).join(', ');
+  return { selector: `JSXOpeningElement[name.name='${element}']:not(${present})`, message };
+}
+
+const accessibilitySyntax = [
+  requiredAttribute(
+    'Pressable',
+    ['accessibilityRole', 'role'],
+    'Give every Pressable an accessibilityRole, such as "button".',
+  ),
+  requiredAttribute(
+    'TextInput',
+    ['accessibilityLabel', 'aria-label'],
+    'Give every TextInput an accessibilityLabel: a placeholder is not read once text is typed.',
+  ),
+];
+
 function restrictedSyntax(files, ignores, rules) {
   return { files, ignores, rules: { 'no-restricted-syntax': ['error', ...rules] } };
 }
@@ -227,7 +255,7 @@ module.exports = defineConfig([
   restrictedSyntax(
     sourceFiles,
     [themeFile, ...testFiles],
-    [...hexColorSyntax, ...literalTextSyntax],
+    [...hexColorSyntax, ...literalTextSyntax, ...accessibilitySyntax],
   ),
   restrictedSyntax([themeFile], [], literalTextSyntax),
   restrictedSyntax(testFiles, [], hexColorSyntax),

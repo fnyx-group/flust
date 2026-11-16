@@ -53,6 +53,7 @@
 - [0028 Error boundaries and safe mode](decisions/0028-error-boundaries-and-safe-mode.md): a boundary per route and at the root, a launch counter, safe mode outside the lock.
 - [0029 Local error log](decisions/0029-local-error-log.md): no messages, 50 entries, AES-GCM with its own key, shown in full before the share sheet.
 - [0030 Production Android permissions](decisions/0030-production-android-permissions.md): network and storage permissions blocked in production only, checked in the source and in the release build.
+- [0032 Accessibility pass](decisions/0032-accessibility-pass.md): a muted color for dimmed text, contrast tests, 44 point calendar days, fades with Reduce Motion, layouts that change with large text and documented caps.
 
 ## Development
 

@@ -6,7 +6,7 @@ import { counterSize, currentStreakMs, streakDisplay } from '@/domain/streak';
 import { useClock } from '@/features/clock/clock-context';
 import { counterParts, spokenCounter } from '@/features/home/labels';
 import { sameFields } from '@/features/clock/minute-clock';
-import { counterFontSizes, colors, sizes, typography } from '@/ui/theme';
+import { counterFontSizes, colors, maxFontScale, sizes, typography } from '@/ui/theme';
 
 // One line of nested text, so digits and units share a baseline. The sizes fit the counter on a
 // screen of sizes.counterDesignWidth (labels.test.ts measures it); only narrower screens shrink it.
@@ -23,7 +23,7 @@ export function StreakCounter({ journey }: { journey: Journey }) {
       <Text
         numberOfLines={1}
         adjustsFontSizeToFit={width < sizes.counterDesignWidth}
-        maxFontSizeMultiplier={1}
+        maxFontSizeMultiplier={maxFontScale.streakCounter}
         style={[styles.counter, { fontSize, lineHeight: fontSize }]}
       >
         {counterParts(t, display).map((part, index) =>

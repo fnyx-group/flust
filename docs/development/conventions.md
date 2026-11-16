@@ -40,6 +40,7 @@ Domain functions never read the clock. They take the current time, `now`, as a U
 - No literal user-facing text in JSX outside tests: text children, string expressions, and attributes such as `accessibilityLabel`, `accessibilityHint`, `placeholder`, `title`, `label` and `alt`. All text goes through i18n with `t()`. Text made only of punctuation or spaces, such as a separator, is allowed.
 - Packages and APIs that touch privacy are used from one file each: `expo-notifications`, `expo-local-authentication`, `expo-screen-capture`, and `Share` from `react-native` (`src/features/errors/share-report.ts`). Other files may import their types.
 - No network APIs in `src/`: the globals `fetch`, `XMLHttpRequest`, `WebSocket` and `EventSource`, `expo/fetch`, `expo-file-system/legacy`, the `downloadFileAsync` and `upload` methods, and the remote SVG components of `react-native-svg` (`SvgUri`, `SvgCssUri`, `SvgFromUri`, `SvgWithCssUri`, `fetchText`) ([0030](../decisions/0030-production-android-permissions.md)).
+- Every `Pressable` has an `accessibilityRole` (or `role`), and every `TextInput` an `accessibilityLabel` (or `aria-label`). A `Pressable` hidden from screen readers with `accessible={false}`, such as a sheet backdrop, is exempt ([0032](../decisions/0032-accessibility-pass.md)).
 - React hooks rules and the React Compiler rules from `eslint-plugin-react-hooks` (included by `eslint-config-expo`) are errors, including `exhaustive-deps`.
 
 ## React Compiler

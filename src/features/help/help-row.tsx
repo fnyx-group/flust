@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { HelpAction, HelpEntry } from '@/domain/help-resources';
@@ -11,10 +11,10 @@ import {
   unbrokenNumber,
 } from '@/features/help/labels';
 import { colors, pressedOpacity, sizes, spacing, typography } from '@/ui/theme';
+import { useLargeText } from '@/ui/use-large-text';
 
-// Above this text scale, a long number such as "0800 32 123" leaves too little room beside it
-// for the name and the detail, so the number goes under them.
-const STACKED_FONT_SCALE = 1.3;
+// With large text, a long number such as "0800 32 123" leaves too little room beside it for the
+// name and the detail, so the number goes under them.
 
 type HelpRowsProps = {
   entry: HelpEntry;
@@ -27,8 +27,7 @@ type HelpRowsProps = {
 // failure to open shows right under the entry that was tapped, where the eye already is.
 export function HelpRows({ entry, onOpen, failure }: HelpRowsProps) {
   const { t } = useTranslation();
-  const { fontScale } = useWindowDimensions();
-  const stacked = fontScale > STACKED_FONT_SCALE;
+  const stacked = useLargeText();
   const [first, ...others] = entry.actions;
   if (first === undefined) return null;
   return (

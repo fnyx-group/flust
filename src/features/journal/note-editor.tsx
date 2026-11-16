@@ -235,7 +235,7 @@ export function NoteEditor({ note }: { note: Note | null }) {
         <TextInput
           accessibilityLabel={t('journal.note.titleSpoken')}
           placeholder={t('journal.note.titlePlaceholder')}
-          placeholderTextColor={colors.locked}
+          placeholderTextColor={colors.muted}
           value={draft.title}
           maxLength={NOTE_TITLE_MAX_LENGTH}
           onChangeText={(title) => change({ title })}
@@ -249,7 +249,7 @@ export function NoteEditor({ note }: { note: Note | null }) {
           ref={body}
           accessibilityLabel={t('journal.note.bodySpoken')}
           placeholder={t('journal.note.bodyPlaceholder')}
-          placeholderTextColor={colors.locked}
+          placeholderTextColor={colors.muted}
           value={draft.body}
           maxLength={NOTE_BODY_MAX_LENGTH}
           onChangeText={(text) => change({ body: text })}
