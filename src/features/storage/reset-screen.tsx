@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { FailureScreen } from '@/features/storage/storage-failure';
-import { StorageMessageScreen } from '@/features/storage/storage-message-screen';
+import { MessageScreen } from '@/ui/message-screen';
 import { Button } from '@/ui/button';
 
 type ResetScreenProps = {
@@ -18,7 +18,7 @@ export function ResetScreen({ reason, onRetry, onReset }: ResetScreenProps) {
 
   if (confirming) {
     return (
-      <StorageMessageScreen
+      <MessageScreen
         title={t('storage.reset.confirm.title')}
         paragraphs={[t('storage.reset.confirm.body')]}
         actions={
@@ -36,7 +36,7 @@ export function ResetScreen({ reason, onRetry, onReset }: ResetScreenProps) {
   }
 
   return (
-    <StorageMessageScreen
+    <MessageScreen
       title={t('storage.reset.title')}
       paragraphs={[t(`storage.reset.reasons.${reason}`), t('storage.reset.noRecovery')]}
       actions={

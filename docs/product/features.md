@@ -81,7 +81,7 @@ The settings show only what works in this version:
 - "Rappels": the check-in time, else the thought time, else "Désactivés" when none is on.
 - "Verrouillage": the method, "Désactivé" or "En pause".
 - "Langue": the device language, French or English, applied at once and stored.
-- "À propos": the version, the MPL-2.0 license, links to the website and the source code, and the privacy promise in one line.
+- "À propos": the version, the MPL-2.0 license, links to the website and the source code, the privacy promise in one line, and the error report.
 - "Tout effacer": erases every piece of data and the key after two confirmations, then returns to the onboarding.
 
 The filter joins the settings with its feature.
@@ -119,6 +119,12 @@ A small list of help numbers, bundled with the app, chosen by the device region,
 - Any other region: 112, named as the official number when the device is set to an unlisted member of the European Union, otherwise with the advice to dial the local number, and a link to findahelpline.com that opens outside flust.
 
 Buttons open the phone app or the messages app with the number filled in. flust sends nothing and records nothing. Each number keeps its official sources and the day it was checked, and is checked again every year ([0027](../decisions/0027-offline-help-resources.md)). The help resources open from the settings, from the emergency screen and from the low mood card, never from the lapse screen.
+
+### Errors and safe mode
+
+A screen that fails shows a calm message with a retry and a way home, without any data from the failed state. After two launches in a row that stop before the first screen, flust opens in safe mode: try again, see and share the error report, or erase everything.
+
+Errors go to a local, encrypted error report: the last 50, with their time, screen, error type and place in the code, never their message or any user content. "Rapport d'erreurs" in About, and safe mode, show the exact text before the share sheet opens. flust never sends it. See [0028](../decisions/0028-error-boundaries-and-safe-mode.md) and [0029](../decisions/0029-local-error-log.md).
 
 ### Encrypted storage
 

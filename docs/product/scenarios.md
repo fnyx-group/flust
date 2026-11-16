@@ -160,13 +160,17 @@ Notification text is always neutral and never reveals what the app is about.
 
 ## Crashes
 
-There is no remote crash reporting. Errors go to a local log without personal data. The user can export it and send it manually.
+There is no remote crash reporting. Errors go to a local, encrypted log without personal data: no message, no user content. The person can read the report and share it through the share sheet; nothing is ever sent by flust. See [0028](../decisions/0028-error-boundaries-and-safe-mode.md) and [0029](../decisions/0029-local-error-log.md).
 
-| Case                            | Expected behavior                                                              |
-| ------------------------------- | ------------------------------------------------------------------------------ |
-| Error in a screen               | An error boundary per screen shows a message with a retry button.              |
-| Two crashes in a row at startup | The app starts in safe mode, which offers to export the data or reset the app. |
-| Corrupted settings              | Settings fall back to their defaults. User data is not affected.               |
+| Case                                       | Expected behavior                                                                                                                                                                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Error in a screen                          | That screen shows a calm message with "Try again" and "Back to home". The tab bar and the other screens keep working.                                                                                                           |
+| Error in the gates (storage, lock)         | A root message offers "Try again". It shows no data.                                                                                                                                                                            |
+| Two launches in a row stop before a screen | The app starts in safe mode, which offers to try again, to see and share the error report, or to erase everything. It shows no data. The report asks for the phone's authentication first, unless the phone has no screen lock. |
+| Error report shared                        | The report screen shows the exact text first. It holds times, screens, error types, codes and code locations, never user content.                                                                                               |
+| Keystore not readable yet                  | Errors are kept in memory and written to the log once the key can be read.                                                                                                                                                      |
+| Everything erased                          | The error log, its key and the launch counter are erased with the rest.                                                                                                                                                         |
+| Corrupted settings                         | Settings fall back to their defaults. User data is not affected.                                                                                                                                                                |
 
 ## Later versions
 

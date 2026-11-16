@@ -74,6 +74,17 @@ const ownedPackages = [
   { name: 'expo-screen-capture', owner: 'src/features/lock/privacy-screen.ios.ts' },
 ];
 
+// Parts of a package that touch privacy, each used from one file, like the packages above.
+const ownedImports = [
+  {
+    name: 'react-native',
+    importNames: ['Share'],
+    owner: 'src/features/errors/share-report.ts',
+    message:
+      'Share is only used from src/features/errors/share-report.ts: the error report is the only thing flust shares.',
+  },
+];
+
 // Local notifications only: nothing that registers the device with a push service.
 const pushFunctions = {
   name: 'expo-notifications',
@@ -101,6 +112,14 @@ function ownedPackagePatterns(owner) {
     }));
 }
 
+function ownedImportPaths(owner) {
+  return ownedImports
+    .filter((owned) => owned.owner !== owner)
+    .map(({ name, importNames, message }) => ({ name, importNames, message }));
+}
+
+const owners = [...ownedPackages, ...ownedImports].map((owned) => owned.owner);
+
 function layer(
   name,
   { forbidden, typesOnly = [], packages = false, allowNativeScroll = false, owner = null },
@@ -125,7 +144,7 @@ function layer(
       message: `src/${name} is pure logic and may not depend on React, React Native or Expo.`,
     });
   }
-  const paths = allowNativeScroll ? [] : [nativeScrollViews];
+  const paths = [...(allowNativeScroll ? [] : [nativeScrollViews]), ...ownedImportPaths(owner)];
   if (owner === 'src/features/reminders/notifier.ios.ts') paths.push(pushFunctions);
   return {
     files: [`src/${name}/**/*.{ts,tsx}`],
@@ -157,7 +176,7 @@ module.exports = defineConfig([
   layer('domain', { forbidden: except('domain'), packages: true }),
   layer('data', { forbidden: except('data', 'domain', 'lib') }),
   layer('features', { forbidden: except('features', 'domain', 'data', 'ui', 'lib') }),
-  ...ownedPackages.map(({ owner }) => ({
+  ...owners.map((owner) => ({
     ...layer('features', { forbidden: except('features', 'domain', 'data', 'ui', 'lib'), owner }),
     files: [owner],
   })),

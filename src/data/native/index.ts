@@ -11,3 +11,5 @@ export const storageService = createStorageService({
   driver: expoDriver,
   files: expoFiles,
 });
+
+export { errorLog, launchGuard } from '@/data/native/expo-diagnostics';

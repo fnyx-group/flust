@@ -5,13 +5,15 @@ import { Screen } from '@/ui/screen';
 import { ScreenTitle } from '@/ui/screen-title';
 import { colors, spacing, typography } from '@/ui/theme';
 
-type StorageMessageScreenProps = {
+type MessageScreenProps = {
   title: string;
   paragraphs: readonly string[];
   actions: ReactNode;
+  // A short line above the actions, announced when it appears.
+  notice?: string | null;
 };
 
-export function StorageMessageScreen({ title, paragraphs, actions }: StorageMessageScreenProps) {
+export function MessageScreen({ title, paragraphs, actions, notice = null }: MessageScreenProps) {
   return (
     <Screen bottomInset>
       <View style={styles.content}>
@@ -22,7 +24,14 @@ export function StorageMessageScreen({ title, paragraphs, actions }: StorageMess
           </Text>
         ))}
       </View>
-      <View style={styles.actions}>{actions}</View>
+      <View style={styles.actions}>
+        {notice !== null && (
+          <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>
+            {notice}
+          </Text>
+        )}
+        {actions}
+      </View>
     </Screen>
   );
 }
@@ -35,6 +44,10 @@ const styles = StyleSheet.create({
   paragraph: {
     ...typography.bodyLarge,
     color: colors.textSecondary,
+  },
+  notice: {
+    ...typography.paragraphSmall,
+    color: colors.text,
   },
   actions: {
     gap: spacing.m,

@@ -262,7 +262,19 @@ A reason or a plan opens its own screen: the back button and "Enregistrer" (prim
 
 ## About
 
-A screen pushed over the tabs: the back button and "À propos" title, the version (row style), the license and the privacy promise (16/400, line height 24, secondary text), then a card with "Site web" and "Code source" rows, each showing its address as its value. The links open outside flust, in the browser or the app that handles the address, and screen readers announce them as links. "Par fnyx-group" closes the screen (body, secondary text, centered).
+A screen pushed over the tabs: the back button and "À propos" title, the version (row style), the license and the privacy promise (16/400, line height 24, secondary text), then a card with "Site web" and "Code source" rows, each showing its address as its value. The links open outside flust, in the browser or the app that handles the address, and screen readers announce them as links. Below, a card with the "Rapport d'erreurs" row, which opens the error report. "Par fnyx-group" closes the screen (body, secondary text, centered).
+
+## Error report
+
+A screen pushed over the others: the back button and "Rapport d'erreurs" title, then, scrolling, with 16 points between blocks: what the report holds and does not hold, and that flust sends nothing by itself (16/400, line height 24, secondary text). With entries, "Voici exactement ce qui sera partagé :" (section label, text color) over a card (surface color, radius 22, padding 20) holding the report text (15/400, line height 22, text color), selectable. Without any, "Aucune erreur enregistrée." (row style). At the bottom, with entries only: "Partager ce rapport" (primary), which opens the system share sheet with that same text, and "Effacer le rapport" (text button), which asks first in a confirmation sheet. If the share sheet cannot open, a line in text color above the buttons says the text can be selected and copied. No red.
+
+## Error screens
+
+A screen that fails to render is replaced by a message screen, built like the storage messages: the title (screen title), one sentence saying the data has not been changed (16/400, secondary text), then "Réessayer" (primary) and "Retour à l'accueil" (text button). Home and the onboarding offer only "Réessayer". When the whole app fails, the root message has its own title and only "Réessayer". No red, no animation, no data.
+
+## Safe mode
+
+After two launches in a row that stopped before the first screen, a message screen: "Mode sans échec", what happened and that the data was neither opened nor changed, then what can be done (16/400, secondary text). At the bottom: "Réessayer" (primary), "Voir le rapport d'erreurs" (secondary button) and "Tout effacer" (text button). The report first asks for the phone's own authentication, unless the phone has no screen lock, then opens the error report screen, its back button returning to safe mode. If the phone does not confirm, a line in text color above the buttons says the report stays closed. "Tout effacer" opens the erase screen and its confirmation sheet, as from the settings.
 
 ## Help
 

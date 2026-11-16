@@ -30,12 +30,15 @@ Code in `src/` is split into layers. A layer may only import from the layers lis
 
 Code in `src/domain/` does not throw for expected failures, such as a start date in the future or a lapse before the start. It returns a `Result` (`src/domain/result.ts`): `{ ok: true, value }` or `{ ok: false, error }`, where `error` is a string literal type such as `'lapse-in-future'`. Callers must handle every error case, and the type checker lists them.
 
+Unexpected errors are caught by the error boundary each route exports, and recorded in the local error log without their message ([0028](../decisions/0028-error-boundaries-and-safe-mode.md), [0029](../decisions/0029-local-error-log.md)). A new route exports `ScreenErrorBoundary` as `ErrorBoundary`; a test checks it.
+
 Domain functions never read the clock. They take the current time, `now`, as a UTC timestamp in milliseconds, so they stay deterministic and testable.
 
 ## Lint rules
 
 - No hex color literals in `src/` outside `src/ui/theme.ts`. Use a color from the theme.
 - No literal user-facing text in JSX outside tests: text children, string expressions, and attributes such as `accessibilityLabel`, `accessibilityHint`, `placeholder`, `title`, `label` and `alt`. All text goes through i18n with `t()`. Text made only of punctuation or spaces, such as a separator, is allowed.
+- Packages and APIs that touch privacy are used from one file each: `expo-notifications`, `expo-local-authentication`, `expo-screen-capture`, and `Share` from `react-native` (`src/features/errors/share-report.ts`). Other files may import their types.
 - React hooks rules and the React Compiler rules from `eslint-plugin-react-hooks` (included by `eslint-config-expo`) are errors, including `exhaustive-deps`.
 
 ## React Compiler
