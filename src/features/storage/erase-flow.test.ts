@@ -25,6 +25,10 @@ function setUp(
       events.push('diagnostics');
       return diagnostics.shift() !== 'fail';
     },
+    pauseDiagnostics: () => {
+      events.push('pause log');
+      return () => void events.push('resume log');
+    },
     show: (step) => void events.push(step),
   });
   const storage = { close: async () => void events.push('close') };
@@ -37,6 +41,7 @@ describe('createEraseFlow', () => {
 
     await flow.eraseAll(storage);
     expect(events).toEqual([
+      'pause log',
       'erasing',
       'pause',
       'reminders',
@@ -47,6 +52,7 @@ describe('createEraseFlow', () => {
       'device language',
       'erased',
       'resume',
+      'resume log',
     ]);
   });
 
@@ -62,6 +68,7 @@ describe('createEraseFlow', () => {
 
     await flow.eraseAll(storage);
     expect(events).toEqual([
+      'pause log',
       'erasing',
       'pause',
       'reminders',
@@ -70,6 +77,7 @@ describe('createEraseFlow', () => {
       'reminders',
       'erase-failed',
       'resume',
+      'resume log',
     ]);
   });
 
@@ -80,6 +88,7 @@ describe('createEraseFlow', () => {
 
     await flow.eraseWithoutStorage();
     expect(events).toEqual([
+      'pause log',
       'erasing',
       'pause',
       'reminders',
@@ -89,6 +98,7 @@ describe('createEraseFlow', () => {
       'device language',
       'erased',
       'resume',
+      'resume log',
     ]);
   });
 
@@ -102,6 +112,7 @@ describe('createEraseFlow', () => {
     events.length = 0;
     await flow.eraseWithoutStorage();
     expect(events).toEqual([
+      'pause log',
       'erasing',
       'pause',
       'reminders',
@@ -111,6 +122,7 @@ describe('createEraseFlow', () => {
       'device language',
       'erased',
       'resume',
+      'resume log',
     ]);
   });
 

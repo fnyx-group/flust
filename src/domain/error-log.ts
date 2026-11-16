@@ -2,7 +2,7 @@ export type ErrorKind = 'render' | 'fatal' | 'uncaught' | 'unhandled-rejection' 
 
 // What the error log keeps of an error. Never its message: messages can carry note text, plan
 // wording or SQL values. Every field is checked against a pattern that only code identifiers,
-// route paths, file names and numbers can match. See docs/decisions/0029-local-error-log.md.
+// route patterns, file names and numbers can match. See docs/decisions/0029-local-error-log.md.
 export type ErrorEntry = {
   readonly at: number;
   readonly kind: ErrorKind;
@@ -41,7 +41,12 @@ const KINDS: readonly ErrorKind[] = [
 const NAME = /^[A-Za-z_$][\w$]{0,63}$/;
 const CODE = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 const MAX_CODE_LENGTH = 48;
-const ROUTE = /^\/[a-z0-9()+_\-/]{0,79}$/;
+const MAX_ROUTE_LENGTH = 80;
+const MAX_SEGMENT_LENGTH = 24;
+// A group such as "(tabs)", a parameter as written in the file name such as "[id]", or a word.
+const SEGMENT = /^(?:\([a-z0-9-]+\)|\[(?:\.\.\.)?[A-Za-z]+\]|[a-z0-9][a-z0-9_+-]*)$/;
+// Ids and tokens: only digits, or several of them mixed with letters.
+const ID_LIKE = /^\d+$|(?:\D*\d){4}/;
 const FUNCTION_NAME = /^[\w$.<>?]{1,80}$/;
 const FILE_NAME = /^[\w.-]{1,80}$/;
 const FRAME = /^[\w$.<>?]{1,80}@[\w.-]{1,80}:\d{1,9}:\d{1,9}$/;
@@ -84,8 +89,20 @@ function parseFrame(line: string): string | null {
   return `${name}@${file}:${lineNumber}:${column}`;
 }
 
+// A screen's route name is its file's pattern relative to its layout, such as "journal" or
+// "note/[id]": a parameter reads "[id]", never its value.
+export function routeFromName(name: string): string {
+  return `/${name}`;
+}
+
 function validRoute(route: string | null): string | null {
-  return route !== null && ROUTE.test(route) ? route : null;
+  if (route === null || route.length > MAX_ROUTE_LENGTH || !route.startsWith('/')) return null;
+  if (route === '/') return route;
+  return route.slice(1).split('/').every(isPlainSegment) ? route : null;
+}
+
+function isPlainSegment(segment: string): boolean {
+  return segment.length <= MAX_SEGMENT_LENGTH && SEGMENT.test(segment) && !ID_LIKE.test(segment);
 }
 
 function validCode(code: string | null): string | null {
@@ -107,7 +124,8 @@ export function isErrorEntry(value: unknown): value is ErrorEntry {
     typeof entry.at === 'number' &&
     Number.isSafeInteger(entry.at) &&
     KINDS.includes(entry.kind as ErrorKind) &&
-    (entry.route === null || (typeof entry.route === 'string' && ROUTE.test(entry.route))) &&
+    (entry.route === null ||
+      (typeof entry.route === 'string' && validRoute(entry.route) !== null)) &&
     (entry.name === null || (typeof entry.name === 'string' && NAME.test(entry.name))) &&
     (entry.code === null || (typeof entry.code === 'string' && validCode(entry.code) !== null)) &&
     Array.isArray(entry.frames) &&

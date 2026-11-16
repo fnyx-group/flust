@@ -7,6 +7,7 @@ import {
   MAX_ENTRIES,
   MAX_FRAMES,
   parseStack,
+  routeFromName,
   toEntry,
   type ErrorEntry,
 } from '@/domain/error-log';
@@ -91,6 +92,34 @@ describe('toEntry', () => {
         expect(isErrorEntry(result)).toBe(true);
       }),
     );
+  });
+});
+
+describe('routes', () => {
+  it('names a route by its screen, with parameters as written in the file name', () => {
+    expect(routeFromName('index')).toBe('/index');
+    expect(routeFromName('journal')).toBe('/journal');
+    expect(routeFromName('(tabs)')).toBe('/(tabs)');
+    expect(routeFromName('note/[id]')).toBe('/note/[id]');
+
+    expect(toEntry({ at: AT, kind: 'render', route: '/note/[id]' }).route).toBe('/note/[id]');
+    expect(toEntry({ at: AT, kind: 'render', route: '/' }).route).toBe('/');
+  });
+
+  it.each([
+    ['/note/12345'],
+    ['/note/7'],
+    ['/reason/3f9a2c71'],
+    ['/reason/a1b2c3d4e5'],
+    ['/plan/550e8400-e29b-41d4-a716-446655440000'],
+    ['/plan/averyveryverylongsegmentname'],
+    ['/note//journal'],
+    ['/Note'],
+    ['note'],
+    [`/${'a/'.repeat(41)}a`],
+  ])('drops %p, which could carry an id, a token or text', (route) => {
+    expect(toEntry({ at: AT, kind: 'render', route }).route).toBeNull();
+    expect(isErrorEntry(entry({ route }))).toBe(false);
   });
 });
 

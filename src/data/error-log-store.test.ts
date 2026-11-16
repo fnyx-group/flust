@@ -120,14 +120,30 @@ describe('createErrorLog', () => {
     expect(await createErrorLog(deps).entries()).toEqual([entry(2)]);
   });
 
-  it('starts a new log over a damaged or unreadable file', async () => {
+  it('starts a new log over a damaged file', async () => {
     const { file, deps, log } = setUp();
     await log.record(entry(1));
     file.bytes = Uint8Array.of(1, 2, 3);
-    expect(await createErrorLog(deps).entries()).toEqual([]);
+    const after = createErrorLog(deps);
+    expect(await after.entries()).toEqual([]);
 
+    await after.record(entry(2));
+    expect(await createErrorLog(deps).entries()).toEqual([entry(2)]);
+  });
+
+  it('keeps the stored entries when the file cannot be read for a while', async () => {
+    const { file, deps, log } = setUp();
+    await log.record(entry(1));
     file.failRead = true;
-    expect(await createErrorLog(deps).entries()).toEqual([]);
+    const later = createErrorLog(deps);
+
+    await later.record(entry(2));
+    expect(await later.entries()).toEqual([entry(2)]);
+    expect(file.writes).toBe(1);
+
+    file.failRead = false;
+    await later.record(entry(3));
+    expect(await createErrorLog(deps).entries()).toEqual([entry(1), entry(2), entry(3)]);
   });
 
   it('never rejects when the file cannot be written, and keeps the entry in memory', async () => {
@@ -167,5 +183,22 @@ describe('createErrorLog', () => {
     file.failRemove = true;
 
     expect(await log.clear()).toEqual({ ok: false, error: 'clear-failed' });
+  });
+
+  it('touches neither the key nor the file while paused, and writes again once resumed', async () => {
+    const { keyStore, file, deps, log } = setUp();
+    await log.record(entry(1));
+    const resume = log.pause();
+
+    expect(await log.clear()).toEqual({ ok: true, value: undefined });
+    await log.record(entry(2));
+    expect(keyStore.value).toBeNull();
+    expect(file.bytes).toBeNull();
+    expect(await log.entries()).toEqual([entry(2)]);
+
+    resume();
+    resume();
+    await log.record(entry(3));
+    expect(await createErrorLog(deps).entries()).toEqual([entry(2), entry(3)]);
   });
 });

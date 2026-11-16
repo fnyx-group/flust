@@ -17,6 +17,8 @@ type EraseFlowDeps = Pick<StorageService, 'reset'> & {
   // The error log and the launch counter live outside storage too. They hold no personal data,
   // but erasing everything leaves nothing behind. Resolves to false when they could not go.
   eraseDiagnostics: () => Promise<boolean>;
+  // Paused for the whole erase, so an error during it writes no new log after the old one goes.
+  pauseDiagnostics: () => () => void;
   show: (step: EraseStep) => void;
 };
 
@@ -31,6 +33,7 @@ export function createEraseFlow(deps: EraseFlowDeps) {
     if (running) return;
     running = true;
     let resumeReminders: () => void = () => undefined;
+    const resumeDiagnostics = deps.pauseDiagnostics();
     try {
       deps.show('erasing');
       resumeReminders = await deps.pauseReminders();
@@ -45,6 +48,7 @@ export function createEraseFlow(deps: EraseFlowDeps) {
       deps.show('erased');
     } finally {
       resumeReminders();
+      resumeDiagnostics();
       running = false;
     }
   }

@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { launchGuard } from '@/data/native';
 import type { LaunchMode } from '@/data/launch-guard';
 import { LaunchContext } from '@/features/errors/launch-context';
+import { createLaunchSession } from '@/features/errors/launch-session';
 import { SafeModeScreen } from '@/features/errors/safe-mode-screen';
 import { createErasedNotice } from '@/features/storage/erase-flow';
 
@@ -14,26 +15,21 @@ type LaunchState = { status: 'checking' } | { status: LaunchMode };
 // splash screen and marks the launch as finished.
 export function LaunchGate({ children }: { children: ReactNode }) {
   const [state, setState] = useState<LaunchState>({ status: 'checking' });
-  const [launch] = useState(() => {
-    let finished = false;
-    return {
+  const [launch] = useState(() =>
+    createLaunchSession({
+      guard: launchGuard,
+      hideSplash: () => void SplashScreen.hideAsync(),
       erasedNotice: createErasedNotice(),
-      firstScreenShown: () => {
-        SplashScreen.hideAsync();
-        if (finished) return;
-        finished = true;
-        void launchGuard.finish();
-      },
-    };
-  });
+    }),
+  );
 
   useEffect(() => {
     let active = true;
-    launchGuard.begin().then((mode) => active && setState({ status: mode }));
+    launch.begin().then((mode) => active && setState({ status: mode }));
     return () => {
       active = false;
     };
-  }, []);
+  }, [launch]);
 
   useEffect(() => {
     if (state.status === 'safe-mode') SplashScreen.hideAsync();
@@ -43,12 +39,8 @@ export function LaunchGate({ children }: { children: ReactNode }) {
   if (state.status === 'safe-mode') {
     return (
       <SafeModeScreen
-        // Not counted as a new launch: if it fails again, the next launch opens safe mode again.
         onRetry={() => setState({ status: 'normal' })}
-        onErased={() => {
-          launch.erasedNotice.mark();
-          setState({ status: 'normal' });
-        }}
+        onErased={() => setState({ status: launch.erasedFromSafeMode() })}
       />
     );
   }

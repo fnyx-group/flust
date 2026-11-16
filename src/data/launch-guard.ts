@@ -15,6 +15,8 @@ const COUNT = /^\d{1,6}$/;
 // It holds nothing else, so it needs no encryption, and it can be read before storage opens.
 // A file that cannot be read counts as zero: a broken counter must never trap the app in safe
 // mode. See docs/decisions/0028-error-boundaries-and-safe-mode.md.
+export type LaunchGuard = ReturnType<typeof createLaunchGuard>;
+
 export function createLaunchGuard(file: TextFile) {
   async function unfinished(): Promise<number> {
     try {
@@ -32,8 +34,18 @@ export function createLaunchGuard(file: TextFile) {
       await file.write(String(count + 1)).catch(() => undefined);
       return 'normal';
     },
-    async finish(): Promise<void> {
-      await file.remove().catch(() => undefined);
+    // A counter left at two would open safe mode on every launch, so when the file cannot be
+    // removed it is set to zero instead. Resolves to false when neither worked.
+    async finish(): Promise<boolean> {
+      try {
+        await file.remove();
+        return true;
+      } catch {
+        return file.write('0').then(
+          () => true,
+          () => false,
+        );
+      }
     },
   };
 }

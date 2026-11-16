@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { recordError } from '@/features/errors/report-error';
-import { StorageMessageScreen } from '@/features/storage/storage-message-screen';
+import { MessageScreen } from '@/ui/message-screen';
 import { Button } from '@/ui/button';
 
 type ErrorFallbackProps = {
@@ -16,7 +16,7 @@ type ErrorFallbackProps = {
 export function ErrorFallback({ onRetry, onHome }: ErrorFallbackProps) {
   const { t } = useTranslation();
   return (
-    <StorageMessageScreen
+    <MessageScreen
       title={t('errors.fallback.title')}
       paragraphs={[t('errors.fallback.body')]}
       actions={

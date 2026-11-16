@@ -36,6 +36,9 @@ export type ErrorLog = {
   record(entry: ErrorEntry): Promise<void>;
   entries(): Promise<readonly ErrorEntry[]>;
   clear(): Promise<Result<void, ClearErrorLogError>>;
+  // Erasing everything pauses the log, so an error during the erase cannot create a new key or
+  // file after the old ones are gone. Entries recorded meanwhile stay in memory only.
+  pause(): () => void;
 };
 
 // The log lives outside the database, with its own key, so it can still be read in safe mode
@@ -46,6 +49,7 @@ export function createErrorLog(deps: ErrorLogDeps): ErrorLog {
   let entries: ErrorEntry[] = [];
   let key: StorageKey | null = null;
   let queue: Promise<unknown> = Promise.resolve();
+  let pauses = 0;
 
   function enqueue<T>(task: () => Promise<T>): Promise<T> {
     const run = queue.then(task, task);
@@ -64,15 +68,27 @@ export function createErrorLog(deps: ErrorLogDeps): ErrorLog {
       key = created.value;
       return key;
     }
-    entries = appendEntries(await readStored(stored.value), entries);
+    const previous = await readStored(stored.value);
+    // A file that could not be read this time may still hold entries: nothing is written over it
+    // until a later read succeeds.
+    if (previous === null) return null;
+    entries = appendEntries(previous, entries);
     key = stored.value;
     return key;
   }
 
-  async function readStored(storedKey: StorageKey): Promise<ErrorEntry[]> {
+  // Null when the file could not be read. A file that cannot be decrypted reads as empty: it can
+  // never be read again, so the next write replaces it.
+  async function readStored(storedKey: StorageKey): Promise<ErrorEntry[] | null> {
+    let sealed: Uint8Array | null;
     try {
-      const sealed = await deps.file.read();
-      return sealed === null ? [] : decodeLog(await deps.box.open(sealed, storedKey));
+      sealed = await deps.file.read();
+    } catch {
+      return null;
+    }
+    if (sealed === null) return [];
+    try {
+      return decodeLog(await deps.box.open(sealed, storedKey));
     } catch {
       return [];
     }
@@ -82,6 +98,7 @@ export function createErrorLog(deps: ErrorLogDeps): ErrorLog {
     record: (entry) =>
       enqueue(async () => {
         entries = appendEntries(entries, [entry]);
+        if (pauses > 0) return;
         try {
           const current = await load();
           if (current !== null) {
@@ -93,7 +110,7 @@ export function createErrorLog(deps: ErrorLogDeps): ErrorLog {
       }),
     entries: () =>
       enqueue(async () => {
-        await load().catch(() => null);
+        if (pauses === 0) await load().catch(() => null);
         return entries;
       }),
     clear: () =>
@@ -108,5 +125,14 @@ export function createErrorLog(deps: ErrorLogDeps): ErrorLog {
           return err('clear-failed');
         }
       }),
+    pause: () => {
+      pauses += 1;
+      let resumed = false;
+      return () => {
+        if (resumed) return;
+        resumed = true;
+        pauses -= 1;
+      };
+    },
   };
 }

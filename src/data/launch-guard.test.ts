@@ -1,12 +1,18 @@
 import { createLaunchGuard, SAFE_MODE_AFTER, type TextFile } from '@/data/launch-guard';
 
-type FakeTextFile = TextFile & { text: string | null; failRead: boolean; failWrite: boolean };
+type FakeTextFile = TextFile & {
+  text: string | null;
+  failRead: boolean;
+  failWrite: boolean;
+  failRemove: boolean;
+};
 
 function createFakeTextFile(text: string | null = null): FakeTextFile {
   return {
     text,
     failRead: false,
     failWrite: false,
+    failRemove: false,
     async read() {
       if (this.failRead) throw new Error('Unreadable');
       return this.text;
@@ -16,7 +22,7 @@ function createFakeTextFile(text: string | null = null): FakeTextFile {
       this.text = next;
     },
     async remove() {
-      if (this.failWrite) throw new Error('Busy');
+      if (this.failRemove) throw new Error('Busy');
       this.text = null;
     },
   };
@@ -30,7 +36,7 @@ describe('createLaunchGuard', () => {
     expect(await guard.begin()).toBe('normal');
     expect(file.text).toBe('1');
 
-    await guard.finish();
+    expect(await guard.finish()).toBe(true);
     expect(file.text).toBeNull();
   });
 
@@ -68,9 +74,18 @@ describe('createLaunchGuard', () => {
     const file = createFakeTextFile('5');
     file.failRead = true;
     file.failWrite = true;
+    file.failRemove = true;
     const guard = createLaunchGuard(file);
 
     expect(await guard.begin()).toBe('normal');
-    await expect(guard.finish()).resolves.toBeUndefined();
+    expect(await guard.finish()).toBe(false);
+  });
+
+  it('sets the counter to zero when it cannot be removed, so the next launch opens normally', async () => {
+    const file = createFakeTextFile(String(SAFE_MODE_AFTER));
+    file.failRemove = true;
+
+    expect(await createLaunchGuard(file).finish()).toBe(true);
+    expect(await createLaunchGuard(file).begin()).toBe('normal');
   });
 });

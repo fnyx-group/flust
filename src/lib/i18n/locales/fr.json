@@ -836,10 +836,14 @@
     },
     "safeMode": {
       "title": "Mode sans échec",
-      "stopped": "flust s'est fermé deux fois de suite au démarrage, alors il s'est ouvert sur cet écran minimal. Rien n'a été lu ni modifié.",
+      "stopped": "flust n'a pas pu démarrer deux fois de suite. Tes données n'ont été ni ouvertes ni modifiées.",
       "choices": "Tu peux réessayer, consulter le rapport d'erreurs et le partager pour signaler le problème, ou tout effacer et recommencer.",
       "retry": "Réessayer",
       "report": "Voir le rapport d'erreurs",
+      "reportHint": "Demande d'abord le déverrouillage du téléphone, s'il en a un.",
+      "reportPrompt": "Ouvrir le rapport d'erreurs",
+      "reportCancel": "Annuler",
+      "reportRefused": "Le rapport reste fermé : le téléphone n'a pas confirmé que c'est toi.",
       "erase": "Tout effacer"
     },
     "report": {

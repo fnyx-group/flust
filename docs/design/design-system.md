@@ -274,7 +274,7 @@ A screen that fails to render is replaced by a message screen, built like the st
 
 ## Safe mode
 
-After two launches in a row that stopped before the first screen, a message screen: "Mode sans échec", what happened and that nothing was read or changed, then what can be done (16/400, secondary text). At the bottom: "Réessayer" (primary), "Voir le rapport d'erreurs" (secondary button) and "Tout effacer" (text button). The report opens the error report screen, its back button returning to safe mode. "Tout effacer" opens the erase screen and its confirmation sheet, as from the settings.
+After two launches in a row that stopped before the first screen, a message screen: "Mode sans échec", what happened and that the data was neither opened nor changed, then what can be done (16/400, secondary text). At the bottom: "Réessayer" (primary), "Voir le rapport d'erreurs" (secondary button) and "Tout effacer" (text button). The report first asks for the phone's own authentication, unless the phone has no screen lock, then opens the error report screen, its back button returning to safe mode. If the phone does not confirm, a line in text color above the buttons says the report stays closed. "Tout effacer" opens the erase screen and its confirmation sheet, as from the settings.
 
 ## Help
 

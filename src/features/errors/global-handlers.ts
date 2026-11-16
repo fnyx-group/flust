@@ -21,17 +21,26 @@ type GlobalHandlersDeps = {
   waitMs: number;
 };
 
+// Marks the handler installed here. The root layout installs it when its module runs, which Fast
+// Refresh repeats: wrapping our own handler again would record every error twice.
+const INSTALLED = Symbol.for('flust.errorHandler');
+
+type MarkedHandler = GlobalHandler & { [INSTALLED]?: true };
+
 // Errors thrown outside rendering, in callbacks and timers, reach the global handler; React
 // Native's own handler then ends the process for a fatal one. The entry gets a short head start,
 // then the previous handler runs as before.
 export function installGlobalHandlers(deps: GlobalHandlersDeps): void {
   const { errorUtils, rejectionTracker, record, waitMs } = deps;
   if (errorUtils !== undefined) {
-    const previous = errorUtils.getGlobalHandler();
-    errorUtils.setGlobalHandler((error, isFatal) => {
+    const previous: MarkedHandler = errorUtils.getGlobalHandler();
+    if (previous[INSTALLED] === true) return;
+    const handler: MarkedHandler = (error, isFatal) => {
       const recorded = record(error, { kind: isFatal ? 'fatal' : 'uncaught' });
       void Promise.race([recorded, delay(waitMs)]).then(() => previous(error, isFatal));
-    });
+    };
+    handler[INSTALLED] = true;
+    errorUtils.setGlobalHandler(handler);
   }
   rejectionTracker?.({
     allRejections: true,

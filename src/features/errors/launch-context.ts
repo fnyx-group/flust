@@ -1,12 +1,9 @@
 import { createContext, use } from 'react';
 
+import type { LaunchSession } from '@/features/errors/launch-session';
 import type { ErasedNotice } from '@/features/storage/erase-flow';
 
-type Launch = {
-  // Hides the splash screen and marks the launch as finished: a first screen is showing.
-  firstScreenShown: () => void;
-  erasedNotice: ErasedNotice;
-};
+type Launch = Pick<LaunchSession, 'firstScreenShown' | 'erasedNotice'>;
 
 export const LaunchContext = createContext<Launch | null>(null);
 

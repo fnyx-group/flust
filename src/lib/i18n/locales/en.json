@@ -836,10 +836,14 @@
     },
     "safeMode": {
       "title": "Safe mode",
-      "stopped": "flust closed twice in a row while starting, so it opened this minimal screen. Nothing has been read or changed.",
+      "stopped": "flust could not start twice in a row. Your data has been neither opened nor changed.",
       "choices": "You can try again, look at the error report and share it to report the problem, or erase everything and start over.",
       "retry": "Try again",
       "report": "See the error report",
+      "reportHint": "Asks for your phone's unlock first, if it has one.",
+      "reportPrompt": "Open the error report",
+      "reportCancel": "Cancel",
+      "reportRefused": "The report stays closed: the phone did not confirm it's you.",
       "erase": "Erase everything"
     },
     "report": {

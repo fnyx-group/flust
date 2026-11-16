@@ -20,9 +20,10 @@ export function createAppEraseFlow(show: (step: EraseStep) => void) {
     },
     eraseDiagnostics: async () => {
       const cleared = await errorLog.clear();
-      await launchGuard.finish();
-      return cleared.ok;
+      const counterGone = await launchGuard.finish();
+      return cleared.ok && counterGone;
     },
+    pauseDiagnostics: () => errorLog.pause(),
     show,
   });
 }

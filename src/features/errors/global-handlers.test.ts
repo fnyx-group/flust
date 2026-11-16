@@ -3,7 +3,7 @@ import { installGlobalHandlers } from '@/features/errors/global-handlers';
 
 type Handler = (error: unknown, isFatal?: boolean) => void;
 
-function setUp(record: (error: unknown, context: ErrorContext) => Promise<void>) {
+function setUp(record: (error: unknown, context: ErrorContext) => Promise<void>, installs = 1) {
   const events: string[] = [];
   let handler: Handler = (_error, isFatal) => void events.push(`previous ${String(isFatal)}`);
   const errorUtils = {
@@ -15,14 +15,16 @@ function setUp(record: (error: unknown, context: ErrorContext) => Promise<void>)
   let tracker:
     | Parameters<NonNullable<Parameters<typeof installGlobalHandlers>[0]['rejectionTracker']>>[0]
     | null = null;
-  installGlobalHandlers({
-    errorUtils,
-    rejectionTracker: (options) => {
-      tracker = options;
-    },
-    record,
-    waitMs: 1000,
-  });
+  for (let install = 0; install < installs; install += 1) {
+    installGlobalHandlers({
+      errorUtils,
+      rejectionTracker: (options) => {
+        tracker = options;
+      },
+      record,
+      waitMs: 1000,
+    });
+  }
   return {
     events,
     handle: (error: unknown, isFatal?: boolean) => handler(error, isFatal),
@@ -37,6 +39,17 @@ describe('installGlobalHandlers', () => {
   it('records a fatal error, then hands it to the previous handler', async () => {
     const contexts: ErrorContext[] = [];
     const { events, handle } = setUp(async (_error, context) => void contexts.push(context));
+
+    handle(new Error('boom'), true);
+    await jest.runAllTimersAsync();
+
+    expect(contexts).toEqual([{ kind: 'fatal' }]);
+    expect(events).toEqual(['previous true']);
+  });
+
+  it('records an error once when installed again, as Fast Refresh does', async () => {
+    const contexts: ErrorContext[] = [];
+    const { events, handle } = setUp(async (_error, context) => void contexts.push(context), 2);
 
     handle(new Error('boom'), true);
     await jest.runAllTimersAsync();
