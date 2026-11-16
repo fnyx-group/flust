@@ -12,7 +12,7 @@ import {
   totalCard,
   type SummaryCardText,
 } from '@/features/lapse/labels';
-import { colors, radii, spacing, typography } from '@/ui/theme';
+import { colors, maxFontScale, radii, spacing, typography } from '@/ui/theme';
 
 type LapseSummaryCardsProps = {
   // The journey before the lapse.
@@ -47,7 +47,7 @@ function SummaryCards({ summary }: { summary: LapseSummary }) {
 function Card({ text }: { text: SummaryCardText }) {
   return (
     <View accessible accessibilityLabel={text.spoken} style={styles.card}>
-      <Text maxFontSizeMultiplier={1.2} style={styles.value}>
+      <Text maxFontSizeMultiplier={maxFontScale.lapseSummary} style={styles.value}>
         {text.value}
       </Text>
       <Text style={styles.caption}>{text.caption}</Text>

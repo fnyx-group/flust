@@ -9,7 +9,8 @@ import { undoLapse } from '@/features/lapse/undo-lapse';
 import { useSession } from '@/features/session/session-context';
 import { deviceOffsetAt } from '@/features/shared/device-time';
 import { useStorage } from '@/features/storage/storage-context';
-import { colors, pressedOpacity, sizes, spacing, typography } from '@/ui/theme';
+import { controlOpacity } from '@/ui/control-opacity';
+import { colors, sizes, spacing, typography } from '@/ui/theme';
 
 // One short line above the emergency button during the hours after a lapse. Plain text: no
 // color, no record, no animation.
@@ -70,7 +71,7 @@ function Undo({ journey, record }: { journey: Journey; record: LapseRecord }) {
           disabled={busy}
           hitSlop={spacing.s}
           onPress={undo}
-          style={({ pressed }) => [styles.undoButton, (pressed || busy) && styles.pressed]}
+          style={({ pressed }) => [styles.undoButton, controlOpacity(pressed, busy)]}
         >
           <Text style={styles.undoLabel}>{t('home.lapse.undo')}</Text>
         </Pressable>
@@ -115,8 +116,5 @@ const styles = StyleSheet.create({
     fontFamily: typography.row.fontFamily,
     color: colors.text,
     textDecorationLine: 'underline',
-  },
-  pressed: {
-    opacity: pressedOpacity,
   },
 });

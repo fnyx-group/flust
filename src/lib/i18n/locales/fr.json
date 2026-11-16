@@ -56,8 +56,7 @@
       "text": "Ces derniers jours ont l'air difficiles. En parler à quelqu'un de confiance ou à un professionnel de santé peut vraiment aider.",
       "emergency": "Si tu es en danger, appelle le numéro d'urgence de l'endroit où tu te trouves.",
       "dismiss": "Masquer ce message pour aujourd'hui",
-      "help": "Voir les numéros d'aide",
-      "helpHint": "Ouvre les numéros d'aide"
+      "help": "Voir les numéros d'aide"
     }
   },
   "emergency": {
@@ -71,7 +70,7 @@
       "inhale": "Inspire",
       "hold": "Retiens",
       "exhale": "Expire",
-      "rhythm": "Inspire 4 s, retiens 4 s, expire 6 s",
+      "rhythm": "Inspire 4 s, retiens 4 s, expire 6 s",
       "guide": "Guide de respiration"
     },
     "plan": "Ton plan",
@@ -158,7 +157,6 @@
     },
     "loadFailed": "Le journal n'a pas pu être lu. Rien n'est perdu.",
     "retry": "Réessayer",
-    "openHint": "Ouvre la note",
     "note": {
       "close": "Fermer",
       "save": "Enregistrer",

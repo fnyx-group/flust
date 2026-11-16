@@ -36,6 +36,7 @@ import {
   type SaveNoteError,
 } from '@/features/journal/save-note';
 import { deviceCalendar, deviceOffsetAt } from '@/features/shared/device-time';
+import { useReduceMotion } from '@/features/shared/use-reduce-motion';
 import { useStorage } from '@/features/storage/storage-context';
 import { Button } from '@/ui/button';
 import { ConfirmSheet } from '@/ui/confirm-sheet';
@@ -76,7 +77,8 @@ export function NoteEditor({ note }: { note: Note | null }) {
   const working = useRef(false);
   const body = useRef<TextInputInstance>(null);
   const scroll = useRef<ScrollViewInstance>(null);
-  const followEnd = useFollowTextEnd(scroll, draft.body);
+  const reduceMotion = useReduceMotion() !== false;
+  const followEnd = useFollowTextEnd(scroll, draft.body, reduceMotion);
 
   const saved = draftOf(note);
   const dirty = hasUnsavedChanges(saved, draft);
@@ -235,7 +237,7 @@ export function NoteEditor({ note }: { note: Note | null }) {
         <TextInput
           accessibilityLabel={t('journal.note.titleSpoken')}
           placeholder={t('journal.note.titlePlaceholder')}
-          placeholderTextColor={colors.locked}
+          placeholderTextColor={colors.muted}
           value={draft.title}
           maxLength={NOTE_TITLE_MAX_LENGTH}
           onChangeText={(title) => change({ title })}
@@ -249,7 +251,7 @@ export function NoteEditor({ note }: { note: Note | null }) {
           ref={body}
           accessibilityLabel={t('journal.note.bodySpoken')}
           placeholder={t('journal.note.bodyPlaceholder')}
-          placeholderTextColor={colors.locked}
+          placeholderTextColor={colors.muted}
           value={draft.body}
           maxLength={NOTE_BODY_MAX_LENGTH}
           onChangeText={(text) => change({ body: text })}

@@ -10,13 +10,11 @@ import {
 } from 'react-native';
 
 import { ScrollView } from '@/ui/scroll-view';
-import { colors, radii, typography } from '@/ui/theme';
+import { colors, maxFontScale, radii, typography, wheelNearOpacity } from '@/ui/theme';
 
 const ROW_HEIGHT = 44;
 const VISIBLE_ROWS = 5;
 const PADDING_ROWS = (VISIBLE_ROWS - 1) / 2;
-// Opacity by distance from the middle band: the rows above and below fade out.
-const FADE = [1, 0.5, 0.2];
 // A drag released without momentum still snaps; the row is read once that snap is over.
 const SNAP_SETTLE_MS = 250;
 
@@ -103,12 +101,14 @@ export function Wheel({ rows, selectedIndex, onChange, label, reduceMotion, widt
         contentContainerStyle={styles.content}
       >
         {rows.map((row, index) => {
-          const distance = Math.abs(index - offset / ROW_HEIGHT);
-          const fade = FADE[Math.min(Math.round(distance), FADE.length - 1)] ?? 0;
+          const distance = Math.round(Math.abs(index - offset / ROW_HEIGHT));
           const selected = index === centered;
           return (
             <View key={row} style={styles.row}>
-              <Text style={[selected ? styles.selected : styles.other, { opacity: fade }]}>
+              <Text
+                maxFontSizeMultiplier={maxFontScale.wheel}
+                style={selected ? styles.selected : distance <= 1 ? styles.near : styles.far}
+              >
                 {row}
               </Text>
             </View>
@@ -144,8 +144,14 @@ const styles = StyleSheet.create({
     ...typography.wheelSelected,
     color: colors.text,
   },
-  other: {
+  // The rows fade out away from the middle band, every one still readable at 4.5:1.
+  near: {
     ...typography.wheelRow,
     color: colors.textSecondary,
+    opacity: wheelNearOpacity,
+  },
+  far: {
+    ...typography.wheelRow,
+    color: colors.muted,
   },
 });

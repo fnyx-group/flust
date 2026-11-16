@@ -7,7 +7,7 @@ import { weekStrip, type WeekDayStatus } from '@/domain/week';
 import { useClock } from '@/features/clock/clock-context';
 import { spokenWeek, weekdayInitial } from '@/features/home/labels';
 import { deviceOffsetAt } from '@/features/shared/device-time';
-import { colors, sizes, spacing, typography } from '@/ui/theme';
+import { colors, sizes, spacing, todayBarOpacity, typography } from '@/ui/theme';
 
 // The selector returns the local day, a number, so the strip re-renders once a day.
 export function WeekStrip({ journey }: { journey: Journey }) {
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   },
   today: {
     backgroundColor: colors.accent,
-    opacity: 0.5,
+    opacity: todayBarOpacity,
   },
   lapse: {
     backgroundColor: colors.separator,
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   beforeStartInitial: {
-    color: colors.locked,
+    color: colors.muted,
   },
 });
 

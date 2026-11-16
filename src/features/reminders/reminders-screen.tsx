@@ -36,7 +36,7 @@ import { RowGroup } from '@/ui/row-group';
 import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
 import { SwitchRow } from '@/ui/switch-row';
-import { colors, pressedOpacity, radii, spacing, typography } from '@/ui/theme';
+import { colors, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type Timed = 'checkIn' | 'thought';
 
@@ -283,9 +283,11 @@ const styles = StyleSheet.create({
   },
   chip: {
     alignSelf: 'flex-start',
-    minHeight: 44,
+    minHeight: sizes.touchTarget,
     justifyContent: 'center',
     paddingHorizontal: spacing.chipHorizontal,
+    // Keeps the time off the edges when large text makes the chip grow.
+    paddingVertical: spacing.xs,
     borderRadius: radii.secondaryButton,
     backgroundColor: colors.separator,
   },

@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { controlOpacity } from '@/ui/control-opacity';
 import { MinusIcon } from '@/ui/icons/minus-icon';
 import { PlusIcon } from '@/ui/icons/plus-icon';
-import { colors, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/theme';
+import { colors, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type StepperProps = {
   label: string;
@@ -73,7 +74,6 @@ type StepButtonProps = {
 };
 
 function StepButton({ label, disabled, onPress, icon }: StepButtonProps) {
-  const color = disabled ? colors.locked : colors.text;
   return (
     <Pressable
       accessibilityRole="button"
@@ -81,9 +81,9 @@ function StepButton({ label, disabled, onPress, icon }: StepButtonProps) {
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.button, controlOpacity(pressed, disabled)]}
     >
-      {icon === 'minus' ? <MinusIcon color={color} /> : <PlusIcon color={color} />}
+      {icon === 'minus' ? <MinusIcon color={colors.text} /> : <PlusIcon color={colors.text} />}
     </Pressable>
   );
 }
@@ -117,9 +117,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.separator,
-  },
-  pressed: {
-    opacity: pressedOpacity,
   },
   value: {
     ...typography.stepperValue,

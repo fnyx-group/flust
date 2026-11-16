@@ -45,6 +45,69 @@ const literalTextSyntax = [
   { selector: `${userFacingAttribute} > JSXExpressionContainer > ${literalText}`, message },
 ];
 
+// Screen readers announce a control by its role and a field by its label. TabBarButton passes
+// the navigator's `role` on, which React Native maps to the same thing. Only the presence of the
+// attribute is checked, not its value.
+const pressable = ":matches([name.name='Pressable'], [name.property.name='Pressable'])";
+const textInput = ":matches([name.name='TextInput'], [name.property.name='TextInput'])";
+
+// A sheet backdrop is hidden from screen readers on both platforms, its sheet having a Cancel
+// button. accessible={false} alone does not hide a touchable view from TalkBack.
+const hiddenFromScreenReaders = [
+  "JSXAttribute[name.name='importantForAccessibility'][value.value=/^no(-hide-descendants)?$/]",
+  "JSXAttribute[name.name='accessibilityElementsHidden']:not([value.expression.value=false])",
+]
+  .map((attribute) => `:has(> ${attribute})`)
+  .join('');
+
+function requiredAttribute(element, attributes, message, { exemptWhenHidden }) {
+  const exempt = attributes.map((name) => `:has(> JSXAttribute[name.name='${name}'])`);
+  if (exemptWhenHidden) exempt.push(hiddenFromScreenReaders);
+  return { selector: `JSXOpeningElement${element}:not(${exempt.join(', ')})`, message };
+}
+
+const checkedComponents = '/^(Pressable|TextInput)$/';
+const checkedMessage =
+  'Use Pressable and TextInput under their own names, so the accessibility rules can check them.';
+
+const accessibilitySyntax = [
+  requiredAttribute(
+    pressable,
+    ['accessibilityRole', 'role'],
+    'Give every Pressable an accessibilityRole, such as "button".',
+    { exemptWhenHidden: true },
+  ),
+  requiredAttribute(
+    textInput,
+    ['accessibilityLabel', 'aria-label'],
+    'Give every TextInput an accessibilityLabel: a placeholder is not read once text is typed.',
+    { exemptWhenHidden: false },
+  ),
+  {
+    selector: `CallExpression:matches([callee.name='createAnimatedComponent'], [callee.property.name='createAnimatedComponent'])[arguments.0.name=${checkedComponents}]`,
+    message: checkedMessage,
+  },
+  { selector: `VariableDeclarator[init.name=${checkedComponents}]`, message: checkedMessage },
+  {
+    selector: `ImportSpecifier[imported.name=${checkedComponents}]:not([local.name=${checkedComponents}])`,
+    message: checkedMessage,
+  },
+  {
+    selector:
+      "JSXOpeningElement[name.name='Text']:has(> JSXAttribute[name.name=/^on(Press|LongPress)$/])",
+    message: 'Put pressable text in a Pressable with an accessibilityRole.',
+  },
+];
+
+// The locked color is too dark for text (decision 0032): only the emblem and the stars draw it.
+const lockedColorOwners = ['src/ui/rank-emblem.tsx', 'src/ui/rank-stars.tsx'];
+const lockedColorSyntax = [
+  {
+    selector: "MemberExpression[object.name='colors'][property.name='locked']",
+    message: `colors.locked is for shapes, drawn by ${lockedColorOwners.join(' and ')}. Dimmed text uses colors.muted.`,
+  },
+];
+
 function restrictedSyntax(files, ignores, rules) {
   return { files, ignores, rules: { 'no-restricted-syntax': ['error', ...rules] } };
 }
@@ -64,6 +127,18 @@ const nativeScrollViews = {
   name: 'react-native',
   importNames: ['ScrollView', 'FlatList', 'SectionList', 'VirtualizedList'],
   message: `Use ScrollView from @/ui/scroll-view. Add a list there if one is needed, with overScrollMode="never".`,
+};
+
+// The Touchable components escape the Pressable accessibility rule.
+const touchables = {
+  name: 'react-native',
+  importNames: [
+    'TouchableOpacity',
+    'TouchableHighlight',
+    'TouchableWithoutFeedback',
+    'TouchableNativeFeedback',
+  ],
+  message: 'Use Pressable with an accessibilityRole.',
 };
 
 // Native libraries that touch privacy are each used from one file, so what they may do is
@@ -166,6 +241,7 @@ function layer(
   }
   const paths = [
     ...networkImportPaths,
+    touchables,
     ...(allowNativeScroll ? [] : [nativeScrollViews]),
     ...ownedImportPaths(owner),
   ];
@@ -226,8 +302,13 @@ module.exports = defineConfig([
   layer('lib', { forbidden: except('lib') }),
   restrictedSyntax(
     sourceFiles,
-    [themeFile, ...testFiles],
-    [...hexColorSyntax, ...literalTextSyntax],
+    [themeFile, ...testFiles, ...lockedColorOwners],
+    [...hexColorSyntax, ...literalTextSyntax, ...accessibilitySyntax, ...lockedColorSyntax],
+  ),
+  restrictedSyntax(
+    lockedColorOwners,
+    [],
+    [...hexColorSyntax, ...literalTextSyntax, ...accessibilitySyntax],
   ),
   restrictedSyntax([themeFile], [], literalTextSyntax),
   restrictedSyntax(testFiles, [], hexColorSyntax),

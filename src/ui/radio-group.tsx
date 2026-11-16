@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     height: sizes.radio,
     borderRadius: sizes.radio / 2,
     borderWidth: 2,
-    borderColor: colors.locked,
+    borderColor: colors.muted,
     alignItems: 'center',
     justifyContent: 'center',
   },

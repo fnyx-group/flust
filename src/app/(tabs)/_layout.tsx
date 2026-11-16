@@ -8,7 +8,8 @@ import type { IconProps } from '@/ui/icons/line-icon';
 import { RanksIcon } from '@/ui/icons/ranks-icon';
 import { SettingsIcon } from '@/ui/icons/settings-icon';
 import { TabBarButton } from '@/ui/tab-bar-button';
-import { colors, typography } from '@/ui/theme';
+import { TabLabel } from '@/ui/tab-label';
+import { colors } from '@/ui/theme';
 
 function tabIcon(Icon: ComponentType<IconProps>) {
   return function TabIcon({ focused }: { focused: boolean }) {
@@ -24,7 +25,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.text,
         tabBarInactiveTintColor: colors.textSecondary,
-        tabBarLabelStyle: typography.tabLabel,
+        tabBarLabel: TabLabel,
         tabBarButton: TabBarButton,
         tabBarStyle: {
           backgroundColor: colors.background,

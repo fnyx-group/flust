@@ -19,6 +19,7 @@ import { useNotificationTaps } from '@/features/reminders/use-notification-taps'
 import { useReminderSync } from '@/features/reminders/use-reminder-sync';
 import { SessionGate } from '@/features/session/session-gate';
 import { useSession } from '@/features/session/session-context';
+import { useReduceMotion } from '@/features/shared/use-reduce-motion';
 import { StorageGate } from '@/features/storage/storage-gate';
 import { i18n } from '@/lib/i18n';
 import { colors, fonts } from '@/ui/theme';
@@ -75,24 +76,28 @@ export default function RootLayout() {
 }
 
 // Screens shown over the others slide up as cards rather than native modals: a native modal
-// would sit above the lock cover, which is drawn inside the app.
+// would sit above the lock cover, which is drawn inside the app. With Reduce Motion on, every
+// screen fades in instead of sliding: the system setting does not reach these transitions.
 const COVERING = { animation: 'slide_from_bottom', gestureEnabled: false } as const;
+const COVERING_STILL = { animation: 'fade', gestureEnabled: false } as const;
 
 // Until a journey exists, the onboarding is the only reachable screen. Finishing it sets the
 // journey, and the router then moves to the first screen that became available: the home tab.
 function RootStack() {
   const { journey } = useSession();
   const started = journey !== null;
+  const reduceMotion = useReduceMotion() !== false;
+  const covering = reduceMotion ? COVERING_STILL : COVERING;
   useReminderSync();
   useNotificationTaps();
   useHeldNavigation();
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false, ...(reduceMotion && { animation: 'fade' }) }}>
       <Stack.Protected guard={started}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="emergency" options={COVERING} />
+        <Stack.Screen name="emergency" options={covering} />
         <Stack.Screen name="check-in" />
-        <Stack.Screen name="note" options={COVERING} />
+        <Stack.Screen name="note" options={covering} />
         <Stack.Screen name="reasons-and-plans" />
         <Stack.Screen name="reason" />
         <Stack.Screen name="plan" />
@@ -102,8 +107,8 @@ function RootStack() {
         <Stack.Screen name="erase" />
         <Stack.Screen name="reminders" />
         <Stack.Screen name="lock-settings" />
-        <Stack.Screen name="lapse" options={COVERING} />
-        <Stack.Screen name="rank-unlocked" options={COVERING} />
+        <Stack.Screen name="lapse" options={covering} />
+        <Stack.Screen name="rank-unlocked" options={covering} />
       </Stack.Protected>
       <Stack.Protected guard={!started}>
         <Stack.Screen name="onboarding" />

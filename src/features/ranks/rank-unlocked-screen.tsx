@@ -40,7 +40,7 @@ function RankUnlocked({ unlock, totalCleanDays }: UnlockScreenData) {
             <Text accessibilityRole="header" style={styles.name}>
               {text.name}
             </Text>
-            <RankStars circle={unlock.highest.circle} color={colors.text} size={sizes.starLarge} />
+            <RankStars circle={unlock.highest.circle} unlocked size={sizes.starLarge} />
             <Text style={styles.line}>{text.line}</Text>
             {text.others !== null && <Text style={styles.others}>{text.others}</Text>}
           </Animated.View>

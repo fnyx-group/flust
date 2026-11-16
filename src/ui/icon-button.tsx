@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
-import { colors, pressedOpacity, radii, sizes } from '@/ui/theme';
+import { controlOpacity } from '@/ui/control-opacity';
+import { colors, radii, sizes } from '@/ui/theme';
 
 type IconButtonProps = {
   accessibilityLabel: string;
@@ -25,7 +26,7 @@ export function IconButton({
       disabled={disabled}
       hitSlop={4}
       onPress={onPress}
-      style={({ pressed }) => [styles.button, (pressed || disabled) && styles.pressed]}
+      style={({ pressed }) => [styles.button, controlOpacity(pressed, disabled)]}
     >
       {children}
     </Pressable>
@@ -40,8 +41,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  pressed: {
-    opacity: pressedOpacity,
   },
 });

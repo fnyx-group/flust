@@ -30,10 +30,7 @@ export function CurrentRankCard({ journey, unlockedRanks }: CurrentRankCardProps
       <View style={styles.texts}>
         <View style={styles.circleRow}>
           <Text style={typography.sectionLabel}>{text.circle}</Text>
-          <RankStars
-            circle={text.rank.circle}
-            color={text.unlocked ? colors.text : colors.locked}
-          />
+          <RankStars circle={text.rank.circle} unlocked={text.unlocked} />
         </View>
         <Text style={styles.name}>{text.name}</Text>
         <Text style={styles.detail}>{text.detail}</Text>
