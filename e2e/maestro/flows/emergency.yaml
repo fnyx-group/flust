@@ -3,7 +3,8 @@ appId: org.fnyxgroup.flust
 - runFlow: ../common/onboard.yaml
 - tapOn: I have an urge
 - assertVisible: Let the wave pass.
-- assertVisible: Breathing guide
+# Android reads the ring as its name followed by the current phase, which changes as it runs.
+- assertVisible: 'Breathing guide, (Breathe in|Hold|Breathe out)'
 - scrollUntilVisible:
     element: Your plan
 - assertVisible: Your reasons

@@ -12,8 +12,13 @@ appId: org.fnyxgroup.flust
 - assertVisible: .*Maestro title.*a walk.*
 
 # Edit: the title is replaced and the list shows the new one. The short title leaves the cursor
-# at its end when the wide field is tapped.
-- tapOn: .*Maestro title.*
+# at its end when the wide field is tapped. A row tapped while the note screen is still closing
+# is ignored, so each one waits for the animation and is tapped again if nothing changed.
+- waitForAnimationToEnd
+- tapOn:
+    text: .*Maestro title.*
+    retryTapIfNoChange: true
+- assertVisible: Close
 - tapOn: Maestro title
 - eraseText: 20
 - inputText: Edited title
@@ -23,8 +28,12 @@ appId: org.fnyxgroup.flust
 - assertNotVisible: .*Maestro title.*
 
 # Delete, after the confirmation sheet.
-- tapOn: .*Edited title.*
-- hideKeyboard
+- waitForAnimationToEnd
+- tapOn:
+    text: .*Edited title.*
+    retryTapIfNoChange: true
+# An existing note opens without the keyboard: hideKeyboard would press Back and close it.
+- assertVisible: Close
 - scrollUntilVisible:
     element: Delete note
 - tapOn: Delete note
