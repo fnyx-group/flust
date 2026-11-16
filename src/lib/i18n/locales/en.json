@@ -56,7 +56,8 @@
       "text": "These last few days seem hard. Talking to someone you trust or to a health professional can really help.",
       "emergency": "If you are in danger, call the emergency number where you are.",
       "dismiss": "Hide this message for today",
-      "help": "See help numbers"
+      "help": "See help numbers",
+      "helpHint": "Opens help numbers"
     }
   },
   "emergency": {
@@ -724,11 +725,11 @@
       },
       "fr114": {
         "name": "Emergencies by text",
-        "detail": "Free text message, 24/7, if you cannot speak out loud or hear"
+        "detail": "Free text message, 24/7, for deaf or hard of hearing people, or if you cannot speak safely"
       },
       "be0800": {
         "name": "Centre de Prévention du Suicide",
-        "detail": "In French, free, 24/7"
+        "detail": "For French-speaking Belgium, free, 24/7"
       },
       "be1813": {
         "name": "Zelfmoordlijn 1813",
@@ -759,16 +760,16 @@
         "detail": "The most important one in an emergency"
       },
       "ca988": {
-        "name": "Suicide crisis helpline",
+        "name": "Suicide Crisis Helpline",
         "detail": "Call or text, 24/7, in English and French. Calls are free."
       },
       "ca911": {
         "name": "Emergency services",
-        "detail": "Police, fire or ambulance"
+        "detail": "For any emergency. Where 911 is not available, dial the local police or emergency number."
       },
       "us988": {
         "name": "988 Suicide & Crisis Lifeline",
-        "detail": "Call or text, free, 24/7"
+        "detail": "Call or text, 24/7. Conversations are free."
       },
       "us911": {
         "name": "Emergency services",
@@ -808,8 +809,8 @@
       }
     },
     "textRow": "Or text {{number}}",
-    "callSpoken": "Call {{number}}, {{name}}",
-    "textSpoken": "Text {{number}}, {{name}}",
+    "callSpoken": "Call {{number}}, {{name}}. {{detail}}",
+    "textSpoken": "Text {{number}}, {{name}}. {{detail}}",
     "callHint": "Opens the phone app with this number",
     "textHint": "Opens messages with this number",
     "directoryIntro": "An online directory lists helplines in many countries. The link opens outside flust.",

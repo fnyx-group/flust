@@ -52,12 +52,28 @@ describe('helpEntries', () => {
   });
 
   it('follows the chosen country, not the device region', () => {
-    expect(helpEntries('US', 'FR')).toBe(helpEntries('US', 'US'));
+    expect(numbersOf(helpEntries('US', 'FR'))).toEqual(['988', '911']);
   });
 
-  it('names 112 as the official number for other countries of the European Union', () => {
-    expect(helpEntries('other', 'DE').map((entry) => entry.id)).toEqual(['eu112']);
-    expect(helpEntries('other', 'fr').map((entry) => entry.id)).toEqual(['eu112']);
+  it('gives the overseas departments the French numbers their official pages confirm', () => {
+    for (const code of ['GP', 'MQ', 'GF', 'RE']) {
+      expect(numbersOf(helpEntries('FR', code))).toEqual(['3114', '15', '112', '114']);
+    }
+    expect(numbersOf(helpEntries('FR', 'YT'))).toEqual(['3114', '112']);
+  });
+
+  it('names 112 as the official number when the device is set to an unlisted EU country', () => {
+    for (const code of ['DE', 'it', 'MF']) {
+      expect(helpEntries('other', code).map((entry) => entry.id)).toEqual(['eu112']);
+    }
+  });
+
+  // Someone whose device is set to a listed country and who picks "another country" may be
+  // anywhere, so 112 comes with the local number as the way out.
+  it('does not assume the European Union when another country is picked over a listed one', () => {
+    for (const code of ['FR', 'fr', 'BE', 'IE', 'GP']) {
+      expect(helpEntries('other', code).map((entry) => entry.id)).toEqual(['fallback112']);
+    }
   });
 
   it('falls back to 112 elsewhere, or without a region', () => {
@@ -68,7 +84,9 @@ describe('helpEntries', () => {
 
   it('gives every region at least one emergency number', () => {
     for (const region of HELP_REGIONS) {
-      expect(helpEntries(region, null).some((entry) => entry.kind === 'emergency')).toBe(true);
+      for (const code of [null, 'YT']) {
+        expect(helpEntries(region, code).some((entry) => entry.kind === 'emergency')).toBe(true);
+      }
     }
   });
 });
@@ -104,8 +122,11 @@ describe('help resources review', () => {
   const now = Date.now();
   const checks = [...ALL_HELP_ENTRIES, HELP_DIRECTORY];
 
-  it('gives every entry an official https source', () => {
-    for (const check of checks) expect(check.source).toMatch(/^https:\/\/[^\s/]+\.[^\s/]+/);
+  it('gives every entry at least one official https source', () => {
+    for (const check of checks) {
+      expect(check.sources.length).toBeGreaterThan(0);
+      for (const source of check.sources) expect(source).toMatch(/^https:\/\/[^\s/]+\.[^\s/]+/);
+    }
     expect(HELP_DIRECTORY.url).toMatch(/^https:\/\//);
   });
 

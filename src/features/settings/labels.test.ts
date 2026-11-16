@@ -1,10 +1,4 @@
-import {
-  displayUrl,
-  languageLabel,
-  planCountLabel,
-  SOURCE_URL,
-  WEBSITE_URL,
-} from '@/features/settings/labels';
+import { languageLabel, planCountLabel } from '@/features/settings/labels';
 import { createI18n } from '@/lib/i18n';
 
 jest.mock('expo-localization', () => ({ getLocales: () => [{ languageCode: 'en' }] }));
@@ -38,12 +32,5 @@ describe('settings footer', () => {
     expect(english('settings.footer', { version: '0.1.0' })).toBe(
       'flust 0.1.0\u00a0· Open source, encrypted on your phone',
     );
-  });
-});
-
-describe('displayUrl', () => {
-  it('drops the scheme and the trailing slash', () => {
-    expect(displayUrl(WEBSITE_URL)).toBe('fnyx-group.org/flust');
-    expect(displayUrl(SOURCE_URL)).toBe('github.com/fnyx-group/flust');
   });
 });

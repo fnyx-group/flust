@@ -115,8 +115,9 @@ Notification text is always neutral and never reveals what the app is about.
 | Case                                                              | Expected behavior                                                                                                               |
 | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | No region on the device                                           | "Another country": 112, with the advice to dial the local number if it does not connect, and the findahelpline.com link.        |
-| Region not in the list                                            | The same. In the European Union, 112 is named as the official number.                                                           |
-| French overseas department                                        | The French numbers.                                                                                                             |
+| Region not in the list                                            | The same. When the device is set to an unlisted EU country, 112 is named as the official number.                                |
+| Canada, where 911 is not available                                | The 911 row says to dial the local police or emergency number instead.                                                          |
+| French overseas department                                        | The French numbers an official page confirms there: all four, except in Mayotte, which shows 3114 and 112.                      |
 | Abroad, or a region setting that differs from where the person is | The "Country" row shows another country's numbers. The choice is not stored and the screen opens on the device region again.    |
 | App language and region differ                                    | The numbers follow the region, the text follows the language.                                                                   |
 | No phone or messages app, such as a tablet                        | A calm line gives the number to dial or text by hand.                                                                           |

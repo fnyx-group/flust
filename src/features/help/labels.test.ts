@@ -8,6 +8,8 @@ import {
   regionLabel,
   spokenAction,
   spokenNumber,
+  textRowLabel,
+  unbrokenNumber,
 } from '@/features/help/labels';
 import { createI18n } from '@/lib/i18n';
 
@@ -50,15 +52,15 @@ describe('spokenNumber', () => {
 });
 
 describe('spokenAction', () => {
-  it('reads the action, the number digit by digit and the service', () => {
+  it('reads the action, the number digit by digit, the service and its detail', () => {
     expect(spokenAction(french, entryOf('FR', 0), 'call')).toBe(
-      'Appeler le 3 1 1 4, Prévention du suicide',
+      'Appeler le 3 1 1 4, Prévention du suicide. Numéro national, gratuit, 24\u00a0h/24 et 7\u00a0j/7',
     );
     expect(spokenAction(english, entryOf('US', 0), 'text')).toBe(
-      'Text 9 8 8, 988 Suicide & Crisis Lifeline',
+      'Text 9 8 8, 988 Suicide & Crisis Lifeline. Call or text, 24/7. Conversations are free.',
     );
-    expect(spokenAction(french, entryOf('FR', 3), 'text')).toBe(
-      'Envoyer un SMS au 1 1 4, Urgences par SMS',
+    expect(spokenAction(english, entryOf('CH', 0), 'call')).toBe(
+      'Call 1 4 3, La Main Tendue. Anonymous, day and night. The call may cost a few cents depending on the operator.',
     );
   });
 
@@ -68,10 +70,22 @@ describe('spokenAction', () => {
   });
 });
 
+describe('unbrokenNumber', () => {
+  it('joins the groups of a number with no-break spaces', () => {
+    expect(unbrokenNumber('0800 32 123')).toBe('0800\u00a032\u00a0123');
+    expect(unbrokenNumber('3114')).toBe('3114');
+  });
+
+  it('names the number of the text row', () => {
+    expect(textRowLabel(french, entryOf('US', 0))).toBe('Ou par SMS au 988');
+    expect(textRowLabel(english, entryOf('CA', 0))).toBe('Or text 988');
+  });
+});
+
 describe('openFailedMessage', () => {
-  it('gives the number to dial or text by hand', () => {
+  it('gives the number to dial or text by hand, on one line', () => {
     expect(openFailedMessage(french, entryOf('GB', 0), 'call')).toBe(
-      "Le téléphone n'a pas pu s'ouvrir. Tu peux composer le 116 123 toi-même.",
+      "Le téléphone n'a pas pu s'ouvrir. Tu peux composer le 116\u00a0123 toi-même.",
     );
     expect(openFailedMessage(english, entryOf('CA', 0), 'text')).toBe(
       'Messages could not open. You can text 988 yourself.',

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { AccessibilityInfo, Linking, Platform, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, Linking, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -15,10 +15,10 @@ import {
   type HelpRegion,
 } from '@/domain/help-resources';
 import { deviceRegion } from '@/features/help/device-region';
-import { HelpRows } from '@/features/help/help-row';
+import { HelpFailure, HelpRows } from '@/features/help/help-row';
 import { checkedMonth, openFailedMessage, regionLabel } from '@/features/help/labels';
 import { openHelp } from '@/features/help/open-help';
-import { displayUrl } from '@/features/settings/labels';
+import { displayUrl } from '@/features/shared/display-url';
 import { BackHeader } from '@/ui/back-header';
 import { NavRow } from '@/ui/nav-row';
 import { OptionSheet } from '@/ui/option-sheet';
@@ -26,6 +26,10 @@ import { RowGroup } from '@/ui/row-group';
 import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
 import { colors, spacing, typography } from '@/ui/theme';
+
+type Failure = { key: string; message: string };
+
+const DIRECTORY = 'directory';
 
 // Calls and text messages open the phone's own apps, and the directory opens outside flust: flust
 // itself sends nothing. The chosen country is not stored, and nothing records that this screen
@@ -35,7 +39,8 @@ export function HelpScreen() {
   const [region] = useState(deviceRegion);
   const [chosen, setChosen] = useState<HelpRegion>(() => helpRegionFor(region));
   const [picking, setPicking] = useState(false);
-  const [failure, setFailure] = useState<string | null>(null);
+  // The row that could not open, by entry id or "directory", and what to do by hand.
+  const [failure, setFailure] = useState<Failure | null>(null);
 
   const entries = helpEntries(chosen, region);
   const listen = entries.filter((entry) => entry.kind === 'listen');
@@ -46,15 +51,24 @@ export function HelpScreen() {
     oldestCheck(withDirectory ? [...entries, HELP_DIRECTORY] : entries),
   );
 
-  async function open(url: string, failedMessage: string) {
+  // Announced on both platforms: an Android live region on a line that has just appeared is not
+  // read reliably.
+  async function open(url: string, failed: Failure) {
     setFailure(null);
     if ((await openHelp((target) => Linking.openURL(target), url)) === 'opened') return;
-    setFailure(failedMessage);
-    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(failedMessage);
+    setFailure(failed);
+    AccessibilityInfo.announceForAccessibility(failed.message);
   }
 
   function openEntry(entry: HelpEntry, action: HelpAction) {
-    void open(dialUrl(entry, action), openFailedMessage(t, entry, action));
+    void open(dialUrl(entry, action), {
+      key: entry.id,
+      message: openFailedMessage(t, entry, action),
+    });
+  }
+
+  function failureOf(key: string): string | null {
+    return failure?.key === key ? failure.message : null;
   }
 
   function choose(next: HelpRegion) {
@@ -63,6 +77,7 @@ export function HelpScreen() {
   }
 
   const address = displayUrl(HELP_DIRECTORY.url);
+  const directoryFailure = failureOf(DIRECTORY);
 
   return (
     <Screen bottomInset>
@@ -88,16 +103,29 @@ export function HelpScreen() {
           {withDirectory && <Text style={styles.paragraph}>{t('help.directoryIntro')}</Text>}
           <RowGroup>
             {listen.map((entry) => (
-              <HelpRows key={entry.id} entry={entry} onOpen={openEntry} />
+              <HelpRows
+                key={entry.id}
+                entry={entry}
+                onOpen={openEntry}
+                failure={failureOf(entry.id)}
+              />
             ))}
             {withDirectory && (
-              <NavRow
-                label={t('help.directory')}
-                value={address}
-                accessibilityRole="link"
-                accessibilityHint={t('about.linkHint')}
-                onPress={() => void open(HELP_DIRECTORY.url, t('help.linkFailed', { address }))}
-              />
+              <View>
+                <NavRow
+                  label={t('help.directory')}
+                  value={address}
+                  accessibilityRole="link"
+                  accessibilityHint={t('about.linkHint')}
+                  onPress={() =>
+                    void open(HELP_DIRECTORY.url, {
+                      key: DIRECTORY,
+                      message: t('help.linkFailed', { address }),
+                    })
+                  }
+                />
+                {directoryFailure !== null && <HelpFailure message={directoryFailure} />}
+              </View>
             )}
           </RowGroup>
         </View>
@@ -107,15 +135,15 @@ export function HelpScreen() {
           </Text>
           <RowGroup>
             {emergency.map((entry) => (
-              <HelpRows key={entry.id} entry={entry} onOpen={openEntry} />
+              <HelpRows
+                key={entry.id}
+                entry={entry}
+                onOpen={openEntry}
+                failure={failureOf(entry.id)}
+              />
             ))}
           </RowGroup>
         </View>
-        {failure !== null && (
-          <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.failure}>
-            {failure}
-          </Text>
-        )}
         <View style={styles.footer}>
           <Text style={styles.footerText}>{t('help.footer')}</Text>
           {month !== null && <Text style={styles.checked}>{t('help.checked', { month })}</Text>}
@@ -148,10 +176,6 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...typography.sectionLabel,
-  },
-  failure: {
-    ...typography.paragraphSmall,
-    color: colors.text,
   },
   footer: {
     gap: spacing.s,

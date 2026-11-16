@@ -25,9 +25,24 @@ export function spokenNumber(display: string): string {
   return display.replace(/ /g, '').split('').join(' ');
 }
 
+// The detail is part of what is read: the label replaces the row's own texts for screen readers,
+// and the detail holds what matters before calling, such as the language or the cost.
 export function spokenAction(t: TFunction, entry: HelpEntry, action: HelpAction): string {
-  const options = { number: spokenNumber(entry.display), name: entryName(t, entry) };
+  const options = {
+    number: spokenNumber(entry.display),
+    name: entryName(t, entry),
+    detail: entryDetail(t, entry),
+  };
   return action === 'call' ? t('help.callSpoken', options) : t('help.textSpoken', options);
+}
+
+// Groups joined by no-break spaces, so a number never wraps onto two lines.
+export function unbrokenNumber(display: string): string {
+  return display.replace(/ /g, '\u00a0');
+}
+
+export function textRowLabel(t: TFunction, entry: HelpEntry): string {
+  return t('help.textRow', { number: unbrokenNumber(entry.display) });
 }
 
 export function actionHint(t: TFunction, action: HelpAction): string {
@@ -35,7 +50,7 @@ export function actionHint(t: TFunction, action: HelpAction): string {
 }
 
 export function openFailedMessage(t: TFunction, entry: HelpEntry, action: HelpAction): string {
-  const options = { number: entry.display };
+  const options = { number: unbrokenNumber(entry.display) };
   return action === 'call' ? t('help.callFailed', options) : t('help.textFailed', options);
 }
 

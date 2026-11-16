@@ -56,7 +56,8 @@
       "text": "Ces derniers jours ont l'air difficiles. En parler à quelqu'un de confiance ou à un professionnel de santé peut vraiment aider.",
       "emergency": "Si tu es en danger, appelle le numéro d'urgence de l'endroit où tu te trouves.",
       "dismiss": "Masquer ce message pour aujourd'hui",
-      "help": "Voir les numéros d'aide"
+      "help": "Voir les numéros d'aide",
+      "helpHint": "Ouvre les numéros d'aide"
     }
   },
   "emergency": {
@@ -724,11 +725,11 @@
       },
       "fr114": {
         "name": "Urgences par SMS",
-        "detail": "SMS gratuit, 24 h/24 et 7 j/7, si tu ne peux pas parler à voix haute ou entendre"
+        "detail": "SMS gratuit, 24 h/24 et 7 j/7, en cas de surdité ou de malentendance, ou si tu ne peux pas parler sans danger"
       },
       "be0800": {
         "name": "Centre de Prévention du Suicide",
-        "detail": "En français, gratuit, 24 h/24 et 7 j/7"
+        "detail": "Pour la Belgique francophone, gratuit, 24 h/24 et 7 j/7"
       },
       "be1813": {
         "name": "Zelfmoordlijn 1813",
@@ -759,16 +760,16 @@
         "detail": "Le plus important en cas d'urgence"
       },
       "ca988": {
-        "name": "Prévention du suicide",
+        "name": "Ligne d'aide en cas de crise de suicide",
         "detail": "Appel ou SMS, 24 h/24 et 7 j/7, en français et en anglais. L'appel est gratuit."
       },
       "ca911": {
         "name": "Urgences",
-        "detail": "Police, pompiers ou ambulance"
+        "detail": "Pour toute urgence. Là où le 911 n'existe pas, compose le numéro local de la police ou des secours."
       },
       "us988": {
         "name": "988 Suicide & Crisis Lifeline",
-        "detail": "Appel ou SMS, gratuit, 24 h/24 et 7 j/7"
+        "detail": "Appel ou SMS, 24 h/24 et 7 j/7. Les échanges sont gratuits."
       },
       "us911": {
         "name": "Urgences",
@@ -808,8 +809,8 @@
       }
     },
     "textRow": "Ou par SMS au {{number}}",
-    "callSpoken": "Appeler le {{number}}, {{name}}",
-    "textSpoken": "Envoyer un SMS au {{number}}, {{name}}",
+    "callSpoken": "Appeler le {{number}}, {{name}}. {{detail}}",
+    "textSpoken": "Envoyer un SMS au {{number}}, {{name}}. {{detail}}",
     "callHint": "Ouvre le téléphone avec ce numéro",
     "textHint": "Ouvre les messages avec ce numéro",
     "directoryIntro": "Un annuaire en ligne recense des lignes d'écoute dans de nombreux pays. Le lien s'ouvre hors de flust.",

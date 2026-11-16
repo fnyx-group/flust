@@ -38,6 +38,7 @@ export function LowMoodCard() {
         <Text style={styles.emergency}>{t('home.lowMood.emergency')}</Text>
         <Pressable
           accessibilityRole="button"
+          accessibilityHint={t('home.lowMood.helpHint')}
           onPress={() => whenFocused(() => router.push('/help'))}
           style={({ pressed }) => [styles.help, pressed && styles.pressed]}
         >

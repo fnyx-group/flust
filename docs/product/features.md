@@ -109,16 +109,16 @@ In production builds, screenshots are blocked and the app switcher preview is hi
 
 A small list of help numbers, bundled with the app, chosen by the device region, with a row to see another country:
 
-- France: 3114 (suicide prevention, free, 24/7), 15 (SAMU), 112, and 114, a free text message line, 24/7, for anyone who cannot speak out loud or hear. Also in the overseas departments.
+- France: 3114 (suicide prevention, free, 24/7), 15 (SAMU), 112, and 114, a free text message line, 24/7, for deaf or hard of hearing people, or if you cannot speak safely. The same in Guadeloupe, Martinique, Guyane and La Réunion; Mayotte shows 3114 and 112 only, since no official page confirms 15 and 114 there.
 - Belgium: the Centre de Prévention du Suicide (0800 32 123), the Zelfmoordlijn (1813), 112 and 101.
 - Switzerland: La Main Tendue (143, day and night, anonymous; the call may cost a few centimes depending on the operator), 144, 117 and 112.
-- Canada: 988 (call or text) and 911.
+- Canada: 988 (call or text) and 911 where available, with the advice to dial the local police or emergency number where it is not.
 - United States: 988 (call or text) and 911.
 - United Kingdom: Samaritans (116 123), 999 and 112.
 - Ireland: Samaritans (116 123), 112 and 999.
-- Any other region: 112, named as the official number in the European Union, otherwise with the advice to dial the local number, and a link to findahelpline.com that opens outside flust.
+- Any other region: 112, named as the official number when the device is set to an unlisted member of the European Union, otherwise with the advice to dial the local number, and a link to findahelpline.com that opens outside flust.
 
-Buttons open the phone app or the messages app with the number filled in. flust sends nothing and records nothing. Each number keeps its official source and the day it was checked, and is checked again every year ([0027](../decisions/0027-offline-help-resources.md)). The help resources open from the settings, from the emergency screen and from the low mood card, never from the lapse screen.
+Buttons open the phone app or the messages app with the number filled in. flust sends nothing and records nothing. Each number keeps its official sources and the day it was checked, and is checked again every year ([0027](../decisions/0027-offline-help-resources.md)). The help resources open from the settings, from the emergency screen and from the low mood card, never from the lapse screen.
 
 ### Encrypted storage
 
