@@ -39,6 +39,7 @@ Domain functions never read the clock. They take the current time, `now`, as a U
 - No hex color literals in `src/` outside `src/ui/theme.ts`. Use a color from the theme.
 - No literal user-facing text in JSX outside tests: text children, string expressions, and attributes such as `accessibilityLabel`, `accessibilityHint`, `placeholder`, `title`, `label` and `alt`. All text goes through i18n with `t()`. Text made only of punctuation or spaces, such as a separator, is allowed.
 - Packages and APIs that touch privacy are used from one file each: `expo-notifications`, `expo-local-authentication`, `expo-screen-capture`, and `Share` from `react-native` (`src/features/errors/share-report.ts`). Other files may import their types.
+- No network APIs in `src/`: the globals `fetch`, `XMLHttpRequest`, `WebSocket` and `EventSource`, `expo/fetch`, `expo-file-system/legacy`, the `downloadFileAsync` and `upload` methods, and the remote SVG components of `react-native-svg` (`SvgUri`, `SvgCssUri`, `SvgFromUri`, `SvgWithCssUri`, `fetchText`) ([0030](../decisions/0030-production-android-permissions.md)).
 - React hooks rules and the React Compiler rules from `eslint-plugin-react-hooks` (included by `eslint-config-expo`) are errors, including `exhaustive-deps`.
 
 ## React Compiler
@@ -51,7 +52,7 @@ The React Compiler is enabled by `experiments.reactCompiler` in `app.json`; `bab
 
 ## Tests
 
-- `test/setup.ts` makes `fetch`, `XMLHttpRequest` and `WebSocket` throw, and fails the test even if the error is caught. Tests cannot replace these globals.
+- `test/setup.ts` makes `fetch`, `XMLHttpRequest`, `WebSocket` and `EventSource` throw, and fails the test even if the error is caught. Tests cannot replace these globals. ESLint rejects them in `src/`, and `test/no-network-apis.test.ts` fails on any reference to them, or to a Kotlin or Swift network API, outside the test setup, and on a URL in the app's code outside `src/domain/help-resources.ts` and `src/features/settings/labels.ts`.
 - `src/domain/` and `src/data/` must keep 90 percent line and branch coverage (`pnpm test:coverage`). Each threshold applies once its folder contains code. There is no global threshold.
 
 See [Testing](testing.md) for what to test.

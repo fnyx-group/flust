@@ -102,6 +102,26 @@ const pushFunctions = {
     'flust sends no data off the device: push notifications are not used. See docs/decisions/0021-local-notifications.md.',
 };
 
+// Library APIs that reach the network without naming fetch, which the globals rule cannot see.
+const networkMessage =
+  'flust makes no network calls. See docs/decisions/0006-no-network-access.md.';
+
+const networkImportPaths = [
+  { name: 'expo/fetch', message: networkMessage },
+  {
+    name: 'react-native-svg',
+    importNames: ['SvgUri', 'SvgCssUri', 'SvgFromUri', 'SvgWithCssUri', 'fetchText'],
+    message: networkMessage,
+  },
+];
+
+const networkImportPatterns = [{ regex: '^expo-file-system/legacy$', message: networkMessage }];
+
+const networkProperties = ['downloadFileAsync', 'upload'].map((property) => ({
+  property,
+  message: networkMessage,
+}));
+
 function ownedPackagePatterns(owner) {
   return ownedPackages
     .filter((owned) => owned.owner !== owner)
@@ -124,7 +144,7 @@ function layer(
   name,
   { forbidden, typesOnly = [], packages = false, allowNativeScroll = false, owner = null },
 ) {
-  const patterns = [parentImport, ...ownedPackagePatterns(owner)];
+  const patterns = [parentImport, ...networkImportPatterns, ...ownedPackagePatterns(owner)];
   if (forbidden.length > 0) {
     patterns.push({
       regex: layerImports(forbidden),
@@ -144,7 +164,11 @@ function layer(
       message: `src/${name} is pure logic and may not depend on React, React Native or Expo.`,
     });
   }
-  const paths = [...(allowNativeScroll ? [] : [nativeScrollViews]), ...ownedImportPaths(owner)];
+  const paths = [
+    ...networkImportPaths,
+    ...(allowNativeScroll ? [] : [nativeScrollViews]),
+    ...ownedImportPaths(owner),
+  ];
   if (owner === 'src/features/reminders/notifier.ios.ts') paths.push(pushFunctions);
   return {
     files: [`src/${name}/**/*.{ts,tsx}`],
@@ -168,6 +192,15 @@ module.exports = defineConfig([
   {
     files: sourceFiles,
     rules: {
+      // test/no-network-apis.test.ts also catches them through globalThis and in native code.
+      'no-restricted-globals': [
+        'error',
+        ...['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource'].map((name) => ({
+          name,
+          message: networkMessage,
+        })),
+      ],
+      'no-restricted-properties': ['error', ...networkProperties],
       'react-hooks/exhaustive-deps': 'error',
       'react-hooks/incompatible-library': 'error',
       'react-hooks/unsupported-syntax': 'error',

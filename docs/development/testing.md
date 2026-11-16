@@ -9,6 +9,16 @@ Jest with the `jest-expo` preset, configured in `jest.config.js`. Run the suite 
 
 CI runs it with coverage right after the typecheck. Network access fails any test, and `src/domain/` and `src/data/` have coverage thresholds: see [Conventions](conventions.md#tests).
 
+## Network
+
+flust makes no network calls ([0006](../decisions/0006-no-network-access.md)), checked three ways:
+
+- `test/setup.ts` makes `fetch`, `XMLHttpRequest`, `WebSocket` and `EventSource` throw in every test, and fails the test even if the error is caught.
+- `test/no-network-apis.test.ts` fails if any source file references them: TypeScript and JavaScript are parsed, so comments and longer names such as `prefetch` do not count. It also fails on a URL in the app's code outside the links handed to other apps. Kotlin and Swift sources are searched for the platform network APIs, and Java, Objective-C or C sources fail the test since they are not searched. Only the test setup is excluded.
+- `app.config.test.ts` checks that production builds block `INTERNET` and the other unused permissions, and that `scripts/check-android-release.sh` blocks and expects the same permissions as `app.config.ts` ([0030](../decisions/0030-production-android-permissions.md)). The script itself runs on the built APK or bundle: see [Release](release.md).
+
+These checks cover flust's own code, against mistakes rather than deliberate evasion. Dependencies are not scanned.
+
 The Kotlin tests of `modules/flust-reminders` run in their own CI job, on the JVM without the Android SDK:
 
     gradle --project-dir modules/flust-reminders/jvm-test test

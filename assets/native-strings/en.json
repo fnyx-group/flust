@@ -1,3 +1,5 @@
 {
-  "NSFaceIDUsageDescription": "flust uses Face ID to keep your space private."
+  "ios": {
+    "NSFaceIDUsageDescription": "flust uses Face ID to keep your space private."
+  }
 }
