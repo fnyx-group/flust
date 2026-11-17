@@ -74,6 +74,69 @@ Only needed to build Android locally and to run the release check ([Release](rel
 
    For a newer version, take the SHA-256 from its release page. A mismatch means the file is not the one Google published: delete it.
 
+## End-to-end tests
+
+The Maestro flows run locally against the production release APK, on an emulator ([0031](../decisions/0031-end-to-end-tests.md)). They need the [Android build tools](#android-build-tools) above, Maestro and an emulator.
+
+1. Maestro needs Java 17 or later. The JBR of Android Studio, already in `JAVA_HOME`, is newer and works: check with `"$JAVA_HOME"/bin/java -version`.
+2. Turn off Maestro's analytics, update check and test analysis notice in the container shell profile, before Maestro runs for the first time. Any `maestro` command, even `maestro --version`, saves the analytics choice on its first run, and saves it as on without the variable. `scripts/e2e-android.sh` sets the same variables, and the profile also covers Maestro run by hand:
+
+       echo 'export MAESTRO_CLI_NO_ANALYTICS=1' >> ~/.bashrc
+       echo 'export MAESTRO_DISABLE_UPDATE_CHECK=true' >> ~/.bashrc
+       echo 'export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true' >> ~/.bashrc
+
+3. Install Maestro from its GitHub release, checked against the SHA-256 published with it, never through its `curl | bash` installer. The version is pinned: the environment variables above were checked against this version's source. The commands are chained, so nothing is unpacked after a failed check:
+
+       mkdir -p ~/tools/downloads &&
+         curl -fL -o ~/tools/downloads/maestro-2.12.1.zip https://github.com/mobile-dev-inc/maestro/releases/download/cli-2.12.1/maestro.zip &&
+         echo "54dbb0716425626604973cbb374c585ca30272375d9ce15177a1152765ddd9d7  $HOME/tools/downloads/maestro-2.12.1.zip" | sha256sum -c &&
+         mkdir ~/tools/maestro-2.12.1 &&
+         unzip -q ~/tools/downloads/maestro-2.12.1.zip -d ~/tools/maestro-2.12.1 &&
+         echo 'export PATH="$HOME/tools/maestro-2.12.1/maestro/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"' >> ~/.bashrc
+
+   The same SHA-256 is in the release's `checksums_sha256.txt` and next to `maestro.zip` on the release page. A mismatch means the file is not the one published: delete it. For a newer version, take its SHA-256 from its release page, and check the variable names above and in `scripts/e2e-android.sh` against its source before switching.
+
+4. Block the servers Maestro reports to. Its crash reporter has no setting to turn it off, and the hosts below also serve its analytics and update check, already off through the variables above. In the 2.12.1 source:
+
+   | Host                     | Used for                                                                                                        |
+   | ------------------------ | --------------------------------------------------------------------------------------------------------------- |
+   | `api.copilot.mobile.dev` | Crash reports (`/maestro/error`), the update check (`/v2/maestro/version`), and Maestro's cloud and AI features |
+   | `us.i.posthog.com`       | Analytics (PostHog)                                                                                             |
+
+   The changelog shown after an update check comes from `raw.githubusercontent.com`, which other tools need. It is only fetched once the update check has succeeded, so blocking `api.copilot.mobile.dev` stops it too.
+
+   The container's `/etc/hosts` is the host's file, mounted read-only, so the entries are added on the host and apply to it too. Run the command in a terminal on the host, outside the distrobox: through `distrobox-host-exec`, `sudo` gets no terminal to ask for the password. The `::` entries cover IPv6, since `us.i.posthog.com` has IPv6 addresses:
+
+       sudo tee -a /etc/hosts <<'EOF'
+       # Maestro crash reports, analytics and update check
+       0.0.0.0 api.copilot.mobile.dev
+       0.0.0.0 us.i.posthog.com
+       :: api.copilot.mobile.dev
+       :: us.i.posthog.com
+       EOF
+
+   Check from the container that both names now resolve to `0.0.0.0` and `::` only:
+
+       getent ahosts api.copilot.mobile.dev us.i.posthog.com
+
+   For a newer version of Maestro, search its source for `https://` again before switching.
+
+5. Open a new shell, check `maestro --version`, then check that the analytics choice was saved as off. Maestro keeps it in `~/.local/state/maestro/` (`$XDG_STATE_HOME/maestro/`), not in `~/.maestro`:
+
+       grep '"enabled" : false' ~/.local/state/maestro/analytics.json
+
+   If it shows nothing, delete `analytics.json` and run `maestro --version` again in a shell that has the variables.
+
+   Maestro writes the logs of each run to `~/.local/state/maestro/tests/`: the commands with the text typed, the emulator PIN included, and the screen hierarchies. Nothing there comes from a real phone, and the folder can be deleted at any time.
+
+6. Use the existing emulator, `Medium_Phone_API_37.0` (API 37, Google Play image, 1080 by 2400). Start it from the Device Manager of Android Studio on the host; `adb` in the container reaches it, since the container shares the host's network. To start it from the container instead, point the emulator at the host's virtual devices:
+
+       ANDROID_AVD_HOME=/home/<user>/.android/avd emulator -avd Medium_Phone_API_37.0
+
+   The emulator's system language must be English: the flows tap system dialogs and settle on screens that follow the device language. No fingerprint may be enrolled, so that the system prompt asks for the PIN.
+
+   The lock flow needs a screen lock PIN. With no screen lock, the script sets one (1357) and removes it at the end. With a screen lock already set, `E2E_PIN` must hold its PIN, such as `E2E_PIN=1234 scripts/e2e-android.sh`: the script then uses it and leaves it in place, and stops if the PIN does not match. Its Google Play image includes TalkBack, for the [manual checks](manual-checklist.md).
+
 ## Dependencies
 
 - Add dependencies with `pnpm expo install <pkg>`, dev dependencies with `pnpm expo install <pkg> -- -D`.

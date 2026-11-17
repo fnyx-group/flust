@@ -11,7 +11,8 @@ The checks before each store release, in order. A release that fails one is not 
    It lists the permissions the build requests. It exits with 1 and lists what it found when the build has something it must not ship, including a permission outside the expected list, and with 2 when it cannot read the build. A new permission is either blocked, or added to `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts` and to the script, with a reason.
 
 4. Every help number was checked against its official sources within the last 400 days, which the review test enforces. Check them again every year ([0027](../decisions/0027-offline-help-resources.md)).
-5. The release goes out as a phased rollout on both stores ([Scenarios](../product/scenarios.md#production-incidents)).
+5. The Maestro flows pass on a local production release APK built from the release commit ([Testing](testing.md#end-to-end)), and the [manual checklist](manual-checklist.md) is done for the platforms being released.
+6. The release goes out as a phased rollout on both stores ([Scenarios](../product/scenarios.md#production-incidents)).
 
 ## Local production build
 

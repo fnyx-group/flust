@@ -1,0 +1,19 @@
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- tapOn: I have an urge
+- assertVisible: Let the wave pass.
+# Android reads the ring as its name followed by the current phase, which changes as it runs.
+- assertVisible: 'Breathing guide, (Breathe in|Hold|Breathe out)'
+# With large text, each card is below the fold: scroll to it rather than assert it.
+- scrollUntilVisible:
+    element: Your plan
+- scrollUntilVisible:
+    element: Your reasons
+# The reason chosen in the onboarding.
+- scrollUntilVisible:
+    element: Sleep better
+- scrollUntilVisible:
+    element: I held on
+- tapOn: I held on
+- assertVisible: I have an urge

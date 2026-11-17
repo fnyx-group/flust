@@ -1,0 +1,16 @@
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- tapOn: Settings
+- tapOn: Reminders, Off
+- tapOn: Evening check-in
+# The Android 13 notification permission dialog, by id since its text follows the device language.
+- tapOn:
+    id: com.android.permissioncontroller:id/permission_allow_button
+- assertVisible: Reminder time, (9:00.PM|21:00)
+- back
+- assertVisible: Reminders, (9:00.PM|21:00)
+- tapOn: Reminders, .*
+- tapOn: Evening check-in
+- back
+- assertVisible: Reminders, Off

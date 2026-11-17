@@ -1,0 +1,28 @@
+# Starts from a fresh install and finishes the onboarding in English, with the protection off.
+# Notifications are left unset, so a flow that needs them meets the system dialog.
+appId: org.fnyxgroup.flust
+---
+- launchApp:
+    clearState: true
+    permissions:
+      notifications: unset
+- extendedWaitUntil:
+    visible: Start
+    timeout: 30000
+- tapOn: '(Language|Langue).*'
+- tapOn: English
+- assertVisible: Take back control.
+- tapOn: Start
+- assertVisible: Why are you quitting\?
+- tapOn: Sleep better
+- tapOn: Continue
+- assertVisible: When is it hardest\?
+- tapOn: Stress
+- tapOn: Continue
+- assertVisible: Your first plan
+- tapOn: Continue
+- assertVisible: Last step
+- tapOn: Let's go
+- extendedWaitUntil:
+    visible: I have an urge
+    timeout: 10000

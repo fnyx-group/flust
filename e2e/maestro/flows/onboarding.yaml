@@ -1,0 +1,14 @@
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- assertVisible: Current streak.*
+- assertVisible: I had a lapse
+- assertVisible: Today's check-in.*
+
+# A cold start reads the profile back from encrypted storage instead of starting the onboarding.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: I had a lapse
+    timeout: 30000
+- assertNotVisible: Start

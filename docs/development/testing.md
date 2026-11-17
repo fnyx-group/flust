@@ -74,6 +74,22 @@ The adapters in `src/data/native/` only forward to Expo modules and are excluded
 3. Screen reader: each control is announced with its role and label, disabled buttons as disabled, the calendar days with their full date. Disabled buttons, the lapse undo button while it works included, look clearly fainter than available ones.
 4. Reduce Motion (Remove animations on Android): screens fade instead of sliding, and the breathing circle keeps its size.
 
+## End-to-end
+
+Maestro flows in `e2e/maestro/` run the main journeys on the production release APK, on an Android emulator, before each release ([0031](../decisions/0031-end-to-end-tests.md)). They run locally only, not in CI. Set up Maestro and the emulator as in [Setup](setup.md#end-to-end-tests), build the APK as in [Release](release.md#local-production-build), then:
+
+    scripts/e2e-android.sh                       # every flow
+    scripts/e2e-android.sh e2e/maestro/flows/journal.yaml
+    scripts/e2e-android.sh --font-scale 2.0      # every flow with the largest text
+
+Each flow starts with the app's data cleared and goes through the onboarding in English (`common/onboard.yaml`), then checks one journey: the home screen, the emergency screen, a lapse and its undo, a check-in, a journal note written, edited and deleted, a reminder turned on and off, the app lock, the help numbers, and erasing everything. Selectors are the English texts and screen reader labels, and the emulator's system language must be English. The onboarding and erase flows also stop and relaunch the app, so the data is read back from storage. Nothing is dialed and nothing leaves the emulator.
+
+The script checks the APK with `scripts/check-android-release.sh` first, refuses any device that is not an emulator (by its serial and its `qemu` property), and sets a screen lock PIN for the lock flow, removed at the end. When the emulator already has a screen lock, `E2E_PIN` must hold its PIN (`E2E_PIN=1234 scripts/e2e-android.sh`); the script then leaves the lock in place. It runs Maestro with its analytics, update check and test analysis notice turned off.
+
+The script exits with 0 when every flow passes, with 1 when a flow fails or the release check finds something the build must not ship, and with 2 when it cannot run: a missing tool or APK, a bad option, not exactly one emulator, an `E2E_PIN` that does not match, or a release check that cannot read the build.
+
+What the flows cannot check, such as safe mode, time zone changes or TalkBack, is in the [manual checklist](manual-checklist.md).
+
 ## Where
 
 Test files live next to the code they test: `streak.ts` -> `streak.test.ts`.

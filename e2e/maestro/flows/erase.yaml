@@ -1,0 +1,26 @@
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- tapOn: Settings
+- scrollUntilVisible:
+    element: Erase everything
+- tapOn: Erase everything
+- scrollUntilVisible:
+    element: Erase my data
+- tapOn: Erase my data
+- assertVisible: Erase for good\?
+# The screen title reads the same, so the button is the one in the sheet.
+- tapOn:
+    text: Erase everything
+    below: Erase for good\?
+# Erasing goes back to the device language, so the onboarding is found by its language row.
+- extendedWaitUntil:
+    visible: '(Language|Langue).*'
+    timeout: 15000
+
+# A cold start opens the onboarding again: the data is gone from storage, not only from the screen.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: '(Language|Langue).*'
+    timeout: 30000

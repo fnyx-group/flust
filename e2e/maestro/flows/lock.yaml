@@ -1,0 +1,23 @@
+# Needs a screen lock PIN on the emulator, which scripts/e2e-android.sh sets and passes as PIN.
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- tapOn: Settings
+- tapOn: App lock, Off
+- tapOn: Lock (flust|with .*)
+# The system prompt that confirms the lock.
+- inputText: ${PIN}
+- pressKey: Enter
+- tapOn: Ask again.*
+- tapOn: Immediately
+- assertVisible: Ask again, Immediately
+
+# Leave and come back: the lock screen asks first.
+- pressKey: Home
+- launchApp:
+    stopApp: false
+- assertVisible: Locked
+- tapOn: Enter passcode
+- inputText: ${PIN}
+- pressKey: Enter
+- assertVisible: Ask again, Immediately
