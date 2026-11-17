@@ -25,12 +25,12 @@ describe('planCountLabel', () => {
 });
 
 describe('settings footer', () => {
-  it('names the version and keeps the dot on its line', () => {
+  it('names the version in a plain sentence', () => {
     expect(french('settings.footer', { version: '0.1.0' })).toBe(
-      'flust 0.1.0\u00a0· Open source, chiffré sur ton téléphone',
+      'flust 0.1.0, open source et chiffré sur ton téléphone',
     );
     expect(english('settings.footer', { version: '0.1.0' })).toBe(
-      'flust 0.1.0\u00a0· Open source, encrypted on your phone',
+      'flust 0.1.0, open source and encrypted on your phone',
     );
   });
 });

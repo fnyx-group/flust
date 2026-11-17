@@ -99,8 +99,9 @@ const accessibilitySyntax = [
   },
 ];
 
-// The locked color is too dark for text (decision 0032): only the emblem and the stars draw it.
-const lockedColorOwners = ['src/ui/rank-emblem.tsx', 'src/ui/rank-stars.tsx'];
+// The locked color is too dark for text (decision 0032): only shapes draw it, the locked emblems
+// and the borders and tracks of controls.
+const lockedColorOwners = ['src/ui/rank-emblem.tsx', 'src/ui/button.tsx', 'src/ui/switch-row.tsx'];
 const lockedColorSyntax = [
   {
     selector: "MemberExpression[object.name='colors'][property.name='locked']",

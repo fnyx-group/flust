@@ -11,13 +11,14 @@
   "home": {
     "urgeButton": "J'ai une envie",
     "streak": {
-      "label": "Série en cours",
       "dayUnit_one": "jour",
       "dayUnit_other": "jours",
-      "hourUnit": "h",
-      "minuteUnit": "min",
       "spokenHoursMinutes": "{{hours}} {{minutes}}",
-      "spoken": "Série en cours : {{value}}"
+      "spoken": "Série en cours, {{value}}",
+      "hourUnit_one": "heure",
+      "hourUnit_other": "heures",
+      "minutesRest_one": "et {{count}} min",
+      "minutesRest_other": "et {{count}} min"
     },
     "rank": {
       "first": "Premier rang",
@@ -30,9 +31,9 @@
       "hint": "Ouvre les rangs"
     },
     "quote": {
-      "text": "« {{text}} »",
-      "spoken": "Mot du jour : {{text}}",
-      "spokenWithAuthor": "Mot du jour : {{text}}, {{author}}"
+      "spoken": "Mot du jour, {{text}}",
+      "spokenWithAuthor": "Mot du jour, {{text}}, {{author}}",
+      "label": "Mot du jour"
     },
     "week": {
       "summary_one": "{{count}} jour propre sur les 7 derniers",
@@ -40,15 +41,14 @@
     },
     "lapse": {
       "link": "J'ai eu un écart",
-      "noted": "Écart noté",
+      "noted": "Écart noté.",
       "undo": "Annuler l'écart",
       "undoSpoken": "Annuler l'écart noté",
       "undoFailed": "L'écart n'a pas pu être annulé. Réessaie.",
       "support": "Les prochaines heures comptent. Tu as déjà fait le plus dur en notant cet écart."
     },
     "checkIn": {
-      "todo": "Check-in du jour · à faire",
-      "todoSpoken": "Check-in du jour, à faire",
+      "todo": "Ton check-in du jour t'attend",
       "done": "Check-in fait",
       "hint": "Ouvre le check-in"
     },
@@ -57,14 +57,14 @@
       "emergency": "Si tu es en danger, appelle le numéro d'urgence de l'endroit où tu te trouves.",
       "dismiss": "Masquer ce message pour aujourd'hui",
       "help": "Voir les numéros d'aide"
-    }
+    },
+    "firstDay": "Premier jour"
   },
   "emergency": {
     "close": "Fermer",
     "title": "Laisse passer la vague.",
-    "subtitle": "Une envie monte, atteint un pic puis redescend, souvent en 15 à 30 minutes.",
+    "subtitle": "Une envie retombe souvent en 15 à 30 minutes.",
     "countdownSpoken": "Encore {{time}}",
-    "countdownTime": "{{minutes}} {{seconds}}",
     "waveOver": "La vague est passée ?",
     "breathing": {
       "inhale": "Inspire",
@@ -80,7 +80,8 @@
     "lapse": "J'ai eu un écart",
     "writeNote": "Écrire maintenant",
     "darkThoughts": "Des idées noires ? Parler à quelqu'un",
-    "darkThoughtsHint": "Ouvre les numéros d'aide"
+    "darkThoughtsHint": "Ouvre les numéros d'aide",
+    "countdown": "{{count}} min"
   },
   "lapse": {
     "back": "Retour",
@@ -102,7 +103,7 @@
     "when": "Quand",
     "now": "Maintenant",
     "earlier": "Plus tôt",
-    "selected": "Moment : {{date}}",
+    "selected": "Le {{date}}",
     "context": "Contexte",
     "nextTime": "La prochaine fois",
     "save": "Enregistrer et repartir",
@@ -162,7 +163,7 @@
       "save": "Enregistrer",
       "titlePlaceholder": "Titre (facultatif)",
       "titleSpoken": "Titre, facultatif",
-      "dateTime": "{{date}} à {{time}}",
+      "dateTime": "{{date}}, {{time}}",
       "bodyPlaceholder": "Écris ce que tu veux.",
       "bodySpoken": "Texte de la note",
       "prompts": "Pour commencer",
@@ -172,8 +173,8 @@
         "tomorrow": "Demain, je…"
       },
       "promptStarters": {
-        "helped": "Ce qui m'a fait du bien : ",
-        "proud": "Ma fierté du jour : ",
+        "helped": "Ce qui m'a fait du bien, c'est ",
+        "proud": "Ma fierté du jour, c'est ",
         "tomorrow": "Demain, je "
       },
       "private": "Chiffrée dès l'enregistrement",
@@ -218,7 +219,7 @@
     "about": "À propos",
     "erase": "Tout effacer",
     "eraseHint": "Explique ce qui sera effacé avant de demander confirmation",
-    "footer": "flust {{version}} · Open source, chiffré sur ton téléphone",
+    "footer": "flust {{version}}, open source et chiffré sur ton téléphone",
     "languageSaveFailed": "La langue n'a pas pu être enregistrée.",
     "reminders": "Rappels",
     "lock": "Verrouillage",
@@ -229,20 +230,20 @@
     "back": "Retour",
     "version": "Version {{version}}",
     "license": "flust est open source, sous licence MPL-2.0.",
-    "privacy": "Pas de compte, pas de pub, pas de pistage : tout reste chiffré sur ton téléphone.",
+    "privacy": "Sans compte, sans pub, sans pistage.",
     "website": "Site web",
     "source": "Code source",
     "errorReport": "Rapport d'erreurs",
-    "linkHint": "Ouvre en dehors de flust",
+    "linkHint": "Ouvre en dehors de flust, {{address}}",
     "byline": "Par fnyx-group"
   },
   "erase": {
     "back": "Retour",
     "title": "Tout effacer",
-    "what": "Cela supprime de ce téléphone tout ce que flust conserve : ton parcours et tes écarts, tes rangs, ton journal, tes check-ins, tes raisons, tes moments à risque et tes plans, l'historique de tes envies, tes réglages et le rapport d'erreurs. Les clés de chiffrement sont supprimées elles aussi.",
-    "noRecovery": "Il n'en existe aucune autre copie : flust n'a ni compte, ni serveur, ni sauvegarde. Rien ne pourra être récupéré.",
+    "what": "Ton parcours, tes rangs, ton journal, tes réglages et tout le reste seront supprimés de ce téléphone.",
+    "noRecovery": "Il n'existe aucune autre copie. Rien ne pourra être récupéré.",
     "after": "flust recommencera ensuite depuis le début.",
-    "lapseHint": "Pas besoin de tout effacer pour repartir après un écart : il suffit de le noter. Tes jours propres restent acquis.",
+    "lapseHint": "Après un écart, pas besoin de tout effacer. Note-le, tes jours propres restent acquis.",
     "continue": "Effacer mes données",
     "confirm": {
       "title": "Effacer définitivement ?",
@@ -256,7 +257,8 @@
       "title": "L'effacement n'a pas abouti",
       "body": "Une partie de tes données est peut-être encore sur ce téléphone. Réessaie pour terminer l'effacement.",
       "retry": "Réessayer"
-    }
+    },
+    "cancel": "Annuler"
   },
   "profile": {
     "title": "Raisons et plans",
@@ -269,7 +271,7 @@
     "plans": "Mes plans",
     "addPlan": "Ajouter un plan",
     "editPlanHint": "Modifie ou supprime ce plan",
-    "footer": "Ils s'affichent sur l'écran d'urgence, au moment où tu en as besoin.",
+    "footer": "Ils s'affichent sur l'écran d'urgence.",
     "reasonLimit": "Tu as déjà {{count}} raisons. Retires-en une pour en ajouter une autre.",
     "planLimit": "Tu as déjà {{count}} plans. Supprimes-en un pour en ajouter un autre.",
     "loadFailed": "Tes raisons et tes plans n'ont pas pu être lus. Rien n'est perdu.",
@@ -305,7 +307,7 @@
       "titleNew": "Nouveau plan",
       "titleEdit": "Ton plan",
       "remove": "Supprimer ce plan",
-      "lastPlan": "Garde au moins un plan : l'écran d'urgence en a toujours un à te montrer.",
+      "lastPlan": "Garde au moins un plan. L'écran d'urgence en a toujours un à te montrer.",
       "removeConfirm": {
         "title": "Supprimer ce plan ?",
         "message": "Tu pourras en créer un autre quand tu veux.",
@@ -359,9 +361,9 @@
       "reasons": {
         "key-missing": "flust chiffre tes données avec une clé que seul ce téléphone conserve, dans son stockage sécurisé. Cette clé n'est plus là. Cela arrive quand le téléphone est restauré depuis une sauvegarde ou que les données sont transférées sur un autre téléphone, car la clé n'est jamais copiée.",
         "database-unreadable": "flust chiffre tes données avec une clé que seul ce téléphone conserve, dans son stockage sécurisé. Les données de ce téléphone ne correspondent pas à cette clé, ou le fichier est endommagé, elles ne peuvent donc pas être déchiffrées.",
-        "journey-corrupted": "flust peut ouvrir tes données, mais ton parcours y est abîmé : ses dates ne sont pas cohérentes, donc ta série et ton total de jours ne peuvent pas être calculés correctement. Réessayer relira les mêmes données."
+        "journey-corrupted": "flust peut ouvrir tes données, mais ton parcours y est abîmé. Ses dates ne sont pas cohérentes, donc ta série et ton total de jours ne peuvent pas être calculés correctement. Réessayer relira les mêmes données."
       },
-      "noRecovery": "Il n'en existe aucune autre copie. flust n'a ni compte, ni serveur, ni sauvegarde : personne, pas même les personnes qui font flust, ne peut récupérer ces données. Tu peux réessayer, ou les effacer et recommencer.",
+      "noRecovery": "Il n'en existe aucune autre copie. flust n'a ni compte, ni serveur, ni sauvegarde, donc personne, pas même les personnes qui font flust, ne peut récupérer ces données. Tu peux réessayer, ou les effacer et recommencer.",
       "startOver": "Effacer et recommencer",
       "retry": "Réessayer",
       "confirm": {
@@ -382,18 +384,18 @@
     "continue": "Continuer",
     "progress": "Étape {{current}} sur {{total}}",
     "welcome": {
-      "language": "Langue : {{language}}",
+      "language": "Langue, {{language}}",
       "languageHint": "Ouvre la liste des langues",
       "languageTitle": "Langue",
       "title": "Reprends le contrôle.",
-      "promise": "Pas de compte, pas de pub, pas de pistage. Tout ce que tu écris reste chiffré sur ton téléphone.",
+      "promise": "Sans compte, sans pub, sans pistage. Tout reste chiffré sur ton téléphone.",
       "duration": "Deux minutes pour poser tes bases.",
       "start": "Commencer",
       "footer": "Open source, par fnyx-group"
     },
     "reasons": {
       "title": "Pourquoi tu arrêtes ?",
-      "subtitle": "Choisis ce qui te parle. On te le rappellera quand ce sera dur.",
+      "subtitle": "On te les rappellera quand ce sera dur.",
       "custom": "Écrire la mienne"
     },
     "riskMoments": {
@@ -402,13 +404,14 @@
     },
     "plan": {
       "title": "Ton premier plan",
-      "subtitle": "Décide maintenant, à froid. Au moment de l'envie, tu n'auras plus qu'à suivre.",
+      "subtitle": "Décide à froid. Au moment de l'envie, tu n'auras qu'à suivre.",
       "if": "Si",
       "then": "Alors",
       "triggerHint": "Ouvre la liste des moments",
       "triggerTitle": "Si",
       "custom": "Autre chose",
-      "customHint": "Écrire ici choisit cette action."
+      "customHint": "Écrire ici choisit cette action.",
+      "ifSpoken": "Si {{condition}}"
     },
     "start": {
       "title": "Dernière étape",
@@ -416,7 +419,7 @@
       "label": "Point de départ",
       "now": "Maintenant",
       "pickDate": "Choisir une date",
-      "selected": "Point de départ : {{date}}",
+      "selected": "Départ le {{date}}",
       "finish": "C'est parti",
       "footer": "Tu pourras tout changer dans les réglages.",
       "errors": {
@@ -468,7 +471,7 @@
     },
     "sentences": {
       "plan": "Si {{condition}}, alors {{action}}.",
-      "planCustom": "Si {{condition}}, alors : {{action}}",
+      "planCustom": "Si {{condition}}, alors {{action}}",
       "conditions": {
         "urge": "une envie arrive",
         "in-bed-at-night": "je suis au lit le soir",
@@ -511,8 +514,7 @@
       "5": "Absolu"
     },
     "screen": {
-      "rule": "Ton rang suit tes jours propres au total. Un écart ne te fait jamais redescendre.",
-      "circle": "Cercle {{number}} · {{name}}",
+      "rule": "Un écart ne te fait jamais redescendre.",
       "circleSpoken": "cercle {{number}}, {{name}}",
       "nextIn_one": "Prochain rang dans {{count}} jour",
       "nextIn_other": "Prochain rang dans {{count}} jours",
@@ -526,7 +528,10 @@
         "unlocked": "débloqué",
         "next": "prochain rang, verrouillé",
         "locked": "verrouillé"
-      }
+      },
+      "totalDays_one": "{{count}} jour propre au total",
+      "totalDays_other": "{{count}} jours propres au total",
+      "nextAt": "{{name}} à {{count}}"
     },
     "unlocked": {
       "label": "Nouveau rang",
@@ -547,12 +552,19 @@
         "4": "Tu avances dans le cercle de la Couronne.",
         "5": "Tu avances dans le cercle de l'Absolu."
       },
-      "others_one": "Aussi débloqué : {{names}}",
-      "others_other": "Aussi débloqués : {{names}}",
+      "others_one": "{{names}} aussi débloqué",
+      "others_other": "{{names}} aussi débloqués",
       "listSeparator": ", ",
-      "spoken": "Nouveau rang : {{name}}, {{circle}}",
+      "spoken": "Nouveau rang, {{name}}, {{circle}}",
       "continue": "Continuer",
       "seeRanks": "Voir mes rangs"
+    },
+    "circleNames": {
+      "1": "Cercle de l'Éveil",
+      "2": "Cercle de l'Ombre",
+      "3": "Cercle de la Lumière",
+      "4": "Cercle de la Couronne",
+      "5": "Cercle de l'Absolu"
     }
   },
   "quotes": {
@@ -560,7 +572,7 @@
     "urge-wave": "Une envie est une vague. Elle monte, culmine, puis retombe.",
     "claim-yourself": "Reprends possession de toi-même.",
     "lapse-moment": "Un écart est un moment, pas un verdict.",
-    "headland": "Sois comme le promontoire où les vagues se brisent sans cesse : il reste debout, et autour de lui l'eau agitée s'apaise.",
+    "headland": "Sois comme le promontoire où les vagues se brisent sans cesse. Il reste debout, et autour de lui l'eau agitée s'apaise.",
     "instead": "Ce que tu fais à la place compte plus que ce à quoi tu résistes.",
     "wait-impression": "Attends-moi un peu, impression. Laisse-moi voir ce que tu es et de quoi il s'agit.",
     "next-hour": "Tu n'as pas à tout régler aujourd'hui. Seulement l'heure qui vient.",
@@ -582,7 +594,7 @@
     "why-started": "Rappelle-toi pourquoi tu as commencé.",
     "judgments": "Ce ne sont pas les choses qui nous troublent, mais les jugements que nous portons sur elles.",
     "putting-off": "Pendant qu'on remet à plus tard, la vie passe.",
-    "be-one": "Cesse de discuter de ce que doit être une personne de bien : sois-en une.",
+    "be-one": "Cesse de discuter de ce que doit être une personne de bien. Sois-en une.",
     "up-to-us": "Certaines choses dépendent de nous, d'autres non.",
     "reason": "Si tu veux tout soumettre, soumets-toi à la raison.",
     "retreat": "Nulle part tu ne trouveras de retraite plus paisible ni plus libre de soucis que dans ta propre âme."
@@ -605,7 +617,7 @@
     "riskHours": {
       "title": "Heures à risque",
       "subtitle": "Un rappel avant tes moments sensibles",
-      "unavailable": "Pour l'activer, choisis « {{night}} » ou « {{weekend}} » dans tes moments à risque."
+      "unavailable": "Choisis un moment comme le soir au lit ou le week-end."
     },
     "ranks": {
       "title": "Rangs et paliers",
@@ -621,9 +633,8 @@
       "cancel": "Annuler"
     },
     "preview": "Aperçu",
-    "previewLabel": "Aperçu d'une notification de flust : {{text}}",
-    "footer": "Les notifications restent neutres. Personne ne peut deviner de quoi parle l'app en voyant ton écran.",
-    "iosPreviews": "Pour masquer aussi leur texte sur l'écran verrouillé, va dans Réglages, Notifications, Afficher les aperçus.",
+    "previewLabel": "Aperçu d'une notification de flust, {{text}}",
+    "footer": "Les notifications restent neutres.",
     "denied": "Les notifications sont désactivées pour flust. Tu peux les autoriser dans les réglages du téléphone.",
     "openSettings": "Ouvrir les réglages",
     "saveFailed": "Le rappel n'a pas pu être enregistré. Réessaie.",
@@ -639,7 +650,8 @@
       "channelDescription": "Les rappels que tu as activés dans flust",
       "previewPlaceholder": "Rappel"
     },
-    "back": "Retour"
+    "back": "Retour",
+    "lockScreenPreviews": "Pour les masquer sur l'écran verrouillé, passe par les réglages du téléphone."
   },
   "lock": {
     "locked": "Verrouillé",
@@ -659,8 +671,8 @@
       "toggleSubtitle": "Avec le code du téléphone en secours",
       "delay": "Demander à nouveau",
       "noDeviceLock": "Ajoute un code de verrouillage à ton téléphone pour activer cette protection.",
-      "paused": "Verrouillage en pause : ton téléphone n'a plus de code de verrouillage.",
-      "note": "Le verrouillage protège l'accès à flust sur ce téléphone. Tes données restent chiffrées dans tous les cas.",
+      "paused": "Verrouillage en pause. Ton téléphone n'a plus de code de verrouillage.",
+      "note": "Tes données restent chiffrées, verrou ou pas.",
       "notConfirmed": "Le déverrouillage n'a pas été confirmé. Le verrouillage reste désactivé.",
       "saveFailed": "Le réglage n'a pas pu être enregistré. Réessaie.",
       "back": "Retour"
@@ -724,7 +736,7 @@
       },
       "fr114": {
         "name": "Urgences par SMS",
-        "detail": "SMS gratuit, 24 h/24 et 7 j/7, en cas de surdité ou de malentendance, ou si tu ne peux pas parler sans danger"
+        "detail": "SMS gratuit, 24 h/24, si tu ne peux pas parler ou entendre"
       },
       "be0800": {
         "name": "Centre de Prévention du Suicide",
@@ -812,12 +824,12 @@
     "textSpoken": "Envoyer un SMS au {{number}}, {{name}}. {{detail}}",
     "callHint": "Ouvre le téléphone avec ce numéro",
     "textHint": "Ouvre les messages avec ce numéro",
-    "directoryIntro": "Un annuaire en ligne recense des lignes d'écoute dans de nombreux pays. Le lien s'ouvre hors de flust.",
+    "directoryIntro": "Des lignes d'écoute dans d'autres pays. S'ouvre hors de flust.",
     "directory": "Trouver une ligne d'écoute",
     "callFailed": "Le téléphone n'a pas pu s'ouvrir. Tu peux composer le {{number}} toi-même.",
     "textFailed": "Les messages n'ont pas pu s'ouvrir. Tu peux écrire au {{number}} toi-même.",
     "linkFailed": "Le lien n'a pas pu s'ouvrir. L'adresse est {{address}}.",
-    "footer": "flust n'envoie rien : l'appel ou le message part de ton téléphone. Chaque service présente ses propres règles de confidentialité.",
+    "footer": "flust n'envoie rien. L'appel part de ton téléphone.",
     "checked": "Numéros vérifiés en {{month}}"
   },
   "errors": {
@@ -841,19 +853,19 @@
       "reportHint": "Demande d'abord le déverrouillage du téléphone, s'il en a un.",
       "reportPrompt": "Ouvrir le rapport d'erreurs",
       "reportCancel": "Annuler",
-      "reportRefused": "Le rapport reste fermé : le téléphone n'a pas confirmé que c'est toi.",
+      "reportRefused": "Le rapport reste fermé. Le téléphone n'a pas confirmé que c'est toi.",
       "erase": "Tout effacer"
     },
     "report": {
       "title": "Rapport d'erreurs",
       "back": "Retour",
-      "intro": "flust garde sur ce téléphone, chiffrée, la liste de ses dernières erreurs techniques. Elle ne contient ni journal, ni check-in, ni raison, ni plan : seulement quand chaque erreur est survenue, sur quel écran, son type et où dans le code.",
-      "preview": "Voici exactement ce qui sera partagé :",
+      "intro": "Les dernières erreurs techniques, chiffrées sur ce téléphone. Rien de ce que tu écris.",
+      "preview": "Voici exactement ce qui sera partagé.",
       "empty": "Aucune erreur enregistrée.",
       "share": "Partager ce rapport",
       "shareHint": "Ouvre le menu de partage. Tu choisis où part le rapport.",
       "shareFailed": "Le menu de partage n'a pas pu s'ouvrir. Tu peux sélectionner le texte ci-dessus et le copier.",
-      "nothingSent": "flust n'envoie rien de lui-même : le rapport ne part que si tu le partages.",
+      "nothingSent": "Rien ne part sans toi.",
       "clear": "Effacer le rapport",
       "clearFailed": "Le rapport n'a pas pu être effacé. Réessaie.",
       "confirm": {

@@ -23,7 +23,8 @@ export function SupportLine({ latestLapse }: { latestLapse: LapseRecord | null }
 
 type UndoLineProps = { journey: Journey; latestLapse: LapseRecord | null };
 
-// "Lapse noted · Undo", until local midnight and at least an hour after the lapse was logged.
+// "Lapse noted." and the undo button, until local midnight and at least an hour after the lapse
+// was logged.
 export function UndoLine({ journey, latestLapse }: UndoLineProps) {
   const shown = useClock((now) => canUndo(latestLapse, now, deviceOffsetAt));
   if (!shown || latestLapse === null) return null;
@@ -61,9 +62,6 @@ function Undo({ journey, record }: { journey: Journey; record: LapseRecord }) {
     <View style={styles.undo}>
       <View style={styles.undoRow}>
         <Text style={styles.noted}>{t('home.lapse.noted')}</Text>
-        <Text importantForAccessibility="no" accessibilityElementsHidden style={styles.noted}>
-          ·
-        </Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('home.lapse.undoSpoken')}

@@ -9,11 +9,12 @@ import { authenticate } from '@/features/lock/local-auth';
 import { useLock } from '@/features/lock/lock-context';
 import { useStorage } from '@/features/storage/storage-context';
 import { BackHeader } from '@/ui/back-header';
-import { NavRow } from '@/ui/nav-row';
-import { OptionSheet } from '@/ui/option-sheet';
+import { LockIcon } from '@/ui/icons/lock-icon';
+import { RadioGroup } from '@/ui/radio-group';
 import { RowGroup } from '@/ui/row-group';
 import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
+import { SectionLabel } from '@/ui/section-label';
 import { SwitchRow } from '@/ui/switch-row';
 import { colors, spacing, typography } from '@/ui/theme';
 
@@ -32,7 +33,6 @@ export function LockSettingsScreen() {
   const lock = useLock();
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
-  const [choosingDelay, setChoosingDelay] = useState(false);
   const { settings, security, paused } = lock;
   const noDeviceLock = security.kind === 'none';
 
@@ -84,18 +84,26 @@ export function LockSettingsScreen() {
           <SwitchRow
             title={lockToggleLabel(t, security, Platform.OS)}
             subtitle={t('lock.settings.toggleSubtitle')}
+            icon={{ icon: LockIcon, color: colors.teal }}
             value={settings.enabled}
             disabled={busy || (noDeviceLock && !settings.enabled)}
             onChange={(value) => void toggle(value)}
           />
-          {settings.enabled && (
-            <NavRow
-              label={t('lock.settings.delay')}
-              value={delayLabel(t, settings.delay)}
-              onPress={() => setChoosingDelay(true)}
-            />
-          )}
         </RowGroup>
+        {settings.enabled && (
+          <View style={styles.section}>
+            <SectionLabel color={colors.accentText}>{t('lock.settings.delay')}</SectionLabel>
+            <RadioGroup
+              accessibilityLabel={t('lock.settings.delay')}
+              options={LOCK_DELAYS.map((delay) => ({
+                key: String(delay),
+                label: delayLabel(t, delay),
+              }))}
+              selected={String(settings.delay)}
+              onSelect={(key) => void save({ ...settings, delay: Number(key) })}
+            />
+          </View>
+        )}
         {(noDeviceLock || paused || notice !== null) && (
           <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>
             {notice !== null
@@ -107,15 +115,6 @@ export function LockSettingsScreen() {
           <Text style={styles.note}>{t('lock.settings.note')}</Text>
         </View>
       </ScrollView>
-      <OptionSheet
-        visible={choosingDelay}
-        title={t('lock.settings.delay')}
-        closeLabel={t('lock.cancel')}
-        options={LOCK_DELAYS.map((delay) => ({ key: String(delay), label: delayLabel(t, delay) }))}
-        selected={String(settings.delay)}
-        onSelect={(key) => void save({ ...settings, delay: Number(key) })}
-        onClose={() => setChoosingDelay(false)}
-      />
     </Screen>
   );
 }
@@ -124,6 +123,9 @@ const styles = StyleSheet.create({
   content: {
     gap: spacing.xl,
     paddingBottom: spacing.l,
+  },
+  section: {
+    gap: spacing.m,
   },
   notice: {
     ...typography.body,

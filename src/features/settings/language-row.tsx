@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next';
 
 import { languageLabel } from '@/features/settings/labels';
 import { DEVICE_LANGUAGE, supportedLanguages, type LanguagePreference } from '@/lib/i18n/language';
+import { GlobeIcon } from '@/ui/icons/globe-icon';
 import { NavRow } from '@/ui/nav-row';
 import { OptionSheet } from '@/ui/option-sheet';
+import { colors } from '@/ui/theme';
 
 type LanguageRowProps = {
   // Null while the stored choice is being read.
@@ -21,6 +23,7 @@ export function LanguageRow({ preference, onChoose }: LanguageRowProps) {
     <>
       <NavRow
         label={t('settings.language')}
+        icon={{ icon: GlobeIcon, color: colors.accentText }}
         value={preference === null ? undefined : languageLabel(t, preference)}
         accessibilityHint={t('settings.languageHint')}
         onPress={() => setOpen(true)}

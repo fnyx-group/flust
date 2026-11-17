@@ -15,16 +15,19 @@ import {
   type HelpRegion,
 } from '@/domain/help-resources';
 import { deviceRegion } from '@/features/help/device-region';
-import { HelpFailure, HelpRows } from '@/features/help/help-row';
+import { HelpRows } from '@/features/help/help-row';
 import { checkedMonth, openFailedMessage, regionLabel } from '@/features/help/labels';
 import { openHelp } from '@/features/help/open-help';
 import { displayUrl } from '@/features/shared/display-url';
 import { BackHeader } from '@/ui/back-header';
+import { Button } from '@/ui/button';
+import { GlobeIcon } from '@/ui/icons/globe-icon';
 import { NavRow } from '@/ui/nav-row';
 import { OptionSheet } from '@/ui/option-sheet';
 import { RowGroup } from '@/ui/row-group';
 import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
+import { SectionLabel } from '@/ui/section-label';
 import { colors, spacing, typography } from '@/ui/theme';
 
 type Failure = { key: string; message: string };
@@ -45,11 +48,8 @@ export function HelpScreen() {
   const entries = helpEntries(chosen, region);
   const listen = entries.filter((entry) => entry.kind === 'listen');
   const emergency = entries.filter((entry) => entry.kind === 'emergency');
-  const withDirectory = chosen === 'other';
-  const month = checkedMonth(
-    i18n.language,
-    oldestCheck(withDirectory ? [...entries, HELP_DIRECTORY] : entries),
-  );
+  // The directory shows with every country, so its check counts too.
+  const month = checkedMonth(i18n.language, oldestCheck([...entries, HELP_DIRECTORY]));
 
   // Announced on both platforms: an Android live region on a line that has just appeared is not
   // read reliably.
@@ -91,48 +91,29 @@ export function HelpScreen() {
         <RowGroup>
           <NavRow
             label={t('help.country')}
+            icon={{ icon: GlobeIcon, color: colors.accentText }}
             value={regionLabel(t, chosen)}
             accessibilityHint={t('help.countryHint')}
             onPress={() => setPicking(true)}
           />
         </RowGroup>
-        <View style={styles.section}>
-          <Text accessibilityRole="header" style={styles.sectionLabel}>
-            {t('help.listen')}
-          </Text>
-          {withDirectory && <Text style={styles.paragraph}>{t('help.directoryIntro')}</Text>}
-          <RowGroup>
-            {listen.map((entry) => (
-              <HelpRows
-                key={entry.id}
-                entry={entry}
-                onOpen={openEntry}
-                failure={failureOf(entry.id)}
-              />
-            ))}
-            {withDirectory && (
-              <View>
-                <NavRow
-                  label={t('help.directory')}
-                  value={address}
-                  accessibilityRole="link"
-                  accessibilityHint={t('about.linkHint')}
-                  onPress={() =>
-                    void open(HELP_DIRECTORY.url, {
-                      key: DIRECTORY,
-                      message: t('help.linkFailed', { address }),
-                    })
-                  }
+        {listen.length > 0 && (
+          <View style={styles.section}>
+            <SectionLabel color={colors.teal}>{t('help.listen')}</SectionLabel>
+            <RowGroup>
+              {listen.map((entry) => (
+                <HelpRows
+                  key={entry.id}
+                  entry={entry}
+                  onOpen={openEntry}
+                  failure={failureOf(entry.id)}
                 />
-                {directoryFailure !== null && <HelpFailure message={directoryFailure} />}
-              </View>
-            )}
-          </RowGroup>
-        </View>
+              ))}
+            </RowGroup>
+          </View>
+        )}
         <View style={styles.section}>
-          <Text accessibilityRole="header" style={styles.sectionLabel}>
-            {t('help.emergencies')}
-          </Text>
+          <SectionLabel color={colors.danger}>{t('help.emergencies')}</SectionLabel>
           <RowGroup>
             {emergency.map((entry) => (
               <HelpRows
@@ -143,6 +124,26 @@ export function HelpScreen() {
               />
             ))}
           </RowGroup>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.footerText}>{t('help.directoryIntro')}</Text>
+          <Button
+            variant="secondary"
+            label={t('help.directory')}
+            accessibilityRole="link"
+            accessibilityHint={t('about.linkHint', { address })}
+            onPress={() =>
+              void open(HELP_DIRECTORY.url, {
+                key: DIRECTORY,
+                message: t('help.linkFailed', { address }),
+              })
+            }
+          />
+          {directoryFailure !== null && (
+            <Text accessibilityRole="alert" style={styles.failure}>
+              {directoryFailure}
+            </Text>
+          )}
         </View>
         <View style={styles.footer}>
           <Text style={styles.footerText}>{t('help.footer')}</Text>
@@ -174,20 +175,19 @@ const styles = StyleSheet.create({
   section: {
     gap: spacing.m,
   },
-  sectionLabel: {
-    ...typography.sectionLabel,
-  },
   footer: {
-    gap: spacing.s,
+    gap: spacing.l,
   },
   footerText: {
-    ...typography.body,
-    textAlign: 'center',
+    ...typography.paragraphSmall,
     color: colors.textSecondary,
   },
   checked: {
-    ...typography.caption,
-    textAlign: 'center',
-    color: colors.textSecondary,
+    ...typography.body,
+    color: colors.muted,
+  },
+  failure: {
+    ...typography.paragraphSmall,
+    color: colors.text,
   },
 });

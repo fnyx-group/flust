@@ -43,7 +43,9 @@ import { BackIcon } from '@/ui/icons/back-icon';
 import { OptionSheet } from '@/ui/option-sheet';
 import { KeyboardScreen } from '@/ui/keyboard-screen';
 import { ScreenTitle } from '@/ui/screen-title';
-import { SelectRow } from '@/ui/select-row';
+import { SectionLabel } from '@/ui/section-label';
+import { NavRow } from '@/ui/nav-row';
+import { RowGroup } from '@/ui/row-group';
 import { colors, spacing, typography } from '@/ui/theme';
 
 export function LapseScreen() {
@@ -221,13 +223,15 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
         </View>
         <LapseSummaryCards journey={journey} at={earlier} unlockedRanks={unlockedRanks} />
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{t('lapse.whatHappened')}</Text>
-          <SelectRow
-            prefix={t('lapse.where')}
-            value={place === null ? t('lapse.notSet') : placeLabel(t, place)}
-            accessibilityHint={t('lapse.whereHint')}
-            onPress={() => setChoosingPlace(true)}
-          />
+          <SectionLabel color={colors.accentText}>{t('lapse.whatHappened')}</SectionLabel>
+          <RowGroup>
+            <NavRow
+              label={t('lapse.where')}
+              value={place === null ? t('lapse.notSet') : placeLabel(t, place)}
+              accessibilityHint={t('lapse.whereHint')}
+              onPress={() => setChoosingPlace(true)}
+            />
+          </RowGroup>
           <WhenField
             earlier={earlier}
             bounds={bounds}
@@ -236,8 +240,9 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
             onSelect={selectEarlier}
           />
           <View style={styles.field}>
-            <Text style={styles.label}>{t('lapse.context')}</Text>
+            <SectionLabel color={colors.gold}>{t('lapse.context')}</SectionLabel>
             <ChipList
+              color={colors.gold}
               items={RISK_MOMENT_IDS.map((id) => ({
                 key: id,
                 label: riskMomentLabel(t, id),
@@ -249,7 +254,7 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
         </View>
         {profile !== null && plan !== null && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{t('lapse.nextTime')}</Text>
+            <SectionLabel color={colors.teal}>{t('lapse.nextTime')}</SectionLabel>
             <PlanFields
               plan={plan}
               triggers={planTriggerOptions(profile.riskMoments, currentPlan.trigger)}
@@ -283,16 +288,8 @@ const styles = StyleSheet.create({
   section: {
     gap: spacing.l,
   },
-  sectionLabel: {
-    ...typography.sectionLabel,
-    color: colors.text,
-  },
   field: {
     gap: spacing.m,
-  },
-  label: {
-    ...typography.label,
-    paddingHorizontal: spacing.xs,
   },
   footer: {
     gap: spacing.m,

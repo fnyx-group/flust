@@ -6,39 +6,31 @@ import type { Timestamp } from '@/domain/time';
 import { useClock } from '@/features/clock/clock-context';
 import { spokenQuote } from '@/features/home/labels';
 import { deviceOffsetAt } from '@/features/shared/device-time';
-import { colors, sizes, spacing, typography } from '@/ui/theme';
+import { colors, spacing, typography } from '@/ui/theme';
 
 // The selected quote is one of the QUOTES objects, the same all day, so ticks within a day do not
 // re-render this component.
 export function DailyQuote({ start }: { start: Timestamp }) {
   const { t } = useTranslation();
   const quote = useClock((now) => quoteOfTheDay(start, now, deviceOffsetAt));
-  const text = t('home.quote.text', { text: t(`quotes.${quote.id}`) });
+  const text = t(`quotes.${quote.id}`);
   const author = quote.author && t(`quoteAuthors.${quote.author}`);
   return (
     <View accessible accessibilityLabel={spokenQuote(t, text, author)} style={styles.container}>
-      <View style={styles.bar} />
-      <View style={styles.texts}>
-        <Text style={styles.text}>{text}</Text>
-        {author !== null && <Text style={styles.author}>{author}</Text>}
-      </View>
+      <Text style={styles.label}>{t('home.quote.label')}</Text>
+      <Text style={styles.text}>{text}</Text>
+      {author !== null && <Text style={styles.author}>{author}</Text>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    gap: spacing.m,
-  },
-  bar: {
-    width: sizes.quoteBarWidth,
-    borderRadius: sizes.quoteBarWidth / 2,
-    backgroundColor: colors.accent,
-  },
-  texts: {
-    flex: 1,
     gap: spacing.s,
+  },
+  label: {
+    ...typography.quoteLabel,
+    color: colors.accentText,
   },
   text: {
     ...typography.quote,

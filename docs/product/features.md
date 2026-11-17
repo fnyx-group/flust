@@ -18,8 +18,9 @@ The onboarding runs once, on first launch. Its steps are:
 
 The home screen shows:
 
-- a rank badge with the current rank and progress toward the next one, which opens the ranks,
-- the current streak,
+- the name of the current circle,
+- the current streak, in a ring that fills toward the next rank,
+- a rank card with the current rank and the time or days left to the next one, which opens the ranks,
 - a week strip of the last 7 days, showing clean days,
 - a daily quote,
 - an emergency button that opens the emergency screen.
@@ -41,7 +42,7 @@ The emergency screen helps the user get through an urge. It contains:
 - the user's if/then plan and reasons,
 - two exits: "I held on" and "I had a lapse".
 
-Each visit is recorded with its start, end and outcome, for future statistics. A discreet line at the bottom, for dark thoughts rather than urges, opens the help resources over the screen. Other help actions, such as a video from a good day or writing to someone, are added with the features they open.
+Each visit is recorded with its start, end and outcome, for future statistics. Two rows above the exits offer to write a note now, over the screen, and, for dark thoughts rather than urges, to open the help resources over the screen. Other help actions, such as a video from a good day or writing to someone, are added with the features they open.
 
 ### Lapse screen
 
@@ -56,13 +57,13 @@ The check-in records:
 - context chips,
 - an optional note.
 
-There is one check-in per local day, editable until local midnight. It never mentions a lapse. Home shows "Check-in du jour · à faire" or "Check-in fait" under the quote, and a calm card after several low mood check-ins, which opens the help resources (see [Relapse](relapse.md#special-cases)).
+There is one check-in per local day, editable until local midnight. It never mentions a lapse. Home shows "Ton check-in du jour t'attend" or "Check-in fait" under the quote, and a calm card after several low mood check-ins, which opens the help resources (see [Relapse](relapse.md#special-cases)).
 
 ### Journal
 
 A text journal. Each note has an optional title and its text, and keeps the day and the time it was written at. The journal tab lists notes under "Cette semaine", "Semaine dernière", then by month, and opens a note to edit or delete it. Writing prompts insert a starter line, such as "Ce qui m'a fait du bien : ". Notes are stored in the encrypted database.
 
-When the user's if/then plan is to write in the journal, the emergency screen offers to open a new note.
+The emergency screen always offers to open a new note, whatever the plan says.
 
 ### Reasons and plans editor
 
@@ -90,7 +91,7 @@ The filter joins the settings with its feature.
 
 Local reminders, all off until turned on, each with a switch:
 
-- Evening check-in, at a chosen time (21:00 by default). Opens the check-in.
+- Evening check-in, at a chosen time (21 h by default). Opens the check-in.
 - Quote of the day, at a chosen time (08:00 by default).
 - Risk hours: before "In bed at night" (22:30) and on "The weekend" (Saturday 10:00), when those risk moments are chosen. Other risk moments have no time. They come at their moment even on a day that already has other reminders.
 - Ranks and milestones: when the next rank is reached, in the daytime, never in the six hours after a lapse is logged.
@@ -116,7 +117,9 @@ A small list of help numbers, bundled with the app, chosen by the device region,
 - United States: 988 (call or text) and 911.
 - United Kingdom: Samaritans (116 123), 999 and 112.
 - Ireland: Samaritans (116 123), 112 and 999.
-- Any other region: 112, named as the official number when the device is set to an unlisted member of the European Union, otherwise with the advice to dial the local number, and a link to findahelpline.com that opens outside flust.
+- Any other region: 112, named as the official number when the device is set to an unlisted member of the European Union, otherwise with the advice to dial the local number.
+
+Every region also shows a link to findahelpline.com, for helplines in other countries, which opens outside flust.
 
 Buttons open the phone app or the messages app with the number filled in. flust sends nothing and records nothing. Each number keeps its official sources and the day it was checked, and is checked again every year ([0027](../decisions/0027-offline-help-resources.md)). The help resources open from the settings, from the emergency screen and from the low mood card, never from the lapse screen.
 

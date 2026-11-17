@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.sectionLabel,
-    color: colors.text,
+    color: colors.accentText,
   },
   optional: {
     fontFamily: typography.bodyLarge.fontFamily,
@@ -48,6 +48,8 @@ const styles = StyleSheet.create({
     padding: spacing.card,
     paddingTop: spacing.l,
     borderRadius: radii.cardLarge,
+    borderWidth: 1.5,
+    borderColor: colors.separator,
     backgroundColor: colors.surface,
     color: colors.text,
   },

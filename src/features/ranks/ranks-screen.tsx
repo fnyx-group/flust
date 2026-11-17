@@ -52,8 +52,7 @@ const styles = StyleSheet.create({
     gap: spacing.xl,
   },
   rule: {
-    ...typography.bodyLarge,
-    lineHeight: 24,
+    ...typography.paragraph,
     color: colors.textSecondary,
   },
 });

@@ -7,10 +7,11 @@ import { localDayNumber } from '@/domain/local-time';
 import { useClock } from '@/features/clock/clock-context';
 import { useSession } from '@/features/session/session-context';
 import { deviceOffsetAt } from '@/features/shared/device-time';
-import { colors, pressedOpacity, sizes, typography } from '@/ui/theme';
+import { PencilIcon } from '@/ui/icons/pencil-icon';
+import { colors, pressedOpacity, sizes, spacing, typography } from '@/ui/theme';
 
-// One line under the quote, which opens the check-in. It follows the local day, so it reads "to
-// do" again after midnight. Plain secondary text: a missed check-in is never shown as a failure.
+// One line under the quote, which opens the check-in. It follows the local day, so it waits again
+// after midnight. Plain secondary text: a missed check-in is never shown as a failure.
 export function CheckInLine() {
   const { t } = useTranslation();
   const { checkIns } = useSession();
@@ -19,11 +20,12 @@ export function CheckInLine() {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={done ? t('home.checkIn.done') : t('home.checkIn.todoSpoken')}
+      accessibilityLabel={done ? t('home.checkIn.done') : t('home.checkIn.todo')}
       accessibilityHint={t('home.checkIn.hint')}
       onPress={() => router.push('/check-in')}
       style={({ pressed }) => [styles.line, pressed && styles.pressed]}
     >
+      <PencilIcon color={colors.gold} size={20} />
       <Text style={styles.text}>{done ? t('home.checkIn.done') : t('home.checkIn.todo')}</Text>
     </Pressable>
   );
@@ -32,13 +34,16 @@ export function CheckInLine() {
 const styles = StyleSheet.create({
   line: {
     minHeight: sizes.touchTarget,
-    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.m,
   },
   pressed: {
     opacity: pressedOpacity,
   },
   text: {
-    ...typography.body,
+    ...typography.bodyLarge,
+    flexShrink: 1,
     color: colors.textSecondary,
   },
 });

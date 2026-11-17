@@ -9,9 +9,29 @@ const HIDDEN_NAME = '???';
 
 const ROMAN: Record<Rank['circle'], string> = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V' };
 
-// "Cercle II · Ombre". Screen readers get the Arabic number, since they read "II" letter by letter.
-export function circleLabel(t: TFunction, circle: Rank['circle']): string {
-  return t('ranks.screen.circle', { number: ROMAN[circle], name: t(`ranks.circles.${circle}`) });
+// Written before the circle name in the grid. Screen readers get the Arabic number instead, since
+// they read "II" letter by letter.
+export function romanNumeral(circle: Rank['circle']): string {
+  return ROMAN[circle];
+}
+
+// "Cercle de l'Ombre".
+export function circleName(t: TFunction, circle: Rank['circle']): string {
+  return t(`ranks.circleNames.${circle}`);
+}
+
+export type CircleGroup = { readonly circle: Rank['circle']; readonly cells: readonly RankCell[] };
+
+// The grid cells in one group per circle, in rank order.
+export function circleGroups(cells: readonly RankCell[]): CircleGroup[] {
+  const groups: CircleGroup[] = [];
+  for (const cell of cells) {
+    const last = groups.at(-1);
+    if (last?.circle === cell.rank.circle)
+      groups[groups.length - 1] = { ...last, cells: [...last.cells, cell] };
+    else groups.push({ circle: cell.rank.circle, cells: [cell] });
+  }
+  return groups;
 }
 
 function spokenCircle(t: TFunction, circle: Rank['circle']): string {
@@ -24,14 +44,17 @@ export type CurrentRankText = {
   readonly circle: string;
   readonly name: string;
   readonly detail: string;
+  // Under the progress bar: the total on the left, the next threshold on the right.
+  readonly total: string;
+  readonly target: string | null;
   readonly spokenLabel: string;
 };
 
-// Before day one the card says what the home badge says: the first rank, locked, and the time
+// Before day one the card says what the home card says: the first rank, locked, and the time
 // left to it.
 export function currentRankText(t: TFunction, standing: RankStanding): CurrentRankText {
   const rank = standing.status === 'pending' ? standing.first : standing.current;
-  const circle = circleLabel(t, rank.circle);
+  const circle = circleName(t, rank.circle);
   const spokenRankCircle = spokenCircle(t, rank.circle);
   if (standing.status === 'pending') {
     const badge = rankBadgeText(t, standing);
@@ -41,6 +64,8 @@ export function currentRankText(t: TFunction, standing: RankStanding): CurrentRa
       circle,
       name: badge.name,
       detail: badge.detail,
+      total: t('ranks.screen.totalDays', { count: 0 }),
+      target: t('ranks.screen.nextAt', { name: rankName(t, rank), count: rank.threshold }),
       spokenLabel: `${badge.spokenLabel}, ${spokenRankCircle}`,
     };
   }
@@ -55,6 +80,8 @@ export function currentRankText(t: TFunction, standing: RankStanding): CurrentRa
     circle,
     name,
     detail,
+    total: t('ranks.screen.totalDays', { count: totalCleanDays }),
+    target: next && t('ranks.screen.nextAt', { name: rankName(t, next), count: next.threshold }),
     spokenLabel: t('ranks.screen.spoken', { name, circle: spokenRankCircle, detail }),
   };
 }
@@ -91,7 +118,7 @@ export function unlockText(t: TFunction, unlock: RankUnlock, totalCleanDays: num
       : t(`ranks.unlocked.advances.${highest.circle}`);
   return {
     name,
-    circle: circleLabel(t, highest.circle),
+    circle: circleName(t, highest.circle),
     line: t('ranks.unlocked.line', {
       days: t('ranks.unlocked.days', { count: totalCleanDays }),
       circle: circleLine,

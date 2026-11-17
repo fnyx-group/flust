@@ -8,6 +8,7 @@ import { reasonLabel } from '@/features/shared/preset-labels';
 import { StepLayout } from '@/features/onboarding/step-layout';
 import type { StepProps } from '@/features/onboarding/step-props';
 import { ChipList } from '@/ui/chip-list';
+import { colors } from '@/ui/theme';
 import { TextEntryRow } from '@/ui/text-entry-row';
 
 export function ReasonsStep({
@@ -43,6 +44,7 @@ export function ReasonsStep({
       action={{ label: t('onboarding.continue'), onPress: onContinue }}
     >
       <ChipList
+        color={colors.accent}
         items={REASON_IDS.map((id) => ({
           key: id,
           label: reasonLabel(t, id),

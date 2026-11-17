@@ -8,9 +8,10 @@ appId: org.fnyxgroup.flust
 # The system prompt that confirms the lock.
 - inputText: ${PIN}
 - pressKey: Enter
-- tapOn: Ask again.*
 - tapOn: Immediately
-- assertVisible: Ask again, Immediately
+- assertVisible:
+    text: Immediately
+    checked: true
 
 # Leave and come back: the lock screen asks first.
 - pressKey: Home
@@ -20,4 +21,6 @@ appId: org.fnyxgroup.flust
 - tapOn: Enter passcode
 - inputText: ${PIN}
 - pressKey: Enter
-- assertVisible: Ask again, Immediately
+- assertVisible:
+    text: Immediately
+    checked: true

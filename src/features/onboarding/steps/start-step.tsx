@@ -18,6 +18,7 @@ import { formatDateTime } from '@/features/shared/time-picker/format';
 import { TimeSteppers } from '@/features/shared/time-picker/time-steppers';
 import { useSession } from '@/features/session/session-context';
 import { useStorage } from '@/features/storage/storage-context';
+import { SectionLabel } from '@/ui/section-label';
 import { SegmentedControl } from '@/ui/segmented-control';
 import { colors, spacing, typography } from '@/ui/theme';
 
@@ -111,7 +112,7 @@ export function StartStep({ answers, onChange, progress, onBack }: StartStepProp
       }
     >
       <View style={styles.section}>
-        <Text style={styles.label}>{t('onboarding.start.label')}</Text>
+        <SectionLabel color={colors.accentText}>{t('onboarding.start.label')}</SectionLabel>
         <SegmentedControl
           accessibilityLabel={t('onboarding.start.label')}
           options={[
@@ -156,10 +157,6 @@ export function StartStep({ answers, onChange, progress, onBack }: StartStepProp
 const styles = StyleSheet.create({
   section: {
     gap: spacing.m,
-  },
-  label: {
-    ...typography.label,
-    paddingHorizontal: spacing.xs,
   },
   selected: {
     ...typography.row,

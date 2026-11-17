@@ -44,14 +44,18 @@ describe('noteDateTime', () => {
   const local = { year: 2026, month: 11, day: 13, hour: 22, minute: 14 };
 
   it('writes the date and the time, in 24 or 12 hours', () => {
-    expect(noteDateTime(french, 'fr', local, 2026, false)).toBe('Vendredi 13 novembre à 22:14');
-    expect(noteDateTime(english, 'en', local, 2026, true)).toBe('Friday, November 13 at 10:14 PM');
-    expect(noteDateTime(english, 'en', local, 2026, false)).toBe('Friday, November 13 at 22:14');
+    expect(noteDateTime(french, 'fr', local, 2026, false)).toBe(
+      'Vendredi 13 novembre, 22\u00a0h\u00a014',
+    );
+    expect(noteDateTime(english, 'en', local, 2026, true)).toMatch(
+      /^Friday, November 13, 10:14\sPM$/,
+    );
+    expect(noteDateTime(english, 'en', local, 2026, false)).toBe('Friday, November 13, 22:14');
   });
 
   it('adds the year of another year', () => {
     expect(noteDateTime(french, 'fr', local, 2027, false)).toBe(
-      'Vendredi 13 novembre 2026 à 22:14',
+      'Vendredi 13 novembre 2026, 22\u00a0h\u00a014',
     );
   });
 });
@@ -95,6 +99,6 @@ describe('prompts', () => {
   // docs/design/design-system.md: French text never assumes the user's gender.
   it('use the neutral French wording', () => {
     expect(french('journal.note.promptLabels.helped')).toBe("Qu'est-ce qui t'a fait du bien ?");
-    expect(french('journal.note.promptStarters.helped')).toBe("Ce qui m'a fait du bien : ");
+    expect(french('journal.note.promptStarters.helped')).toBe("Ce qui m'a fait du bien, c'est ");
   });
 });

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, type TextStyle, type ViewStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Journey } from '@/domain/journey';
@@ -7,8 +7,10 @@ import { weekStrip, type WeekDayStatus } from '@/domain/week';
 import { useClock } from '@/features/clock/clock-context';
 import { spokenWeek, weekdayInitial } from '@/features/home/labels';
 import { deviceOffsetAt } from '@/features/shared/device-time';
-import { colors, sizes, spacing, todayBarOpacity, typography } from '@/ui/theme';
+import { CheckIcon } from '@/ui/icons/check-icon';
+import { colors, sizes, spacing, typography } from '@/ui/theme';
 
+// The selector returns the local day, a number, so the strip re-renders once a day.
 // The selector returns the local day, a number, so the strip re-renders once a day.
 export function WeekStrip({ journey }: { journey: Journey }) {
   const { t, i18n } = useTranslation();
@@ -18,13 +20,10 @@ export function WeekStrip({ journey }: { journey: Journey }) {
     <View accessible accessibilityLabel={spokenWeek(t, week)} style={styles.strip}>
       {week.map(({ day, status }) => (
         <View key={day} style={styles.day}>
-          <View style={[styles.bar, BAR_STYLES[status]]} />
-          <Text
-            style={[
-              typography.weekdayInitial,
-              status === 'before-start' && styles.beforeStartInitial,
-            ]}
-          >
+          <View style={[styles.circle, CIRCLE_STYLES[status]]}>
+            {status === 'clean' && <CheckIcon color={colors.onAccent} size={16} />}
+          </View>
+          <Text style={[typography.weekdayInitial, INITIAL_STYLES[status]]}>
             {weekdayInitial(i18n.language, day)}
           </Text>
         </View>
@@ -33,43 +32,54 @@ export function WeekStrip({ journey }: { journey: Journey }) {
   );
 }
 
+// A clean day is a filled circle with a check, today a bright ring. A day with a lapse looks like
+// a day before the start, a faint ring: the strip never uses red or crosses.
 const styles = StyleSheet.create({
   strip: {
     flexDirection: 'row',
-    gap: spacing.s,
+    justifyContent: 'space-between',
   },
   day: {
     flex: 1,
     alignItems: 'center',
     gap: spacing.s,
   },
-  bar: {
-    alignSelf: 'stretch',
-    height: sizes.weekBarHeight,
-    borderRadius: sizes.weekBarHeight / 2,
+  circle: {
+    width: sizes.weekDay,
+    height: sizes.weekDay,
+    borderRadius: sizes.weekDay / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   clean: {
     backgroundColor: colors.accent,
   },
   today: {
-    backgroundColor: colors.accent,
-    opacity: todayBarOpacity,
+    borderWidth: sizes.weekDayToday,
+    borderColor: colors.text,
   },
-  lapse: {
-    backgroundColor: colors.separator,
+  faint: {
+    borderWidth: sizes.weekDayRing,
+    borderColor: colors.separator,
   },
-  // No bar, but its slot stays so that every initial sits on the same line.
-  beforeStart: {
-    backgroundColor: 'transparent',
+  todayInitial: {
+    color: colors.text,
   },
   beforeStartInitial: {
     color: colors.muted,
   },
 });
 
-const BAR_STYLES: Record<WeekDayStatus, ViewStyle> = {
+const CIRCLE_STYLES: Record<WeekDayStatus, ViewStyle> = {
   clean: styles.clean,
   today: styles.today,
-  lapse: styles.lapse,
-  'before-start': styles.beforeStart,
+  lapse: styles.faint,
+  'before-start': styles.faint,
+};
+
+const INITIAL_STYLES: Record<WeekDayStatus, TextStyle | null> = {
+  clean: null,
+  today: styles.todayInitial,
+  lapse: null,
+  'before-start': styles.beforeStartInitial,
 };

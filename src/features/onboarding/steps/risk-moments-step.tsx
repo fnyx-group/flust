@@ -6,6 +6,7 @@ import { riskMomentLabel } from '@/features/shared/preset-labels';
 import { StepLayout } from '@/features/onboarding/step-layout';
 import type { StepProps } from '@/features/onboarding/step-props';
 import { ChipList } from '@/ui/chip-list';
+import { colors } from '@/ui/theme';
 
 type RiskMomentsStepProps = Pick<
   StepProps,
@@ -29,6 +30,7 @@ export function RiskMomentsStep({
       action={{ label: t('onboarding.continue'), onPress: onContinue }}
     >
       <ChipList
+        color={colors.gold}
         items={RISK_MOMENT_IDS.map((id) => ({
           key: id,
           label: riskMomentLabel(t, id),

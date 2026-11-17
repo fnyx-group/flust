@@ -10,7 +10,9 @@ import {
   textRowLabel,
   unbrokenNumber,
 } from '@/features/help/labels';
-import { colors, pressedOpacity, sizes, spacing, typography } from '@/ui/theme';
+import { MessageIcon } from '@/ui/icons/message-icon';
+import { PhoneIcon } from '@/ui/icons/phone-icon';
+import { colors, pressedOpacity, sizes, spacing, tint, tintAlpha, typography } from '@/ui/theme';
 import { useLargeText } from '@/ui/use-large-text';
 
 type HelpRowsProps = {
@@ -42,11 +44,14 @@ export function HelpRows({ entry, onOpen, failure }: HelpRowsProps) {
           pressed && styles.pressed,
         ]}
       >
+        <Text style={[styles.number, !stacked && styles.numberColumn]}>
+          {unbrokenNumber(entry.display)}
+        </Text>
         <View style={[styles.texts, !stacked && styles.fill]}>
           <Text style={styles.name}>{entryName(t, entry)}</Text>
           <Text style={styles.detail}>{entryDetail(t, entry)}</Text>
         </View>
-        <Text style={styles.number}>{unbrokenNumber(entry.display)}</Text>
+        <ActionIcon action={first} />
       </Pressable>
       {others.map((action) => (
         <Pressable
@@ -70,8 +75,19 @@ export function HelpRows({ entry, onOpen, failure }: HelpRowsProps) {
   );
 }
 
+// A call or a message, as the round button at the end of the row. The row is the button: this
+// only shows what it does.
+function ActionIcon({ action }: { action: HelpAction }) {
+  const Icon = action === 'call' ? PhoneIcon : MessageIcon;
+  return (
+    <View style={styles.action}>
+      <Icon color={colors.teal} size={22} />
+    </View>
+  );
+}
+
 // The number or the address to use by hand, under the row that could not open.
-export function HelpFailure({ message }: { message: string }) {
+function HelpFailure({ message }: { message: string }) {
   return (
     <Text accessibilityRole="alert" style={styles.failure}>
       {message}
@@ -117,8 +133,20 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   number: {
-    ...typography.countdown,
+    ...typography.helpNumber,
     color: colors.text,
+  },
+  // The numbers of a card line up, and a short one leaves the same room as a long one.
+  numberColumn: {
+    minWidth: 64,
+  },
+  action: {
+    width: sizes.callButton,
+    height: sizes.callButton,
+    borderRadius: sizes.callButton / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: tint(colors.teal, tintAlpha.chip),
   },
   otherLabel: {
     ...typography.row,

@@ -8,10 +8,10 @@ appId: org.fnyxgroup.flust
 - tapOn: Save and start again
 # With large text, the undo line is below the fold of the home screen.
 - scrollUntilVisible:
-    element: Lapse noted
+    element: Lapse noted\.
 - tapOn: Undo the lapse you noted
 # The line is the last one on the screen: scroll to the end first, so that it is gone rather
 # than out of view.
 - scroll
 - assertVisible: I had a lapse
-- assertNotVisible: Lapse noted
+- assertNotVisible: Lapse noted\.

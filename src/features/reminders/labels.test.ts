@@ -39,7 +39,8 @@ describe('notificationText', () => {
 
 describe('formatReminderTime', () => {
   it('follows the 12 or 24 hour setting, whatever the time zone', () => {
-    expect(formatReminderTime('fr', 21 * 60, false)).toBe('21:00');
+    expect(formatReminderTime('fr', 21 * 60, false)).toBe('21\u00a0h');
+    expect(formatReminderTime('fr', 21 * 60 + 30, false)).toBe('21\u00a0h\u00a030');
     expect(formatReminderTime('en', 8 * 60 + 5, false)).toBe('08:05');
     expect(formatReminderTime('en', 21 * 60, true)).toMatch(/^9:00\sPM$/);
   });
@@ -81,12 +82,11 @@ describe('remindersValue', () => {
 });
 
 describe('risk hours hint', () => {
-  it('names the two timed moments as the profile shows them', () => {
-    const hint = french('reminders.riskHours.unavailable', {
-      night: french('presets.riskMoments.in-bed-at-night'),
-      weekend: french('presets.riskMoments.weekend'),
-    });
-    expect(hint).toContain('« Le soir au lit »');
-    expect(hint).toContain('« Le week-end »');
+  it('names the two timed moments without a capital mid-sentence', () => {
+    for (const language of ['fr', 'en'] as const) {
+      const hint = createI18n(language).t('reminders.riskHours.unavailable');
+      expect(hint.slice(1)).toBe(hint.slice(1).toLowerCase());
+    }
+    expect(french('reminders.riskHours.unavailable')).toContain('le soir au lit ou le week-end');
   });
 });

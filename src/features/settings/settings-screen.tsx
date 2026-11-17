@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, Platform, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { DEFAULT_REMINDER_SETTINGS, type ReminderSettings } from '@/domain/reminders';
@@ -22,8 +22,14 @@ import {
   toPreference,
   type LanguagePreference,
 } from '@/lib/i18n/language';
-import { Button } from '@/ui/button';
+import { BellIcon } from '@/ui/icons/bell-icon';
+import { HeartIcon } from '@/ui/icons/heart-icon';
+import { InfoIcon } from '@/ui/icons/info-icon';
+import { LockIcon } from '@/ui/icons/lock-icon';
+import { SparkleIcon } from '@/ui/icons/sparkle-icon';
+import { TrashIcon } from '@/ui/icons/trash-icon';
 import { NavRow } from '@/ui/nav-row';
+import { PrivateLine } from '@/ui/private-line';
 import { RowGroup } from '@/ui/row-group';
 import { Screen } from '@/ui/screen';
 import { ScreenTitle } from '@/ui/screen-title';
@@ -100,16 +106,15 @@ export function SettingsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ScreenTitle>{t('tabs.settings')}</ScreenTitle>
         <RowGroup>
-          <NavRow label={t('settings.help')} onPress={() => router.push('/help')} />
-        </RowGroup>
-        <RowGroup>
           <NavRow
             label={t('settings.reasonsAndPlans')}
+            icon={{ icon: SparkleIcon, color: colors.accent }}
             value={planCount === null ? undefined : planCountLabel(t, planCount)}
             onPress={() => router.push('/reasons-and-plans')}
           />
           <NavRow
             label={t('settings.reminders')}
+            icon={{ icon: BellIcon, color: colors.gold }}
             value={
               reminders === null
                 ? undefined
@@ -119,52 +124,52 @@ export function SettingsScreen() {
           />
           <NavRow
             label={t('settings.lock')}
+            icon={{ icon: LockIcon, color: colors.teal }}
             value={lockValue(t, lock.settings, lock.security, Platform.OS)}
             onPress={() => router.push('/lock-settings')}
           />
           <LanguageRow preference={preference} onChoose={(next) => void choose(next)} />
-          <NavRow label={t('settings.about')} onPress={() => router.push('/about')} />
         </RowGroup>
         {saveFailed && (
           <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>
             {t('settings.languageSaveFailed')}
           </Text>
         )}
-        <View style={styles.erase}>
-          <Button
-            variant="plain"
+        <RowGroup>
+          <NavRow
+            label={t('settings.help')}
+            icon={{ icon: HeartIcon, color: colors.danger }}
+            onPress={() => router.push('/help')}
+          />
+          <NavRow
+            label={t('settings.about')}
+            icon={{ icon: InfoIcon, color: colors.textSecondary }}
+            onPress={() => router.push('/about')}
+          />
+        </RowGroup>
+        <RowGroup>
+          <NavRow
             label={t('settings.erase')}
+            icon={{ icon: TrashIcon, color: colors.danger }}
+            destructive
             accessibilityHint={t('settings.eraseHint')}
             onPress={() => router.push('/erase')}
           />
-        </View>
-        {version !== undefined && (
-          <Text style={styles.footer}>{t('settings.footer', { version })}</Text>
-        )}
+        </RowGroup>
+        {version !== undefined && <PrivateLine text={t('settings.footer', { version })} />}
       </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  // The footer sits at the bottom of the screen, or after the rows when they fill it.
   content: {
-    flexGrow: 1,
-    gap: spacing.xl,
+    gap: spacing.l,
     paddingBottom: spacing.l,
   },
   error: {
     ...typography.body,
     textAlign: 'center',
     color: colors.text,
-  },
-  erase: {
-    alignItems: 'center',
-  },
-  footer: {
-    ...typography.caption,
-    marginTop: 'auto',
-    textAlign: 'center',
-    color: colors.textSecondary,
   },
 });

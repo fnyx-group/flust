@@ -23,7 +23,7 @@ export function CountdownChip() {
       style={styles.chip}
     >
       <Text maxFontSizeMultiplier={maxFontScale.countdown} style={styles.text}>
-        {countdownText(parts)}
+        {countdownText(t, parts)}
       </Text>
     </View>
   );

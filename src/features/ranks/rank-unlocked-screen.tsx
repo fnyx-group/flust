@@ -7,10 +7,9 @@ import { unlockText } from '@/features/ranks/labels';
 import { fromUnlockParams, type UnlockScreenData } from '@/features/ranks/unlock-params';
 import { revealTextStyle, UnlockReveal, useRevealProgress } from '@/features/ranks/unlock-reveal';
 import { Button } from '@/ui/button';
-import { RankStars } from '@/ui/rank-stars';
 import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
-import { colors, sizes, spacing, typography } from '@/ui/theme';
+import { circleTextColors, colors, spacing, typography } from '@/ui/theme';
 
 // The ranks were stored when this screen was opened (see useRankUnlockTrigger), so it only shows.
 export function RankUnlockedScreen() {
@@ -36,11 +35,12 @@ function RankUnlocked({ unlock, totalCleanDays }: UnlockScreenData) {
         <View style={styles.middle}>
           <UnlockReveal rank={unlock.highest} progress={progress} />
           <Animated.View style={[styles.texts, revealTextStyle(progress)]}>
-            <Text style={styles.label}>{t('ranks.unlocked.label')}</Text>
+            <Text style={[styles.label, { color: circleTextColors[unlock.highest.circle] }]}>
+              {t('ranks.unlocked.label')}
+            </Text>
             <Text accessibilityRole="header" style={styles.name}>
               {text.name}
             </Text>
-            <RankStars circle={unlock.highest.circle} unlocked size={sizes.starLarge} />
             <Text style={styles.line}>{text.line}</Text>
             {text.others !== null && <Text style={styles.others}>{text.others}</Text>}
           </Animated.View>
@@ -76,8 +76,6 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.unlockLabel,
-    color: colors.accent,
-    textTransform: 'uppercase',
   },
   name: {
     ...typography.unlockRankName,
@@ -85,8 +83,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   line: {
-    ...typography.bodyLarge,
-    lineHeight: 24,
+    ...typography.paragraph,
     color: colors.textSecondary,
     textAlign: 'center',
   },

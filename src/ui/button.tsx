@@ -6,9 +6,12 @@ import { colors, radii, sizes, spacing, typography } from '@/ui/theme';
 type ButtonProps = {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'plain';
+  // Danger and destructive are for actions that delete something: filled, or plain text.
+  variant?: 'primary' | 'secondary' | 'plain' | 'danger' | 'destructive';
   disabled?: boolean;
   accessibilityHint?: string;
+  // A button that leaves the app is a link.
+  accessibilityRole?: 'button' | 'link';
 };
 
 export function Button({
@@ -17,10 +20,11 @@ export function Button({
   variant = 'primary',
   disabled = false,
   accessibilityHint,
+  accessibilityRole = 'button',
 }: ButtonProps) {
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
       disabled={disabled}
@@ -43,13 +47,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  danger: {
+    minHeight: sizes.primaryButtonHeight,
+    paddingVertical: spacing.m,
+    paddingHorizontal: 20,
+    borderRadius: radii.primaryButton,
+    backgroundColor: colors.danger,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   secondary: {
     minHeight: sizes.secondaryButtonHeight,
     paddingVertical: 10,
     paddingHorizontal: spacing.l,
     borderRadius: radii.secondaryButton,
-    borderWidth: 1,
-    borderColor: colors.separator,
+    borderWidth: 1.5,
+    borderColor: colors.locked,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -75,11 +88,23 @@ const styles = StyleSheet.create({
     ...typography.secondaryButton,
     color: colors.textSecondary,
   },
+  destructiveLabel: {
+    ...typography.secondaryButton,
+    color: colors.danger,
+  },
 });
 
-const CONTAINERS = { primary: styles.primary, secondary: styles.secondary, plain: styles.plain };
+const CONTAINERS = {
+  primary: styles.primary,
+  secondary: styles.secondary,
+  plain: styles.plain,
+  danger: styles.danger,
+  destructive: styles.plain,
+};
 const LABELS = {
   primary: styles.primaryLabel,
   secondary: styles.secondaryLabel,
   plain: styles.plainLabel,
+  danger: styles.primaryLabel,
+  destructive: styles.destructiveLabel,
 };

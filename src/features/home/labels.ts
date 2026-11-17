@@ -11,26 +11,31 @@ function twoDigits(value: number): string {
   return String(value).padStart(2, '0');
 }
 
-export type CounterPart = { readonly kind: 'number' | 'unit'; readonly text: string };
+export type CounterParts = {
+  readonly number: string;
+  readonly unit: string;
+  // The minutes after the hours, on a quieter line, or null.
+  readonly rest: string | null;
+};
 
-// The counter as it is drawn: numbers in the counter font, units with their surrounding spaces in
-// the unit style. The width test measures these same parts.
-export function counterParts(t: TFunction, display: StreakDisplay): CounterPart[] {
+// The counter as it is drawn in its ring: "7", "heures", "et 40 min". The width test measures the
+// number.
+export function counterParts(t: TFunction, display: StreakDisplay): CounterParts {
   if (display.unit === 'days') {
-    return [
-      { kind: 'number', text: String(display.days) },
-      { kind: 'unit', text: ` ${t('home.streak.dayUnit', { count: display.days })}` },
-    ];
+    return {
+      number: String(display.days),
+      unit: t('home.streak.dayUnit', { count: display.days }),
+      rest: null,
+    };
   }
-  return [
-    { kind: 'number', text: String(display.hours) },
-    { kind: 'unit', text: ` ${t('home.streak.hourUnit')} ` },
-    { kind: 'number', text: twoDigits(display.minutes) },
-    { kind: 'unit', text: ` ${t('home.streak.minuteUnit')}` },
-  ];
+  return {
+    number: String(display.hours),
+    unit: t('home.streak.hourUnit', { count: display.hours }),
+    rest: display.minutes === 0 ? null : t('home.streak.minutesRest', { count: display.minutes }),
+  };
 }
 
-// What a screen reader says for the counter: "Current streak: 7 hours 40 minutes".
+// What a screen reader says for the counter: "Current streak, 7 hours 40 minutes".
 export function spokenCounter(t: TFunction, display: StreakDisplay): string {
   return t('home.streak.spoken', { value: spokenStreak(t, display) });
 }
@@ -93,7 +98,17 @@ export function weekdayInitial(language: string, day: number): string {
   );
 }
 
-// "Quote of the day: “text”, Seneca".
+// The circle in the home header, "Cercle de l'Ombre", or "Premier jour" before the first rank.
+export function headerCircle(
+  t: TFunction,
+  standing: RankStanding,
+): { readonly text: string; readonly circle: Rank['circle'] | null } {
+  if (standing.status === 'pending') return { text: t('home.firstDay'), circle: null };
+  const { circle } = standing.current;
+  return { text: t(`ranks.circleNames.${circle}`), circle };
+}
+
+// "Quote of the day, text, Seneca".
 export function spokenQuote(t: TFunction, text: string, author: string | null): string {
   return author === null
     ? t('home.quote.spoken', { text })

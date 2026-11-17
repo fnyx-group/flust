@@ -9,12 +9,21 @@ type ProgressRingProps = {
   fraction: number;
   size: number;
   strokeWidth: number;
+  color?: string;
+  trackColor?: string;
   // Drawn centered inside the ring.
   children?: ReactNode;
 };
 
 // Decorative: the parent announces the progress in its own label.
-export function ProgressRing({ fraction, size, strokeWidth, children }: ProgressRingProps) {
+export function ProgressRing({
+  fraction,
+  size,
+  strokeWidth,
+  color = colors.accent,
+  trackColor = colors.separator,
+  children,
+}: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clamped = Math.min(1, Math.max(0, fraction));
@@ -30,7 +39,7 @@ export function ProgressRing({ fraction, size, strokeWidth, children }: Progress
           cx={center}
           cy={center}
           r={radius}
-          stroke={colors.separator}
+          stroke={trackColor}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -40,7 +49,7 @@ export function ProgressRing({ fraction, size, strokeWidth, children }: Progress
             cx={center}
             cy={center}
             r={radius}
-            stroke={colors.accent}
+            stroke={color}
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={`${circumference} ${circumference}`}

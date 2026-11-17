@@ -35,13 +35,13 @@ There are twelve ranks, grouped in five circles. The French name is the one show
 
 Each rank has an emblem. The outer shape identifies the circle:
 
-| Circle | Outer shape                     |
-| ------ | ------------------------------- |
-| I      | Circle                          |
-| II     | Diamond                         |
-| III    | Hexagon                         |
-| IV     | Square crossed with a diamond   |
-| V      | Sun with a double ring and rays |
+| Circle | Outer shape        |
+| ------ | ------------------ |
+| I      | Circle             |
+| II     | Diamond            |
+| III    | Hexagon            |
+| IV     | Eight-pointed star |
+| V      | Twelve-pointed sun |
 
 The inner design identifies the rank within its circle:
 
@@ -49,11 +49,11 @@ The inner design identifies the rank within its circle:
 | -------------- | --------------------------------- |
 | 1              | A center dot                      |
 | 2              | A center dot and an inner outline |
-| 3              | A filled inner shape with spokes  |
+| 3              | A filled inner shape and a dot    |
 
-On the ranks screen and the rank unlock screen, each emblem shows rarity stars. The number of stars equals the circle number, from 1 star in circle I to 5 stars in circle V. The rank badge on the home screen shows the emblem without stars, since it is smaller.
+The inner outline and the inner shape repeat the outer shape, smaller. In circle V they are a circle, since a small sun would blur.
 
-Unlocked emblems use the accent color. Locked emblems use the locked color. See the [design system](../design/design-system.md).
+An unlocked emblem is a solid shape in the color of its circle: teal for I, violet for II, gold for III, coral for IV and white for V. A lighter facet at the top left and a darker one at the bottom right give it some depth, and its inner design is cut out in the background color. A locked emblem is the same shape, filled a shade above the surface and outlined in the locked color, with its inner design in the locked color too. Emblems carry no stars: the color and the shape already name the circle. See the [design system](../design/design-system.md).
 
 ## Locked ranks
 
@@ -69,17 +69,17 @@ The unlock screen appears on the home screen: when it opens, within the minute a
 
 A rank is stored as unlocked when its unlock screen opens, so the screen is never shown twice for the same rank. If storing fails, the screen is shown again on the next launch.
 
-The unlock screen shows "Nouveau rang", the emblem with its stars, the rank name, the total clean days and one line about the circle: "Le cercle de la Lumière s'ouvre." for the first rank of a circle, "Tu avances dans le cercle de l'Ombre." for the others. "Continuer" returns home, "Voir mes rangs" opens the ranks tab.
+The unlock screen shows "Nouveau rang", the emblem, the rank name, the total clean days and one line about the circle: "Le cercle de la Lumière s'ouvre." for the first rank of a circle, "Tu avances dans le cercle de l'Ombre." for the others. "Continuer" returns home, "Voir mes rangs" opens the ranks tab.
 
 ## Ranks screen
 
-The ranks tab shows the current rank with its emblem, stars, circle and the days left to the next rank, then the rule in one line, then the twelve ranks in a grid. Before the first clean day, it shows the first rank, locked, and the time left to it, like the home badge.
+The ranks tab shows the current rank with its emblem, circle and the days left to the next rank, a bar of the progress toward it, then the rule in one line, then the twelve ranks grouped by circle. Before the first clean day, it shows the first rank, locked, and the time left to it, like the home badge.
 
 ## After Free soul
 
 This section describes a planned evolution, not implemented yet. It is planned for V0.4 (see [Features](features.md)).
 
-Once Free soul is unlocked, every additional 365 total clean days adds a yearly seal to the rank. The rank then reads "Âme libre · an II" at 730 total clean days, "Âme libre · an III" at 1095, and so on. The year is shown in Roman numerals on screen and spoken as a number by screen readers, such as "Âme libre, an 2".
+Once Free soul is unlocked, every additional 365 total clean days adds a yearly seal to the rank. The rank then reads "Âme libre, an II" at 730 total clean days, "Âme libre, an III" at 1095, and so on. The year is shown in Roman numerals on screen and spoken as a number by screen readers, such as "Âme libre, an 2".
 
 A yearly seal reuses the Free soul emblem, with a small seal marker next to the rank name. Reaching a new seal shows a lighter version of the rank unlock screen.
 

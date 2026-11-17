@@ -5,12 +5,14 @@ import { useTranslation } from 'react-i18next';
 import { CUSTOM_TEXT_MAX_LENGTH, parseCustomText } from '@/domain/custom-text';
 import { DEFAULT_PLAN, type Plan } from '@/domain/onboarding';
 import { ACTION_IDS, type PlanTrigger } from '@/domain/presets';
-import { actionLabel, planCondition } from '@/features/shared/preset-labels';
+import { actionLabel, planCondition, planSentence } from '@/features/shared/preset-labels';
+import { NavRow } from '@/ui/nav-row';
 import { OptionSheet } from '@/ui/option-sheet';
 import { RadioGroup } from '@/ui/radio-group';
-import { SelectRow } from '@/ui/select-row';
+import { RowGroup } from '@/ui/row-group';
+import { SectionLabel } from '@/ui/section-label';
 import { TextEntryRow } from '@/ui/text-entry-row';
-import { spacing, typography } from '@/ui/theme';
+import { colors, radii, spacing, typography } from '@/ui/theme';
 
 type PlanFieldsProps = {
   plan: Plan;
@@ -54,14 +56,21 @@ export function PlanFields({
 
   return (
     <>
-      <SelectRow
-        prefix={t('onboarding.plan.if')}
-        value={planCondition(t, plan.trigger)}
-        accessibilityHint={t('onboarding.plan.triggerHint')}
-        onPress={() => setChoosingTrigger(true)}
-      />
-      <View style={styles.then}>
-        <Text style={styles.label}>{t('onboarding.plan.then')}</Text>
+      <View style={styles.field}>
+        <SectionLabel color={colors.gold}>{t('onboarding.plan.if')}</SectionLabel>
+        <RowGroup>
+          <NavRow
+            label={planCondition(t, plan.trigger)}
+            accessibilityLabel={t('onboarding.plan.ifSpoken', {
+              condition: planCondition(t, plan.trigger),
+            })}
+            accessibilityHint={t('onboarding.plan.triggerHint')}
+            onPress={() => setChoosingTrigger(true)}
+          />
+        </RowGroup>
+      </View>
+      <View style={styles.field}>
+        <SectionLabel color={colors.teal}>{t('onboarding.plan.then')}</SectionLabel>
         <RadioGroup
           accessibilityLabel={t('onboarding.plan.then')}
           options={ACTION_IDS.map((id) => ({ key: id, label: actionLabel(t, id) }))}
@@ -82,6 +91,9 @@ export function PlanFields({
           }
         />
       </View>
+      <View style={styles.sentence}>
+        <Text style={styles.sentenceText}>{planSentence(t, plan)}</Text>
+      </View>
       <OptionSheet
         visible={choosingTrigger}
         title={t('onboarding.plan.triggerTitle')}
@@ -96,11 +108,17 @@ export function PlanFields({
 }
 
 const styles = StyleSheet.create({
-  then: {
+  field: {
     gap: spacing.m,
   },
-  label: {
-    ...typography.label,
-    paddingHorizontal: spacing.xs,
+  // The whole plan as it will read on the emergency screen.
+  sentence: {
+    padding: spacing.card,
+    borderRadius: radii.cardLarge,
+    backgroundColor: colors.accentSurface,
+  },
+  sentenceText: {
+    ...typography.quote,
+    color: colors.text,
   },
 });

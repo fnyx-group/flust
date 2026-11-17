@@ -14,9 +14,9 @@ import {
 export type StreakDisplay =
   { unit: 'hours'; hours: number; minutes: number } | { unit: 'days'; days: number };
 
-// The streak counter shrinks with its number of digits so that it stays on one line.
-// Hours have their own sizes, as their " h " and " min" units take more room than " days".
-export type CounterSize = 'large' | 'medium' | 'small' | 'hoursMedium' | 'hoursSmall';
+// The number inside the streak ring shrinks with its digits so that it stays inside the ring.
+// Hours never pass two digits, and their minutes go on a line of their own.
+export type CounterSize = 'large' | 'medium' | 'small';
 
 export type HoursAndMinutes = { hours: number; minutes: number };
 
@@ -47,9 +47,8 @@ export function streakDisplay(streakMs: number): StreakDisplay {
   };
 }
 
-// Minutes always show two digits, so only the hours change the width: 7 h 05 is as wide as 7 h 40.
 export function counterSize(display: StreakDisplay): CounterSize {
-  if (display.unit === 'hours') return display.hours < 10 ? 'hoursMedium' : 'hoursSmall';
+  if (display.unit === 'hours') return 'large';
   const digits = String(display.days).length;
   if (digits <= 2) return 'large';
   if (digits === 3) return 'medium';

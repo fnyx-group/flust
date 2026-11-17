@@ -227,13 +227,13 @@ export function NoteEditor({ note }: { note: Note | null }) {
               message={t('journal.note.deleteConfirm.message')}
               cancelLabel={t('journal.note.deleteConfirm.cancel')}
               confirmLabel={t('journal.note.deleteConfirm.confirm')}
+              destructive
               onCancel={() => setSheet(null)}
               onConfirm={() => void remove()}
             />
           </>
         }
       >
-        {note === null ? <CurrentDateTime /> : <WrittenDateTime note={note} />}
         <TextInput
           accessibilityLabel={t('journal.note.titleSpoken')}
           placeholder={t('journal.note.titlePlaceholder')}
@@ -247,6 +247,7 @@ export function NoteEditor({ note }: { note: Note | null }) {
           selectionColor={colors.accent}
           style={styles.title}
         />
+        {note === null ? <CurrentDateTime /> : <WrittenDateTime note={note} />}
         <TextInput
           ref={body}
           accessibilityLabel={t('journal.note.bodySpoken')}
@@ -266,7 +267,7 @@ export function NoteEditor({ note }: { note: Note | null }) {
           <PrivateLine text={t('journal.note.private')} />
           {note !== null && (
             <Button
-              variant="plain"
+              variant="destructive"
               label={t('journal.note.delete')}
               disabled={busy}
               onPress={() => setSheet({ kind: 'delete' })}
@@ -316,6 +317,8 @@ const styles = StyleSheet.create({
   },
   date: {
     ...typography.row,
+    fontFamily: typography.quote.fontFamily,
+    paddingBottom: spacing.m,
     color: colors.textSecondary,
   },
   title: {

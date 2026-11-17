@@ -4,14 +4,13 @@ import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-nativ
 import { useTranslation } from 'react-i18next';
 
 import type { Profile } from '@/data/profile-repository';
-import { opensJournal } from '@/domain/onboarding';
 import { countdownMs } from '@/domain/urge';
 import { ClockContext, useClock } from '@/features/clock/clock-context';
 import { createElapsedClock } from '@/features/clock/elapsed-clock';
 import { nativeElapsedClockDeps } from '@/features/clock/native-clock';
 import { BreathingCircle } from '@/features/emergency/breathing-circle';
 import { CountdownChip } from '@/features/emergency/countdown-chip';
-import { PlansCard, ReasonsCard } from '@/features/emergency/profile-cards';
+import { PlansCard, ReasonsList } from '@/features/emergency/profile-cards';
 import { startUrgeVisit, type UrgeVisit } from '@/features/emergency/urge-visit';
 import { handOffVisit } from '@/features/emergency/visit-handoff';
 import { useWhenFocused } from '@/features/shared/use-when-focused';
@@ -19,6 +18,10 @@ import { useStorage } from '@/features/storage/storage-context';
 import { Button } from '@/ui/button';
 import { IconButton } from '@/ui/icon-button';
 import { CloseIcon } from '@/ui/icons/close-icon';
+import { HeartIcon } from '@/ui/icons/heart-icon';
+import { PencilIcon } from '@/ui/icons/pencil-icon';
+import { NavRow } from '@/ui/nav-row';
+import { RowGroup } from '@/ui/row-group';
 import { Screen } from '@/ui/screen';
 import { ScreenTitle } from '@/ui/screen-title';
 import { ScrollView } from '@/ui/scroll-view';
@@ -106,22 +109,24 @@ export function EmergencyScreen() {
             <WaveOver />
           </View>
           <BreathingCircle />
-          {plans.length > 0 && (
-            <PlansCard
-              plans={plans}
-              onWrite={plans.some(opensJournal) ? () => whenFocused(writeNote) : undefined}
+          {plans.length > 0 && <PlansCard plans={plans} />}
+          {reasons.length > 0 && <ReasonsList reasons={reasons} />}
+          <RowGroup>
+            <NavRow
+              label={t('emergency.writeNote')}
+              icon={{ icon: PencilIcon, color: colors.accent }}
+              onPress={() => whenFocused(writeNote)}
             />
-          )}
-          {reasons.length > 0 && <ReasonsCard reasons={reasons} />}
-          <View style={styles.actions}>
-            <Button label={t('emergency.held')} onPress={held} />
-            <Button variant="plain" label={t('emergency.lapse')} onPress={lapse} />
-            <Button
-              variant="plain"
+            <NavRow
               label={t('emergency.darkThoughts')}
+              icon={{ icon: HeartIcon, color: colors.danger }}
               accessibilityHint={t('emergency.darkThoughtsHint')}
               onPress={() => whenFocused(openHelp)}
             />
+          </RowGroup>
+          <View style={styles.actions}>
+            <Button label={t('emergency.held')} onPress={held} />
+            <Button variant="plain" label={t('emergency.lapse')} onPress={lapse} />
           </View>
         </ScrollView>
       </ClockContext>
@@ -129,7 +134,8 @@ export function EmergencyScreen() {
   );
 }
 
-// The note opens over this screen, which stays open with its countdown running.
+// The note opens over this screen, which stays open with its countdown running. It is offered
+// with every plan, not only one that says to write.
 function writeNote() {
   router.push('/note');
 }

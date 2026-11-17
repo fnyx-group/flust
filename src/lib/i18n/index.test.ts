@@ -65,4 +65,13 @@ describe('locales', () => {
     expect(french.filter((text) => /(?<!\u00a0):/.test(text))).toEqual([]);
     expect(french.some((text) => text.includes('\u202f?'))).toBe(true);
   });
+
+  // docs/design/design-system.md: sentences are joined with commas and full stops, never with a
+  // separator sign or a colon.
+  it.each([
+    ['en', en],
+    ['fr', fr],
+  ] as const)('use no separator signs in %s', (_, locale) => {
+    expect(valuesOf(locale).filter((text) => /[·«»“”—–:;]/.test(text))).toEqual([]);
+  });
 });

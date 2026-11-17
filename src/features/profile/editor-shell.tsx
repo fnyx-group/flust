@@ -96,21 +96,29 @@ export function EditorShell({
           backLabel={t('profile.back')}
           disabled={busy}
           onBack={() => (router.canGoBack() ? router.back() : router.replace('/reasons-and-plans'))}
-          action={
-            <Button
-              label={t('profile.save')}
-              disabled={busy || !canSave}
-              onPress={() => void perform(save)}
-            />
-          }
         />
       }
       footer={
-        error !== null && (
-          <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>
-            {error}
-          </Text>
-        )
+        <View style={styles.footer}>
+          {error !== null && (
+            <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>
+              {error}
+            </Text>
+          )}
+          <Button
+            label={t('profile.save')}
+            disabled={busy || !canSave}
+            onPress={() => void perform(save)}
+          />
+          {removal !== undefined && (
+            <Button
+              variant="destructive"
+              label={removal.label}
+              disabled={busy}
+              onPress={() => setSheet({ kind: 'remove' })}
+            />
+          )}
+        </View>
       }
       overlay={
         <>
@@ -135,6 +143,7 @@ export function EditorShell({
               message={removal.confirm.message}
               cancelLabel={removal.confirm.cancel}
               confirmLabel={removal.confirm.confirm}
+              destructive
               onCancel={() => setSheet(null)}
               onConfirm={() => {
                 setSheet(null);
@@ -147,19 +156,7 @@ export function EditorShell({
     >
       <ScreenTitle>{title}</ScreenTitle>
       {children}
-      {(removal !== undefined || note !== undefined) && (
-        <View style={styles.end}>
-          {note !== undefined && <Text style={styles.note}>{note}</Text>}
-          {removal !== undefined && (
-            <Button
-              variant="plain"
-              label={removal.label}
-              disabled={busy}
-              onPress={() => setSheet({ kind: 'remove' })}
-            />
-          )}
-        </View>
-      )}
+      {note !== undefined && <Text style={styles.note}>{note}</Text>}
     </KeyboardScreen>
   );
 }
@@ -169,8 +166,9 @@ const styles = StyleSheet.create({
     gap: spacing.xl,
     paddingBottom: spacing.xl,
   },
-  end: {
-    gap: spacing.s,
+  footer: {
+    gap: spacing.xs,
+    paddingTop: spacing.m,
   },
   note: {
     ...typography.body,
@@ -181,6 +179,6 @@ const styles = StyleSheet.create({
     ...typography.body,
     textAlign: 'center',
     color: colors.text,
-    paddingTop: spacing.m,
+    paddingBottom: spacing.s,
   },
 });

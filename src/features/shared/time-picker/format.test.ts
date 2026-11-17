@@ -29,7 +29,7 @@ describe('picker formats', () => {
     expect(english).toContain('2019');
     expect(english).toMatch(/9:05\s?PM/);
     expect(formatDateTime('fr', local, false)).toContain('2019');
-    expect(formatDateTime('fr', local, false)).toContain('21:05');
+    expect(formatDateTime('fr', local, false)).toContain('2019, 21\u00a0h\u00a005');
   });
 
   it('start weeks on the given day', () => {

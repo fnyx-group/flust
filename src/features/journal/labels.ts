@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next';
 import type { NoteGroupKey, NoteSummary } from '@/domain/journal';
 import type { LocalDateTime } from '@/domain/local-time';
 import { MS_PER_DAY } from '@/domain/time';
+import { formatClockTime } from '@/features/shared/clock-time';
 
 export const PROMPT_IDS = ['helped', 'proud', 'tomorrow'] as const;
 export type PromptId = (typeof PROMPT_IDS)[number];
@@ -58,8 +59,8 @@ export function noteGroupTitle(
   }
 }
 
-// "Jeudi 13 novembre, 22:14", with the year when it is not the current one. The time follows the
-// device's 12 or 24 hour setting, like the time pickers.
+// "Jeudi 13 novembre, 22 h 14", with the year when it is not the current one. The time follows
+// the device's 12 or 24 hour setting, like the time pickers.
 export function noteDateTime(
   t: TFunction,
   language: string,
@@ -76,7 +77,7 @@ export function noteDateTime(
   };
   if (year !== currentYear) dateOptions.year = 'numeric';
   const date = capitalize(language, format(language, dateOptions, at));
-  const time = format(language, { hour: 'numeric', minute: '2-digit', hour12 }, at);
+  const time = formatClockTime(language, hour, minute, hour12);
   return t('journal.note.dateTime', { date, time });
 }
 

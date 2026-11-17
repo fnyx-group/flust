@@ -11,10 +11,11 @@ import { ClockContext } from '@/features/clock/clock-context';
 import { createMinuteClock } from '@/features/clock/minute-clock';
 import { nativeClockDeps } from '@/features/clock/native-clock';
 import { CheckInLine } from '@/features/home/check-in-line';
+import { CircleName } from '@/features/home/circle-name';
 import { DailyQuote } from '@/features/home/daily-quote';
 import { SupportLine, UndoLine } from '@/features/home/lapse-lines';
 import { LowMoodCard } from '@/features/home/low-mood-card';
-import { RankBadge } from '@/features/home/rank-badge';
+import { RankCard } from '@/features/home/rank-card';
 import { StreakCounter } from '@/features/home/streak-counter';
 import { WeekStrip } from '@/features/home/week-strip';
 import { useRankUnlockTrigger } from '@/features/ranks/use-rank-unlock-trigger';
@@ -38,8 +39,8 @@ type HomeProps = {
   latestLapse: LapseRecord | null;
 };
 
-// This component never reads the clock: only the badge, the counter, the week strip, the quote, the
-// check-in line and the low mood card subscribe to it, so a tick re-renders them and nothing
+// This component never reads the clock: only the circle name, the counter, the rank card, the
+// week strip, the quote, the check-in line and the low mood card subscribe to it, so a tick re-renders them and nothing
 // else. A lapse moves the streak start, which the clock's ticks are aligned to, so it gets a new
 // clock.
 function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
@@ -61,11 +62,12 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
         >
           <View style={styles.header}>
             <BrandHeader />
-            <RankBadge journey={journey} unlockedRanks={unlockedRanks} />
+            <CircleName journey={journey} unlockedRanks={unlockedRanks} />
           </View>
           <View style={styles.middle}>
-            <View style={styles.hero}>
-              <StreakCounter journey={journey} />
+            <StreakCounter journey={journey} unlockedRanks={unlockedRanks} />
+            <View style={styles.progress}>
+              <RankCard journey={journey} unlockedRanks={unlockedRanks} />
               <WeekStrip journey={journey} />
             </View>
             <View style={styles.quote}>
@@ -105,19 +107,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.m,
   },
-  // The counter, the week strip and the quote are one block: the free space goes above and below
-  // it, never between its parts. The padding is the least space left around it.
+  // The ring, the rank card, the week strip and the quote are one block: the free space goes
+  // above and below it, never between its parts. The padding is the least space left around it.
   middle: {
     flexGrow: 1,
     justifyContent: 'center',
+    gap: spacing.xl,
     paddingVertical: spacing.xl,
   },
-  hero: {
-    gap: spacing.xl,
+  progress: {
+    gap: spacing.l,
   },
   quote: {
-    marginTop: spacing.xxxl,
-    gap: spacing.s,
+    gap: spacing.xs,
   },
   actions: {
     gap: spacing.s,

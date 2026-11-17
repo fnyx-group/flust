@@ -8,7 +8,7 @@ export function BrandHeader() {
   const { t } = useTranslation();
   return (
     <View style={styles.container} accessibilityRole="header">
-      <FlustSymbol height={24} />
+      <FlustSymbol height={26} />
       <Text style={styles.name}>{t('app.name')}</Text>
     </View>
   );
@@ -18,10 +18,10 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.m,
+    gap: spacing.s,
   },
   name: {
-    ...typography.screenTitle,
+    ...typography.brandLockup,
     color: colors.text,
   },
 });

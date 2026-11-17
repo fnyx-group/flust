@@ -1,4 +1,5 @@
 import type { LocalDateTime, Weekday } from '@/domain/local-time';
+import { formatClockTime } from '@/features/shared/clock-time';
 
 type LocalDate = Pick<LocalDateTime, 'year' | 'month' | 'day'>;
 
@@ -20,21 +21,10 @@ export function formatFullDate(language: string, { year, month, day }: LocalDate
   );
 }
 
+// "mardi 17 novembre 2026, 21 h 14": the date, a comma, then the time.
 export function formatDateTime(language: string, local: LocalDateTime, hour12: boolean): string {
-  const { year, month, day, hour, minute } = local;
-  return format(
-    language,
-    {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12,
-    },
-    Date.UTC(year, month - 1, day, hour, minute),
-  );
+  const time = formatClockTime(language, local.hour, local.minute, hour12);
+  return `${formatFullDate(language, local)}, ${time}`;
 }
 
 export function formatHour(language: string, hour: number, hour12: boolean): string {
