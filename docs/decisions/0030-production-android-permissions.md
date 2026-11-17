@@ -35,4 +35,5 @@ Where each one comes from:
 - A production-variant build cannot load JavaScript from Metro. Work that needs Metro uses the development variant.
 - Links to the website, the source code and findahelpline.com still open: the browser or the app that handles them makes the connection, not flust.
 - A new dependency that adds a permission fails the release check, until the permission is blocked or added to the expected list with a reason.
+- This holds for V0.1. From V0.2, the Android content filter forwards DNS lookups and the production build requests `INTERNET`, contained by the rules of [0033](0033-android-filter-network-access.md).
 - The debug APK contains Google Play services, ML Kit and Firebase component classes, which `expo-dev-launcher` brings for its QR code scanner. The release classpath has none; the release check proves it on each build ([0021](0021-local-notifications.md)).

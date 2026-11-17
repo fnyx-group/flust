@@ -55,6 +55,7 @@
 - [0030 Production Android permissions](decisions/0030-production-android-permissions.md): network and storage permissions blocked in production only, checked in the source and in the release build.
 - [0031 End-to-end tests](decisions/0031-end-to-end-tests.md): Maestro flows on the production release APK, on a local emulator before each release, not in CI.
 - [0032 Accessibility pass](decisions/0032-accessibility-pass.md): a muted color for dimmed text, contrast tests, 44 point calendar days, fades with Reduce Motion, layouts that change with large text and documented caps.
+- [0033 Network access of the Android filter](decisions/0033-android-filter-network-access.md): from V0.2, `INTERNET` for the DNS filter only, network code in its module alone, no query logged, an audit before release.
 
 ## Development
 
