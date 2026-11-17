@@ -8,7 +8,7 @@ flust is the first app of fnyx-group, a non-profit open source project. The sour
 
 - No account. The app works from the first launch without signing up.
 - No ads, no tracking, no analytics.
-- No network calls at all. The app works fully offline and never contacts a server.
+- Nothing the user records leaves the phone. flust contacts no server of its own and has no account or tracking. The only network traffic is the content filter's, described in [0033](../decisions/0033-android-filter-network-access.md).
 - Everything is stored encrypted on the device, with keys held by the platform keystores (Keychain on iOS, Android Keystore on Android).
 - The tone is calm and non-judgmental. The app never shames, scolds or pressures the user.
 - A lapse is information, not failure. It helps the user understand their patterns and adjust their plan.

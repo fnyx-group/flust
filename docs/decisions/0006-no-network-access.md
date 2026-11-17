@@ -16,7 +16,7 @@ flust makes no network calls at all. From V0.2, the Android content filter forwa
 
 ## Consequences
 
-- The app works fully offline and cannot leak data over the network.
+- In V0.1, the app works fully offline and cannot leak data over the network.
 - Crashes are known only when users report them. Error boundaries, safe mode and local logs must make reports useful.
 - Fixes take as long as a store review. Phased rollouts limit the impact of a bad release.
 - Blocklists are updated only with app updates.

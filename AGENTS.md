@@ -82,7 +82,7 @@ Lint, typecheck, tests and format check must pass before any change is considere
 
 ## Security and privacy
 
-- Never add network calls, telemetry, crash reporters or SDKs that send data off the device.
+- No network calls outside the filter module ([0033](docs/decisions/0033-android-filter-network-access.md)). Never add telemetry, crash reporters or SDKs that send data off the device.
 - Never commit secrets, keys or tokens.
 - Sensitive data is encrypted at rest with platform keystores (Keychain / Android Keystore).
 - New dependencies must be justified, maintained and minimal.
