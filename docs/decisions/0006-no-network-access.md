@@ -6,7 +6,7 @@
 
 ## Decision
 
-flust makes no network calls at all.
+flust makes no network calls at all. From V0.2, the Android content filter forwards DNS lookups, under the rules of [0033](0033-android-filter-network-access.md).
 
 - No remote crash reporting. Errors go to a local log without personal data, which the user can export and send manually.
 - No over-the-air updates. Every update, including hotfixes, goes through a new store release.

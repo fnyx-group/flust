@@ -9,12 +9,13 @@ All user data stays on the device, encrypted. No accounts, no ads, no analytics,
 
 - Expo SDK 58, React Native, TypeScript (strict), Expo Router
 - pnpm
-- Native modules: Swift (iOS Screen Time), Kotlin (Android VPN filtering)
+- Native modules: Swift and Kotlin, for local reminders on Android, screen privacy and the lock wait clock
+- Planned for V0.2: Swift (iOS Screen Time) and Kotlin (Android VPN filtering) for the content filter
 
 ## Layout
 
     src/app/        routes only: every file is a screen, `_layout.tsx` defines navigators
-    src/features/   screens and hooks: clock, home, onboarding, ranks, session, shared, storage
+    src/features/   screens and hooks, one folder per feature, and shared
     src/domain/     pure logic: streaks, ranks, dates
     src/data/       storage and crypto
     src/ui/         shared components and theme

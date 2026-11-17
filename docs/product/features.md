@@ -140,7 +140,7 @@ French and English.
 
 The content filter blocks pornographic sites on the device.
 
-- Android uses a local `VpnService` for DNS filtering. No traffic leaves the device through the VPN.
+- Android uses a local `VpnService` for DNS filtering. Only DNS lookups go through it: blocked ones are answered on the device, allowed ones are forwarded to a DNS resolver, and no query is logged. The Android build requests `INTERNET` from this version, for the filter only ([0033](../decisions/0033-android-filter-network-access.md)).
 - iOS uses the Screen Time APIs (`FamilyControls`, `ManagedSettings`). They require an entitlement from Apple and cannot fully prevent the app from being removed.
 
 The filter includes:

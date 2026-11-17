@@ -15,29 +15,26 @@ Navigation uses Expo Router. Each file in `src/app/` is a screen and `_layout.ts
 
 `src/app/` contains routes only. Logic lives outside the routes, in layers whose imports are enforced by lint (see [Conventions](../development/conventions.md#layers)):
 
-| Folder          | Purpose                                                 |
-| --------------- | ------------------------------------------------------- |
-| `src/app/`      | Screens and navigators                                  |
-| `src/features/` | Screens and hooks: journal, streak, emergency, blocking |
-| `src/domain/`   | Pure logic: streaks, ranks, dates                       |
-| `src/data/`     | Storage and crypto                                      |
-| `src/ui/`       | Shared components and theme                             |
-| `src/lib/`      | Shared infrastructure such as i18n                      |
-| `modules/`      | Native modules                                          |
-| `assets/`       | Brand and images                                        |
+| Folder          | Purpose                                               |
+| --------------- | ----------------------------------------------------- |
+| `src/app/`      | Screens and navigators                                |
+| `src/features/` | Screens and hooks: one folder per feature, and shared |
+| `src/domain/`   | Pure logic: streaks, ranks, dates                     |
+| `src/data/`     | Storage and crypto                                    |
+| `src/ui/`       | Shared components and theme                           |
+| `src/lib/`      | Shared infrastructure such as i18n                    |
+| `modules/`      | Native modules                                        |
+| `assets/`       | Brand and images                                      |
 
 Folders are created when their first code lands.
 
 ## Native modules
 
-Content blocking needs platform APIs that Expo does not expose:
-
-- iOS: Swift module using the Screen Time API.
-- Android: Kotlin module providing VPN-based filtering.
-
 Reminders on Android use `modules/flust-reminders`, a Kotlin module that sets local alarms and shows notifications, so the app links no Firebase code ([0021](../decisions/0021-local-notifications.md)). iOS uses `expo-notifications`.
 
 `modules/flust-privacy`, in Swift and Kotlin, reads a clock that keeps running while the phone sleeps, for the wait between unlock attempts ([0024](../decisions/0024-lock-wait.md)). On Android, it also sets `FLAG_SECURE` on the app's window, in place of `expo-screen-capture`, which is not linked there ([0025](../decisions/0025-screen-privacy.md)).
+
+The content filter of V0.2 will need platform APIs that Expo does not expose: a Swift module using the Screen Time API on iOS, and a Kotlin module providing VPN-based DNS filtering on Android ([0033](../decisions/0033-android-filter-network-access.md)). Neither exists yet.
 
 They live in `modules/` as local Expo modules. Any native code requires a development build, Expo Go cannot load it.
 
