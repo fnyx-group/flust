@@ -15,12 +15,13 @@ Once, on the first bundle EAS builds for the stores, then again whenever the bui
        scripts/check-android-release.sh path/to/flust.aab
 
 2. It lists the same permissions as the local release APK. Compare them with the list it prints for `android/app/build/outputs/apk/release/app-release.apk`.
-3. Turn the bundle into an APK that installs on the emulator, signed with the debug key, and run the flows on it. Uninstall the local build first, which has another signature:
+3. Turn the bundle into an APK that installs on the emulator, signed with the debug key of the generated project, the same as the local release APK, and run the flows on it. Without `--ks`, bundletool looks for `~/.android/debug.keystore`, which the container's home folder does not have:
 
-       java -jar "$BUNDLETOOL" build-apks --bundle=path/to/flust.aab --output=/tmp/flust.apks --mode=universal
-       unzip -o /tmp/flust.apks universal.apk -d /tmp
-       adb uninstall org.fnyxgroup.flust
-       scripts/e2e-android.sh --apk /tmp/universal.apk
+       out=$(mktemp -d)
+       java -jar "$BUNDLETOOL" build-apks --bundle=path/to/flust.aab --output="$out/flust.apks" --mode=universal \
+         --ks=android/app/debug.keystore --ks-pass=pass:android --ks-key-alias=androiddebugkey --key-pass=pass:android
+       unzip -o "$out/flust.apks" universal.apk -d "$out"
+       scripts/e2e-android.sh --apk "$out/universal.apk"
 
 ### Install and update
 
@@ -38,20 +39,30 @@ Once, on the first bundle EAS builds for the stores, then again whenever the bui
 
 No code can trigger it: the app is stopped during the splash twice instead ([0028](../decisions/0028-error-boundaries-and-safe-mode.md)).
 
-1. Run these twice in a row, the second command as soon as the splash shows:
+1. Turn the app lock on first, so that safe mode is seen to open without it.
+2. Do item 12 of [Testing](testing.md#storage) with the production identifier, plus item 11. A release build reaches its first screen quickly, so start and stop it in one command, run twice:
 
-       adb shell am start -n org.fnyxgroup.flust/.MainActivity
-       adb shell am force-stop org.fnyxgroup.flust
+       adb shell 'am start -n org.fnyxgroup.flust/.MainActivity; sleep 0.3; am force-stop org.fnyxgroup.flust'
 
-2. The third launch opens safe mode, without the app lock.
-3. "Try again" starts normally.
-4. The error report asks for the phone's authentication, then shows its text before the share sheet opens.
-5. Erasing asks twice, then starts the onboarding.
-6. The other error checks, the unreadable log file and a screen error on the journal tab, are items 11 and 12 of [Testing](testing.md#storage).
+3. The third launch opens safe mode, without the app lock. Erasing there asks twice.
 
 ### Storage
 
 The encryption, keystore and backup checks of [Testing](testing.md#storage), items 1 to 3 and 5 to 8 (items 4 and 9 are for iOS).
+
+### Lock
+
+The wait between attempts ([0024](../decisions/0024-lock-wait.md)), with the lock on:
+
+1. Cancel the system prompt three times: the third shows a 30 second wait.
+2. With a wait running, move the clock forward in the system settings: the wait does not get shorter.
+
+### Reminders
+
+Taps on a notification ([0021](../decisions/0021-local-notifications.md)), with the evening check-in reminder on:
+
+1. Tap the reminder when it comes: flust opens on the check-in, through the lock when it is on.
+2. Then leave flust and reopen it from the recent apps: it opens where it was, not on the check-in again.
 
 ### Reboot
 

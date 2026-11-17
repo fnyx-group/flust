@@ -45,6 +45,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 [[ ${#flows[@]} -gt 0 ]] || flows=("$root/e2e/maestro")
+# The PIN reaches the device shell through adb, so only digits are accepted.
+[[ $pin =~ ^[0-9]{4,16}$ ]] || fail "E2E_PIN must be 4 to 16 digits."
 
 command -v maestro >/dev/null || fail "maestro not found: see docs/development/setup.md#end-to-end-tests."
 if command -v adb >/dev/null; then
@@ -61,6 +63,8 @@ mapfile -t devices < <("$adb" devices | awk 'NR > 1 && $2 == "device" { print $1
 [[ ${#devices[@]} -eq 1 ]] || fail "Start exactly one emulator; found ${#devices[@]} devices."
 [[ ${devices[0]} == emulator-* ]] || fail "${devices[0]} is not an emulator."
 export ANDROID_SERIAL=${devices[0]}
+qemu=$("$adb" shell 'getprop ro.boot.qemu; getprop ro.kernel.qemu' | tr -d '\r')
+[[ $qemu == *1* ]] || fail "$ANDROID_SERIAL does not report itself as an emulator."
 
 "$root/scripts/check-android-release.sh" "$apk"
 
@@ -73,21 +77,30 @@ restore() {
   fi
   if [[ -n $font_scale ]]; then
     if [[ $previous_scale == null ]]; then
-      "$adb" shell settings delete system font_scale >/dev/null
+      "$adb" shell settings delete system font_scale >/dev/null ||
+        echo "Could not reset the emulator font scale." >&2
     else
-      "$adb" shell settings put system font_scale "$previous_scale"
+      "$adb" shell settings put system font_scale "$previous_scale" ||
+        echo "Could not restore the emulator font scale $previous_scale." >&2
     fi
   fi
 }
 trap restore EXIT
 
 # A screen lock already set is kept when E2E_PIN is its PIN, and is not removed at the end.
-if "$adb" shell locksettings set-pin "$pin" >/dev/null; then
-  pin_set=true
-elif ! "$adb" shell locksettings verify --old "$pin" >/dev/null; then
-  fail "The emulator already has a screen lock: set E2E_PIN to its PIN, or remove it."
+# pin_set is true before set-pin, so an interruption right after it still removes the PIN; a
+# removal with a PIN that was never set only fails.
+pin_set=true
+if ! "$adb" shell locksettings set-pin "$pin" >/dev/null; then
+  pin_set=false
+  "$adb" shell locksettings verify --old "$pin" >/dev/null ||
+    fail "The emulator already has a screen lock: set E2E_PIN to its PIN, or remove it."
 fi
 [[ -z $font_scale ]] || "$adb" shell settings put system font_scale "$font_scale"
 
+# With a PIN set, a sleeping screen shows the keyguard, which the flows cannot pass.
+"$adb" shell input keyevent KEYCODE_WAKEUP
+
 "$adb" install -r "$apk"
-maestro test --env "PIN=$pin" "${flows[@]}"
+# Maestro does not read ANDROID_SERIAL.
+maestro --device "$ANDROID_SERIAL" test --env "PIN=$pin" "${flows[@]}"

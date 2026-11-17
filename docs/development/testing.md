@@ -82,9 +82,11 @@ Maestro flows in `e2e/maestro/` run the main journeys on the production release 
     scripts/e2e-android.sh e2e/maestro/flows/journal.yaml
     scripts/e2e-android.sh --font-scale 2.0      # every flow with the largest text
 
-Each flow starts from a fresh install and goes through the onboarding in English (`common/onboard.yaml`), then checks one journey: the home screen, the emergency screen, a lapse and its undo, a check-in, a journal note written, edited and deleted, a reminder turned on and off, the app lock, the help numbers, and erasing everything. Selectors are the English texts and screen reader labels. Nothing is dialed and nothing leaves the emulator.
+Each flow starts with the app's data cleared and goes through the onboarding in English (`common/onboard.yaml`), then checks one journey: the home screen, the emergency screen, a lapse and its undo, a check-in, a journal note written, edited and deleted, a reminder turned on and off, the app lock, the help numbers, and erasing everything. Selectors are the English texts and screen reader labels, and the emulator's system language must be English. The onboarding and erase flows also stop and relaunch the app, so the data is read back from storage. Nothing is dialed and nothing leaves the emulator.
 
-The script checks the APK with `scripts/check-android-release.sh` first, refuses any device that is not an emulator, and sets a screen lock PIN for the lock flow, removed at the end. When the emulator already has a screen lock, `E2E_PIN` must hold its PIN (`E2E_PIN=1234 scripts/e2e-android.sh`); the script then leaves the lock in place. It runs Maestro with its analytics, update check and test analysis notice turned off.
+The script checks the APK with `scripts/check-android-release.sh` first, refuses any device that is not an emulator (by its serial and its `qemu` property), and sets a screen lock PIN for the lock flow, removed at the end. When the emulator already has a screen lock, `E2E_PIN` must hold its PIN (`E2E_PIN=1234 scripts/e2e-android.sh`); the script then leaves the lock in place. It runs Maestro with its analytics, update check and test analysis notice turned off.
+
+The script exits with 0 when every flow passes, with 1 when a flow fails or the release check finds something the build must not ship, and with 2 when it cannot run: a missing tool or APK, a bad option, not exactly one emulator, an `E2E_PIN` that does not match, or a release check that cannot read the build.
 
 What the flows cannot check, such as safe mode, time zone changes or TalkBack, is in the [manual checklist](manual-checklist.md).
 

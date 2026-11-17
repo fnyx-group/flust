@@ -7,32 +7,39 @@ appId: org.fnyxgroup.flust
 - inputText: Maestro title
 - tapOn: What helped you today\?
 - inputText: a walk
-- hideKeyboard
+# Save is in the header, above the keyboard: hideKeyboard could press Back and close the note.
 - tapOn: Save
-- assertVisible: .*Maestro title.*a walk.*
+- assertVisible: '.*, Maestro title, .*a walk.*'
 
-# Edit: the title is replaced and the list shows the new one. The short title leaves the cursor
-# at its end when the wide field is tapped. A row tapped while the note screen is still closing
-# is ignored, so each one waits for the animation and is tapped again if nothing changed.
-- waitForAnimationToEnd
+# Edit: the title is replaced and the list shows the new one. eraseText deletes back from the
+# cursor, which lands where the field was tapped: the tap is at the field's right end, past the
+# text even with large text, and the field is checked whole before saving.
+# Screenshots are black under FLAG_SECURE, so waitForAnimationToEnd cannot see the note screen
+# close: the flow waits for its Close button to go, and taps a row again if nothing changed.
+- extendedWaitUntil:
+    notVisible: Close
+    timeout: 5000
 - tapOn:
-    text: .*Maestro title.*
+    text: '.*, Maestro title, .*'
     retryTapIfNoChange: true
 - assertVisible: Close
-- tapOn: Maestro title
+- tapOn:
+    text: Maestro title
+    point: 97%,50%
 - eraseText: 20
 - inputText: Edited title
-- hideKeyboard
+- assertVisible: Edited title
 - tapOn: Save
-- assertVisible: .*Edited title.*a walk.*
+- assertVisible: '.*, Edited title, .*a walk.*'
 - assertNotVisible: .*Maestro title.*
 
 # Delete, after the confirmation sheet.
-- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible: Close
+    timeout: 5000
 - tapOn:
-    text: .*Edited title.*
+    text: '.*, Edited title, .*'
     retryTapIfNoChange: true
-# An existing note opens without the keyboard: hideKeyboard would press Back and close it.
 - assertVisible: Close
 - scrollUntilVisible:
     element: Delete note

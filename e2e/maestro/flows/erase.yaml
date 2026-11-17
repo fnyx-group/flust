@@ -13,6 +13,14 @@ appId: org.fnyxgroup.flust
 - tapOn:
     text: Erase everything
     below: Erase for good\?
+# Erasing goes back to the device language, so the onboarding is found by its language row.
 - extendedWaitUntil:
-    visible: Take back control.
+    visible: '(Language|Langue).*'
     timeout: 15000
+
+# A cold start opens the onboarding again: the data is gone from storage, not only from the screen.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: '(Language|Langue).*'
+    timeout: 30000
