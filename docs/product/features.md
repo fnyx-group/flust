@@ -1,6 +1,6 @@
 # Features
 
-This document lists flust features by version. Each version builds on the previous one. All features work offline and store their data encrypted on the device.
+This document lists flust features by version. Each version builds on the previous one. All features work offline, except the Android filter, which forwards allowed DNS lookups. Every feature stores its data encrypted on the device.
 
 ## V0.1
 
