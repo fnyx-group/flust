@@ -23,7 +23,7 @@
     "rank": {
       "first": "First rank",
       "firstIn": "{{name}} in {{time}}",
-      "shortTime": "{{hours}} h {{minutes}} min",
+      "shortTime": "{{hours}} h {{minutes}}",
       "nextIn_one": "{{name}} in {{count}} day",
       "nextIn_other": "{{name}} in {{count}} days",
       "allUnlocked": "All ranks unlocked",
@@ -33,10 +33,6 @@
     "quote": {
       "spoken": "Quote of the day, {{text}}",
       "spokenWithAuthor": "Quote of the day, {{text}}, {{author}}"
-    },
-    "week": {
-      "summary_one": "{{count}} clean day in the last 7",
-      "summary_other": "{{count}} clean days in the last 7"
     },
     "lapse": {
       "link": "I had a lapse",
@@ -491,6 +487,10 @@
     }
   },
   "ranks": {
+    "week": {
+      "summary_one": "{{count}} clean day in the last 7",
+      "summary_other": "{{count}} clean days in the last 7"
+    },
     "names": {
       "novice": "Novice",
       "apprentice": "Apprentice",
@@ -616,7 +616,7 @@
     "riskHours": {
       "title": "Risky hours",
       "subtitle": "A reminder before your sensitive moments",
-      "unavailable": "Choose a moment like at night in bed or the weekend."
+      "unavailable": "Add a night or weekend moment to your risk moments first."
     },
     "ranks": {
       "title": "Ranks and milestones",
@@ -735,7 +735,7 @@
       },
       "fr114": {
         "name": "Emergencies by text",
-        "detail": "Free text, 24/7, if you cannot speak or hear"
+        "detail": "Free text, 24/7, if you cannot speak or hear, or cannot speak safely"
       },
       "be0800": {
         "name": "Centre de Prévention du Suicide",

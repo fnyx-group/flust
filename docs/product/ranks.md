@@ -53,7 +53,7 @@ The inner design identifies the rank within its circle:
 
 The inner outline and the inner shape repeat the outer shape, smaller. In circle V they are a circle, since a small sun would blur.
 
-An unlocked emblem is a solid shape in the color of its circle: teal for I, violet for II, gold for III, coral for IV and white for V. A lighter facet at the top left and a darker one at the bottom right give it some depth, and its inner design is cut out in the background color. A locked emblem is the same shape, filled a shade above the surface and outlined in the locked color, with its inner design in the locked color too. Emblems carry no stars: the color and the shape already name the circle. See the [design system](../design/design-system.md).
+An unlocked emblem is a solid shape in the color of its circle: teal for I, violet for II, gold for III, orange for IV and white for V. A lighter facet at the top left and a darker one at the bottom right give it some depth, and its inner design is cut out in the background color. A locked emblem is the same shape, filled a shade above the surface and outlined in the locked color, with its inner design in the locked color too. Emblems carry no stars: the color and the shape already name the circle. See the [design system](../design/design-system.md).
 
 ## Locked ranks
 

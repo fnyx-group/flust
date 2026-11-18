@@ -99,15 +99,41 @@ const accessibilitySyntax = [
   },
 ];
 
-// The locked color is too dark for text (decision 0032): only shapes draw it, the locked emblems
-// and the borders and tracks of controls.
-const lockedColorOwners = ['src/ui/rank-emblem.tsx', 'src/ui/button.tsx', 'src/ui/switch-row.tsx'];
-const lockedColorSyntax = [
+// Colors kept to a few files, each for one use. The locked color is too dark for text or a
+// control's outline (decision 0032): only the locked emblems draw it. Red marks destructive
+// actions and emergency numbers only, never a lapse, the counter or the ranks (decision 0034).
+const ownedColors = [
   {
-    selector: "MemberExpression[object.name='colors'][property.name='locked']",
-    message: `colors.locked is for shapes, drawn by ${lockedColorOwners.join(' and ')}. Dimmed text uses colors.muted.`,
+    name: 'locked',
+    owners: ['src/ui/rank-emblem.tsx'],
+    use: 'the outline of locked emblems',
+    hint: 'Dimmed text and control outlines use colors.muted.',
+  },
+  {
+    name: 'danger',
+    owners: [
+      'src/ui/button.tsx',
+      'src/ui/nav-row.tsx',
+      'src/features/settings/erase-view.tsx',
+      'src/features/settings/settings-screen.tsx',
+      'src/features/help/help-screen.tsx',
+    ],
+    use: 'destructive actions and emergency numbers',
   },
 ];
+const colorOwners = [...new Set(ownedColors.flatMap((color) => color.owners))];
+
+// One rule per color that `file` does not own, so every color for a file that owns none (null).
+function ownedColorSyntax(file) {
+  return ownedColors
+    .filter((color) => !color.owners.includes(file))
+    .map(({ name, owners, use, hint }) => ({
+      selector: `MemberExpression[object.name='colors'][property.name='${name}']`,
+      message: [`colors.${name} is only for ${use}, in ${owners.join(', ')}.`, hint]
+        .filter(Boolean)
+        .join(' '),
+    }));
+}
 
 function restrictedSyntax(files, ignores, rules) {
   return { files, ignores, rules: { 'no-restricted-syntax': ['error', ...rules] } };
@@ -303,13 +329,15 @@ module.exports = defineConfig([
   layer('lib', { forbidden: except('lib') }),
   restrictedSyntax(
     sourceFiles,
-    [themeFile, ...testFiles, ...lockedColorOwners],
-    [...hexColorSyntax, ...literalTextSyntax, ...accessibilitySyntax, ...lockedColorSyntax],
+    [themeFile, ...testFiles, ...colorOwners],
+    [...hexColorSyntax, ...literalTextSyntax, ...accessibilitySyntax, ...ownedColorSyntax(null)],
   ),
-  restrictedSyntax(
-    lockedColorOwners,
-    [],
-    [...hexColorSyntax, ...literalTextSyntax, ...accessibilitySyntax],
+  ...colorOwners.map((file) =>
+    restrictedSyntax(
+      [file],
+      [],
+      [...hexColorSyntax, ...literalTextSyntax, ...accessibilitySyntax, ...ownedColorSyntax(file)],
+    ),
   ),
   restrictedSyntax([themeFile], [], literalTextSyntax),
   restrictedSyntax(testFiles, [], hexColorSyntax),

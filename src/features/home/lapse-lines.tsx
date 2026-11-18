@@ -12,8 +12,8 @@ import { useStorage } from '@/features/storage/storage-context';
 import { controlOpacity } from '@/ui/control-opacity';
 import { colors, sizes, spacing, typography } from '@/ui/theme';
 
-// One short line above the emergency button during the hours after a lapse. Plain text: no
-// color, no record, no animation.
+// One short line at the end of the scrolling content during the hours after a lapse. Plain text:
+// no color, no record, no animation.
 export function SupportLine({ latestLapse }: { latestLapse: LapseRecord | null }) {
   const { t } = useTranslation();
   const shown = useClock((now) => inSupportWindow(latestLapse, now));

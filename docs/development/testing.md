@@ -86,7 +86,7 @@ Each flow starts with the app's data cleared and goes through the onboarding in 
 
 The script checks the APK with `scripts/check-android-release.sh` first, refuses any device that is not an emulator (by its serial and its `qemu` property), and sets a screen lock PIN for the lock flow, removed at the end. When the emulator already has a screen lock, `E2E_PIN` must hold its PIN (`E2E_PIN=1234 scripts/e2e-android.sh`); the script then leaves the lock in place. It runs Maestro with its analytics, update check and test analysis notice turned off.
 
-During the run, the script records the app's log from `adb logcat` into a temporary file: the app's own lines, and the system's lines that name the package, which show each start of the app's process and any death or restart. When a flow fails, the script prints the file's path; when every flow passes, it deletes the file. A flow that ends on an unexpected screen can then be checked for a process restart.
+During the run, the script records the app's log from `adb logcat` into a temporary file: the app's own lines, and the system's lines that name the package, which show each start of the app's process and any death or restart. When a flow fails or the run is interrupted, the script prints the file's path; when every flow passes, it deletes the file. A flow that ends on an unexpected screen can then be checked for a process restart.
 
 The script exits with 0 when every flow passes, with 1 when a flow fails or the release check finds something the build must not ship, and with 2 when it cannot run: a missing tool or APK, a bad option, not exactly one emulator, an `E2E_PIN` that does not match, or a release check that cannot read the build.
 

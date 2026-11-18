@@ -11,20 +11,20 @@ This document defines the visual language of flust: colors, typography, layout, 
 | Accent surface | `#1F1C33` | Cards that hold the user's own progress or plan                           |
 | Separator      | `#2A2A33` | Separators, progress tracks                                               |
 | Locked fill    | `#22222B` | Fill of locked emblems, track of the streak ring                          |
-| Locked         | `#5C5B66` | Shapes only: outline of locked emblems, control borders, off switch track |
-| Muted          | `#8A8994` | Dimmed text: locked rank names, placeholders, unavailable days            |
+| Locked         | `#5C5B66` | Outline of locked emblems only                                            |
+| Muted          | `#8A8994` | Dimmed text, and control outlines: secondary buttons, off switch track    |
 | Secondary text | `#B9B8C2` | Labels and secondary text                                                 |
 | Text           | `#FFFFFF` | Primary text, circle V                                                    |
 | Accent         | `#7B6BFF` | Primary buttons, progress, clean days, circle II                          |
 | Accent text    | `#A99EFF` | Violet text and labels                                                    |
 | Teal           | `#4FD1C5` | Calm and protection: privacy, lock, breathing, plans, listening; circle I |
 | Gold           | `#F2B84B` | Moments and reminders: risk moments, urges, the check-in; circle III      |
-| Coral          | `#FF7A7A` | Circle IV                                                                 |
+| Orange         | `#FF9F5A` | Circle IV                                                                 |
 | Danger         | `#FF7A7A` | Destructive actions and emergency numbers only                            |
 
 Text on the accent, teal, gold and danger colors is always `#111116`.
 
-Every text color reaches 4.5:1 on the backgrounds it is used on, faded wheel rows and tinted fills included, and the shapes that carry information 3:1: the accent, the circle colors, the ring of an unchecked radio button (muted) and today's ring in the week strip. `src/ui/theme.test.ts` checks each pair. The accent itself is under 4.5:1 on the surface, so violet text uses the accent text color. The locked color is too dark for text or for a control's outline, so dimmed text and the radio ring use the muted color.
+Every text color reaches 4.5:1 on the backgrounds it is used on, faded wheel rows and tinted fills included, and the shapes that carry information 3:1: the accent, the circle colors, the outlines of controls (muted: the ring of an unchecked radio button, the border of a secondary button, the off switch track) and today's ring in the week strip. `src/ui/theme.test.ts` checks each pair. The accent itself is under 4.5:1 on the surface, so violet text uses the accent text color. The locked color is too dark for text or for a control's outline, so dimmed text and control outlines use the muted color; only locked emblems use it.
 
 ### Color meanings
 
@@ -33,8 +33,8 @@ Color says what something is about, never only decorates it. [Decision 0034](../
 - The violet accent is the color of primary buttons, progress (the streak ring, rank progress) and clean days. Section labels about the user's own words, such as reasons and notes, use accent text.
 - Teal is for calm and protection: the lock icon of the privacy lines, the lock, the breathing guide, plans ("Alors", "La prochaine fois") and listening lines.
 - Gold is for moments and reminders: risk moments and their chips, the urge level, the evening check-in and the "Si" of a plan.
-- Each circle of ranks has its color: teal for I (Éveil), violet for II (Ombre), gold for III (Lumière), coral for IV (Couronne) and white for V (Absolu). Text in a circle color uses accent text for circle II.
-- Red, the danger color, is only for destructive actions (erasing everything, deleting a note, removing a reason or a plan, clearing the error report) and for the emergency numbers of the help screen. It is never used on the lapse screens, the counter, the week strip or the ranks. Circle IV shares its value, but it is a rank color, not a warning.
+- Each circle of ranks has its color: teal for I (Éveil), violet for II (Ombre), gold for III (Lumière), orange for IV (Couronne) and white for V (Absolu). Text in a circle color uses accent text for circle II.
+- Red, the danger color, is only for destructive actions (erasing everything, deleting a note, removing a reason or a plan, clearing the error report) and for the emergency numbers of the help screen. It is never used on the lapse screens, the counter, the week strip or the ranks: no circle color is red, and a test checks that each differs from the danger color. The way to the help numbers, such as "Besoin d'aide" in the settings, is teal, the color of listening lines.
 
 A color appears as a tinted fill over the surface: icon tiles at 0.16 opacity, selected chips at 0.22, danger cards at 0.12, with a border at 0.5. Icon tiles are 36 by 36, radius 10, with a 20 point line icon in their color.
 
@@ -51,11 +51,11 @@ Counters use tabular numbers so digits do not shift as they change.
 
 | Style                        | Size  | Weight | Notes                                                       |
 | ---------------------------- | ----- | ------ | ----------------------------------------------------------- |
-| Streak number, 1 or 2 digits | 120   | 600    | Barlow Condensed, days and hours                            |
-| Streak number, 3 digits      | 100   | 600    | Barlow Condensed                                            |
-| Streak number, 4 digits      | 80    | 600    | Barlow Condensed                                            |
-| Streak unit                  | 20    | 700    | Secondary text color                                        |
-| Streak minutes               | 16    | 400    | Muted color                                                 |
+| Streak number, 1 or 2 digits | 150   | 600    | Barlow Condensed, days and hours, in a 280 point ring       |
+| Streak number, 3 digits      | 130   | 600    | Barlow Condensed                                            |
+| Streak number, 4 digits      | 100   | 600    | Barlow Condensed                                            |
+| Streak unit                  | 24    | 700    | Line height 32, secondary text color                        |
+| Streak minutes               | 16    | 400    | Line height 22, muted color                                 |
 | Welcome title                | 40    | 800    | Onboarding welcome                                          |
 | Brand lockup                 | 36    | 800    | Home header (line height 40), About                         |
 | Unlocked rank name           | 40    | 800    | Rank unlock screen, lock screen                             |
@@ -87,7 +87,7 @@ Counters use tabular numbers so digits do not shift as they change.
 
 Section labels are in sentence case, such as "Ce qui s'est passé": no capitals, no letter spacing.
 
-The streak counter is the hero of home. It sits in a ring with a 14 point stroke, 280 points at most, the size of the boards on a 390 point wide screen. It is smaller in proportion on a narrower screen, and the home screen may shrink it to 200 points to fit the height (see Home). The accent shows the progress toward the next rank on a locked fill track. The number alone is in the center, its unit under it ("jours", "heures", 24/700, secondary text), and for hours a quieter line with the minutes ("et 40 min"), shown only when there are some. In a 280 point ring, the number is 150 points up to 99 days and for hours, 130 for three digits and 100 for four, and it shrinks in the same proportion as the ring. A test measures the widest number of each size with the font's glyph widths and checks that it fits inside the ring, less its stroke and 16 points on each side, for rings from 200 to 280 points. Tapping the ring opens the ranks tab.
+The streak counter is the hero of home. It sits in a ring with a 14 point stroke, 280 points at most, the size of the boards on a 390 point wide screen. It is smaller in proportion on a narrower screen, and the home screen may shrink it to 200 points to fit the height (see Home). The accent shows the progress toward the next rank on a locked fill track. The number alone is in the center, its unit under it ("jours", "heures", 24/700, secondary text), and for hours a quieter line with the minutes ("et 40 min"), shown only when there are some. In a 280 point ring, the number is 150 points up to 99 days and for hours, 130 for three digits and 100 for four, and it shrinks in the same proportion as the ring. A test measures the widest number of each size with the font's glyph widths and checks that it fits inside the ring, less its stroke and 16 points on each side, and that the number, the unit and the minutes stacked fit its height, less its stroke and 4 points above and below, for rings from 200 to 280 points. Tapping the ring opens the ranks tab.
 
 The counter does not grow with the system text size, since it is already the largest text on screen and the ring has a fixed size. Screen readers read it as one sentence, such as "Série en cours, 7 heures 40 minutes".
 
@@ -168,10 +168,10 @@ One discreet centered line under the rank line, two at most (16/400, line height
 From top to bottom, in a scrolling screen with the screen padding of 20 and 24 points between blocks:
 
 1. The "Rangs" screen title.
-2. A card on the accent surface (radius 22, padding 20). At the top, the 64 point emblem of the current rank, and beside it the circle name in its color (section label), the rank name (28/800) and "Prochain rang dans 13 jours" (body, secondary text). Under them, an 8 point progress bar (accent on the separator color), then the total on the left ("32 jours propres au total") and the next threshold on the right ("Sorcier à 45"). Before day one it shows "Premier rang" and the time left to Novice, with the emblem locked.
+2. A card on the accent surface (radius 22, padding 20). At the top, the 64 point emblem of the current rank, and beside it the circle name in its color (row style), the rank name (28/800) and "Prochain rang dans 13 jours" (body, secondary text). Under them, an 8 point progress bar (accent on the separator color), then the total on the left ("32 jours propres au total") and the next threshold on the right ("Sorcier à 45"). Before day one it shows "Premier rang" and the time left to Novice, with the emblem locked.
 3. The week strip.
 4. The rule, "Un écart ne te fait jamais redescendre." (16/400, line height 24, secondary text).
-5. The twelve ranks, grouped by circle. Each group has a header, the Roman numeral in the muted color then the circle name in its color, both 16/700, with no separator between them: "II Cercle de l'Ombre". Under it, its ranks in 3 columns, 8 points apart (2 above a text scale of 1.3). Each cell is a card (radius 20) with the 36 point emblem, the name (15/800) and the threshold (body, secondary text).
+5. The twelve ranks, grouped by circle. Each group has a header, the Roman numeral in the muted color then the circle name in its color, both 16/700, with no separator between them: "II Ombre". Under it, its ranks in 3 columns, 8 points apart (2 above a text scale of 1.3). Each cell is a card (radius 20) with the 36 point emblem, the name (15/800) and the threshold (body, secondary text).
 
 | Rank         | Emblem           | Name                 | Outline                    |
 | ------------ | ---------------- | -------------------- | -------------------------- |
@@ -212,7 +212,7 @@ A full screen without the tab bar, in a scrolling column with 24 points between 
 3. The breathing guide: a 170 point teal circle with the phase name (20/600) and the seconds left in the phase (56/600 Barlow Condensed) in the on-accent color, inside a 220 point ring of teal at half opacity. The ring grows on the inhale, stays on the hold and shrinks on the exhale, from just around the circle to its full size; the circle and its text keep their size and do not scale. The rhythm is written under it in secondary body text. With reduce motion on, the ring keeps its size and only the text changes. Screen readers hear the rhythm once when the screen opens. The guide is one element, "Guide de respiration", whose value is the phase name; screen readers read the phase again as it changes only while that element has focus, and never the seconds.
 4. The plan card, on the accent surface with radius 22: "Ton plan", or "Tes plans" with several (section label, teal), then one sentence per plan (19/700, text color).
 5. "Tes raisons" (section label, accent text), then one pill per reason (surface color, body text).
-6. A card of two rows: "Écrire maintenant" with a violet pencil tile, which opens a new note over the screen, and "Des idées noires ? Parler à quelqu'un" with a red heart tile, for dark thoughts rather than urges, which opens the help screen over the emergency screen, which keeps running underneath.
+6. A card of two rows: "Écrire maintenant" with a violet pencil tile, which opens a new note over the screen, and "Des idées noires ? Parler à quelqu'un" with a teal heart tile, for dark thoughts rather than urges, which opens the help screen over the emergency screen, which keeps running underneath.
 7. At the bottom: "J'ai tenu" (primary) and "J'ai eu un écart" (text button).
 
 The plan card and the reasons only show when they have content.
@@ -279,7 +279,7 @@ A note that cannot be opened shows the close button and a calm centered message 
 A tab screen, scrolling, with 16 points between blocks: the "Réglages" screen title, then three cards (surface color, radius 22) of rows separated by lines. Each row holds an icon tile, its label (row style), its value in secondary body text on the right when it has one, and a chevron:
 
 1. "Raisons et plans" (violet sparkle), with the number of plans ("2 plans"); "Rappels" (gold bell), with the check-in time ("21 h"), else the thought time, else nothing when another reminder is on, else "Désactivés", reading as off while notifications are not allowed; "Verrouillage" (teal lock), with the method ("Face ID", "Empreinte", "Code"), "Désactivé", or "En pause" when the phone has no screen lock; "Langue" (violet globe), with "Langue de l'appareil", "Français" or "English", which opens the language sheet, the choice applying at once, each language named in itself.
-2. "Besoin d'aide" (red heart), which opens the help screen, and "À propos" (grey info).
+2. "Besoin d'aide" (teal heart), which opens the help screen, and "À propos" (grey info).
 3. "Tout effacer", in red with a red trash tile, which opens the erase screen.
 
 At the end, a teal lock and a line in body text and secondary color: "flust 0.1.0, open source et chiffré sur ton téléphone", with the version from the app config.

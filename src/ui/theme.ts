@@ -7,11 +7,11 @@ export const colors = {
   background: '#111116',
   surface: '#1A1A21',
   separator: '#2A2A33',
-  // The outline of a locked emblem, control borders and the off switch track. Too dark for text:
-  // see muted.
+  // The outline of a locked emblem. Too dark for text or a control's outline: see muted.
   locked: '#5C5B66',
-  // Text that must read as dimmed, such as locked rank names, placeholders and unavailable days.
-  // At least 4.5:1 on the background and on the surface, unlike locked.
+  // Text that must read as dimmed, such as locked rank names, placeholders and unavailable days,
+  // and the outlines of controls: secondary buttons, the off switch track, the radio ring. At
+  // least 4.5:1 on the background and on the surface, unlike locked.
   muted: '#8A8994',
   textSecondary: '#B9B8C2',
   text: '#FFFFFF',
@@ -26,8 +26,8 @@ export const colors = {
   teal: '#4FD1C5',
   // Moments and reminders: risk moments, the evening check-in, and circle III.
   gold: '#F2B84B',
-  // Circle IV.
-  coral: '#FF7A7A',
+  // Circle IV. Kept apart from danger, so a rank never reads as a warning.
+  orange: '#FF9F5A',
   // Destructive actions and emergency numbers only. Never on the lapse screens, the counter or
   // the ranks.
   danger: '#FF7A7A',
@@ -40,7 +40,7 @@ export const circleColors: Record<Rank['circle'], string> = {
   1: colors.teal,
   2: colors.accent,
   3: colors.gold,
-  4: colors.coral,
+  4: colors.orange,
   5: colors.text,
 };
 
@@ -76,8 +76,8 @@ export const fonts = {
 export const typography = {
   // The size comes from counterFontSizes.
   streakNumber: { fontFamily: fonts.numberSemiBold, fontVariant: ['tabular-nums'] },
-  streakUnit: { fontFamily: fonts.bold, fontSize: 24, color: colors.textSecondary },
-  streakRest: { fontFamily: fonts.regular, fontSize: 16, color: colors.muted },
+  streakUnit: { fontFamily: fonts.bold, fontSize: 24, lineHeight: 32, color: colors.textSecondary },
+  streakRest: { fontFamily: fonts.regular, fontSize: 16, lineHeight: 22, color: colors.muted },
   sectionLabel: { fontFamily: fonts.bold, fontSize: 14, color: colors.textSecondary },
   quote: { fontFamily: fonts.bold, fontSize: 19, lineHeight: 26 },
   welcomeTitle: { fontFamily: fonts.extraBold, fontSize: 40, lineHeight: 46 },
@@ -128,7 +128,7 @@ export const typography = {
 } as const satisfies Record<string, TextStyle>;
 
 // The number inside the streak ring, by its digits: 2 or fewer (hours always), 3, then 4 or more.
-// Each keeps the widest number of its group inside the ring (labels.test.ts measures it).
+// Each keeps the widest number of its group inside the ring (home/labels.test.ts measures it).
 const counterFontSizes: Record<CounterSize, number> = {
   large: 150,
   medium: 130,

@@ -119,7 +119,7 @@ export function EmergencyScreen() {
             />
             <NavRow
               label={t('emergency.darkThoughts')}
-              icon={{ icon: HeartIcon, color: colors.danger }}
+              icon={{ icon: HeartIcon, color: colors.teal }}
               accessibilityHint={t('emergency.darkThoughtsHint')}
               onPress={() => whenFocused(openHelp)}
             />

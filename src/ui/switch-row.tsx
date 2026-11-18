@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     height: sizes.switchHeight,
     borderRadius: radii.pill,
     padding: 4,
-    backgroundColor: colors.locked,
+    backgroundColor: colors.muted,
   },
   trackDisabled: {
     backgroundColor: colors.surface,

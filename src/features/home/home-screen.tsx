@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type PropsWithChildren } from 'react';
 import { StyleSheet, useWindowDimensions, View, type LayoutChangeEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -84,11 +84,9 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
             <View onLayout={measure('rankLine')}>
               <RankLine journey={journey} unlockedRanks={unlockedRanks} />
             </View>
-            {(fit?.quote ?? true) && (
-              <View onLayout={measure('quote')}>
-                <DailyQuote start={journey.start} />
-              </View>
-            )}
+            <QuoteSlot shown={fit?.quote ?? true} onLayout={measure('quote')}>
+              <DailyQuote start={journey.start} />
+            </QuoteSlot>
           </View>
           <View style={styles.notices} onLayout={measure('notices')}>
             <LowMoodCard />
@@ -114,8 +112,7 @@ type MeasuredPart = 'available' | 'rankLine' | 'quote' | 'notices';
 
 type Measured = Partial<Record<MeasuredPart, number>>;
 
-// null until every part has been measured once. The quote is shown until then, so its height is
-// known before it may be hidden, and keeps it while hidden.
+// null until every part has been measured once.
 function fitOf(measured: Measured, fontScale: number, ringMax: number): HomeFit | null {
   const { available, rankLine, quote, notices } = measured;
   if (
@@ -167,6 +164,15 @@ const styles = StyleSheet.create({
   notices: {
     gap: spacing.s,
   },
+  // Out of the flow, unseen and unreachable, at the width the quote would have.
+  offstage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    opacity: 0,
+    pointerEvents: 'none',
+  },
   // Outside the scroll view, so the check-in line and the urge button are always on screen,
   // whatever the text size.
   actions: {
@@ -174,6 +180,23 @@ const styles = StyleSheet.create({
     paddingTop: spacing.m,
   },
 });
+
+type QuoteSlotProps = { shown: boolean; onLayout: (event: LayoutChangeEvent) => void };
+
+// A hidden quote stays laid out off the flow, so its height follows the quote of the day: a
+// longer quote, or one with an author, gets the room it needs before it shows again.
+function QuoteSlot({ shown, onLayout, children }: PropsWithChildren<QuoteSlotProps>) {
+  return (
+    <View
+      onLayout={onLayout}
+      importantForAccessibility={shown ? 'auto' : 'no-hide-descendants'}
+      accessibilityElementsHidden={!shown}
+      style={shown ? undefined : styles.offstage}
+    >
+      {children}
+    </View>
+  );
+}
 
 // A component of its own, so that the clock ticks it subscribes to re-render nothing else.
 function RankUnlockTrigger({ journey, unlockedRanks, latestLapse }: HomeProps) {

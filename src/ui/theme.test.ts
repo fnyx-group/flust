@@ -1,4 +1,4 @@
-import { colors, tintAlpha, wheelNearOpacity } from '@/ui/theme';
+import { circleColors, colors, tintAlpha, wheelNearOpacity } from '@/ui/theme';
 
 type Color = keyof typeof colors;
 type Rgb = readonly [number, number, number];
@@ -76,11 +76,15 @@ describe('theme contrast', () => {
     ['teal', 'accentSurface'],
     ['gold', 'background'],
     ['gold', 'surface'],
-    ['coral', 'background'],
+    ['gold', 'accentSurface'],
+    ['orange', 'background'],
+    ['orange', 'surface'],
+    ['orange', 'accentSurface'],
     ['danger', 'background'],
     ['danger', 'surface'],
-    // Filled controls: buttons, the selected segment and the selected mood.
+    // Filled controls: buttons, the selected segment and the selected mood, and the breathing disk.
     ['onAccent', 'accent'],
+    ['onAccent', 'teal'],
     ['onAccent', 'gold'],
     ['onAccent', 'danger'],
   ])('reads %s text on %s at 4.5:1 or more', (foreground, background) => {
@@ -117,14 +121,21 @@ describe('theme contrast', () => {
     ['gold', 'background'],
     ['gold', 'surface'],
     ['gold', 'accentSurface'],
-    ['coral', 'background'],
-    ['coral', 'surface'],
-    ['coral', 'accentSurface'],
+    ['orange', 'background'],
+    ['orange', 'surface'],
+    ['orange', 'accentSurface'],
     ['text', 'surface'],
     ['danger', 'background'],
-    // The ring of an unchecked radio button, which shows that the row can be chosen.
+    // Control outlines: the ring of an unchecked radio button, the border of a secondary button and
+    // the off switch track, which show that something can be chosen or pressed.
+    ['muted', 'background'],
     ['muted', 'surface'],
   ])('shows %s shapes on %s at 3:1 or more', (foreground, background) => {
     expect(contrast(foreground, background)).toBeGreaterThanOrEqual(SHAPE);
+  });
+
+  // A rank is never drawn in the warning red (decision 0034).
+  it('keeps every circle color apart from the danger color', () => {
+    for (const color of Object.values(circleColors)) expect(color).not.toBe(colors.danger);
   });
 });

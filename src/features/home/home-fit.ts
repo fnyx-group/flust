@@ -3,7 +3,7 @@ import { largeTextScale, spacing } from '@/ui/theme';
 // The smallest the streak ring gets before the home screen hides the quote.
 export const HOME_RING_MIN = 200;
 
-// Measured with onLayout, in points. The quote keeps its last height while it is hidden.
+// Measured with onLayout, in points. The quote is measured even while it is hidden.
 export type HomeHeights = {
   readonly rankLine: number;
   // The quote block: its text, two lines at most, and the author's line when there is one.
@@ -21,11 +21,10 @@ export type HomeFitInput = {
   readonly heights: HomeHeights;
 };
 
+// When even the smallest ring does not fit, the content scrolls above the pinned buttons.
 export type HomeFit = {
   readonly ring: number;
   readonly quote: boolean;
-  // Only when nothing more may give way: then the content scrolls above the pinned buttons.
-  readonly scrolls: boolean;
 };
 
 // Spacing of the home screen, which HomeScreen uses too, so the sum below matches the layout.
@@ -44,9 +43,9 @@ export function fitHome({ available, fontScale, ringMax, heights }: HomeFitInput
   const steps = fontScale > largeTextScale ? [true] : [true, false];
   for (const quote of steps) {
     const room = Math.floor(available - heightWithoutRing(quote, heights));
-    if (room >= ringMin) return { ring: Math.min(ringMax, room), quote, scrolls: false };
+    if (room >= ringMin) return { ring: Math.min(ringMax, room), quote };
   }
-  return { ring: ringMin, quote: steps.at(-1) ?? true, scrolls: true };
+  return { ring: ringMin, quote: steps.at(-1) ?? true };
 }
 
 function heightWithoutRing(quote: boolean, heights: HomeHeights): number {

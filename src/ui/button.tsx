@@ -38,23 +38,19 @@ export function Button({
 
 const styles = StyleSheet.create({
   // A minimum height lets the label grow with large text instead of being clipped.
-  primary: {
+  filled: {
     minHeight: sizes.primaryButtonHeight,
     paddingVertical: spacing.m,
     paddingHorizontal: 20,
     borderRadius: radii.primaryButton,
-    backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  primary: {
+    backgroundColor: colors.accent,
+  },
   danger: {
-    minHeight: sizes.primaryButtonHeight,
-    paddingVertical: spacing.m,
-    paddingHorizontal: 20,
-    borderRadius: radii.primaryButton,
     backgroundColor: colors.danger,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   secondary: {
     minHeight: sizes.secondaryButtonHeight,
@@ -62,7 +58,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.l,
     borderRadius: radii.secondaryButton,
     borderWidth: 1.5,
-    borderColor: colors.locked,
+    borderColor: colors.muted,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -95,10 +91,10 @@ const styles = StyleSheet.create({
 });
 
 const CONTAINERS = {
-  primary: styles.primary,
+  primary: [styles.filled, styles.primary],
   secondary: styles.secondary,
   plain: styles.plain,
-  danger: styles.danger,
+  danger: [styles.filled, styles.danger],
   destructive: styles.plain,
 };
 const LABELS = {

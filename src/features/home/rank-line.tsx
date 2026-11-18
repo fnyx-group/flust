@@ -6,7 +6,7 @@ import type { Journey } from '@/domain/journey';
 import { rankStanding, type RankId } from '@/domain/ranks';
 import { useClock } from '@/features/clock/clock-context';
 import { sameFields } from '@/features/clock/minute-clock';
-import { rankBadgeText } from '@/features/home/labels';
+import { rankLineText } from '@/features/home/labels';
 import { RankEmblem } from '@/ui/rank-emblem';
 import { colors, pressedOpacity, sizes, spacing, typography } from '@/ui/theme';
 
@@ -22,7 +22,7 @@ type RankLineProps = {
 export function RankLine({ journey, unlockedRanks }: RankLineProps) {
   const { t } = useTranslation();
   const standing = useClock((now) => rankStanding(journey, unlockedRanks, now), sameFields);
-  const text = rankBadgeText(t, standing);
+  const text = rankLineText(t, standing);
   return (
     <Pressable
       accessibilityRole="button"

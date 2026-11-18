@@ -14,7 +14,7 @@ export function IconTile({ icon: Icon, color }: IconTileProps) {
       accessibilityElementsHidden
       style={[styles.tile, { backgroundColor: tint(color, tintAlpha.tile) }]}
     >
-      <Icon color={color} size={20} />
+      <Icon color={color} size={sizes.icon} />
     </View>
   );
 }

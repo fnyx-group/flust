@@ -4,7 +4,8 @@
 # scripts/check-android-release.sh, so the flows always run on what would ship.
 # Maestro's analytics, update check and test analysis notice are turned off. The emulator gets a
 # screen lock PIN for the lock flow, removed again at the end, along with any font scale change.
-# The app's log is recorded during the run, and its path printed when a flow fails.
+# The app's log is recorded during the run, and its path printed when a flow fails or the run is
+# interrupted.
 # Usage: scripts/e2e-android.sh [--apk <app-release.apk>] [--font-scale <scale>] [flow.yaml ...]
 set -euo pipefail
 
@@ -136,7 +137,11 @@ logcat_file=$(mktemp "${TMPDIR:-/tmp}/flust-e2e-logcat.XXXXXX")
 ) &
 logcat_pid=$!
 
-# Maestro does not read ANDROID_SERIAL.
-status=0
-maestro --device "$ANDROID_SERIAL" test --env "PIN=$pin" "${flows[@]}" || status=$?
+# Maestro does not read ANDROID_SERIAL. status stays 1 until Maestro returns, so an interrupted
+# run keeps its log.
+if maestro --device "$ANDROID_SERIAL" test --env "PIN=$pin" "${flows[@]}"; then
+  status=0
+else
+  status=$?
+fi
 exit "$status"

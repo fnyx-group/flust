@@ -106,6 +106,7 @@ TalkBack is in Settings, Accessibility, TalkBack. The font scale can be set with
 
 1. French and English: every screen reads in the chosen language.
 2. With "Device language" chosen, change the phone's language while flust runs: flust follows it ([Scenarios](../product/scenarios.md)).
+3. Times, in both languages, with the phone on a 24 hour then a 12 hour clock: the reminders value and time chips, a note's date and the lapse time. French on 24 hours reads "21 h" and "21 h 14", English "21:14", and a 12 hour clock the platform's "9:14 PM" in both. Unit tests format times with Node's locale data, which can differ from the phone's.
 
 ## iOS
 

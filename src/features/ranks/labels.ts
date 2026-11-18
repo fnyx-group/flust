@@ -1,7 +1,9 @@
 import type { TFunction } from 'i18next';
 
 import type { Rank, RankCell, RankStanding, RankUnlock } from '@/domain/ranks';
-import { rankBadgeText } from '@/features/home/labels';
+import { MS_PER_DAY } from '@/domain/time';
+import { cleanDayCount, type WeekDay } from '@/domain/week';
+import { rankLineText } from '@/features/home/labels';
 import { rankName } from '@/features/shared/rank-labels';
 
 // Punctuation only, so the same in every language.
@@ -50,23 +52,23 @@ export type CurrentRankText = {
   readonly spokenLabel: string;
 };
 
-// Before day one the card says what the home card says: the first rank, locked, and the time
+// Before day one the card says what the home rank line says: the first rank, locked, and the time
 // left to it.
 export function currentRankText(t: TFunction, standing: RankStanding): CurrentRankText {
   const rank = standing.status === 'pending' ? standing.first : standing.current;
   const circle = circleName(t, rank.circle);
   const spokenRankCircle = spokenCircle(t, rank.circle);
   if (standing.status === 'pending') {
-    const badge = rankBadgeText(t, standing);
+    const line = rankLineText(t, standing);
     return {
       rank,
       unlocked: false,
       circle,
-      name: badge.name,
-      detail: badge.detail,
+      name: line.name,
+      detail: line.detail,
       total: t('ranks.screen.totalDays', { count: 0 }),
       target: t('ranks.screen.nextAt', { name: rankName(t, rank), count: rank.threshold }),
-      spokenLabel: `${badge.spokenLabel}, ${spokenRankCircle}`,
+      spokenLabel: `${line.spokenLabel}, ${spokenRankCircle}`,
     };
   }
   const { next, totalCleanDays } = standing;
@@ -132,4 +134,17 @@ export function unlockText(t: TFunction, unlock: RankUnlock, totalCleanDays: num
           }),
     announcement: t('ranks.unlocked.spoken', { name, circle: spokenCircle(t, highest.circle) }),
   };
+}
+
+// "6 clean days in the last 7".
+export function spokenWeek(t: TFunction, week: readonly WeekDay[]): string {
+  return t('ranks.week.summary', { count: cleanDayCount(week) });
+}
+
+// Local day numbers count days from 1970-01-01, so formatting the day's start in UTC gives its
+// weekday without the device time zone shifting it a second time.
+export function weekdayInitial(language: string, day: number): string {
+  return new Intl.DateTimeFormat(language, { weekday: 'narrow', timeZone: 'UTC' }).format(
+    day * MS_PER_DAY,
+  );
 }

@@ -1,12 +1,15 @@
 import { rankGrid, rankProgress, RANKS, rankStanding, unlockFromIds } from '@/domain/ranks';
 import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE } from '@/domain/time';
+import type { WeekDayStatus } from '@/domain/week';
 import {
   circleGroups,
   circleName,
   currentRankText,
   rankCellText,
   romanNumeral,
+  spokenWeek,
   unlockText,
+  weekdayInitial,
 } from '@/features/ranks/labels';
 import { createI18n } from '@/lib/i18n';
 import { journeyOf } from '@test/arbitraries';
@@ -172,5 +175,36 @@ describe('unlockText', () => {
         expect(unlockText(t, unlock(rank.id), rank.threshold).line).not.toMatch(/ranks\./);
       }
     }
+  });
+});
+
+describe('spokenWeek', () => {
+  const day = (status: WeekDayStatus, index: number) => ({ day: index, status });
+
+  it('counts the clean days of the week', () => {
+    const week = (['lapse', 'clean', 'clean', 'clean', 'clean', 'clean', 'today'] as const).map(
+      day,
+    );
+    expect(spokenWeek(english, week)).toBe('5 clean days in the last 7');
+    expect(spokenWeek(french, week)).toBe('5 jours propres sur les 7 derniers');
+  });
+
+  it('follows French plurals, where 0 and 1 are singular', () => {
+    const none = Array.from({ length: 7 }, (_, index) => day('lapse', index));
+    expect(spokenWeek(french, none)).toBe('0 jour propre sur les 7 derniers');
+    expect(spokenWeek(english, none)).toBe('0 clean days in the last 7');
+    expect(spokenWeek(english, [day('clean', 0)])).toBe('1 clean day in the last 7');
+  });
+});
+
+describe('weekdayInitial', () => {
+  // Exact letters belong to the platform's locale data; flust decides the weekday.
+  it('names the weekday of the local day, whatever the device time zone', () => {
+    // 2026-01-19 was a Monday.
+    const monday = Date.UTC(2026, 0, 19) / MS_PER_DAY;
+    expect(weekdayInitial('en', monday)).toBe('M');
+    expect(weekdayInitial('en', monday + 2)).toBe('W');
+    expect(weekdayInitial('fr', monday + 2)).toBe('M');
+    expect(weekdayInitial('fr', monday + 6)).toBe('D');
   });
 });

@@ -138,7 +138,7 @@ export function SettingsScreen() {
         <RowGroup>
           <NavRow
             label={t('settings.help')}
-            icon={{ icon: HeartIcon, color: colors.danger }}
+            icon={{ icon: HeartIcon, color: colors.teal }}
             onPress={() => router.push('/help')}
           />
           <NavRow

@@ -31,8 +31,8 @@ export function RankGrid({ journey, unlockedRanks }: RankGridProps) {
       {groups.map(({ circle, cells }) => (
         <View key={circle} style={styles.group}>
           <View accessibilityRole="header" accessible style={styles.header}>
-            <Text style={styles.numeral}>{romanNumeral(circle)}</Text>
-            <Text style={[styles.name, { color: circleTextColors[circle] }]}>
+            <Text style={[styles.headerText, styles.numeral]}>{romanNumeral(circle)}</Text>
+            <Text style={[styles.headerText, { color: circleTextColors[circle] }]}>
               {t(`ranks.circles.${circle}`)}
             </Text>
           </View>
@@ -71,14 +71,12 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
     gap: spacing.s,
   },
-  numeral: {
+  headerText: {
     ...typography.sectionLabel,
     fontSize: 16,
-    color: colors.muted,
   },
-  name: {
-    ...typography.sectionLabel,
-    fontSize: 16,
+  numeral: {
+    color: colors.muted,
   },
   row: {
     flexDirection: 'row',

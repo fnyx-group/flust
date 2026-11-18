@@ -5,7 +5,7 @@ import type { Journey } from '@/domain/journey';
 import { localDayNumber } from '@/domain/local-time';
 import { weekStrip, type WeekDayStatus } from '@/domain/week';
 import { useClock } from '@/features/clock/clock-context';
-import { spokenWeek, weekdayInitial } from '@/features/home/labels';
+import { spokenWeek, weekdayInitial } from '@/features/ranks/labels';
 import { deviceOffsetAt } from '@/features/shared/device-time';
 import { CheckIcon } from '@/ui/icons/check-icon';
 import { colors, sizes, spacing, typography } from '@/ui/theme';

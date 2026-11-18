@@ -34,10 +34,6 @@
       "spoken": "Mot du jour, {{text}}",
       "spokenWithAuthor": "Mot du jour, {{text}}, {{author}}"
     },
-    "week": {
-      "summary_one": "{{count}} jour propre sur les 7 derniers",
-      "summary_other": "{{count}} jours propres sur les 7 derniers"
-    },
     "lapse": {
       "link": "J'ai eu un écart",
       "noted": "Écart noté.",
@@ -491,6 +487,10 @@
     }
   },
   "ranks": {
+    "week": {
+      "summary_one": "{{count}} jour propre sur les 7 derniers",
+      "summary_other": "{{count}} jours propres sur les 7 derniers"
+    },
     "names": {
       "novice": "Novice",
       "apprentice": "Apprenti",
@@ -735,7 +735,7 @@
       },
       "fr114": {
         "name": "Urgences par SMS",
-        "detail": "SMS gratuit, 24 h/24, si tu ne peux pas parler ou entendre"
+        "detail": "SMS gratuit, 24 h/24, si tu ne peux pas parler ou entendre, ou pas sans danger"
       },
       "be0800": {
         "name": "Centre de Prévention du Suicide",

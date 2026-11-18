@@ -2,18 +2,10 @@ import { QUOTES } from '@/domain/quotes';
 import { rankStanding } from '@/domain/ranks';
 import { counterSize, type StreakDisplay } from '@/domain/streak';
 import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE } from '@/domain/time';
-import type { WeekDayStatus } from '@/domain/week';
-import {
-  counterParts,
-  rankBadgeText,
-  spokenCounter,
-  spokenQuote,
-  spokenWeek,
-  weekdayInitial,
-} from '@/features/home/labels';
+import { counterParts, rankLineText, spokenCounter, spokenQuote } from '@/features/home/labels';
 import { HOME_RING_MIN } from '@/features/home/home-fit';
 import { createI18n } from '@/lib/i18n';
-import { counterFontSize, sizes, spacing, streakRingSize } from '@/ui/theme';
+import { counterFontSize, sizes, spacing, streakRingSize, typography } from '@/ui/theme';
 import { journeyOf } from '@test/arbitraries';
 
 jest.mock('expo-localization', () => ({ getLocales: () => [{ languageCode: 'en' }] }));
@@ -97,6 +89,19 @@ describe('streak counter width', () => {
     },
   );
 
+  // The number, its unit and the minutes are stacked in the middle of the ring.
+  it.each(RING_SIZES.flatMap((ring) => WIDEST.map((display) => [ring, display] as const)))(
+    'stacks its lines inside a %d point ring %o',
+    (ring, display) => {
+      const { rest } = counterParts(english, display);
+      const height =
+        counterFontSize(ring, counterSize(display)) +
+        typography.streakUnit.lineHeight +
+        (rest === null ? 0 : typography.streakRest.lineHeight);
+      expect(height).toBeLessThanOrEqual(ring - 2 * sizes.streakRingStroke - 2 * spacing.xs);
+    },
+  );
+
   it('keeps the boards size and the counter sizes from 390 points wide', () => {
     expect(streakRingSize(390)).toBe(sizes.streakRing);
     expect(streakRingSize(430)).toBe(sizes.streakRing);
@@ -107,70 +112,39 @@ describe('streak counter width', () => {
   });
 });
 
-describe('rankBadgeText', () => {
+describe('rankLineText', () => {
   it('shows the first rank locked, with the time left to it, before day one', () => {
-    expect(rankBadgeText(french, firstDay)).toMatchObject({
+    expect(rankLineText(french, firstDay)).toMatchObject({
       rank: { id: 'novice' },
       unlocked: false,
       name: 'Premier rang',
       detail: `Novice dans 16${NBSP}h${NBSP}20`,
       spokenLabel: 'Premier rang, Novice dans 16 heures 20 minutes',
     });
-    expect(rankBadgeText(english, firstDay).detail).toBe(`Novice in 16${NBSP}h${NBSP}20${NBSP}min`);
+    expect(rankLineText(english, firstDay).detail).toBe(`Novice in 16${NBSP}h${NBSP}20`);
   });
 
   it('shows the current rank and the days left to the next one', () => {
-    expect(rankBadgeText(french, sorcerer)).toMatchObject({
+    expect(rankLineText(french, sorcerer)).toMatchObject({
       rank: { id: 'sorcerer' },
       unlocked: true,
       name: 'Sorcier',
       detail: 'Mage blanc dans 13 jours',
       spokenLabel: 'Sorcier, Mage blanc dans 13 jours',
     });
-    expect(rankBadgeText(french, almostWhiteMage).detail).toBe('Mage blanc dans 1 jour');
-    expect(rankBadgeText(english, sorcerer)).toMatchObject({
+    expect(rankLineText(french, almostWhiteMage).detail).toBe('Mage blanc dans 1 jour');
+    expect(rankLineText(english, sorcerer)).toMatchObject({
       name: 'Sorcerer',
       detail: 'White mage in 13 days',
     });
   });
 
   it('says when every rank is unlocked', () => {
-    expect(rankBadgeText(french, freeSoul)).toMatchObject({
+    expect(rankLineText(french, freeSoul)).toMatchObject({
       name: 'Âme libre',
       detail: 'Tous les rangs débloqués',
       spokenLabel: 'Âme libre, Tous les rangs débloqués',
     });
-  });
-});
-
-describe('spokenWeek', () => {
-  const day = (status: WeekDayStatus, index: number) => ({ day: index, status });
-
-  it('counts the clean days of the week', () => {
-    const week = (['lapse', 'clean', 'clean', 'clean', 'clean', 'clean', 'today'] as const).map(
-      day,
-    );
-    expect(spokenWeek(english, week)).toBe('5 clean days in the last 7');
-    expect(spokenWeek(french, week)).toBe('5 jours propres sur les 7 derniers');
-  });
-
-  it('follows French plurals, where 0 and 1 are singular', () => {
-    const none = Array.from({ length: 7 }, (_, index) => day('lapse', index));
-    expect(spokenWeek(french, none)).toBe('0 jour propre sur les 7 derniers');
-    expect(spokenWeek(english, none)).toBe('0 clean days in the last 7');
-    expect(spokenWeek(english, [day('clean', 0)])).toBe('1 clean day in the last 7');
-  });
-});
-
-describe('weekdayInitial', () => {
-  // Exact letters belong to the platform's locale data; flust decides the weekday.
-  it('names the weekday of the local day, whatever the device time zone', () => {
-    // 2026-01-19 was a Monday.
-    const monday = Date.UTC(2026, 0, 19) / MS_PER_DAY;
-    expect(weekdayInitial('en', monday)).toBe('M');
-    expect(weekdayInitial('en', monday + 2)).toBe('W');
-    expect(weekdayInitial('fr', monday + 2)).toBe('M');
-    expect(weekdayInitial('fr', monday + 6)).toBe('D');
   });
 });
 

@@ -11,7 +11,8 @@ import { PencilIcon } from '@/ui/icons/pencil-icon';
 import { colors, pressedOpacity, sizes, spacing, typography } from '@/ui/theme';
 
 // One centered line just above the urge button, which opens the check-in. It follows the local
-// day, so it waits again after midnight. Plain secondary text: a missed check-in is never shown as a failure.
+// day, so it waits again after midnight. Plain secondary text: a missed check-in is never shown
+// as a failure.
 export function CheckInLine() {
   const { t } = useTranslation();
   const { checkIns } = useSession();
@@ -25,7 +26,7 @@ export function CheckInLine() {
       onPress={() => router.push('/check-in')}
       style={({ pressed }) => [styles.line, pressed && styles.pressed]}
     >
-      <PencilIcon color={colors.gold} size={20} />
+      <PencilIcon color={colors.gold} size={sizes.icon} />
       <Text style={styles.text}>{done ? t('home.checkIn.done') : t('home.checkIn.todo')}</Text>
     </Pressable>
   );

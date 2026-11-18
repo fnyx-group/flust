@@ -17,8 +17,17 @@ const IPHONE_SE_CHROME = 60 + 44 + 198 + 49;
 const WITHOUT_QUOTE = 2 * homeSpacing.middlePadding + homeSpacing.middleGap + HEIGHTS.rankLine;
 const WITH_QUOTE = WITHOUT_QUOTE + homeSpacing.middleGap + HEIGHTS.quote;
 
+// The result and whether the content it lays out is taller than the space, so that it scrolls.
 function fit(available: number, fontScale = 1, heights: HomeHeights = HEIGHTS) {
-  return fitHome({ available, fontScale, ringMax: sizes.streakRing, heights });
+  const { ring, quote } = fitHome({ available, fontScale, ringMax: sizes.streakRing, heights });
+  const content =
+    2 * homeSpacing.middlePadding +
+    ring +
+    homeSpacing.middleGap +
+    heights.rankLine +
+    (quote ? homeSpacing.middleGap + heights.quote : 0) +
+    heights.notices;
+  return { ring, quote, scrolls: content > available };
 }
 
 describe('fitHome', () => {
@@ -118,6 +127,6 @@ describe('fitHome', () => {
     );
     expect(
       fitHome({ available: WITH_QUOTE + 170, fontScale: 1, ringMax: 170, heights: HEIGHTS }),
-    ).toEqual({ ring: 170, quote: true, scrolls: false });
+    ).toEqual({ ring: 170, quote: true });
   });
 });

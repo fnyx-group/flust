@@ -2,8 +2,6 @@ import type { TFunction } from 'i18next';
 
 import type { Rank, RankStanding } from '@/domain/ranks';
 import { remainingParts, type StreakDisplay } from '@/domain/streak';
-import { MS_PER_DAY } from '@/domain/time';
-import { cleanDayCount, type WeekDay } from '@/domain/week';
 import { rankName } from '@/features/shared/rank-labels';
 import { spokenHoursMinutes, spokenStreak } from '@/features/shared/streak-labels';
 
@@ -40,17 +38,17 @@ export function spokenCounter(t: TFunction, display: StreakDisplay): string {
   return t('home.streak.spoken', { value: spokenStreak(t, display) });
 }
 
-export type RankBadgeText = {
+export type RankLineText = {
   readonly rank: Rank;
   readonly unlocked: boolean;
   readonly name: string;
   readonly detail: string;
-  // The badge is a single button, so its one label says everything on it, in full words.
+  // The line is a single button, so its one label says everything on it, in full words.
   readonly spokenLabel: string;
 };
 
-// Before day one the badge shows the first rank, locked, and the time left to it.
-export function rankBadgeText(t: TFunction, standing: RankStanding): RankBadgeText {
+// Before day one the line shows the first rank, locked, and the time left to it.
+export function rankLineText(t: TFunction, standing: RankStanding): RankLineText {
   if (standing.status === 'pending') {
     const left = remainingParts(standing.msLeft);
     const firstName = rankName(t, standing.first);
@@ -83,19 +81,6 @@ export function rankBadgeText(t: TFunction, standing: RankStanding): RankBadgeTe
     detail,
     spokenLabel: t('home.rank.spoken', { name, detail }),
   };
-}
-
-// "6 clean days in the last 7".
-export function spokenWeek(t: TFunction, week: readonly WeekDay[]): string {
-  return t('home.week.summary', { count: cleanDayCount(week) });
-}
-
-// Local day numbers count days from 1970-01-01, so formatting the day's start in UTC gives its
-// weekday without the device time zone shifting it a second time.
-export function weekdayInitial(language: string, day: number): string {
-  return new Intl.DateTimeFormat(language, { weekday: 'narrow', timeZone: 'UTC' }).format(
-    day * MS_PER_DAY,
-  );
 }
 
 // The circle in the home header, "Cercle de l'Ombre", or "Premier jour" before the first rank.
