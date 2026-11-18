@@ -86,7 +86,7 @@ Counters use tabular numbers so digits do not shift as they change.
 
 Section labels are in sentence case, such as "Ce qui s'est passé": no capitals, no letter spacing.
 
-The streak counter sits in a 232 point ring with a 12 point stroke: the accent shows the progress toward the next rank on a locked fill track. The number alone is in the center, its unit under it ("jours", "heures"), and for hours a quieter line with the minutes ("et 40 min"), shown only when there are some. The number is 120 points up to 99 days and for hours, 100 for three digits and 80 for four. A test measures the widest number of each size with the font's glyph widths and checks that it fits inside the ring, less its stroke and 16 points on each side.
+The streak counter sits in a 236 point ring with a 12 point stroke, the size of the boards on a 390 point wide screen. On a narrower screen the ring and the number shrink in the same proportion, and on a wider one they keep that size: the accent shows the progress toward the next rank on a locked fill track. The number alone is in the center, its unit under it ("jours", "heures"), and for hours a quieter line with the minutes ("et 40 min"), shown only when there are some. The number is 120 points up to 99 days and for hours, 100 for three digits and 80 for four. A test measures the widest number of each size with the font's glyph widths and checks that it fits inside the ring, less its stroke and 16 points on each side, at screen widths from 320 to 430 points.
 
 The counter does not grow with the system text size, since it is already the largest text on screen and the ring has a fixed size. Screen readers read it as one sentence, such as "Série en cours, 7 heures 40 minutes".
 
@@ -132,13 +132,13 @@ From top to bottom, with the screen padding of 20:
 
 1. A header row: the brand lockup on the left, the name of the current circle on the right, such as "Cercle de l'Ombre" (row style, in the circle's text color), or "Premier jour" in secondary text before day one.
 2. One block, without a card, centered vertically in the free space between the header and the buttons: the streak ring, then the rank card and the week strip, then the daily quote and the check-in line. The free space goes above and below the block, never between its parts.
-3. At the bottom: the "J'ai une envie" button, then the discreet "J'ai eu un écart" text button.
+3. Pinned at the bottom, above the tab bar and outside the scrolling content: the "J'ai une envie" button, then the discreet "J'ai eu un écart" text button. The urge button is the most important action, so it is always on screen without scrolling, whatever the text size. When the header and the block do not fit above the buttons, such as with large text, they scroll there while the buttons stay in place.
 
 The check-in line, under the quote, holds a gold pencil and one line of body text: "Ton check-in du jour t'attend", or "Check-in fait" once today's check-in is saved. It opens the check-in and is read as one button. A missed check-in never looks like a failure.
 
-After several low mood check-ins, a card sits above the "J'ai une envie" button, outside the centered block so the counter stays in place: surface color, radius 22, the suggestion in text color and the emergency line in secondary text (15/400, line height 22), then "Voir les numéros d'aide", a text button (15/600, text color) that opens the help screen, and a close button on the right. No red, no accent, no animation. Closing it hides it until the next local day.
+After several low mood check-ins, a card sits at the end of the scrolling content, above the "J'ai une envie" button and outside the centered block so the counter stays in place: surface color, radius 22, the suggestion in text color and the emergency line in secondary text (15/400, line height 22), then "Voir les numéros d'aide", a text button (15/600, text color) that opens the help screen, and a close button on the right. No red, no accent, no animation. Closing it hides it until the next local day.
 
-For six hours after a lapse is logged, one supportive line in secondary text sits above the "J'ai une envie" button. Until local midnight after a lapse is logged, and at least an hour, a caption line "Écart noté." sits under the text button, followed by the "Annuler l'écart" text button. Neither uses red, the record streak or an animation.
+For six hours after a lapse is logged, one supportive line in secondary text sits at the end of the scrolling content, above the "J'ai une envie" button. Until local midnight after a lapse is logged, and at least an hour, a caption line "Écart noté." sits under the text button, pinned with it, followed by the "Annuler l'écart" text button. Neither uses red, the record streak or an animation.
 
 ### Rank card
 

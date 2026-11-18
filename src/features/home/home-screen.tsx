@@ -75,18 +75,20 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
               <CheckInLine />
             </View>
           </View>
-          <View style={styles.actions}>
+          <View style={styles.notices}>
             <LowMoodCard />
             <SupportLine latestLapse={latestLapse} />
-            <Button label={t('home.urgeButton')} onPress={() => router.push('/emergency')} />
-            <Button
-              variant="plain"
-              label={t('home.lapse.link')}
-              onPress={() => router.push('/lapse')}
-            />
-            <UndoLine journey={journey} latestLapse={latestLapse} />
           </View>
         </ScrollView>
+        <View style={styles.actions}>
+          <Button label={t('home.urgeButton')} onPress={() => router.push('/emergency')} />
+          <Button
+            variant="plain"
+            label={t('home.lapse.link')}
+            onPress={() => router.push('/lapse')}
+          />
+          <UndoLine journey={journey} latestLapse={latestLapse} />
+        </View>
       </ClockContext>
     </Screen>
   );
@@ -96,8 +98,8 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
-  // flexGrow lets the middle take the free height when everything fits, and the screen scroll when
-  // large text makes it taller.
+  // flexGrow lets the middle take the free height when everything fits, and the content scroll
+  // above the buttons when large text makes it taller.
   content: {
     flexGrow: 1,
   },
@@ -121,8 +123,13 @@ const styles = StyleSheet.create({
   quote: {
     gap: spacing.xs,
   },
+  notices: {
+    gap: spacing.s,
+  },
+  // Outside the scroll view, so the urge button is always on screen, whatever the text size.
   actions: {
     gap: spacing.s,
+    paddingTop: spacing.m,
   },
 });
 

@@ -12,7 +12,7 @@ import {
   weekdayInitial,
 } from '@/features/home/labels';
 import { createI18n } from '@/lib/i18n';
-import { counterFontSizes, sizes, spacing } from '@/ui/theme';
+import { sizes, spacing, streakRingLayout } from '@/ui/theme';
 import { journeyOf } from '@test/arbitraries';
 
 jest.mock('expo-localization', () => ({ getLocales: () => [{ languageCode: 'en' }] }));
@@ -81,14 +81,25 @@ const WIDEST: StreakDisplay[] = [
   { unit: 'days', days: 9999 },
 ];
 
-// Inside the ring, less its stroke and some air on each side.
-const RING_INSIDE = sizes.streakRing - 2 * sizes.streakRingStroke - 2 * spacing.l;
+// Small phones, the boards' width and a wide phone.
+const WINDOW_WIDTHS = [320, 360, 390, 430];
 
 describe('streak counter width', () => {
-  it.each(WIDEST)('fits %o inside the ring', (display) => {
-    const { number } = counterParts(english, display);
-    const fontSize = counterFontSizes[counterSize(display)];
-    expect(number.length * DIGIT_EM * fontSize).toBeLessThanOrEqual(RING_INSIDE);
+  it.each(WINDOW_WIDTHS.flatMap((width) => WIDEST.map((display) => [width, display] as const)))(
+    'fits on a %d point wide screen %o inside the ring',
+    (width, display) => {
+      const { number } = counterParts(english, display);
+      const { ring, fontSize } = streakRingLayout(width, counterSize(display));
+      // Inside the ring, less its stroke and some air on each side.
+      const inside = ring - 2 * sizes.streakRingStroke - 2 * spacing.l;
+      expect(number.length * DIGIT_EM * fontSize).toBeLessThanOrEqual(inside);
+    },
+  );
+
+  it('keeps the boards size from 390 points up', () => {
+    expect(streakRingLayout(390, 'large')).toEqual({ ring: sizes.streakRing, fontSize: 120 });
+    expect(streakRingLayout(430, 'small')).toEqual({ ring: sizes.streakRing, fontSize: 80 });
+    expect(streakRingLayout(320, 'large').ring).toBeLessThan(sizes.streakRing);
   });
 });
 

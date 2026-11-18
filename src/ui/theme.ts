@@ -128,11 +128,27 @@ export const typography = {
 
 // The number inside the streak ring, by its digits: 2 or fewer (hours always), 3, then 4 or more.
 // Each keeps the widest number of its group inside the ring (labels.test.ts measures it).
-export const counterFontSizes: Record<CounterSize, number> = {
+const counterFontSizes: Record<CounterSize, number> = {
   large: 120,
   medium: 100,
   small: 80,
 };
+
+// The boards are drawn for a screen 390 points wide.
+const BOARD_WIDTH = 390;
+
+// The ring and its number keep the boards' size on a screen as wide as the boards or wider, and
+// shrink together on a narrower one, so the number fits the ring at every width.
+export function streakRingLayout(
+  windowWidth: number,
+  counter: CounterSize,
+): { readonly ring: number; readonly fontSize: number } {
+  const scale = Math.min(1, windowWidth / BOARD_WIDTH);
+  return {
+    ring: Math.round(sizes.streakRing * scale),
+    fontSize: Math.round(counterFontSizes[counter] * scale),
+  };
+}
 
 export const spacing = {
   screen: 20,
@@ -230,6 +246,6 @@ export const sizes = {
   breathingRing: 220,
   breathingCircle: 170,
   breathingStroke: 3,
-  streakRing: 232,
+  streakRing: 236,
   streakRingStroke: 12,
 } as const;

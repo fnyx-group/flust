@@ -2,13 +2,17 @@ appId: org.fnyxgroup.flust
 ---
 - runFlow: ../common/onboard.yaml
 - assertVisible: Current streak.*
+- assertVisible: I have an urge
 - assertVisible: I had a lapse
-- assertVisible: Your check-in for today.*
+# With large text, the check-in line is below the fold of the content above the buttons.
+- scrollUntilVisible:
+    element: Your check-in for today.*
 
 # A cold start reads the profile back from encrypted storage instead of starting the onboarding.
 - stopApp
 - launchApp
 - extendedWaitUntil:
-    visible: I had a lapse
+    visible: Current streak.*
     timeout: 30000
 - assertNotVisible: Start
+- assertVisible: I had a lapse
