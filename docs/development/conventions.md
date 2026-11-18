@@ -49,6 +49,11 @@ Domain functions never read the clock. They take the current time, `now`, as a U
 
 The React Compiler is enabled by `experiments.reactCompiler` in `app.json`; `babel-preset-expo` applies it. Code must follow the Rules of React so that the compiler can memoize it, which the lint rules above check.
 
+## Dependencies
+
+- pnpm installs only versions published at least one day earlier (`minimumReleaseAge: 1440` in `pnpm-workspace.yaml`), so a compromised release has time to be caught and pulled before it reaches the lockfile.
+- Dependency build scripts are denied, and new dependencies are added with `pnpm expo install` ([Setup](setup.md#dependencies)).
+
 ## Unused code
 
 [knip](https://knip.dev) reports unused files, exports and dependencies (`pnpm knip`, configured in `knip.json`). Routes in `src/app/` are its entry points. `expo-updates` is ignored because knip assumes it for every Expo app, while flust has no over-the-air updates ([0006](../decisions/0006-no-network-access.md)).
