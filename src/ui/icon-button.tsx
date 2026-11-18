@@ -9,6 +9,8 @@ type IconButtonProps = {
   onPress: () => void;
   children: ReactNode;
   disabled?: boolean;
+  // Accent for the main action of a screen, such as a new note.
+  variant?: 'surface' | 'accent';
 };
 
 // The button is drawn at 40 points; the hit slop brings the touch target to 48.
@@ -17,6 +19,7 @@ export function IconButton({
   onPress,
   children,
   disabled = false,
+  variant = 'surface',
 }: IconButtonProps) {
   return (
     <Pressable
@@ -26,7 +29,11 @@ export function IconButton({
       disabled={disabled}
       hitSlop={4}
       onPress={onPress}
-      style={({ pressed }) => [styles.button, controlOpacity(pressed, disabled)]}
+      style={({ pressed }) => [
+        styles.button,
+        variant === 'accent' && styles.accent,
+        controlOpacity(pressed, disabled),
+      ]}
     >
       {children}
     </Pressable>
@@ -41,5 +48,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  accent: {
+    backgroundColor: colors.accent,
   },
 });

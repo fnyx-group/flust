@@ -13,6 +13,8 @@ type ConfirmSheetProps = {
   cancelLabel: string;
   onConfirm: () => void;
   onCancel: () => void;
+  // The confirmation deletes something, so it reads in the danger color.
+  destructive?: boolean;
 };
 
 // Built like OptionSheet: a fade, a backdrop that cancels, and the escape gesture. Cancelling is
@@ -27,6 +29,7 @@ export function ConfirmSheet({
   cancelLabel,
   onConfirm,
   onCancel,
+  destructive = false,
 }: ConfirmSheetProps) {
   const insets = useSafeAreaInsets();
   const hidden = useOverlaysHidden();
@@ -51,7 +54,11 @@ export function ConfirmSheet({
           <Text style={styles.message}>{message}</Text>
           <View style={styles.actions}>
             <Button label={cancelLabel} onPress={onCancel} />
-            <Button variant="plain" label={confirmLabel} onPress={onConfirm} />
+            <Button
+              variant={destructive ? 'destructive' : 'plain'}
+              label={confirmLabel}
+              onPress={onConfirm}
+            />
           </View>
         </View>
       </View>

@@ -1,47 +1,83 @@
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Journey } from '@/domain/journey';
+import { rankStanding, type RankId } from '@/domain/ranks';
 import { counterSize, currentStreakMs, streakDisplay } from '@/domain/streak';
 import { useClock } from '@/features/clock/clock-context';
-import { counterParts, spokenCounter } from '@/features/home/labels';
 import { sameFields } from '@/features/clock/minute-clock';
-import { counterFontSizes, colors, maxFontScale, sizes, typography } from '@/ui/theme';
+import { counterParts, spokenCounter } from '@/features/home/labels';
+import { ProgressRing } from '@/ui/progress-ring';
+import {
+  colors,
+  counterFontSize,
+  maxFontScale,
+  pressedOpacity,
+  sizes,
+  typography,
+} from '@/ui/theme';
 
-// One line of nested text, so digits and units share a baseline. The sizes fit the counter on a
-// screen of sizes.counterDesignWidth (labels.test.ts measures it); only narrower screens shrink it.
-// Digits and units do not follow the system text size, as they are already the largest text on
-// screen; the whole counter is read as one sentence instead.
-export function StreakCounter({ journey }: { journey: Journey }) {
+type StreakCounterProps = {
+  journey: Journey;
+  unlockedRanks: readonly RankId[];
+  // Chosen by the home screen to fit its height (fitHome).
+  ring: number;
+};
+
+// The number alone in the ring, its unit under it, and for hours the minutes on a quieter line.
+// The ring fills toward the next rank, or toward the first day. None of it follows the system
+// text size: the ring's size depends on the screen, and the number is already the largest text
+// on screen. Screen readers read the whole counter as one sentence instead. Like the rank line,
+// it opens the ranks tab, which shows where the ring is heading.
+export function StreakCounter({ journey, unlockedRanks, ring }: StreakCounterProps) {
   const { t } = useTranslation();
-  const { width } = useWindowDimensions();
   const display = useClock((now) => streakDisplay(currentStreakMs(journey, now)), sameFields);
-  const fontSize = counterFontSizes[counterSize(display)];
+  const fraction = useClock((now) => rankStanding(journey, unlockedRanks, now).fraction);
+  const fontSize = counterFontSize(ring, counterSize(display));
+  const parts = counterParts(t, display);
   return (
-    <View accessible accessibilityLabel={spokenCounter(t, display)}>
-      <Text style={typography.sectionLabel}>{t('home.streak.label')}</Text>
-      <Text
-        numberOfLines={1}
-        adjustsFontSizeToFit={width < sizes.counterDesignWidth}
-        maxFontSizeMultiplier={maxFontScale.streakCounter}
-        style={[styles.counter, { fontSize, lineHeight: fontSize }]}
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={spokenCounter(t, display)}
+      accessibilityHint={t('home.rank.hint')}
+      onPress={() => router.navigate('/ranks')}
+      style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+    >
+      <ProgressRing
+        fraction={fraction}
+        size={ring}
+        strokeWidth={sizes.streakRingStroke}
+        trackColor={colors.lockedFill}
       >
-        {counterParts(t, display).map((part, index) =>
-          part.kind === 'number' ? (
-            part.text
-          ) : (
-            <Text key={index} style={typography.streakUnit}>
-              {part.text}
-            </Text>
-          ),
+        <Text
+          numberOfLines={1}
+          maxFontSizeMultiplier={maxFontScale.streakCounter}
+          style={[styles.number, { fontSize, lineHeight: fontSize }]}
+        >
+          {parts.number}
+        </Text>
+        <Text maxFontSizeMultiplier={maxFontScale.streakCounter} style={typography.streakUnit}>
+          {parts.unit}
+        </Text>
+        {parts.rest !== null && (
+          <Text maxFontSizeMultiplier={maxFontScale.streakCounter} style={typography.streakRest}>
+            {parts.rest}
+          </Text>
         )}
-      </Text>
-    </View>
+      </ProgressRing>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  counter: {
+  container: {
+    alignItems: 'center',
+  },
+  pressed: {
+    opacity: pressedOpacity,
+  },
+  number: {
     ...typography.streakNumber,
     color: colors.text,
     includeFontPadding: false,

@@ -16,9 +16,11 @@ import { sameFields } from '@/features/clock/minute-clock';
 import { nativeClockDeps } from '@/features/clock/native-clock';
 import { breathingLabel } from '@/features/emergency/labels';
 import { useReduceMotion } from '@/features/shared/use-reduce-motion';
-import { colors, maxFontScale, sizes, spacing, typography } from '@/ui/theme';
+import { colors, maxFontScale, sizes, spacing, tint, tintAlpha, typography } from '@/ui/theme';
 
-const SMALL = 0.7;
+// The ring around the disk breathes; the disk keeps its size so the text on it always fits. At
+// its smallest the ring still clears the disk.
+const SMALL = sizes.breathingCircle / sizes.breathingRing + 0.04;
 
 const SCALES: Record<BreathingPhase, readonly [number, number]> = {
   inhale: [SMALL, 1],
@@ -51,7 +53,7 @@ function useForegroundCount(): number {
   return count;
 }
 
-// The circle grows on the inhale, stays on the hold and shrinks on the exhale, on the screen's
+// The ring grows on the inhale, stays on the hold and shrinks on the exhale, on the screen's
 // elapsed clock. With reduce motion on, only the text changes.
 //
 // Screen readers hear the rhythm once when the screen opens. After that, the phase is the value
@@ -101,10 +103,10 @@ export function BreathingCircle() {
         accessibilityLabel={t('emergency.breathing.guide')}
         accessibilityValue={{ text: label }}
         accessibilityRole={Platform.OS === 'ios' ? 'progressbar' : undefined}
-        style={styles.ring}
+        style={styles.area}
       >
-        <Animated.View style={[styles.circle, { transform: [{ scale }] }]} />
-        <View style={styles.center}>
+        <Animated.View style={[styles.ring, { transform: [{ scale }] }]} />
+        <View style={styles.circle}>
           <Text maxFontSizeMultiplier={maxFontScale.breathingPhase} style={styles.phase}>
             {label}
           </Text>
@@ -128,39 +130,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.l,
   },
+  area: {
+    width: sizes.breathingRing,
+    height: sizes.breathingRing,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   ring: {
+    position: 'absolute',
     width: sizes.breathingRing,
     height: sizes.breathingRing,
     borderRadius: sizes.breathingRing / 2,
-    borderWidth: 1,
-    borderColor: colors.separator,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderWidth: sizes.breathingStroke,
+    borderColor: tint(colors.teal, tintAlpha.border),
   },
   circle: {
     width: sizes.breathingCircle,
     height: sizes.breathingCircle,
     borderRadius: sizes.breathingCircle / 2,
-    borderWidth: sizes.breathingStroke,
-    borderColor: colors.accent,
-    backgroundColor: colors.surface,
-  },
-  center: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
+    padding: spacing.s,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: colors.teal,
   },
   phase: {
     ...typography.breathingPhase,
-    color: colors.text,
+    textAlign: 'center',
+    color: colors.onAccent,
   },
   count: {
     ...typography.breathingCount,
-    color: colors.text,
+    color: colors.onAccent,
   },
   rhythm: {
     ...typography.body,

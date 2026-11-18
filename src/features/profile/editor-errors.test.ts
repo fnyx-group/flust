@@ -36,7 +36,7 @@ describe('editor errors', () => {
 
   it('explain why the last plan stays', () => {
     expect(planErrorMessage(english, 'last-plan')).toBe(
-      'Keep at least one plan: the emergency screen always has one to show you.',
+      'Keep at least one plan. The emergency screen always has one to show you.',
     );
   });
 

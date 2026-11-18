@@ -12,8 +12,8 @@ import { useStorage } from '@/features/storage/storage-context';
 import { controlOpacity } from '@/ui/control-opacity';
 import { colors, sizes, spacing, typography } from '@/ui/theme';
 
-// One short line above the emergency button during the hours after a lapse. Plain text: no
-// color, no record, no animation.
+// One short line at the end of the scrolling content during the hours after a lapse. Plain text:
+// no color, no record, no animation.
 export function SupportLine({ latestLapse }: { latestLapse: LapseRecord | null }) {
   const { t } = useTranslation();
   const shown = useClock((now) => inSupportWindow(latestLapse, now));
@@ -23,7 +23,8 @@ export function SupportLine({ latestLapse }: { latestLapse: LapseRecord | null }
 
 type UndoLineProps = { journey: Journey; latestLapse: LapseRecord | null };
 
-// "Lapse noted · Undo", until local midnight and at least an hour after the lapse was logged.
+// "Lapse noted." and the undo button, until local midnight and at least an hour after the lapse
+// was logged.
 export function UndoLine({ journey, latestLapse }: UndoLineProps) {
   const shown = useClock((now) => canUndo(latestLapse, now, deviceOffsetAt));
   if (!shown || latestLapse === null) return null;
@@ -61,9 +62,6 @@ function Undo({ journey, record }: { journey: Journey; record: LapseRecord }) {
     <View style={styles.undo}>
       <View style={styles.undoRow}>
         <Text style={styles.noted}>{t('home.lapse.noted')}</Text>
-        <Text importantForAccessibility="no" accessibilityElementsHidden style={styles.noted}>
-          ·
-        </Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('home.lapse.undoSpoken')}

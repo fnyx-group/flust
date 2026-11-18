@@ -6,46 +6,41 @@ import type { Timestamp } from '@/domain/time';
 import { useClock } from '@/features/clock/clock-context';
 import { spokenQuote } from '@/features/home/labels';
 import { deviceOffsetAt } from '@/features/shared/device-time';
-import { colors, sizes, spacing, typography } from '@/ui/theme';
+import { colors, spacing, typography } from '@/ui/theme';
 
-// The selected quote is one of the QUOTES objects, the same all day, so ticks within a day do not
-// re-render this component.
+// At most this many lines of quote, the author's line aside; screen readers read the whole quote.
+const QUOTE_LINES = 2;
+
+// One discreet line or two, without a label, then the author when there is one, so the ring
+// stays the focus. The selected quote is one of the QUOTES objects, the same all day, so ticks
+// within a day do not re-render this component.
 export function DailyQuote({ start }: { start: Timestamp }) {
   const { t } = useTranslation();
   const quote = useClock((now) => quoteOfTheDay(start, now, deviceOffsetAt));
-  const text = t('home.quote.text', { text: t(`quotes.${quote.id}`) });
+  const text = t(`quotes.${quote.id}`);
   const author = quote.author && t(`quoteAuthors.${quote.author}`);
   return (
     <View accessible accessibilityLabel={spokenQuote(t, text, author)} style={styles.container}>
-      <View style={styles.bar} />
-      <View style={styles.texts}>
-        <Text style={styles.text}>{text}</Text>
-        {author !== null && <Text style={styles.author}>{author}</Text>}
-      </View>
+      <Text numberOfLines={QUOTE_LINES} style={styles.text}>
+        {text}
+      </Text>
+      {author !== null && <Text style={styles.author}>{author}</Text>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    gap: spacing.m,
-  },
-  bar: {
-    width: sizes.quoteBarWidth,
-    borderRadius: sizes.quoteBarWidth / 2,
-    backgroundColor: colors.accent,
-  },
-  texts: {
-    flex: 1,
-    gap: spacing.s,
+    gap: spacing.xs,
   },
   text: {
-    ...typography.quote,
-    color: colors.text,
+    ...typography.paragraph,
+    textAlign: 'center',
+    color: colors.textSecondary,
   },
   author: {
-    ...typography.bodyLarge,
-    color: colors.textSecondary,
+    ...typography.quoteAuthor,
+    textAlign: 'center',
+    color: colors.muted,
   },
 });

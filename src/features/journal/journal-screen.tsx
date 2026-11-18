@@ -49,8 +49,8 @@ export function JournalScreen() {
     <Screen>
       <View style={styles.header}>
         <ScreenTitle>{t('journal.title')}</ScreenTitle>
-        <IconButton accessibilityLabel={t('journal.newNote')} onPress={write}>
-          <PencilIcon color={colors.text} size={20} />
+        <IconButton accessibilityLabel={t('journal.newNote')} variant="accent" onPress={write}>
+          <PencilIcon color={colors.onAccent} size={20} />
         </IconButton>
       </View>
       <View style={styles.body}>

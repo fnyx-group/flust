@@ -32,9 +32,14 @@ import { deviceCalendar, deviceOffsetAt } from '@/features/shared/device-time';
 import { useStorage } from '@/features/storage/storage-context';
 import { BackHeader } from '@/ui/back-header';
 import { Button } from '@/ui/button';
+import { ClockIcon } from '@/ui/icons/clock-icon';
+import { PencilIcon } from '@/ui/icons/pencil-icon';
+import { RanksIcon } from '@/ui/icons/ranks-icon';
+import { SparkleIcon } from '@/ui/icons/sparkle-icon';
 import { RowGroup } from '@/ui/row-group';
 import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
+import { SectionLabel } from '@/ui/section-label';
 import { SwitchRow } from '@/ui/switch-row';
 import { colors, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/theme';
 
@@ -161,6 +166,8 @@ export function RemindersScreen() {
           <SwitchRow
             title={t('reminders.checkIn.title')}
             subtitle={t('reminders.checkIn.subtitle')}
+            icon={{ icon: PencilIcon, color: colors.gold }}
+            accessory={settings.checkIn.on && timeChip('checkIn')}
             value={settings.checkIn.on}
             onChange={(on) =>
               void toggle(
@@ -169,12 +176,12 @@ export function RemindersScreen() {
                 on,
               )
             }
-          >
-            {settings.checkIn.on && timeChip('checkIn')}
-          </SwitchRow>
+          />
           <SwitchRow
             title={t('reminders.thought.title')}
             subtitle={t('reminders.thought.subtitle')}
+            icon={{ icon: SparkleIcon, color: colors.accent }}
+            accessory={settings.thought.on && timeChip('thought')}
             value={settings.thought.on}
             onChange={(on) =>
               void toggle(
@@ -182,12 +189,11 @@ export function RemindersScreen() {
                 on,
               )
             }
-          >
-            {settings.thought.on && timeChip('thought')}
-          </SwitchRow>
+          />
           <SwitchRow
             title={t('reminders.riskHours.title')}
             subtitle={t('reminders.riskHours.subtitle')}
+            icon={{ icon: ClockIcon, color: colors.teal }}
             value={settings.riskHours}
             disabled={!timedMoments && !settings.riskHours}
             onChange={(on) => void toggle((value) => ({ ...settings, riskHours: value }), on)}
@@ -195,18 +201,12 @@ export function RemindersScreen() {
           <SwitchRow
             title={t('reminders.ranks.title')}
             subtitle={t('reminders.ranks.subtitle')}
+            icon={{ icon: RanksIcon, color: colors.gold }}
             value={settings.ranks}
             onChange={(on) => void toggle((value) => ({ ...settings, ranks: value }), on)}
           />
         </RowGroup>
-        {!timedMoments && (
-          <Text style={styles.hint}>
-            {t('reminders.riskHours.unavailable', {
-              night: t('presets.riskMoments.in-bed-at-night'),
-              weekend: t('presets.riskMoments.weekend'),
-            })}
-          </Text>
-        )}
+        {!timedMoments && <Text style={styles.hint}>{t('reminders.riskHours.unavailable')}</Text>}
         {notice === 'save-failed' && (
           <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>
             {t('reminders.saveFailed')}
@@ -225,17 +225,12 @@ export function RemindersScreen() {
           </View>
         )}
         <View style={styles.preview}>
-          <Text style={styles.label}>{t('reminders.preview')}</Text>
-          <NotificationPreview
-            text={t('reminders.notifications.check-in')}
-            time={formatReminderTime(i18n.language, settings.checkIn.minute, hour12)}
-          />
+          <SectionLabel>{t('reminders.preview')}</SectionLabel>
+          <NotificationPreview text={t('reminders.notifications.check-in')} />
         </View>
         <View style={styles.footer}>
           <Text style={styles.footerText}>{t('reminders.footer')}</Text>
-          {Platform.OS === 'ios' && (
-            <Text style={styles.footerText}>{t('reminders.iosPreviews')}</Text>
-          )}
+          <Text style={styles.footerText}>{t('reminders.lockScreenPreviews')}</Text>
         </View>
       </ScrollView>
       {editing !== null && (
@@ -282,20 +277,19 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.l,
   },
   chip: {
-    alignSelf: 'flex-start',
     minHeight: sizes.touchTarget,
     justifyContent: 'center',
-    paddingHorizontal: spacing.chipHorizontal,
+    paddingHorizontal: spacing.l,
     // Keeps the time off the edges when large text makes the chip grow.
     paddingVertical: spacing.xs,
-    borderRadius: radii.secondaryButton,
-    backgroundColor: colors.separator,
+    borderRadius: radii.segment,
+    backgroundColor: colors.background,
   },
   pressed: {
     opacity: pressedOpacity,
   },
   chipText: {
-    ...typography.selectValue,
+    ...typography.countdown,
     color: colors.text,
   },
   hint: {
@@ -312,16 +306,11 @@ const styles = StyleSheet.create({
   preview: {
     gap: spacing.m,
   },
-  label: {
-    ...typography.sectionLabel,
-    paddingHorizontal: spacing.xs,
-  },
   footer: {
-    gap: spacing.s,
+    gap: spacing.l,
   },
   footerText: {
-    ...typography.body,
-    textAlign: 'center',
+    ...typography.paragraphSmall,
     color: colors.textSecondary,
   },
 });

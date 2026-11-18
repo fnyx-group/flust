@@ -11,6 +11,9 @@ import { formatReminderTime } from '@/features/reminders/labels';
 import { notifier } from '@/features/reminders/notifier';
 import { deviceCalendar } from '@/features/shared/device-time';
 import { RowGroup } from '@/ui/row-group';
+import { BellIcon } from '@/ui/icons/bell-icon';
+import { LockIcon } from '@/ui/icons/lock-icon';
+import { SectionLabel } from '@/ui/section-label';
 import { SwitchRow } from '@/ui/switch-row';
 import { colors, spacing, typography } from '@/ui/theme';
 
@@ -76,11 +79,12 @@ export function ProtectionCard({ protection, onChange }: ProtectionCardProps) {
   const time = formatReminderTime(i18n.language, DEFAULT_REMINDER_SETTINGS.checkIn.minute, hour12);
   return (
     <View style={styles.section}>
-      <Text style={styles.label}>{t('onboarding.start.protection.label')}</Text>
+      <SectionLabel color={colors.teal}>{t('onboarding.start.protection.label')}</SectionLabel>
       <RowGroup>
         <SwitchRow
           title={lockToggleLabel(t, lock.security, Platform.OS)}
           subtitle={t('lock.settings.toggleSubtitle')}
+          icon={{ icon: LockIcon, color: colors.teal }}
           value={protection.lock}
           disabled={busy}
           onChange={(on) => void run(() => toggleLock(on))}
@@ -88,6 +92,7 @@ export function ProtectionCard({ protection, onChange }: ProtectionCardProps) {
         <SwitchRow
           title={t('reminders.checkIn.title')}
           subtitle={t('onboarding.start.protection.checkInSubtitle', { time })}
+          icon={{ icon: BellIcon, color: colors.gold }}
           value={protection.checkInReminder}
           disabled={busy}
           onChange={(on) => void run(() => toggleCheckIn(on))}
@@ -105,10 +110,6 @@ export function ProtectionCard({ protection, onChange }: ProtectionCardProps) {
 const styles = StyleSheet.create({
   section: {
     gap: spacing.m,
-  },
-  label: {
-    ...typography.label,
-    paddingHorizontal: spacing.xs,
   },
   notice: {
     ...typography.body,

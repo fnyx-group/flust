@@ -10,6 +10,7 @@ import { useLock } from '@/features/lock/lock-context';
 import { useWaitCountdown } from '@/features/lock/wait-countdown';
 import { useStorage } from '@/features/storage/storage-context';
 import { BrandLockup } from '@/ui/brand/brand-lockup';
+import { LockIcon } from '@/ui/icons/lock-icon';
 import { Button } from '@/ui/button';
 import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
@@ -95,7 +96,10 @@ export function LockScreen({ security, attempts, onAttempts, onUnlock }: LockScr
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.center}>
           <BrandLockup />
-          <Text style={styles.status}>{t('lock.locked')}</Text>
+          <View style={styles.statusRow}>
+            <LockIcon color={colors.teal} size={18} />
+            <Text style={styles.status}>{t('lock.locked')}</Text>
+          </View>
         </View>
         <View style={styles.bottom}>
           {(waiting || lockout) && (
@@ -130,7 +134,10 @@ export function LockCover() {
     <Screen bottomInset>
       <View accessible accessibilityLabel={t('lock.cover')} style={styles.center}>
         <BrandLockup />
-        <Text style={[styles.status, styles.invisible]}>{t('lock.locked')}</Text>
+        <View style={[styles.statusRow, styles.invisible]}>
+          <LockIcon color={colors.teal} size={18} />
+          <Text style={styles.status}>{t('lock.locked')}</Text>
+        </View>
       </View>
     </Screen>
   );
@@ -144,7 +151,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xl,
+    gap: spacing.xs,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.s,
   },
   status: {
     ...typography.bodyLarge,

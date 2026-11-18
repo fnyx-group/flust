@@ -12,7 +12,7 @@ import {
 } from '@/features/journal/labels';
 import { deviceOffsetAt } from '@/features/shared/device-time';
 import { SectionList } from '@/ui/scroll-view';
-import { colors, pressedOpacity, spacing, typography } from '@/ui/theme';
+import { colors, pressedOpacity, radii, spacing, typography } from '@/ui/theme';
 import { useLargeText } from '@/ui/use-large-text';
 
 type NoteListProps = {
@@ -21,7 +21,13 @@ type NoteListProps = {
   onOpen: (note: NoteSummary) => void;
 };
 
-type Section = { key: string; title: string; data: readonly NoteSummary[] };
+type Section = {
+  key: string;
+  title: string;
+  // Dates of the current week stand out in violet, older ones stay quieter.
+  recent: boolean;
+  data: readonly NoteSummary[];
+};
 
 function sectionKey(key: NoteGroupKey): string {
   return key.kind === 'month' ? `${key.year}-${key.month}` : key.kind;
@@ -35,6 +41,7 @@ export function NoteList({ notes, firstWeekday, onOpen }: NoteListProps) {
   const sections: Section[] = groupNotes(notes, today, firstWeekday).map((group) => ({
     key: sectionKey(group.key),
     title: noteGroupTitle(t, i18n.language, group.key, currentYear),
+    recent: group.key.kind === 'this-week',
     data: group.notes,
   }));
 
@@ -49,7 +56,9 @@ export function NoteList({ notes, firstWeekday, onOpen }: NoteListProps) {
           {section.title}
         </Text>
       )}
-      renderItem={({ item }) => <NoteRow note={item} onOpen={onOpen} />}
+      renderItem={({ item, section }) => (
+        <NoteRow note={item} recent={section.recent} onOpen={onOpen} />
+      )}
     />
   );
 }
@@ -59,7 +68,9 @@ export function NoteList({ notes, firstWeekday, onOpen }: NoteListProps) {
 const TITLE_LINES = 1;
 const TITLE_LINES_LARGE_TEXT = 3;
 
-function NoteRow({ note, onOpen }: { note: NoteSummary; onOpen: (note: NoteSummary) => void }) {
+type NoteRowProps = { note: NoteSummary; recent: boolean; onOpen: (note: NoteSummary) => void };
+
+function NoteRow({ note, recent, onOpen }: NoteRowProps) {
   const { i18n } = useTranslation();
   const largeText = useLargeText();
   return (
@@ -69,7 +80,9 @@ function NoteRow({ note, onOpen }: { note: NoteSummary; onOpen: (note: NoteSumma
       onPress={() => onOpen(note)}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
-      <Text style={styles.date}>{noteListDate(i18n.language, note.day)}</Text>
+      <Text style={[styles.date, recent && styles.recentDate]}>
+        {noteListDate(i18n.language, note.day)}
+      </Text>
       <View style={styles.content}>
         {note.title !== null && (
           <Text
@@ -92,28 +105,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    ...typography.sectionLabel,
+    ...typography.bodyLarge,
+    fontSize: 18,
+    fontFamily: typography.row.fontFamily,
+    color: colors.textSecondary,
     paddingTop: spacing.xl,
-    paddingBottom: spacing.xs,
+    paddingBottom: spacing.m,
   },
   row: {
-    gap: spacing.xs,
-    paddingVertical: spacing.l,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.separator,
+    gap: spacing.s,
+    marginBottom: spacing.m,
+    padding: spacing.card,
+    borderRadius: radii.cardLarge,
+    backgroundColor: colors.surface,
   },
   pressed: {
     opacity: pressedOpacity,
   },
   date: {
-    ...typography.bodyLarge,
+    ...typography.row,
+    fontFamily: typography.quote.fontFamily,
     color: colors.textSecondary,
+  },
+  recentDate: {
+    color: colors.accentText,
   },
   content: {
     gap: spacing.xxs,
   },
   title: {
-    ...typography.rankName,
+    ...typography.rankCardName,
     color: colors.text,
   },
   excerpt: {

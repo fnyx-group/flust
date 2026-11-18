@@ -29,7 +29,9 @@ import { IconButton } from '@/ui/icon-button';
 import { BackIcon } from '@/ui/icons/back-icon';
 import { ScalePicker } from '@/ui/scale-picker';
 import { KeyboardScreen } from '@/ui/keyboard-screen';
+import { PrivateLine } from '@/ui/private-line';
 import { ScreenTitle } from '@/ui/screen-title';
+import { SectionLabel } from '@/ui/section-label';
 import { SegmentedControl } from '@/ui/segmented-control';
 import { colors, spacing, typography } from '@/ui/theme';
 
@@ -110,18 +112,18 @@ export function CheckInScreen() {
                 {t(SAVE_CHECK_IN_ERROR_MESSAGES[error])}
               </Text>
             )}
+            <PrivateLine text={t('checkIn.private')} />
             <Button
               label={t('checkIn.save')}
               onPress={() => void save()}
               disabled={busy || !isComplete(draft)}
             />
-            <Text style={styles.private}>{t('checkIn.private')}</Text>
           </View>
         }
       >
         <ScreenTitle>{t('checkIn.title')}</ScreenTitle>
         <View style={styles.field}>
-          <Text style={styles.label}>{t('checkIn.mood')}</Text>
+          <SectionLabel color={colors.accentText}>{t('checkIn.mood')}</SectionLabel>
           <ScalePicker
             accessibilityLabel={t('checkIn.mood')}
             options={moodOptions(t)}
@@ -132,9 +134,10 @@ export function CheckInScreen() {
           />
         </View>
         <View style={styles.field}>
-          <Text style={styles.label}>{t('checkIn.urge')}</Text>
+          <SectionLabel color={colors.gold}>{t('checkIn.urge')}</SectionLabel>
           <SegmentedControl
             accessibilityLabel={t('checkIn.urge')}
+            color={colors.gold}
             options={URGE_LEVELS.map((key) => ({
               key,
               label: t(`checkIn.urgeLevels.${key}`),
@@ -144,8 +147,9 @@ export function CheckInScreen() {
           />
         </View>
         <View style={styles.field}>
-          <Text style={styles.label}>{t('checkIn.context')}</Text>
+          <SectionLabel color={colors.teal}>{t('checkIn.context')}</SectionLabel>
           <ChipList
+            color={colors.teal}
             items={RISK_MOMENT_IDS.map((id) => ({
               key: id,
               label: riskMomentLabel(t, id),
@@ -190,10 +194,6 @@ const styles = StyleSheet.create({
   field: {
     gap: spacing.m,
   },
-  label: {
-    ...typography.sectionLabel,
-    color: colors.text,
-  },
   footer: {
     gap: spacing.m,
     paddingTop: spacing.m,
@@ -202,10 +202,5 @@ const styles = StyleSheet.create({
     ...typography.body,
     textAlign: 'center',
     color: colors.text,
-  },
-  private: {
-    ...typography.body,
-    textAlign: 'center',
-    color: colors.textSecondary,
   },
 });

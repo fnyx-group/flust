@@ -11,18 +11,19 @@
   "home": {
     "urgeButton": "I have an urge",
     "streak": {
-      "label": "Current streak",
       "dayUnit_one": "day",
       "dayUnit_other": "days",
-      "hourUnit": "h",
-      "minuteUnit": "min",
       "spokenHoursMinutes": "{{hours}} {{minutes}}",
-      "spoken": "Current streak: {{value}}"
+      "spoken": "Current streak, {{value}}",
+      "hourUnit_one": "hour",
+      "hourUnit_other": "hours",
+      "minutesRest_one": "and {{count}} min",
+      "minutesRest_other": "and {{count}} min"
     },
     "rank": {
       "first": "First rank",
       "firstIn": "{{name}} in {{time}}",
-      "shortTime": "{{hours}} h {{minutes}} min",
+      "shortTime": "{{hours}} h {{minutes}}",
       "nextIn_one": "{{name}} in {{count}} day",
       "nextIn_other": "{{name}} in {{count}} days",
       "allUnlocked": "All ranks unlocked",
@@ -30,25 +31,19 @@
       "hint": "Opens the ranks"
     },
     "quote": {
-      "text": "“{{text}}”",
-      "spoken": "Quote of the day: {{text}}",
-      "spokenWithAuthor": "Quote of the day: {{text}}, {{author}}"
-    },
-    "week": {
-      "summary_one": "{{count}} clean day in the last 7",
-      "summary_other": "{{count}} clean days in the last 7"
+      "spoken": "Quote of the day, {{text}}",
+      "spokenWithAuthor": "Quote of the day, {{text}}, {{author}}"
     },
     "lapse": {
       "link": "I had a lapse",
-      "noted": "Lapse noted",
+      "noted": "Lapse noted.",
       "undo": "Undo",
       "undoSpoken": "Undo the lapse you noted",
       "undoFailed": "The lapse could not be undone. Try again.",
       "support": "The next few hours matter. You've already done the hardest part by noting it."
     },
     "checkIn": {
-      "todo": "Today's check-in · to do",
-      "todoSpoken": "Today's check-in, to do",
+      "todo": "Your check-in for today is waiting",
       "done": "Check-in done",
       "hint": "Opens the check-in"
     },
@@ -57,14 +52,14 @@
       "emergency": "If you are in danger, call the emergency number where you are.",
       "dismiss": "Hide this message for today",
       "help": "See help numbers"
-    }
+    },
+    "firstDay": "First day"
   },
   "emergency": {
     "close": "Close",
     "title": "Let the wave pass.",
-    "subtitle": "An urge rises, peaks and falls, often within 15 to 30 minutes.",
+    "subtitle": "An urge often fades within 15 to 30 minutes.",
     "countdownSpoken": "{{time}} left",
-    "countdownTime": "{{minutes}} {{seconds}}",
     "waveOver": "Has the wave passed?",
     "breathing": {
       "inhale": "Breathe in",
@@ -80,7 +75,8 @@
     "lapse": "I had a lapse",
     "writeNote": "Write now",
     "darkThoughts": "Dark thoughts? Talk to someone",
-    "darkThoughtsHint": "Opens help numbers"
+    "darkThoughtsHint": "Opens help numbers",
+    "countdown": "{{count}} min"
   },
   "lapse": {
     "back": "Back",
@@ -102,7 +98,7 @@
     "when": "When",
     "now": "Now",
     "earlier": "Earlier",
-    "selected": "Time: {{date}}",
+    "selected": "On {{date}}",
     "context": "Context",
     "nextTime": "Next time",
     "save": "Save and start again",
@@ -162,7 +158,7 @@
       "save": "Save",
       "titlePlaceholder": "Title (optional)",
       "titleSpoken": "Title, optional",
-      "dateTime": "{{date}} at {{time}}",
+      "dateTime": "{{date}}, {{time}}",
       "bodyPlaceholder": "Write whatever you like.",
       "bodySpoken": "Note text",
       "prompts": "To get started",
@@ -172,7 +168,7 @@
         "tomorrow": "Tomorrow, I…"
       },
       "promptStarters": {
-        "helped": "What helped: ",
+        "helped": "What helped was ",
         "proud": "Today I'm proud of ",
         "tomorrow": "Tomorrow, I "
       },
@@ -218,7 +214,7 @@
     "about": "About",
     "erase": "Erase everything",
     "eraseHint": "Explains what will be erased before asking to confirm",
-    "footer": "flust {{version}} · Open source, encrypted on your phone",
+    "footer": "flust {{version}}, open source and encrypted on your phone",
     "languageSaveFailed": "The language could not be saved.",
     "reminders": "Reminders",
     "lock": "App lock",
@@ -229,20 +225,20 @@
     "back": "Back",
     "version": "Version {{version}}",
     "license": "flust is open source, under the MPL-2.0 license.",
-    "privacy": "No account, no ads, no tracking: everything stays encrypted on your phone.",
+    "privacy": "No account, no ads, no tracking.",
     "website": "Website",
     "source": "Source code",
     "errorReport": "Error report",
-    "linkHint": "Opens outside flust",
+    "linkHint": "Opens outside flust, {{address}}",
     "byline": "By fnyx-group"
   },
   "erase": {
     "back": "Back",
     "title": "Erase everything",
-    "what": "This deletes everything flust keeps on this phone: your journey and lapses, your ranks, your journal, your check-ins, your reasons, risk moments and plans, your urge history, your settings and the error report. The encryption keys are deleted too.",
-    "noRecovery": "There is no other copy: flust has no account, no server and no backup. Nothing can be recovered.",
+    "what": "Your journey, ranks, journal, settings and everything else will be deleted from this phone.",
+    "noRecovery": "There is no other copy. Nothing can be recovered.",
     "after": "flust then starts again from the beginning.",
-    "lapseHint": "No need to erase everything to start again after a lapse: just note it. Your clean days stay yours.",
+    "lapseHint": "After a lapse, no need to erase everything. Note it, your clean days stay yours.",
     "continue": "Erase my data",
     "confirm": {
       "title": "Erase for good?",
@@ -256,7 +252,8 @@
       "title": "Erasing did not finish",
       "body": "Some of your data may still be on this phone. Try again to finish erasing it.",
       "retry": "Try again"
-    }
+    },
+    "cancel": "Cancel"
   },
   "profile": {
     "title": "Reasons and plans",
@@ -269,7 +266,7 @@
     "plans": "My plans",
     "addPlan": "Add a plan",
     "editPlanHint": "Edit or delete this plan",
-    "footer": "They show on the emergency screen, when you need them.",
+    "footer": "They show on the emergency screen.",
     "reasonLimit": "You already have {{count}} reasons. Remove one to add another.",
     "planLimit": "You already have {{count}} plans. Delete one to add another.",
     "loadFailed": "Your reasons and plans could not be read. Nothing is lost.",
@@ -305,7 +302,7 @@
       "titleNew": "New plan",
       "titleEdit": "Your plan",
       "remove": "Delete this plan",
-      "lastPlan": "Keep at least one plan: the emergency screen always has one to show you.",
+      "lastPlan": "Keep at least one plan. The emergency screen always has one to show you.",
       "removeConfirm": {
         "title": "Delete this plan?",
         "message": "You can create another one whenever you want.",
@@ -359,7 +356,7 @@
       "reasons": {
         "key-missing": "flust encrypts your data with a key that only this phone keeps, in its secure storage. That key is no longer there. This happens when the phone is restored from a backup or the data is moved to another phone, because the key is never copied.",
         "database-unreadable": "flust encrypts your data with a key that only this phone keeps, in its secure storage. The data on this phone does not match that key, or the file is damaged, so it cannot be decrypted.",
-        "journey-corrupted": "flust can open your data, but your journey in it is damaged: its dates do not make sense, so your streak and clean days cannot be counted correctly. Trying again reads the same data."
+        "journey-corrupted": "flust can open your data, but your journey in it is damaged. Its dates do not make sense, so your streak and clean days cannot be counted correctly. Trying again reads the same data."
       },
       "noRecovery": "There is no other copy. flust has no account, no server and no backup, so nobody, including the people who make flust, can recover this data. You can try again, or erase it and start over.",
       "startOver": "Erase and start over",
@@ -382,18 +379,18 @@
     "continue": "Continue",
     "progress": "Step {{current}} of {{total}}",
     "welcome": {
-      "language": "Language: {{language}}",
+      "language": "Language, {{language}}",
       "languageHint": "Opens the list of languages",
       "languageTitle": "Language",
       "title": "Take back control.",
-      "promise": "No account, no ads, no tracking. Everything you write stays encrypted on your phone.",
+      "promise": "No account, no ads, no tracking. Everything stays encrypted on your phone.",
       "duration": "Two minutes to lay your foundations.",
       "start": "Start",
       "footer": "Open source, by fnyx-group"
     },
     "reasons": {
       "title": "Why are you quitting?",
-      "subtitle": "Pick what speaks to you. We'll remind you of it when things get hard.",
+      "subtitle": "We'll remind you of them when things get hard.",
       "custom": "Write my own"
     },
     "riskMoments": {
@@ -402,13 +399,14 @@
     },
     "plan": {
       "title": "Your first plan",
-      "subtitle": "Decide now, with a clear head. When the urge comes, you'll only have to follow it.",
+      "subtitle": "Decide with a clear head. When the urge comes, just follow.",
       "if": "If",
       "then": "Then",
       "triggerHint": "Opens the list of moments",
       "triggerTitle": "If",
       "custom": "Something else",
-      "customHint": "Writing here chooses this action."
+      "customHint": "Writing here chooses this action.",
+      "ifSpoken": "If {{condition}}"
     },
     "start": {
       "title": "Last step",
@@ -416,7 +414,7 @@
       "label": "Starting point",
       "now": "Now",
       "pickDate": "Pick a date",
-      "selected": "Starting point: {{date}}",
+      "selected": "Starting on {{date}}",
       "finish": "Let's go",
       "footer": "You can change all of this later in the settings.",
       "errors": {
@@ -468,7 +466,7 @@
     },
     "sentences": {
       "plan": "If {{condition}}, then {{action}}.",
-      "planCustom": "If {{condition}}, then: {{action}}",
+      "planCustom": "If {{condition}}, then {{action}}",
       "conditions": {
         "urge": "an urge hits",
         "in-bed-at-night": "I'm in bed at night",
@@ -489,6 +487,10 @@
     }
   },
   "ranks": {
+    "week": {
+      "summary_one": "{{count}} clean day in the last 7",
+      "summary_other": "{{count}} clean days in the last 7"
+    },
     "names": {
       "novice": "Novice",
       "apprentice": "Apprentice",
@@ -511,8 +513,7 @@
       "5": "Absolute"
     },
     "screen": {
-      "rule": "Your rank follows your total clean days. A lapse never brings it down.",
-      "circle": "Circle {{number}} · {{name}}",
+      "rule": "A lapse never brings your rank down.",
       "circleSpoken": "circle {{number}}, {{name}}",
       "nextIn_one": "Next rank in {{count}} day",
       "nextIn_other": "Next rank in {{count}} days",
@@ -526,7 +527,10 @@
         "unlocked": "unlocked",
         "next": "next rank, locked",
         "locked": "locked"
-      }
+      },
+      "totalDays_one": "{{count}} clean day in total",
+      "totalDays_other": "{{count}} clean days in total",
+      "nextAt": "{{name}} at {{count}}"
     },
     "unlocked": {
       "label": "New rank",
@@ -547,12 +551,19 @@
         "4": "You move forward in the circle of the Crown.",
         "5": "You move forward in the circle of the Absolute."
       },
-      "others_one": "Also unlocked: {{names}}",
-      "others_other": "Also unlocked: {{names}}",
+      "others_one": "{{names}} unlocked too",
+      "others_other": "{{names}} unlocked too",
       "listSeparator": ", ",
-      "spoken": "New rank: {{name}}, {{circle}}",
+      "spoken": "New rank, {{name}}, {{circle}}",
       "continue": "Continue",
       "seeRanks": "See my ranks"
+    },
+    "circleNames": {
+      "1": "Circle of Awakening",
+      "2": "Circle of Shadow",
+      "3": "Circle of Light",
+      "4": "Circle of the Crown",
+      "5": "Circle of the Absolute"
     }
   },
   "quotes": {
@@ -560,7 +571,7 @@
     "urge-wave": "An urge is a wave. It rises, peaks and passes.",
     "claim-yourself": "Claim yourself back.",
     "lapse-moment": "A lapse is a moment, not a verdict.",
-    "headland": "Be like the headland the waves keep breaking on: it stands firm, and around it the churning water grows calm.",
+    "headland": "Be like the headland the waves keep breaking on. It stands firm, and around it the churning water grows calm.",
     "instead": "What you do instead matters more than what you resist.",
     "wait-impression": "Wait for me a little, impression. Let me see what you are and what you are about.",
     "next-hour": "You don't have to settle everything today. Only the next hour.",
@@ -605,7 +616,7 @@
     "riskHours": {
       "title": "Risky hours",
       "subtitle": "A reminder before your sensitive moments",
-      "unavailable": "To turn it on, choose “{{night}}” or “{{weekend}}” in your risk moments."
+      "unavailable": "Add a night or weekend moment to your risk moments first."
     },
     "ranks": {
       "title": "Ranks and milestones",
@@ -621,9 +632,8 @@
       "cancel": "Cancel"
     },
     "preview": "Preview",
-    "previewLabel": "Preview of a flust notification: {{text}}",
-    "footer": "Notifications stay neutral. Nobody can tell what the app is about by looking at your screen.",
-    "iosPreviews": "To also hide their text on the lock screen, go to Settings, Notifications, Show Previews.",
+    "previewLabel": "Preview of a flust notification, {{text}}",
+    "footer": "Notifications stay neutral.",
     "denied": "Notifications are off for flust. You can allow them in your phone's settings.",
     "openSettings": "Open settings",
     "saveFailed": "The reminder could not be saved. Try again.",
@@ -639,7 +649,8 @@
       "channelDescription": "The reminders you turned on in flust",
       "previewPlaceholder": "Reminder"
     },
-    "back": "Back"
+    "back": "Back",
+    "lockScreenPreviews": "To hide them on the lock screen, use your phone's settings."
   },
   "lock": {
     "locked": "Locked",
@@ -659,8 +670,8 @@
       "toggleSubtitle": "With your phone's passcode as a fallback",
       "delay": "Ask again",
       "noDeviceLock": "Set a screen lock on your phone to turn this on.",
-      "paused": "Lock paused: your phone no longer has a screen lock.",
-      "note": "The lock protects access to flust on this phone. Your data stays encrypted either way.",
+      "paused": "Lock paused. Your phone no longer has a screen lock.",
+      "note": "Your data stays encrypted, lock or not.",
       "notConfirmed": "Unlocking was not confirmed. The lock stays off.",
       "saveFailed": "The setting could not be saved. Try again.",
       "back": "Back"
@@ -724,7 +735,7 @@
       },
       "fr114": {
         "name": "Emergencies by text",
-        "detail": "Free text message, 24/7, for deaf or hard of hearing people, or if you cannot speak safely"
+        "detail": "Free text, 24/7, if you cannot speak or hear, or cannot speak safely"
       },
       "be0800": {
         "name": "Centre de Prévention du Suicide",
@@ -812,12 +823,12 @@
     "textSpoken": "Text {{number}}, {{name}}. {{detail}}",
     "callHint": "Opens the phone app with this number",
     "textHint": "Opens messages with this number",
-    "directoryIntro": "An online directory lists helplines in many countries. The link opens outside flust.",
+    "directoryIntro": "Helplines in other countries. Opens outside flust.",
     "directory": "Find a helpline",
     "callFailed": "The phone app could not open. You can dial {{number}} yourself.",
     "textFailed": "Messages could not open. You can text {{number}} yourself.",
     "linkFailed": "The link could not open. The address is {{address}}.",
-    "footer": "flust sends nothing: the call or message goes from your phone. Each service sets out its own confidentiality.",
+    "footer": "flust sends nothing. The call goes from your phone.",
     "checked": "Numbers checked in {{month}}"
   },
   "errors": {
@@ -841,19 +852,19 @@
       "reportHint": "Asks for your phone's unlock first, if it has one.",
       "reportPrompt": "Open the error report",
       "reportCancel": "Cancel",
-      "reportRefused": "The report stays closed: the phone did not confirm it's you.",
+      "reportRefused": "The report stays closed. The phone did not confirm it's you.",
       "erase": "Erase everything"
     },
     "report": {
       "title": "Error report",
       "back": "Back",
-      "intro": "flust keeps a list of its last technical errors on this phone, encrypted. It holds no journal, check-in, reason or plan: only when each error happened, on which screen, its type and where in the code.",
-      "preview": "This is exactly what will be shared:",
+      "intro": "The last technical errors, encrypted on this phone. Nothing you write.",
+      "preview": "This is exactly what will be shared.",
       "empty": "No error has been recorded.",
       "share": "Share this report",
       "shareHint": "Opens the share sheet. You choose where the report goes.",
       "shareFailed": "The share sheet could not open. You can select the text above and copy it.",
-      "nothingSent": "flust sends nothing by itself: the report only leaves if you share it.",
+      "nothingSent": "Nothing leaves without you.",
       "clear": "Clear the report",
       "clearFailed": "The report could not be cleared. Try again.",
       "confirm": {

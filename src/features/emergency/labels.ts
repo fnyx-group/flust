@@ -2,23 +2,22 @@ import type { TFunction } from 'i18next';
 
 import type { BreathingPhase, MinutesAndSeconds } from '@/domain/urge';
 
-// "19:42", the same in every language.
-export function countdownText({ minutes, seconds }: MinutesAndSeconds): string {
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+// Whole minutes left, rounded up, so the chip never reads "0 min" while time remains and starts
+// at the full 20.
+function minutesLeft({ minutes, seconds }: MinutesAndSeconds): number {
+  return seconds > 0 ? minutes + 1 : minutes;
 }
 
-// "19 minutes 42 seconds left": screen readers would read "19:42" as a time of day.
-export function spokenCountdown(t: TFunction, { minutes, seconds }: MinutesAndSeconds): string {
-  const parts = [
-    minutes > 0 ? t('units.minute', { count: minutes }) : null,
-    seconds > 0 || minutes === 0 ? t('units.second', { count: seconds }) : null,
-  ].filter((part) => part !== null);
-  const [first, second] = parts;
-  const time =
-    second === undefined
-      ? first
-      : t('emergency.countdownTime', { minutes: first, seconds: second });
-  return t('emergency.countdownSpoken', { time });
+// "19 min".
+export function countdownText(t: TFunction, parts: MinutesAndSeconds): string {
+  return t('emergency.countdown', { count: minutesLeft(parts) });
+}
+
+// "19 minutes left", the same minutes as the chip, in words.
+export function spokenCountdown(t: TFunction, parts: MinutesAndSeconds): string {
+  return t('emergency.countdownSpoken', {
+    time: t('units.minute', { count: minutesLeft(parts) }),
+  });
 }
 
 export function breathingLabel(t: TFunction, phase: BreathingPhase): string {

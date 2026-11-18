@@ -2,8 +2,6 @@ import type { TFunction } from 'i18next';
 
 import type { Rank, RankStanding } from '@/domain/ranks';
 import { remainingParts, type StreakDisplay } from '@/domain/streak';
-import { MS_PER_DAY } from '@/domain/time';
-import { cleanDayCount, type WeekDay } from '@/domain/week';
 import { rankName } from '@/features/shared/rank-labels';
 import { spokenHoursMinutes, spokenStreak } from '@/features/shared/streak-labels';
 
@@ -11,41 +9,46 @@ function twoDigits(value: number): string {
   return String(value).padStart(2, '0');
 }
 
-export type CounterPart = { readonly kind: 'number' | 'unit'; readonly text: string };
+export type CounterParts = {
+  readonly number: string;
+  readonly unit: string;
+  // The minutes after the hours, on a quieter line, or null.
+  readonly rest: string | null;
+};
 
-// The counter as it is drawn: numbers in the counter font, units with their surrounding spaces in
-// the unit style. The width test measures these same parts.
-export function counterParts(t: TFunction, display: StreakDisplay): CounterPart[] {
+// The counter as it is drawn in its ring: "7", "heures", "et 40 min". The width test measures the
+// number.
+export function counterParts(t: TFunction, display: StreakDisplay): CounterParts {
   if (display.unit === 'days') {
-    return [
-      { kind: 'number', text: String(display.days) },
-      { kind: 'unit', text: ` ${t('home.streak.dayUnit', { count: display.days })}` },
-    ];
+    return {
+      number: String(display.days),
+      unit: t('home.streak.dayUnit', { count: display.days }),
+      rest: null,
+    };
   }
-  return [
-    { kind: 'number', text: String(display.hours) },
-    { kind: 'unit', text: ` ${t('home.streak.hourUnit')} ` },
-    { kind: 'number', text: twoDigits(display.minutes) },
-    { kind: 'unit', text: ` ${t('home.streak.minuteUnit')}` },
-  ];
+  return {
+    number: String(display.hours),
+    unit: t('home.streak.hourUnit', { count: display.hours }),
+    rest: display.minutes === 0 ? null : t('home.streak.minutesRest', { count: display.minutes }),
+  };
 }
 
-// What a screen reader says for the counter: "Current streak: 7 hours 40 minutes".
+// What a screen reader says for the counter: "Current streak, 7 hours 40 minutes".
 export function spokenCounter(t: TFunction, display: StreakDisplay): string {
   return t('home.streak.spoken', { value: spokenStreak(t, display) });
 }
 
-export type RankBadgeText = {
+export type RankLineText = {
   readonly rank: Rank;
   readonly unlocked: boolean;
   readonly name: string;
   readonly detail: string;
-  // The badge is a single button, so its one label says everything on it, in full words.
+  // The line is a single button, so its one label says everything on it, in full words.
   readonly spokenLabel: string;
 };
 
-// Before day one the badge shows the first rank, locked, and the time left to it.
-export function rankBadgeText(t: TFunction, standing: RankStanding): RankBadgeText {
+// Before day one the line shows the first rank, locked, and the time left to it.
+export function rankLineText(t: TFunction, standing: RankStanding): RankLineText {
   if (standing.status === 'pending') {
     const left = remainingParts(standing.msLeft);
     const firstName = rankName(t, standing.first);
@@ -80,20 +83,17 @@ export function rankBadgeText(t: TFunction, standing: RankStanding): RankBadgeTe
   };
 }
 
-// "6 clean days in the last 7".
-export function spokenWeek(t: TFunction, week: readonly WeekDay[]): string {
-  return t('home.week.summary', { count: cleanDayCount(week) });
+// The circle in the home header, "Cercle de l'Ombre", or "Premier jour" before the first rank.
+export function headerCircle(
+  t: TFunction,
+  standing: RankStanding,
+): { readonly text: string; readonly circle: Rank['circle'] | null } {
+  if (standing.status === 'pending') return { text: t('home.firstDay'), circle: null };
+  const { circle } = standing.current;
+  return { text: t(`ranks.circleNames.${circle}`), circle };
 }
 
-// Local day numbers count days from 1970-01-01, so formatting the day's start in UTC gives its
-// weekday without the device time zone shifting it a second time.
-export function weekdayInitial(language: string, day: number): string {
-  return new Intl.DateTimeFormat(language, { weekday: 'narrow', timeZone: 'UTC' }).format(
-    day * MS_PER_DAY,
-  );
-}
-
-// "Quote of the day: “text”, Seneca".
+// "Quote of the day, text, Seneca".
 export function spokenQuote(t: TFunction, text: string, author: string | null): string {
   return author === null
     ? t('home.quote.spoken', { text })

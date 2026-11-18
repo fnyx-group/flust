@@ -15,26 +15,30 @@ type BackHeaderProps = {
   action?: ReactNode;
 };
 
+// The back button and any action on one row, the title under them.
 export function BackHeader({ backLabel, onBack, title, disabled, action }: BackHeaderProps) {
   return (
     <View style={styles.header}>
-      <IconButton accessibilityLabel={backLabel} disabled={disabled} onPress={onBack}>
-        <BackIcon color={colors.text} size={sizes.icon} />
-      </IconButton>
-      <View style={styles.title}>{title !== undefined && <ScreenTitle>{title}</ScreenTitle>}</View>
-      {action}
+      <View style={styles.row}>
+        <IconButton accessibilityLabel={backLabel} disabled={disabled} onPress={onBack}>
+          <BackIcon color={colors.text} size={sizes.icon} />
+        </IconButton>
+        {action}
+      </View>
+      {title !== undefined && <ScreenTitle>{title}</ScreenTitle>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: spacing.l,
     marginBottom: spacing.xl,
   },
-  title: {
-    flex: 1,
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.l,
   },
 });

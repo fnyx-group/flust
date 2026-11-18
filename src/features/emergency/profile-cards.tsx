@@ -1,51 +1,40 @@
-import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import type { Plan, Reason } from '@/domain/onboarding';
 import { planSentence, reasonLabel } from '@/features/shared/preset-labels';
-import { Button } from '@/ui/button';
+import { SectionLabel } from '@/ui/section-label';
 import { colors, radii, spacing, typography } from '@/ui/theme';
 
-// One sentence per plan, in their order. The card offers to start a note when one of them is to
-// write in the journal.
-export function PlansCard({ plans, onWrite }: { plans: readonly Plan[]; onWrite?: () => void }) {
+// One sentence per plan, in their order, on the plan card.
+export function PlansCard({ plans }: { plans: readonly Plan[] }) {
   const { t } = useTranslation();
   return (
-    <Card label={t(plans.length > 1 ? 'emergency.plans' : 'emergency.plan')}>
+    <View style={styles.card}>
+      <Text style={styles.label}>{t(plans.length > 1 ? 'emergency.plans' : 'emergency.plan')}</Text>
       {/* The list is only read here, and two plans can read the same, so the index is the key. */}
       {plans.map((plan, index) => (
-        <Text key={index} style={styles.text}>
+        <Text key={index} style={styles.plan}>
           {planSentence(t, plan)}
         </Text>
       ))}
-      {onWrite !== undefined && (
-        <View style={styles.action}>
-          <Button variant="secondary" label={t('emergency.writeNote')} onPress={onWrite} />
-        </View>
-      )}
-    </Card>
+    </View>
   );
 }
 
-export function ReasonsCard({ reasons }: { reasons: readonly Reason[] }) {
+// One pill per reason, under their label.
+export function ReasonsList({ reasons }: { reasons: readonly Reason[] }) {
   const { t } = useTranslation();
   return (
-    <Card label={t('emergency.reasons')}>
+    <View style={styles.reasons}>
+      <SectionLabel color={colors.accentText}>{t('emergency.reasons')}</SectionLabel>
       {reasons.map((reason, index) => (
-        <Text key={reason.kind === 'preset' ? reason.id : `custom-${index}`} style={styles.text}>
-          {reason.kind === 'preset' ? reasonLabel(t, reason.id) : reason.text}
-        </Text>
+        <View key={reason.kind === 'preset' ? reason.id : `custom-${index}`} style={styles.reason}>
+          <Text style={styles.reasonText}>
+            {reason.kind === 'preset' ? reasonLabel(t, reason.id) : reason.text}
+          </Text>
+        </View>
       ))}
-    </Card>
-  );
-}
-
-function Card({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <View style={styles.card}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={styles.content}>{children}</View>
     </View>
   );
 }
@@ -55,19 +44,28 @@ const styles = StyleSheet.create({
     gap: spacing.s,
     padding: spacing.card,
     borderRadius: radii.cardLarge,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.accentSurface,
   },
   label: {
     ...typography.sectionLabel,
+    color: colors.teal,
   },
-  content: {
-    gap: spacing.s,
-  },
-  text: {
-    ...typography.paragraph,
+  plan: {
+    ...typography.quote,
     color: colors.text,
   },
-  action: {
-    paddingTop: spacing.s,
+  reasons: {
+    alignItems: 'flex-start',
+    gap: spacing.s,
+  },
+  reason: {
+    paddingHorizontal: spacing.chipHorizontal,
+    paddingVertical: spacing.chipVertical,
+    borderRadius: radii.pill,
+    backgroundColor: colors.surface,
+  },
+  reasonText: {
+    ...typography.bodyLarge,
+    color: colors.text,
   },
 });

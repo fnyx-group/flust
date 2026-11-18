@@ -8,7 +8,7 @@ export function BrandHeader() {
   const { t } = useTranslation();
   return (
     <View style={styles.container} accessibilityRole="header">
-      <FlustSymbol height={24} />
+      <FlustSymbol height={26} />
       <Text style={styles.name}>{t('app.name')}</Text>
     </View>
   );
@@ -18,10 +18,14 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.m,
+    gap: spacing.s,
   },
+  // Fits the 44 point row of the screen titles. A shorter line would cut the top of "f", "l"
+  // and "t" on Android, which keeps the font's descent and trims its ascent.
   name: {
-    ...typography.screenTitle,
+    ...typography.brandLockup,
+    lineHeight: 40,
+    includeFontPadding: false,
     color: colors.text,
   },
 });

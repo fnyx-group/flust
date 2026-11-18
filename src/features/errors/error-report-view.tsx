@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { shareReport } from '@/features/errors/share-report';
@@ -7,6 +7,7 @@ import { useErrorReport } from '@/features/errors/use-error-report';
 import { BackHeader } from '@/ui/back-header';
 import { Button } from '@/ui/button';
 import { ConfirmSheet } from '@/ui/confirm-sheet';
+import { PrivateLine } from '@/ui/private-line';
 import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
 import { colors, radii, spacing, typography } from '@/ui/theme';
@@ -33,7 +34,6 @@ export function ErrorReportView({ onBack }: { onBack: () => void }) {
       />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.paragraph}>{t('errors.report.intro')}</Text>
-        <Text style={styles.paragraph}>{t('errors.report.nothingSent')}</Text>
         {report.status === 'ready' && report.count === 0 && (
           <Text style={styles.empty}>{t('errors.report.empty')}</Text>
         )}
@@ -47,6 +47,7 @@ export function ErrorReportView({ onBack }: { onBack: () => void }) {
             </View>
           </View>
         )}
+        <PrivateLine text={t('errors.report.nothingSent')} />
         {clearFailed && (
           <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>
             {t('errors.report.clearFailed')}
@@ -66,7 +67,7 @@ export function ErrorReportView({ onBack }: { onBack: () => void }) {
             onPress={() => void share(report.text)}
           />
           <Button
-            variant="plain"
+            variant="destructive"
             label={t('errors.report.clear')}
             onPress={() => setConfirming(true)}
           />
@@ -78,6 +79,7 @@ export function ErrorReportView({ onBack }: { onBack: () => void }) {
         message={t('errors.report.confirm.message')}
         cancelLabel={t('errors.report.confirm.cancel')}
         confirmLabel={t('errors.report.confirm.clear')}
+        destructive
         onCancel={() => setConfirming(false)}
         onConfirm={() => {
           setConfirming(false);
@@ -96,7 +98,7 @@ const styles = StyleSheet.create({
   },
   paragraph: {
     ...typography.paragraph,
-    color: colors.textSecondary,
+    color: colors.text,
   },
   empty: {
     ...typography.row,
@@ -107,7 +109,6 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.sectionLabel,
-    color: colors.text,
   },
   card: {
     padding: spacing.card,
@@ -116,6 +117,7 @@ const styles = StyleSheet.create({
   },
   report: {
     ...typography.paragraphSmall,
+    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
     color: colors.text,
   },
   notice: {

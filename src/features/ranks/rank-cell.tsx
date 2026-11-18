@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { RankCell as Cell } from '@/domain/ranks';
 import { rankCellText } from '@/features/ranks/labels';
 import { RankEmblem } from '@/ui/rank-emblem';
-import { RankStars } from '@/ui/rank-stars';
-import { colors, radii, sizes, spacing, typography } from '@/ui/theme';
+import { circleColors, colors, radii, sizes, spacing, typography } from '@/ui/theme';
 
 export function RankCell({ cell }: { cell: Cell }) {
   const { t } = useTranslation();
@@ -15,7 +14,10 @@ export function RankCell({ cell }: { cell: Cell }) {
     <View
       accessible
       accessibilityLabel={text.spokenLabel}
-      style={[styles.cell, cell.state === 'current' && styles.current]}
+      style={[
+        styles.cell,
+        cell.state === 'current' && { borderColor: circleColors[cell.rank.circle] },
+      ]}
     >
       <RankEmblem
         circle={cell.rank.circle}
@@ -24,7 +26,6 @@ export function RankCell({ cell }: { cell: Cell }) {
         size={sizes.gridEmblem}
       />
       <Text style={[styles.name, NAME_COLORS[cell.state]]}>{text.name}</Text>
-      <RankStars circle={cell.rank.circle} unlocked={unlocked} />
       <Text style={styles.days}>{t('units.day', { count: cell.rank.threshold })}</Text>
     </View>
   );
@@ -36,15 +37,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     gap: spacing.s,
-    paddingVertical: spacing.l,
+    paddingVertical: spacing.xl,
     paddingHorizontal: spacing.s,
     borderRadius: radii.card,
     borderWidth: sizes.currentRankOutline,
     borderColor: colors.surface,
     backgroundColor: colors.surface,
-  },
-  current: {
-    borderColor: colors.accent,
   },
   name: {
     ...typography.badgeName,

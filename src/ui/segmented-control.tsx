@@ -10,6 +10,8 @@ type SegmentedControlProps<K extends string> = {
   // Null until a first choice, when no answer must be suggested.
   selected: K | null;
   onSelect: (key: K) => void;
+  // The fill of the chosen segment, under text in the on-accent color.
+  color?: string;
 };
 
 // Only one segment can be chosen, so screen readers announce the segments as radio buttons. With
@@ -19,6 +21,7 @@ export function SegmentedControl<K extends string>({
   options,
   selected,
   onSelect,
+  color = colors.accent,
 }: SegmentedControlProps<K>) {
   const stacked = useLargeText();
   return (
@@ -35,7 +38,11 @@ export function SegmentedControl<K extends string>({
             accessibilityRole="radio"
             accessibilityState={{ checked }}
             onPress={() => onSelect(option.key)}
-            style={[styles.segment, stacked && styles.stackedSegment, checked && styles.checked]}
+            style={[
+              styles.segment,
+              stacked && styles.stackedSegment,
+              checked && { backgroundColor: color },
+            ]}
           >
             <Text style={[styles.label, checked && styles.checkedLabel]}>{option.label}</Text>
           </Pressable>
@@ -68,16 +75,13 @@ const styles = StyleSheet.create({
     flex: 0,
     paddingVertical: spacing.s,
   },
-  checked: {
-    backgroundColor: colors.separator,
-  },
   label: {
     ...typography.row,
     textAlign: 'center',
     color: colors.textSecondary,
   },
   checkedLabel: {
-    fontFamily: fonts.bold,
-    color: colors.text,
+    fontFamily: fonts.extraBold,
+    color: colors.onAccent,
   },
 });

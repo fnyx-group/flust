@@ -8,7 +8,6 @@ import { RISK_MOMENT_IDS, toggleRiskMoment, type RiskMomentId } from '@/domain/p
 import { canAddPlan, canAddReason, MAX_PLANS, MAX_REASONS } from '@/domain/profile';
 import { EntriesUnavailable } from '@/features/profile/entries-unavailable';
 import { reasonText } from '@/features/profile/labels';
-import { PlanRow } from '@/features/profile/plan-row';
 import { useProfileEntries } from '@/features/profile/use-profile-entries';
 import { planSentence, riskMomentLabel } from '@/features/shared/preset-labels';
 import { useStorage } from '@/features/storage/storage-context';
@@ -18,6 +17,7 @@ import { AddRow, NavRow } from '@/ui/nav-row';
 import { RowGroup } from '@/ui/row-group';
 import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
+import { SectionLabel } from '@/ui/section-label';
 import { colors, spacing, typography } from '@/ui/theme';
 
 export function ReasonsAndPlansScreen() {
@@ -92,7 +92,11 @@ function ReasonsAndPlans({ entries, update }: ReasonsAndPlansProps) {
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
       />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Section label={t('profile.reasons')} notice={noticeFor('reason-limit')}>
+        <Section
+          label={t('profile.reasons')}
+          color={colors.accentText}
+          notice={noticeFor('reason-limit')}
+        >
           <RowGroup>
             {entries.reasons.map(({ id, reason }) => (
               <NavRow
@@ -105,8 +109,13 @@ function ReasonsAndPlans({ entries, update }: ReasonsAndPlansProps) {
             <AddRow label={t('profile.addReason')} onPress={addReason} />
           </RowGroup>
         </Section>
-        <Section label={t('profile.riskMoments')} notice={noticeFor('save-failed')}>
+        <Section
+          label={t('profile.riskMoments')}
+          color={colors.gold}
+          notice={noticeFor('save-failed')}
+        >
           <ChipList
+            color={colors.gold}
             items={RISK_MOMENT_IDS.map((id) => ({
               key: id,
               label: riskMomentLabel(t, id),
@@ -115,17 +124,15 @@ function ReasonsAndPlans({ entries, update }: ReasonsAndPlansProps) {
             onToggle={(id) => void toggleMoment(id)}
           />
         </Section>
-        <Section label={t('profile.plans')} notice={noticeFor('plan-limit')}>
+        <Section label={t('profile.plans')} color={colors.teal} notice={noticeFor('plan-limit')}>
           <RowGroup>
             {entries.plans.map(({ id, plan }) => (
               <NavRow
                 key={id}
-                accessibilityLabel={planSentence(t, plan)}
+                label={planSentence(t, plan)}
                 accessibilityHint={t('profile.editPlanHint')}
                 onPress={() => router.push({ pathname: '/plan', params: { id: String(id) } })}
-              >
-                <PlanRow plan={plan} />
-              </NavRow>
+              />
             ))}
             <AddRow label={t('profile.addPlan')} onPress={addPlan} />
           </RowGroup>
@@ -138,18 +145,18 @@ function ReasonsAndPlans({ entries, update }: ReasonsAndPlansProps) {
 
 function Section({
   label,
+  color,
   notice,
   children,
 }: {
   label: string;
+  color: string;
   notice: string | null;
   children: ReactNode;
 }) {
   return (
     <View style={styles.section}>
-      <Text accessibilityRole="header" style={styles.label}>
-        {label}
-      </Text>
+      <SectionLabel color={color}>{label}</SectionLabel>
       {children}
       {notice !== null && (
         <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>
@@ -168,10 +175,6 @@ const styles = StyleSheet.create({
   section: {
     gap: spacing.m,
   },
-  label: {
-    ...typography.sectionLabel,
-    paddingHorizontal: spacing.xs,
-  },
   notice: {
     ...typography.body,
     color: colors.text,
@@ -179,7 +182,6 @@ const styles = StyleSheet.create({
   },
   footer: {
     ...typography.body,
-    textAlign: 'center',
     color: colors.textSecondary,
   },
 });

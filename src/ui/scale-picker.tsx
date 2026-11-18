@@ -81,16 +81,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radii.segmentedControl,
+    borderWidth: 1.5,
+    borderColor: colors.separator,
     backgroundColor: colors.surface,
   },
   checked: {
+    borderColor: colors.accent,
     backgroundColor: colors.accent,
   },
   pressed: {
     opacity: pressedOpacity,
   },
   value: {
-    ...typography.scaleValue,
+    ...typography.stepperValue,
     color: colors.text,
   },
   checkedValue: {

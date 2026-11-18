@@ -1,15 +1,16 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { FlustSymbol } from '@/ui/brand/flust-symbol';
+import { AppIcon } from '@/ui/brand/app-icon';
 import { colors, spacing, typography } from '@/ui/theme';
 
-// The large symbol and name of the welcome screen; BrandHeader is the small one of the home.
+// The app icon over the name, centered, for the lock screen and its cover; BrandHeader is the
+// symbol beside the name, for the home and the welcome screen.
 export function BrandLockup() {
   const { t } = useTranslation();
   return (
     <View style={styles.container} accessible accessibilityRole="header">
-      <FlustSymbol height={36} />
+      <AppIcon size={120} backgroundColor={colors.accentSurface} />
       <Text style={styles.name}>{t('app.name')}</Text>
     </View>
   );
@@ -17,12 +18,11 @@ export function BrandLockup() {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.l,
+    gap: spacing.xl,
   },
   name: {
-    ...typography.brandLockup,
+    ...typography.unlockRankName,
     color: colors.text,
   },
 });

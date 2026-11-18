@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { PROMPT_IDS, type PromptId } from '@/features/journal/labels';
 import { ActionChips } from '@/ui/action-chips';
-import { spacing, typography } from '@/ui/theme';
+import { colors, spacing, typography } from '@/ui/theme';
 
 // Each chip inserts its starter line, given in the app language, into the text.
 export function NotePrompts({ onInsert }: { onInsert: (starter: string) => void }) {
@@ -25,5 +25,6 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.sectionLabel,
+    color: colors.gold,
   },
 });

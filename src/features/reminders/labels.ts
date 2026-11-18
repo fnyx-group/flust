@@ -8,6 +8,7 @@ import {
   type ReminderSettings,
 } from '@/domain/reminders';
 import type { NotificationLabels } from '@/features/reminders/notifier-types';
+import { formatClockTime } from '@/features/shared/clock-time';
 
 const NOTIFICATION_TEXT = {
   'check-in': 'reminders.notifications.check-in',
@@ -30,16 +31,10 @@ export function notificationLabels(t: TFunction): NotificationLabels {
   };
 }
 
-// Follows the device's 12 or 24 hour setting. The fields are formatted as UTC so the device time
-// zone cannot shift them.
+// Follows the device's 12 or 24 hour setting: "21 h" in French.
 export function formatReminderTime(language: string, minute: MinuteOfDay, hour12: boolean): string {
   const time = hourAndMinute(minute);
-  return new Intl.DateTimeFormat(language, {
-    hour: hour12 ? 'numeric' : '2-digit',
-    minute: '2-digit',
-    hour12,
-    timeZone: 'UTC',
-  }).format(Date.UTC(2000, 0, 1, time.hour, time.minute));
+  return formatClockTime(language, time.hour, time.minute, hour12);
 }
 
 // The value of the settings row: the evening check-in's time, else the morning thought's, else

@@ -115,18 +115,18 @@ describe('planSentence', () => {
     ).toBe('If an urge hits, then I start the guided breathing.');
   });
 
-  it("keeps the user's own action exactly as written, after a colon", () => {
+  it("keeps the user's own action exactly as written", () => {
     expect(
       planSentence(createI18n('fr').t, {
         trigger: 'stress',
         action: { kind: 'custom', text: custom },
       }),
-    ).toBe('Si le stress monte, alors\u00a0: Call Sam & Alex');
+    ).toBe('Si le stress monte, alors Call Sam & Alex');
     expect(
       planSentence(createI18n('en').t, {
         trigger: 'stress',
         action: { kind: 'custom', text: custom },
       }),
-    ).toBe('If stress builds up, then: Call Sam & Alex');
+    ).toBe('If stress builds up, then Call Sam & Alex');
   });
 });

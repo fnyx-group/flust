@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import type { ComponentType } from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -6,15 +7,21 @@ import { appVersion } from '@/features/settings/app-version';
 import { SOURCE_URL, WEBSITE_URL } from '@/features/settings/labels';
 import { displayUrl } from '@/features/shared/display-url';
 import { BackHeader } from '@/ui/back-header';
+import { AppIcon } from '@/ui/brand/app-icon';
+import { IconTile } from '@/ui/icon-tile';
+import { CodeIcon } from '@/ui/icons/code-icon';
+import { DocumentIcon } from '@/ui/icons/document-icon';
+import { GlobeIcon } from '@/ui/icons/globe-icon';
+import type { IconProps } from '@/ui/icons/line-icon';
+import { LockIcon } from '@/ui/icons/lock-icon';
 import { NavRow } from '@/ui/nav-row';
 import { RowGroup } from '@/ui/row-group';
 import { Screen } from '@/ui/screen';
 import { ScrollView } from '@/ui/scroll-view';
-import { colors, spacing, typography } from '@/ui/theme';
+import { colors, radii, spacing, typography } from '@/ui/theme';
 
 // Links open outside flust, in the browser or the app that handles the address: flust itself
-// sends nothing. The address shows next to each
-// link, so it can be checked first, or typed if no browser opens.
+// sends nothing. Screen readers hear the address with each link, so it can be checked first.
 export function AboutScreen() {
   const { t } = useTranslation();
   const version = appVersion();
@@ -31,35 +38,54 @@ export function AboutScreen() {
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
       />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.text}>
-          {version !== undefined && (
-            <Text style={styles.version}>{t('about.version', { version })}</Text>
-          )}
-          <Text style={styles.paragraph}>{t('about.license')}</Text>
-          <Text style={styles.paragraph}>{t('about.privacy')}</Text>
+        <View style={styles.card}>
+          <AppIcon size={64} />
+          <View style={styles.identity}>
+            <Text style={styles.name}>{t('app.name')}</Text>
+            {version !== undefined && (
+              <Text style={styles.version}>{t('about.version', { version })}</Text>
+            )}
+            <Text style={styles.byline}>{t('about.byline')}</Text>
+          </View>
+        </View>
+        <View style={styles.facts}>
+          <Fact icon={LockIcon} color={colors.teal} text={t('about.privacy')} />
+          <Fact icon={CodeIcon} color={colors.gold} text={t('about.license')} />
         </View>
         <RowGroup>
           <NavRow
             label={t('about.website')}
-            value={displayUrl(WEBSITE_URL)}
+            icon={{ icon: GlobeIcon, color: colors.accentText }}
             accessibilityRole="link"
-            accessibilityHint={t('about.linkHint')}
+            accessibilityHint={t('about.linkHint', { address: displayUrl(WEBSITE_URL) })}
             onPress={() => open(WEBSITE_URL)}
           />
           <NavRow
             label={t('about.source')}
-            value={displayUrl(SOURCE_URL)}
+            icon={{ icon: CodeIcon, color: colors.accent }}
             accessibilityRole="link"
-            accessibilityHint={t('about.linkHint')}
+            accessibilityHint={t('about.linkHint', { address: displayUrl(SOURCE_URL) })}
             onPress={() => open(SOURCE_URL)}
           />
+          <NavRow
+            label={t('about.errorReport')}
+            icon={{ icon: DocumentIcon, color: colors.textSecondary }}
+            onPress={() => router.push('/error-report')}
+          />
         </RowGroup>
-        <RowGroup>
-          <NavRow label={t('about.errorReport')} onPress={() => router.push('/error-report')} />
-        </RowGroup>
-        <Text style={styles.byline}>{t('about.byline')}</Text>
       </ScrollView>
     </Screen>
+  );
+}
+
+type FactProps = { icon: ComponentType<IconProps>; color: string; text: string };
+
+function Fact({ icon, color, text }: FactProps) {
+  return (
+    <View style={styles.fact}>
+      <IconTile icon={icon} color={color} />
+      <Text style={styles.factText}>{text}</Text>
+    </View>
   );
 }
 
@@ -68,20 +94,41 @@ const styles = StyleSheet.create({
     gap: spacing.xl,
     paddingBottom: spacing.xl,
   },
-  text: {
-    gap: spacing.m,
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.l,
+    padding: spacing.card,
+    borderRadius: radii.cardLarge,
+    backgroundColor: colors.accentSurface,
+  },
+  identity: {
+    flexShrink: 1,
+  },
+  name: {
+    ...typography.brandLockup,
+    color: colors.text,
   },
   version: {
     ...typography.row,
-    color: colors.text,
-  },
-  paragraph: {
-    ...typography.paragraph,
-    color: colors.textSecondary,
+    color: colors.accentText,
   },
   byline: {
     ...typography.body,
-    textAlign: 'center',
     color: colors.textSecondary,
+  },
+  facts: {
+    gap: spacing.l,
+  },
+  fact: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.l,
+  },
+  factText: {
+    ...typography.paragraph,
+    flex: 1,
+    paddingTop: spacing.xs,
+    color: colors.text,
   },
 });

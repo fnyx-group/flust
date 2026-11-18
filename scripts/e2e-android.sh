@@ -4,6 +4,8 @@
 # scripts/check-android-release.sh, so the flows always run on what would ship.
 # Maestro's analytics, update check and test analysis notice are turned off. The emulator gets a
 # screen lock PIN for the lock flow, removed again at the end, along with any font scale change.
+# The app's log is recorded during the run, and its path printed when a flow fails or the run is
+# interrupted.
 # Usage: scripts/e2e-android.sh [--apk <app-release.apk>] [--font-scale <scale>] [flow.yaml ...]
 set -euo pipefail
 
@@ -13,6 +15,7 @@ export MAESTRO_DISABLE_UPDATE_CHECK=true
 export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
 
 root=$(cd "$(dirname "$0")/.." && pwd)
+package=org.fnyxgroup.flust
 apk=$root/android/app/build/outputs/apk/release/app-release.apk
 font_scale=
 pin=${E2E_PIN:-1357}
@@ -70,8 +73,19 @@ qemu=$("$adb" shell 'getprop ro.boot.qemu; getprop ro.kernel.qemu' | tr -d '\r')
 
 previous_scale=$("$adb" shell settings get system font_scale | tr -d '\r')
 pin_set=false
+logcat_pid=
+logcat_file=
+status=1
 
 restore() {
+  if [[ -n $logcat_pid ]]; then
+    kill "$logcat_pid" 2>/dev/null || true
+    if [[ $status -eq 0 ]]; then
+      rm -f "$logcat_file"
+    else
+      echo "App log of this run: $logcat_file" >&2
+    fi
+  fi
   if $pin_set; then
     "$adb" shell locksettings clear --old "$pin" >/dev/null || echo "Could not remove the emulator PIN $pin." >&2
   fi
@@ -102,5 +116,32 @@ fi
 "$adb" shell input keyevent KEYCODE_WAKEUP
 
 "$adb" install -r "$apk"
-# Maestro does not read ANDROID_SERIAL.
-maestro --device "$ANDROID_SERIAL" test --env "PIN=$pin" "${flows[@]}"
+
+# Each launch of the app is a new process: the system's lines naming the package give each new
+# PID (and show a process that died or restarted), and the app's own lines are kept by PID.
+logcat_file=$(mktemp "${TMPDIR:-/tmp}/flust-e2e-logcat.XXXXXX")
+"$adb" logcat -c
+"$adb" logcat -v threadtime > >(
+  awk -v package="$package" '
+    index($0, package) {
+      if (match($0, /Start proc [0-9]+:/)) pids[substr($0, RSTART + 11, RLENGTH - 12)] = 1
+      print
+      fflush()
+      next
+    }
+    $3 in pids {
+      print
+      fflush()
+    }
+  ' > "$logcat_file"
+) &
+logcat_pid=$!
+
+# Maestro does not read ANDROID_SERIAL. status stays 1 until Maestro returns, so an interrupted
+# run keeps its log.
+if maestro --device "$ANDROID_SERIAL" test --env "PIN=$pin" "${flows[@]}"; then
+  status=0
+else
+  status=$?
+fi
+exit "$status"

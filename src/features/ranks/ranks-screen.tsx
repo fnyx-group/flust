@@ -10,6 +10,7 @@ import { createMinuteClock } from '@/features/clock/minute-clock';
 import { nativeClockDeps } from '@/features/clock/native-clock';
 import { CurrentRankCard } from '@/features/ranks/current-rank-card';
 import { RankGrid } from '@/features/ranks/rank-grid';
+import { WeekStrip } from '@/features/ranks/week-strip';
 import { useSession } from '@/features/session/session-context';
 import { Screen } from '@/ui/screen';
 import { ScreenTitle } from '@/ui/screen-title';
@@ -28,7 +29,8 @@ type RanksProps = {
   unlockedRanks: readonly RankId[];
 };
 
-// The tab has its own clock, so that the time left to the first rank and the grid stay current.
+// The tab has its own clock, so that the time left to the first rank, the week strip and the grid
+// stay current.
 function Ranks({ journey, unlockedRanks }: RanksProps) {
   const { t } = useTranslation();
   const anchor = streakStart(journey);
@@ -39,6 +41,7 @@ function Ranks({ journey, unlockedRanks }: RanksProps) {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <ScreenTitle>{t('tabs.ranks')}</ScreenTitle>
           <CurrentRankCard journey={journey} unlockedRanks={unlockedRanks} />
+          <WeekStrip journey={journey} />
           <Text style={styles.rule}>{t('ranks.screen.rule')}</Text>
           <RankGrid journey={journey} unlockedRanks={unlockedRanks} />
         </ScrollView>
@@ -52,8 +55,7 @@ const styles = StyleSheet.create({
     gap: spacing.xl,
   },
   rule: {
-    ...typography.bodyLarge,
-    lineHeight: 24,
+    ...typography.paragraph,
     color: colors.textSecondary,
   },
 });

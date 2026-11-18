@@ -8,7 +8,7 @@ export function PrivateLine({ text }: { text: string }) {
   return (
     <View style={styles.line}>
       <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
-        <LockIcon color={colors.textSecondary} size={16} />
+        <LockIcon color={colors.teal} size={16} />
       </View>
       <Text style={styles.text}>{text}</Text>
     </View>

@@ -12,7 +12,8 @@ import {
   totalCard,
   type SummaryCardText,
 } from '@/features/lapse/labels';
-import { colors, maxFontScale, radii, spacing, typography } from '@/ui/theme';
+import { RankEmblem } from '@/ui/rank-emblem';
+import { colors, maxFontScale, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type LapseSummaryCardsProps = {
   // The journey before the lapse.
@@ -36,18 +37,32 @@ function SummaryCards({ summary }: { summary: LapseSummary }) {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <Card text={totalCard(t, summary)} />
+        <Card text={totalCard(t, summary)} kept />
         <Card text={endedStreakCard(t, summary)} />
       </View>
-      {rank !== null && <Text style={styles.rank}>{rank}</Text>}
+      {rank !== null && summary.rank !== null && (
+        <View style={styles.rankCard}>
+          <RankEmblem
+            circle={summary.rank.circle}
+            tier={summary.rank.tier}
+            unlocked
+            size={sizes.rankCardEmblem}
+          />
+          <Text style={styles.rank}>{rank}</Text>
+        </View>
+      )}
     </View>
   );
 }
 
-function Card({ text }: { text: SummaryCardText }) {
+// The days kept read in teal, never in red: what stays is what matters here.
+function Card({ text, kept = false }: { text: SummaryCardText; kept?: boolean }) {
   return (
     <View accessible accessibilityLabel={text.spoken} style={styles.card}>
-      <Text maxFontSizeMultiplier={maxFontScale.lapseSummary} style={styles.value}>
+      <Text
+        maxFontSizeMultiplier={maxFontScale.lapseSummary}
+        style={[styles.value, kept && styles.kept]}
+      >
         {text.value}
       </Text>
       <Text style={styles.caption}>{text.caption}</Text>
@@ -74,12 +89,25 @@ const styles = StyleSheet.create({
     ...typography.summaryNumber,
     color: colors.text,
   },
+  kept: {
+    color: colors.teal,
+  },
+  rankCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.l,
+    padding: spacing.card,
+    borderRadius: radii.cardLarge,
+    backgroundColor: colors.accentSurface,
+  },
   caption: {
     ...typography.body,
     color: colors.textSecondary,
   },
   rank: {
-    ...typography.body,
-    color: colors.textSecondary,
+    ...typography.badgeName,
+    fontSize: 17,
+    flexShrink: 1,
+    color: colors.text,
   },
 });
