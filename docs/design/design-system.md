@@ -161,7 +161,7 @@ Before day one, the emblem is the first rank's, locked. Screen readers read the 
 
 ### Daily quote
 
-One discreet centered line under the rank line, two at most (16/400, line height 24, teal, the color of the Éveil circle), with no label and no quotation marks. When the quote has an author, the name follows on its own line, 4 points below (13/400, line height 18, muted color). The two line limit is for the quote text; the author's line comes in addition, and it is hidden together with the quote when home needs the height. Screen readers read the whole quote and its author as one label, starting with "Mot du jour".
+One discreet centered line under the rank line, two at most (16/400, line height 24, secondary text), with no label and no quotation marks. When the quote has an author, the name follows on its own line, 4 points below (13/400, line height 18, muted color). The two line limit is for the quote text; the author's line comes in addition, and it is hidden together with the quote when home needs the height. Screen readers read the whole quote and its author as one label, starting with "Mot du jour".
 
 ## Ranks
 

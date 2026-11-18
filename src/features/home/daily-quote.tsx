@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   text: {
     ...typography.paragraph,
     textAlign: 'center',
-    color: colors.teal,
+    color: colors.textSecondary,
   },
   author: {
     ...typography.quoteAuthor,
