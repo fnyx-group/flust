@@ -11,7 +11,6 @@ import { CheckIcon } from '@/ui/icons/check-icon';
 import { colors, sizes, spacing, typography } from '@/ui/theme';
 
 // The selector returns the local day, a number, so the strip re-renders once a day.
-// The selector returns the local day, a number, so the strip re-renders once a day.
 export function WeekStrip({ journey }: { journey: Journey }) {
   const { t, i18n } = useTranslation();
   const today = useClock((now) => localDayNumber(now, deviceOffsetAt));

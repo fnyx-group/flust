@@ -19,19 +19,18 @@ The onboarding runs once, on first launch. Its steps are:
 The home screen shows:
 
 - the name of the current circle,
-- the current streak, in a ring that fills toward the next rank,
-- a rank card with the current rank and the time or days left to the next one, which opens the ranks,
-- a week strip of the last 7 days, showing clean days,
-- a daily quote,
-- an emergency button that opens the emergency screen.
+- the current streak, in a ring that fills toward the next rank, which opens the ranks,
+- a rank line with the current rank and the time or days left to the next one, which also opens the ranks,
+- a daily quote, on one or two lines,
+- the check-in line, then the emergency button that opens the emergency screen and the lapse link, always on screen.
 
-The daily check-in will add a single line under the quote.
+The week strip of the last 7 days is on the ranks tab.
 
 During the first 24 hours of a streak, the counter shows hours and minutes. After that, it shows days.
 
 ### Ranks
 
-Ranks reward total clean days. A dedicated screen lists all ranks, and a rank unlock screen appears when a new rank is reached. See [Ranks](ranks.md).
+Ranks reward total clean days. A dedicated screen shows the current rank, the week strip of the last 7 days and all ranks, and a rank unlock screen appears when a new rank is reached. See [Ranks](ranks.md).
 
 ### Emergency screen
 

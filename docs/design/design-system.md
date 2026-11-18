@@ -57,7 +57,7 @@ Counters use tabular numbers so digits do not shift as they change.
 | Streak unit                  | 20    | 700    | Secondary text color                                        |
 | Streak minutes               | 16    | 400    | Muted color                                                 |
 | Welcome title                | 40    | 800    | Onboarding welcome                                          |
-| Brand lockup                 | 36    | 800    | About                                                       |
+| Brand lockup                 | 36    | 800    | Home header (line height 40), About                         |
 | Unlocked rank name           | 40    | 800    | Rank unlock screen, lock screen                             |
 | Breathing count              | 56    | 600    | Barlow Condensed                                            |
 | Lapse summary number         | 48    | 600    | Barlow Condensed                                            |
@@ -69,8 +69,10 @@ Counters use tabular numbers so digits do not shift as they change.
 | Breathing phase              | 20    | 600    |                                                             |
 | Screen title                 | 28    | 800    |                                                             |
 | Rank name                    | 22    | 800    |                                                             |
-| Daily quote                  | 19    | 700    | Line height 26                                              |
-| Rank card name               | 18    | 800    | Home rank card, note titles in the journal                  |
+| Plan sentence                | 19    | 700    | Line height 26                                              |
+| Rank card name               | 18    | 800    | Note titles in the journal                                  |
+| Rank line name               | 17    | 800    | Home rank line                                              |
+| Quote author                 | 13    | 400    | Line height 18, muted color                                 |
 | Calendar day                 | 18    | 500    | Barlow Condensed, in 44 by 44 cells; unavailable days muted |
 | Row                          | 15    | 600    |                                                             |
 | Rank badge name              | 15    | 800    | Rank cells, notification preview                            |
@@ -80,13 +82,12 @@ Counters use tabular numbers so digits do not shift as they change.
 | Section label                | 14    | 700    | Secondary text, or the color of its section                 |
 | Unlock label                 | 14    | 700    | Circle text color                                           |
 | Weekday initial              | 14    | 600    | Secondary text color                                        |
-| Quote label                  | 13    | 700    | Accent text                                                 |
 | Label                        | 13    | 600    | Secondary text color                                        |
 | Caption                      | 12    | 400    |                                                             |
 
 Section labels are in sentence case, such as "Ce qui s'est passé": no capitals, no letter spacing.
 
-The streak counter sits in a 236 point ring with a 12 point stroke, the size of the boards on a 390 point wide screen. On a narrower screen the ring and the number shrink in the same proportion, and on a wider one they keep that size: the accent shows the progress toward the next rank on a locked fill track. The number alone is in the center, its unit under it ("jours", "heures"), and for hours a quieter line with the minutes ("et 40 min"), shown only when there are some. The number is 120 points up to 99 days and for hours, 100 for three digits and 80 for four. A test measures the widest number of each size with the font's glyph widths and checks that it fits inside the ring, less its stroke and 16 points on each side, at screen widths from 320 to 430 points.
+The streak counter is the hero of home. It sits in a ring with a 14 point stroke, 280 points at most, the size of the boards on a 390 point wide screen. It is smaller in proportion on a narrower screen, and the home screen may shrink it to 200 points to fit the height (see Home). The accent shows the progress toward the next rank on a locked fill track. The number alone is in the center, its unit under it ("jours", "heures", 24/700, secondary text), and for hours a quieter line with the minutes ("et 40 min"), shown only when there are some. In a 280 point ring, the number is 150 points up to 99 days and for hours, 130 for three digits and 100 for four, and it shrinks in the same proportion as the ring. A test measures the widest number of each size with the font's glyph widths and checks that it fits inside the ring, less its stroke and 16 points on each side, for rings from 200 to 280 points. Tapping the ring opens the ranks tab.
 
 The counter does not grow with the system text size, since it is already the largest text on screen and the ring has a fixed size. Screen readers read it as one sentence, such as "Série en cours, 7 heures 40 minutes".
 
@@ -130,19 +131,25 @@ Full screens shown over the others (emergency, note, lapse, rank unlocked) slide
 
 From top to bottom, with the screen padding of 20:
 
-1. A header row: the brand lockup on the left, the name of the current circle on the right, such as "Cercle de l'Ombre" (row style, in the circle's text color), or "Premier jour" in secondary text before day one.
-2. One block, without a card, centered vertically in the free space between the header and the buttons: the streak ring, then the rank card and the week strip, then the daily quote and the check-in line. The free space goes above and below the block, never between its parts.
-3. Pinned at the bottom, above the tab bar and outside the scrolling content: the "J'ai une envie" button, then the discreet "J'ai eu un écart" text button. The urge button is the most important action, so it is always on screen without scrolling, whatever the text size. When the header and the block do not fit above the buttons, such as with large text, they scroll there while the buttons stay in place.
+1. A header row placed like the screen titles of the other tabs, at the same top padding and 44 points tall: the brand lockup on the left (line height 40, so the letters are not cut on Android), the name of the current circle on the right, such as "Cercle de l'Ombre" (row style, in the circle's text color), or "Premier jour" in secondary text before day one.
+2. One block, without a card, centered vertically in the free space between the header and the check-in line, with at least 8 points above and below it and 24 between its parts: the streak ring, the rank line, then the daily quote. The free space goes above and below the block, never between its parts.
+3. Pinned at the bottom, above the tab bar and outside the scrolling content: the check-in line, the "J'ai une envie" button, then the discreet "J'ai eu un écart" text button. The urge button is the most important action, so it is always on screen without scrolling, whatever the text size.
 
-The check-in line, under the quote, holds a gold pencil and one line of body text: "Ton check-in du jour t'attend", or "Check-in fait" once today's check-in is saved. It opens the check-in and is read as one button. A missed check-in never looks like a failure.
+The week strip is not on home: it is on the ranks tab, under the current rank card.
 
-After several low mood check-ins, a card sits at the end of the scrolling content, above the "J'ai une envie" button and outside the centered block so the counter stays in place: surface color, radius 22, the suggestion in text color and the emergency line in secondary text (15/400, line height 22), then "Voir les numéros d'aide", a text button (15/600, text color) that opens the help screen, and a close button on the right. No red, no accent, no animation. Closing it hides it until the next local day.
+The home screen does not scroll at the default text size on a phone from 667 points tall, the iPhone SE. When the block does not fit, the ring shrinks, down to 200 points, then the quote is hidden and the ring takes the height it frees. On a 667 point phone the quote is hidden; on Android it shows from about 731 points tall, or 753 with an author's line. Below 667 points, such as at 640, the content may scroll.
 
-For six hours after a lapse is logged, one supportive line in secondary text sits at the end of the scrolling content, above the "J'ai une envie" button. Until local midnight after a lapse is logged, and at least an hour, a caption line "Écart noté." sits under the text button, pinned with it, followed by the "Annuler l'écart" text button. Neither uses red, the record streak or an animation.
+Above a text scale of 1.3, the quote stays, since losing text would hurt more than scrolling: the ring still shrinks to 200 points, then the content above the check-in line scrolls, and the header and the pinned buttons stay in place. `fitHome` in `src/features/home/home-fit.ts` makes the choice from the height measured between the header and the check-in line, the measured heights of the rank line and the quote, and the text scale, and its tests cover each case.
 
-### Rank card
+The check-in line, centered just above the urge button, holds a gold pencil and one line of body text: "Ton check-in du jour t'attend", or "Check-in fait" once today's check-in is saved. It opens the check-in and is read as one button. A missed check-in never looks like a failure.
 
-A card on the accent surface (radius 22, padding 20) under the ring. It holds the 44 point rank emblem, a text column with the rank name (18/800) and a secondary line (body, secondary text), and a chevron. It opens the ranks tab.
+After several low mood check-ins, a card sits at the end of the scrolling content, under the block so the counter stays in place: surface color, radius 22, the suggestion in text color and the emergency line in secondary text (15/400, line height 22), then "Voir les numéros d'aide", a text button (15/600, text color) that opens the help screen, and a close button on the right. No red, no accent, no animation. Closing it hides it until the next local day.
+
+For six hours after a lapse is logged, one supportive line in secondary text sits at the end of the scrolling content. Until local midnight after a lapse is logged, and at least an hour, a caption line "Écart noté." sits under the text button, pinned with it, followed by the "Annuler l'écart" text button. Neither uses red, the record streak or an animation.
+
+### Rank line
+
+One centered line under the ring: the 24 point rank emblem, the rank name (17/800, text color) and a secondary line in secondary body text (16/400), 12 points apart. With large text the parts wrap under each other, still centered. It opens the ranks tab.
 
 | Moment              | Name         | Secondary line             | Ring                                  |
 | ------------------- | ------------ | -------------------------- | ------------------------------------- |
@@ -150,7 +157,30 @@ A card on the accent surface (radius 22, padding 20) under the ring. It holds th
 | With a next rank    | Current rank | "Mage blanc dans 2 jours"  | Total clean days toward its threshold |
 | After the last rank | Current rank | "Tous les rangs débloqués" | Full                                  |
 
-Before day one, the emblem is the first rank's, locked. Screen readers read the card as one button, such as "Sorcier, Mage blanc dans 2 jours".
+Before day one, the emblem is the first rank's, locked. Screen readers read the line as one button, such as "Sorcier, Mage blanc dans 2 jours".
+
+### Daily quote
+
+One discreet centered line under the rank line, two at most (16/400, line height 24, teal, the color of the Éveil circle), with no label and no quotation marks. When the quote has an author, the name follows on its own line, 4 points below (13/400, line height 18, muted color). The two line limit is for the quote text; the author's line comes in addition, and it is hidden together with the quote when home needs the height. Screen readers read the whole quote and its author as one label, starting with "Mot du jour".
+
+## Ranks
+
+From top to bottom, in a scrolling screen with the screen padding of 20 and 24 points between blocks:
+
+1. The "Rangs" screen title.
+2. A card on the accent surface (radius 22, padding 20). At the top, the 64 point emblem of the current rank, and beside it the circle name in its color (section label), the rank name (28/800) and "Prochain rang dans 13 jours" (body, secondary text). Under them, an 8 point progress bar (accent on the separator color), then the total on the left ("32 jours propres au total") and the next threshold on the right ("Sorcier à 45"). Before day one it shows "Premier rang" and the time left to Novice, with the emblem locked.
+3. The week strip.
+4. The rule, "Un écart ne te fait jamais redescendre." (16/400, line height 24, secondary text).
+5. The twelve ranks, grouped by circle. Each group has a header, the Roman numeral in the muted color then the circle name in its color, both 16/700, with no separator between them: "II Cercle de l'Ombre". Under it, its ranks in 3 columns, 8 points apart (2 above a text scale of 1.3). Each cell is a card (radius 20) with the 36 point emblem, the name (15/800) and the threshold (body, secondary text).
+
+| Rank         | Emblem           | Name                 | Outline                    |
+| ------------ | ---------------- | -------------------- | -------------------------- |
+| Unlocked     | Its circle color | Its name, text color | None                       |
+| Current      | Its circle color | Its name, text color | 2 points, its circle color |
+| Next         | Locked           | Its name, secondary  | None                       |
+| Other locked | Locked           | "???", muted color   | None                       |
+
+Emblems are filled shapes in their circle's color, with a light facet at the top left and a dark one at the bottom right. Locked emblems are filled in the locked fill color and outlined in the locked color. See [ranks](../product/ranks.md) for the shapes. Screen readers read the circle as a number ("cercle 2"), since they spell out Roman numerals.
 
 ### Week strip
 
@@ -163,29 +193,7 @@ The last 7 local days, today on the right. Each day is a 28 point circle with it
 | With a lapse       | Separator ring, 2 points              | Secondary text |
 | Before the start   | Separator ring, 2 points              | Muted          |
 
-A day with a lapse keeps a neutral ring like the days before the start: the strip never uses red or crosses, and only clean days stand out. Today turns to the separator ring once a lapse is logged. Days change at local midnight, like the daily quote. Screen readers read the strip as one summary, such as "6 jours propres sur les 7 derniers".
-
-### Daily quote
-
-"Mot du jour" (quote label, accent text) above the quote (19/700, line height 26), with no quotation marks, and the author under it in secondary text when there is one. Screen readers read it as one label starting with "Mot du jour", followed by the author.
-
-## Ranks
-
-From top to bottom, in a scrolling screen with the screen padding of 20 and 24 points between blocks:
-
-1. The "Rangs" screen title.
-2. A card on the accent surface (radius 22, padding 20). At the top, the 64 point emblem of the current rank, and beside it the circle name in its color (section label), the rank name (28/800) and "Prochain rang dans 13 jours" (body, secondary text). Under them, an 8 point progress bar (accent on the separator color), then the total on the left ("32 jours propres au total") and the next threshold on the right ("Sorcier à 45"). Before day one it shows "Premier rang" and the time left to Novice, with the emblem locked.
-3. The rule, "Un écart ne te fait jamais redescendre." (16/400, line height 24, secondary text).
-4. The twelve ranks, grouped by circle. Each group has a header, the Roman numeral in the muted color then the circle name in its color, both 16/700, with no separator between them: "II Cercle de l'Ombre". Under it, its ranks in 3 columns, 8 points apart (2 above a text scale of 1.3). Each cell is a card (radius 20) with the 36 point emblem, the name (15/800) and the threshold (body, secondary text).
-
-| Rank         | Emblem           | Name                 | Outline                    |
-| ------------ | ---------------- | -------------------- | -------------------------- |
-| Unlocked     | Its circle color | Its name, text color | None                       |
-| Current      | Its circle color | Its name, text color | 2 points, its circle color |
-| Next         | Locked           | Its name, secondary  | None                       |
-| Other locked | Locked           | "???", muted color   | None                       |
-
-Emblems are filled shapes in their circle's color, with a light facet at the top left and a dark one at the bottom right. Locked emblems are filled in the locked fill color and outlined in the locked color. See [ranks](../product/ranks.md) for the shapes. Screen readers read the circle as a number ("cercle 2"), since they spell out Roman numerals.
+A day with a lapse keeps a neutral ring like the days before the start: the strip never uses red or crosses, and only clean days stand out. Today turns to the separator ring once a lapse is logged. Days change at local midnight. Screen readers read the strip as one summary, such as "6 jours propres sur les 7 derniers".
 
 Each grid cell is read as one label: name or "Rang verrouillé", circle, state and threshold, such as "Sorcier, cercle 2, rang actuel, 45 jours".
 

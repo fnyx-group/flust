@@ -32,8 +32,7 @@
     },
     "quote": {
       "spoken": "Quote of the day, {{text}}",
-      "spokenWithAuthor": "Quote of the day, {{text}}, {{author}}",
-      "label": "Quote of the day"
+      "spokenWithAuthor": "Quote of the day, {{text}}, {{author}}"
     },
     "week": {
       "summary_one": "{{count}} clean day in the last 7",

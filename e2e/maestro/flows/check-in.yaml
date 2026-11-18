@@ -1,9 +1,6 @@
 appId: org.fnyxgroup.flust
 ---
 - runFlow: ../common/onboard.yaml
-# With large text, the line is below the fold of the content above the buttons.
-- scrollUntilVisible:
-    element: Your check-in for today.*
 - tapOn: Your check-in for today.*
 - assertVisible: How are you\?
 - tapOn: 4 out of 5

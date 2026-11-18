@@ -8,8 +8,12 @@ import { spokenQuote } from '@/features/home/labels';
 import { deviceOffsetAt } from '@/features/shared/device-time';
 import { colors, spacing, typography } from '@/ui/theme';
 
-// The selected quote is one of the QUOTES objects, the same all day, so ticks within a day do not
-// re-render this component.
+// At most this many lines of quote, the author's line aside; screen readers read the whole quote.
+const QUOTE_LINES = 2;
+
+// One discreet line or two, without a label, then the author when there is one, so the ring
+// stays the focus. The selected quote is one of the QUOTES objects, the same all day, so ticks
+// within a day do not re-render this component.
 export function DailyQuote({ start }: { start: Timestamp }) {
   const { t } = useTranslation();
   const quote = useClock((now) => quoteOfTheDay(start, now, deviceOffsetAt));
@@ -17,8 +21,9 @@ export function DailyQuote({ start }: { start: Timestamp }) {
   const author = quote.author && t(`quoteAuthors.${quote.author}`);
   return (
     <View accessible accessibilityLabel={spokenQuote(t, text, author)} style={styles.container}>
-      <Text style={styles.label}>{t('home.quote.label')}</Text>
-      <Text style={styles.text}>{text}</Text>
+      <Text numberOfLines={QUOTE_LINES} style={styles.text}>
+        {text}
+      </Text>
       {author !== null && <Text style={styles.author}>{author}</Text>}
     </View>
   );
@@ -26,18 +31,16 @@ export function DailyQuote({ start }: { start: Timestamp }) {
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.s,
-  },
-  label: {
-    ...typography.quoteLabel,
-    color: colors.accentText,
+    gap: spacing.xs,
   },
   text: {
-    ...typography.quote,
-    color: colors.text,
+    ...typography.paragraph,
+    textAlign: 'center',
+    color: colors.teal,
   },
   author: {
-    ...typography.bodyLarge,
-    color: colors.textSecondary,
+    ...typography.quoteAuthor,
+    textAlign: 'center',
+    color: colors.muted,
   },
 });

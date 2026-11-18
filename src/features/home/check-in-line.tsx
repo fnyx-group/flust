@@ -10,8 +10,8 @@ import { deviceOffsetAt } from '@/features/shared/device-time';
 import { PencilIcon } from '@/ui/icons/pencil-icon';
 import { colors, pressedOpacity, sizes, spacing, typography } from '@/ui/theme';
 
-// One line under the quote, which opens the check-in. It follows the local day, so it waits again
-// after midnight. Plain secondary text: a missed check-in is never shown as a failure.
+// One centered line just above the urge button, which opens the check-in. It follows the local
+// day, so it waits again after midnight. Plain secondary text: a missed check-in is never shown as a failure.
 export function CheckInLine() {
   const { t } = useTranslation();
   const { checkIns } = useSession();
@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
     minHeight: sizes.touchTarget,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: spacing.m,
   },
   pressed: {

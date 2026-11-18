@@ -11,8 +11,9 @@ import {
   spokenWeek,
   weekdayInitial,
 } from '@/features/home/labels';
+import { HOME_RING_MIN } from '@/features/home/home-fit';
 import { createI18n } from '@/lib/i18n';
-import { sizes, spacing, streakRingLayout } from '@/ui/theme';
+import { counterFontSize, sizes, spacing, streakRingSize } from '@/ui/theme';
 import { journeyOf } from '@test/arbitraries';
 
 jest.mock('expo-localization', () => ({ getLocales: () => [{ languageCode: 'en' }] }));
@@ -81,25 +82,28 @@ const WIDEST: StreakDisplay[] = [
   { unit: 'days', days: 9999 },
 ];
 
-// Small phones, the boards' width and a wide phone.
-const WINDOW_WIDTHS = [320, 360, 390, 430];
+// The smallest ring the home screen uses, one between, and the boards' size.
+const RING_SIZES = [HOME_RING_MIN, 240, sizes.streakRing];
 
 describe('streak counter width', () => {
-  it.each(WINDOW_WIDTHS.flatMap((width) => WIDEST.map((display) => [width, display] as const)))(
-    'fits on a %d point wide screen %o inside the ring',
-    (width, display) => {
+  it.each(RING_SIZES.flatMap((ring) => WIDEST.map((display) => [ring, display] as const)))(
+    'fits in a %d point ring %o',
+    (ring, display) => {
       const { number } = counterParts(english, display);
-      const { ring, fontSize } = streakRingLayout(width, counterSize(display));
+      const fontSize = counterFontSize(ring, counterSize(display));
       // Inside the ring, less its stroke and some air on each side.
       const inside = ring - 2 * sizes.streakRingStroke - 2 * spacing.l;
       expect(number.length * DIGIT_EM * fontSize).toBeLessThanOrEqual(inside);
     },
   );
 
-  it('keeps the boards size from 390 points up', () => {
-    expect(streakRingLayout(390, 'large')).toEqual({ ring: sizes.streakRing, fontSize: 120 });
-    expect(streakRingLayout(430, 'small')).toEqual({ ring: sizes.streakRing, fontSize: 80 });
-    expect(streakRingLayout(320, 'large').ring).toBeLessThan(sizes.streakRing);
+  it('keeps the boards size and the counter sizes from 390 points wide', () => {
+    expect(streakRingSize(390)).toBe(sizes.streakRing);
+    expect(streakRingSize(430)).toBe(sizes.streakRing);
+    expect(streakRingSize(320)).toBeLessThan(sizes.streakRing);
+    expect(counterFontSize(sizes.streakRing, 'large')).toBe(150);
+    expect(counterFontSize(sizes.streakRing, 'medium')).toBe(130);
+    expect(counterFontSize(sizes.streakRing, 'small')).toBe(100);
   });
 });
 

@@ -32,8 +32,7 @@
     },
     "quote": {
       "spoken": "Mot du jour, {{text}}",
-      "spokenWithAuthor": "Mot du jour, {{text}}, {{author}}",
-      "label": "Mot du jour"
+      "spokenWithAuthor": "Mot du jour, {{text}}, {{author}}"
     },
     "week": {
       "summary_one": "{{count}} jour propre sur les 7 derniers",

@@ -20,8 +20,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.s,
   },
+  // Fits the 44 point row of the screen titles. A shorter line would cut the top of "f", "l"
+  // and "t" on Android, which keeps the font's descent and trims its ascent.
   name: {
     ...typography.brandLockup,
+    lineHeight: 40,
+    includeFontPadding: false,
     color: colors.text,
   },
 });

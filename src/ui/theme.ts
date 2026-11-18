@@ -76,10 +76,9 @@ export const fonts = {
 export const typography = {
   // The size comes from counterFontSizes.
   streakNumber: { fontFamily: fonts.numberSemiBold, fontVariant: ['tabular-nums'] },
-  streakUnit: { fontFamily: fonts.bold, fontSize: 20, color: colors.textSecondary },
+  streakUnit: { fontFamily: fonts.bold, fontSize: 24, color: colors.textSecondary },
   streakRest: { fontFamily: fonts.regular, fontSize: 16, color: colors.muted },
   sectionLabel: { fontFamily: fonts.bold, fontSize: 14, color: colors.textSecondary },
-  quoteLabel: { fontFamily: fonts.bold, fontSize: 13 },
   quote: { fontFamily: fonts.bold, fontSize: 19, lineHeight: 26 },
   welcomeTitle: { fontFamily: fonts.extraBold, fontSize: 40, lineHeight: 46 },
   brandLockup: { fontFamily: fonts.extraBold, fontSize: 36 },
@@ -108,6 +107,8 @@ export const typography = {
   row: { fontFamily: fonts.semiBold, fontSize: 15 },
   badgeName: { fontFamily: fonts.extraBold, fontSize: 15 },
   rankCardName: { fontFamily: fonts.extraBold, fontSize: 18 },
+  rankLineName: { fontFamily: fonts.extraBold, fontSize: 17 },
+  quoteAuthor: { fontFamily: fonts.regular, fontSize: 13, lineHeight: 18 },
   helpNumber: {
     fontFamily: fonts.numberSemiBold,
     fontSize: 30,
@@ -129,25 +130,23 @@ export const typography = {
 // The number inside the streak ring, by its digits: 2 or fewer (hours always), 3, then 4 or more.
 // Each keeps the widest number of its group inside the ring (labels.test.ts measures it).
 const counterFontSizes: Record<CounterSize, number> = {
-  large: 120,
-  medium: 100,
-  small: 80,
+  large: 150,
+  medium: 130,
+  small: 100,
 };
 
 // The boards are drawn for a screen 390 points wide.
 const BOARD_WIDTH = 390;
 
-// The ring and its number keep the boards' size on a screen as wide as the boards or wider, and
-// shrink together on a narrower one, so the number fits the ring at every width.
-export function streakRingLayout(
-  windowWidth: number,
-  counter: CounterSize,
-): { readonly ring: number; readonly fontSize: number } {
-  const scale = Math.min(1, windowWidth / BOARD_WIDTH);
-  return {
-    ring: Math.round(sizes.streakRing * scale),
-    fontSize: Math.round(counterFontSizes[counter] * scale),
-  };
+// The largest the ring gets: the boards' size on a screen as wide as the boards or wider, smaller
+// in proportion on a narrower one. The home screen may shrink it further to fit the height.
+export function streakRingSize(windowWidth: number): number {
+  return Math.round(sizes.streakRing * Math.min(1, windowWidth / BOARD_WIDTH));
+}
+
+// The number shrinks with the ring, so it fits the ring at every size.
+export function counterFontSize(ring: number, counter: CounterSize): number {
+  return Math.round((counterFontSizes[counter] * ring) / sizes.streakRing);
 }
 
 export const spacing = {
@@ -231,6 +230,7 @@ export const sizes = {
   scaleOption: 52,
   emblem: 48,
   rankCardEmblem: 44,
+  rankLineEmblem: 24,
   currentRankEmblem: 64,
   gridEmblem: 36,
   unlockEmblem: 120,
@@ -246,6 +246,6 @@ export const sizes = {
   breathingRing: 220,
   breathingCircle: 170,
   breathingStroke: 3,
-  streakRing: 236,
-  streakRingStroke: 12,
+  streakRing: 280,
+  streakRingStroke: 14,
 } as const;
