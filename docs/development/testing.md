@@ -46,9 +46,10 @@ Every fixed bug gets a test that reproduces it.
 
 `src/data/` is tested without a device:
 
-- SQL runs on `node:sqlite`, built into Node, in memory. `test/fakes/fake-disk.ts` models the database directory as serialized databases tagged with the key they were created with. Opening one with another key fails on the first read, as with SQLCipher, and a file can be damaged on purpose.
+- SQL runs on `node:sqlite`, built into Node, in memory. `test/fakes/fake-disk.ts` models the database directory as serialized databases tagged with the key they were created with. Opening one with another key fails on the first read, as with SQLCipher. A file can be damaged on purpose, and a copy can be cut short halfway, as when the process dies during it.
 - `test/fakes/fake-key-store.ts` replaces the keystore and the random source. The keystore can fail on read, write or remove, or drop writes.
 - `test/fakes/fake-storage.ts` wires both into the dependencies `openStorage` takes, and gives tests a second connection to set up or inspect rows.
+- `src/data/migrations/frozen-migrations.test.ts` records the SHA-256 of each published migration file and fails if one changes.
 
 The adapters in `src/data/native/` only forward to Expo modules and are excluded from coverage. Encryption itself, the keystore and backups are checked by hand on devices:
 

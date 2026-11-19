@@ -1,6 +1,6 @@
 import { openStorage } from '@/data/open-storage';
 import { resetStorage } from '@/data/reset-storage';
-import { BACKUP_NAME, DATABASE_NAME } from '@/data/storage-deps';
+import { BACKUP_NAME, BACKUP_TEMP_NAME, DATABASE_NAME } from '@/data/storage-deps';
 import { err, ok } from '@/domain/result';
 import { journeyOf, unwrap } from '@test/arbitraries';
 import { createFakeStorage } from '@test/fakes/fake-storage';
@@ -8,13 +8,14 @@ import { seedJourney } from '@test/seed';
 
 const OTHER_KEY = 'cd'.repeat(32);
 
-// A database that can no longer be read, with a backup left next to it.
+// A database that can no longer be read, with a backup and a backup copy left next to it.
 async function unreadable() {
   const fake = createFakeStorage();
   const storage = unwrap(await openStorage(fake.deps));
   await storage.close();
   await seedJourney(fake, journeyOf(Date.UTC(2026, 0, 1)));
   await fake.disk.files.copy(DATABASE_NAME, BACKUP_NAME);
+  await fake.disk.files.copy(DATABASE_NAME, BACKUP_TEMP_NAME);
   fake.keyStore.value = OTHER_KEY;
   return fake;
 }

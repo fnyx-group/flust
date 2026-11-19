@@ -20,7 +20,11 @@ export type StorageDeps = {
   randomBytes: RandomBytes;
   driver: DatabaseDriver;
   files: DatabaseFiles;
+  // Told when a backup left by an interrupted migration could not be read and was deleted.
+  onBackupDiscarded?: () => void;
 };
 
 export const DATABASE_NAME = 'flust.db';
 export const BACKUP_NAME = 'flust.db.pre-migration';
+// The backup is copied here, then renamed: a copy cut short never takes the backup's name.
+export const BACKUP_TEMP_NAME = 'flust.db.pre-migration.tmp';

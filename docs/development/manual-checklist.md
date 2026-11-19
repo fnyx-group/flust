@@ -48,7 +48,22 @@ No code can trigger it: the app is stopped during the splash twice instead ([002
 
 ### Storage
 
-The encryption, keystore and backup checks of [Testing](testing.md#storage), items 1 to 3 and 5 to 8 (items 4 and 9 are for iOS).
+The encryption, keystore and backup checks of [Testing](testing.md#storage), items 1 to 3 and 5 to 8 (items 4 and 9 are for iOS), plus a migration backup cut short ([0011](../decisions/0011-encrypted-sqlite-storage.md)):
+
+1. With some data in flust, stop it:
+
+       adb shell am force-stop org.fnyxgroup.flust
+
+2. Put a truncated copy of the database at the backup's name. The whole command is quoted, so the redirection runs inside `run-as`, as the app:
+
+       adb shell "run-as org.fnyxgroup.flust sh -c 'head -c 4096 files/SQLite/flust.db > files/SQLite/flust.db.pre-migration'"
+
+3. Launch flust: the data is still there.
+4. The backup is gone, and no `-journal`, `-wal` or `-shm` file is left under its name:
+
+       adb shell "run-as org.fnyxgroup.flust ls files/SQLite"
+
+5. The error report lists one `backup-discarded` entry, with no other detail.
 
 ### Lock
 
@@ -56,6 +71,11 @@ The wait between attempts ([0024](../decisions/0024-lock-wait.md)), with the loc
 
 1. Cancel the system prompt three times: the third shows a 30 second wait.
 2. With a wait running, move the clock forward in the system settings: the wait does not get shorter.
+
+The relock after time away ([0023](../decisions/0023-app-lock.md)), with the lock on and a 1 minute delay:
+
+3. Leave flust, lock the phone and let it sleep for more than a minute. On the emulator, `adb shell input keyevent KEYCODE_SLEEP`, wait, then `adb shell input keyevent KEYCODE_WAKEUP`.
+4. Before going back to flust, move the date back a day in the system settings. Back in flust, it asks to unlock.
 
 ### Reminders
 
@@ -85,8 +105,19 @@ Taps on a notification ([0021](../decisions/0021-local-notifications.md)), with 
 ### Privacy
 
 1. A screenshot of flust is refused, and the recent apps preview is blank.
-2. The release check passes on the APK: no `INTERNET` permission ([Release](release.md)).
-3. On the lock screen, notification texts are neutral and never name the app's purpose.
+2. From a cold start (`adb shell am force-stop org.fnyxgroup.flust`, then open flust), open the recent apps during the splash screen: the preview is already blank ([0025](../decisions/0025-screen-privacy.md)).
+3. The release check passes on the APK: no `INTERNET` permission and no URL scheme ([Release](release.md)).
+4. No URL opens flust ([0035](../decisions/0035-no-url-scheme-in-production.md)). Each of these reports that the intent cannot be resolved, and flust does not open:
+
+       adb shell am start -a android.intent.action.VIEW -d flust://emergency
+       adb shell am start -a android.intent.action.VIEW -d exp+flust://emergency
+
+5. On the lock screen, notification texts are neutral and never name the app's purpose.
+6. Keyboard learning ([0036](../decisions/0036-keyboard-learning.md)), with Gboard: focus each text field in turn, a note's title and text, the check-in note, and a custom reason and plan in the onboarding and in the settings. Gboard shows its incognito icon on each one. With a field focused, the flag is set, `0x1000000` in the options:
+
+       adb shell dumpsys input_method | grep -o 'imeOptions=0x[0-9a-f]*'
+
+   Other keyboards may ignore the request: the docs say flust asks the keyboard not to learn, never that it prevents it.
 
 ### Accessibility
 
@@ -115,5 +146,7 @@ After the first iOS build:
 1. Face ID: the system asks for permission with the flust text, and unlocking works; the passcode works as a fallback.
 2. Notification previews: hidden on the lock screen when Show Previews is set to When Unlocked.
 3. App switcher: the preview is hidden.
-4. A reinstall with a stale key, and the keychain before the first unlock: [Testing](testing.md#storage), items 4 and 9.
-5. VoiceOver and Dynamic Type at the largest sizes: the checks of [Testing](testing.md#accessibility).
+4. The built `Info.plist` has no `CFBundleURLTypes`, and opening `flust://emergency` in Safari does nothing ([0035](../decisions/0035-no-url-scheme-in-production.md)).
+5. The relock after a sleep with the date moved back, as on Android ([Lock](#lock), items 3 and 4), which also checks that the clock of `modules/flust-privacy` counts sleep on iOS.
+6. A reinstall with a stale key, and the keychain before the first unlock: [Testing](testing.md#storage), items 4 and 9.
+7. VoiceOver and Dynamic Type at the largest sizes: the checks of [Testing](testing.md#accessibility).

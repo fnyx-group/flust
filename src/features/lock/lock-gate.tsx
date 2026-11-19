@@ -8,12 +8,12 @@ import {
   type Attempts,
   type LockSettings,
 } from '@/domain/lock';
-import { nativeElapsedClockDeps } from '@/features/clock/native-clock';
 import { useFirstScreenShown } from '@/features/errors/launch-context';
 import { setLocked } from '@/features/lock/held-navigation';
 import { deviceSecurity, type DeviceSecurity } from '@/features/lock/local-auth';
 import { LockContext, type LockApi } from '@/features/lock/lock-context';
 import { createLockController, type LockController } from '@/features/lock/lock-controller';
+import { lockClockDeps } from '@/features/lock/lock-clock';
 import { LockCover, LockScreen } from '@/features/lock/lock-screen';
 import { protectScreen } from '@/features/lock/privacy-screen';
 import { applyStoredLanguage } from '@/features/session/load-session';
@@ -70,7 +70,7 @@ async function load(storage: Storage): Promise<Loaded> {
     attempts: attempts.ok ? attempts.value : NO_ATTEMPTS,
     controller: createLockController(
       { settings: effective(stored, security), locked: true },
-      nativeElapsedClockDeps,
+      lockClockDeps,
     ),
   };
 }

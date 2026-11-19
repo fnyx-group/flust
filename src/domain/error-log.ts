@@ -1,4 +1,12 @@
-export type ErrorKind = 'render' | 'fatal' | 'uncaught' | 'unhandled-rejection' | 'storage-failure';
+export type ErrorKind =
+  | 'render'
+  | 'fatal'
+  | 'uncaught'
+  | 'unhandled-rejection'
+  | 'storage-failure'
+  | 'backup-discarded'
+  | 'screen-privacy-failed'
+  | 'notifier-failed';
 
 // What the error log keeps of an error. Never its message: messages can carry note text, plan
 // wording or SQL values. Every field is checked against a pattern that only code identifiers,
@@ -36,6 +44,9 @@ const KINDS: readonly ErrorKind[] = [
   'uncaught',
   'unhandled-rejection',
   'storage-failure',
+  'backup-discarded',
+  'screen-privacy-failed',
+  'notifier-failed',
 ];
 
 const NAME = /^[A-Za-z_$][\w$]{0,63}$/;

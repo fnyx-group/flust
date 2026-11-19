@@ -7,9 +7,10 @@ type StoredFile = { readonly bytes: Uint8Array; readonly key: string };
 
 type FileOperation = keyof DatabaseFiles | 'open';
 
-// 'garbage' replaces the whole file, 'pages' wipes a page after the header, and 'freelist' leaves
-// every page readable but makes the header inconsistent, which only an integrity check notices.
-type Damage = 'garbage' | 'pages' | 'freelist';
+// 'garbage' replaces the whole file, 'pages' wipes a page after the header, 'freelist' leaves
+// every page readable but makes the header inconsistent, which only an integrity check notices,
+// and 'truncated' keeps only the first half, as a copy cut short does.
+type Damage = 'garbage' | 'pages' | 'freelist' | 'truncated';
 
 export type FakeDiskOptions = {
   // Simulates a build where the SQLCipher plugin is missing: PRAGMA cipher_version returns nothing.
@@ -22,6 +23,9 @@ export type FakeDisk = {
   stored: Map<string, StoredFile>;
   openConnections(): number;
   failNext(operation: FileOperation, name?: string): void;
+  // The next copy from `name` writes half the file to its destination, then fails, like a
+  // process killed while copying.
+  interruptNextCopy(name?: string): void;
   damage(name: string, damage: Damage): void;
   query(name: string, sql: string): Row[];
 };
@@ -32,6 +36,7 @@ export type FakeDisk = {
 export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}): FakeDisk {
   const stored = new Map<string, StoredFile>();
   const failures: { operation: FileOperation; name: string | undefined }[] = [];
+  const interruptedCopies: (string | undefined)[] = [];
   let open = 0;
 
   function failIfPlanned(operation: FileOperation, name: string) {
@@ -57,7 +62,16 @@ export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}):
     },
     async copy(from, to) {
       failIfPlanned('copy', from);
-      stored.set(to, existing(from));
+      const file = existing(from);
+      const interrupted = interruptedCopies.findIndex(
+        (name) => name === undefined || name === from,
+      );
+      if (interrupted !== -1) {
+        interruptedCopies.splice(interrupted, 1);
+        stored.set(to, { key: file.key, bytes: damaged(file.bytes, 'truncated') });
+        throw new Error(`Copy of ${from} interrupted`);
+      }
+      stored.set(to, file);
     },
     async move(from, to) {
       failIfPlanned('move', from);
@@ -113,6 +127,9 @@ export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}):
     failNext(operation, name) {
       failures.push({ operation, name });
     },
+    interruptNextCopy(name) {
+      interruptedCopies.push(name);
+    },
     damage(name, damage) {
       const file = existing(name);
       stored.set(name, { key: file.key, bytes: damaged(file.bytes, damage) });
@@ -141,6 +158,7 @@ function deserialize(db: DatabaseSync, bytes: Uint8Array): boolean {
 
 function damaged(bytes: Uint8Array, damage: Damage): Uint8Array {
   if (damage === 'garbage') return new Uint8Array(bytes.length).fill(7);
+  if (damage === 'truncated') return bytes.slice(0, Math.floor(bytes.length / 2));
   const copy = new Uint8Array(bytes);
   if (damage === 'pages') copy.fill(0xff, PAGE_SIZE, 2 * PAGE_SIZE);
   else copy[FREELIST_COUNT_OFFSET] = 3;

@@ -1,6 +1,8 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 import { withAndroidNoBackup } from './plugins/with-android-no-backup.ts';
+import { withNoUrlScheme } from './plugins/with-no-url-scheme.ts';
+import { withScreenPrivacy } from './plugins/with-screen-privacy.ts';
 
 const production = { name: 'flust', identifier: 'org.fnyxgroup.flust', scheme: 'flust' };
 
@@ -42,22 +44,31 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       `Unknown APP_VARIANT "${name}". Use one of: ${Object.keys(variants).join(', ')}.`,
     );
   }
-  return withAndroidNoBackup({
-    ...config,
-    name: variant.name,
-    scheme: variant.scheme,
-    slug: config.slug ?? 'flust',
-    ios: { ...config.ios, bundleIdentifier: variant.identifier },
-    android: {
-      ...config.android,
-      package: variant.identifier,
-      blockedPermissions: [
-        ...(config.android?.blockedPermissions ?? []),
-        ...(name === 'production' ? PRODUCTION_BLOCKED_PERMISSIONS : []),
-      ],
-    },
-    // Hides the app from screenshots and the app switcher, except in the development build,
-    // where screenshots are part of the work. See docs/decisions/0025-screen-privacy.md.
-    extra: { ...config.extra, screenPrivacy: name !== 'development' },
-  });
+  const production = name === 'production';
+  const screenPrivacy = name !== 'development';
+  const configured = withScreenPrivacy(
+    withAndroidNoBackup({
+      ...config,
+      name: variant.name,
+      // Kept in production for expo-linking, which reads it at run time. withNoUrlScheme removes
+      // its native registration (docs/decisions/0035-no-url-scheme-in-production.md).
+      scheme: variant.scheme,
+      slug: config.slug ?? 'flust',
+      ios: { ...config.ios, bundleIdentifier: variant.identifier },
+      android: {
+        ...config.android,
+        package: variant.identifier,
+        blockedPermissions: [
+          ...(config.android?.blockedPermissions ?? []),
+          ...(production ? PRODUCTION_BLOCKED_PERMISSIONS : []),
+        ],
+      },
+      // Hides the app from screenshots and the app switcher, except in the development build,
+      // where screenshots are part of the work. See docs/decisions/0025-screen-privacy.md.
+      extra: { ...config.extra, screenPrivacy },
+    }),
+    screenPrivacy,
+  );
+  // The development build keeps flust-dev, which the dev client is opened with.
+  return production ? withNoUrlScheme(configured) : configured;
 };

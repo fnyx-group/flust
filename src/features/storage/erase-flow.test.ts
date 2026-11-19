@@ -5,6 +5,7 @@ function setUp(
   resets: ('ok' | 'fail')[],
   clearReminders: 'ok' | 'fail' = 'ok',
   diagnostics: ('ok' | 'fail')[] = [],
+  throws: ('language' | 'pause' | 'diagnostics')[] = [],
 ) {
   const events: string[] = [];
   const flow = createEraseFlow({
@@ -12,9 +13,13 @@ function setUp(
       events.push('reset');
       return resets.shift() === 'fail' ? err('reset-failed') : ok(undefined);
     },
-    applyDeviceLanguage: async () => void events.push('device language'),
+    applyDeviceLanguage: async () => {
+      events.push('device language');
+      if (throws.includes('language')) throw new Error('i18n unavailable');
+    },
     pauseReminders: async () => {
       events.push('pause');
+      if (throws.includes('pause')) throw new Error('sync stuck');
       return () => void events.push('resume');
     },
     clearReminders: async () => {
@@ -23,6 +28,7 @@ function setUp(
     },
     eraseDiagnostics: async () => {
       events.push('diagnostics');
+      if (throws.includes('diagnostics')) throw new Error('file system unavailable');
       return diagnostics.shift() !== 'fail';
     },
     pauseDiagnostics: () => {
@@ -55,6 +61,25 @@ describe('createEraseFlow', () => {
       'resume log',
     ]);
   });
+
+  it('still shows the end of the erase when the device language cannot be applied', async () => {
+    const { events, flow, storage } = setUp(['ok'], 'ok', [], ['language']);
+
+    await flow.eraseAll(storage);
+    expect(events.slice(-4)).toEqual(['device language', 'erased', 'resume', 'resume log']);
+  });
+
+  it.each(['pause', 'diagnostics'] as const)(
+    'shows the failure, never "erasing" for good, when a step throws (%s)',
+    async (step) => {
+      const { events, flow, storage } = setUp(['ok'], 'ok', [], [step]);
+
+      await flow.eraseAll(storage);
+      expect(events).toContain('erase-failed');
+      expect(events).not.toContain('erased');
+      expect(events.at(-1)).toBe('resume log');
+    },
+  );
 
   it('still erases when reminders cannot be cancelled', async () => {
     const { events, flow, storage } = setUp(['ok'], 'fail');

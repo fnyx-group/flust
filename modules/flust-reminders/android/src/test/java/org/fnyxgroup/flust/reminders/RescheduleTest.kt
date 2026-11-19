@@ -1,7 +1,10 @@
 package org.fnyxgroup.flust.reminders
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Test
+import java.io.IOException
 import java.util.TimeZone
 
 class RescheduleTest {
@@ -70,5 +73,36 @@ class RescheduleTest {
     val now = at(2026, 11, 15, 20, 1)
 
     assertEquals(listOf(next), afterDelivery(listOf(missed, delivered, next), 2, now, paris))
+  }
+
+  @Test
+  fun deliversAReminderEvenWhenTheListCannotBeWritten() {
+    val delivered = reminder(2, WallTime(2026, 11, 15, 21, 0))
+    val now = at(2026, 11, 15, 20, 1)
+
+    val shown = deliver(listOf(delivered), 2, now, paris) { throw IOException("disk full") }
+
+    assertEquals(delivered, shown)
+  }
+
+  @Test
+  fun writesTheListLeftAfterADelivery() {
+    val delivered = reminder(2, WallTime(2026, 11, 15, 21, 0))
+    val next = reminder(3, WallTime(2026, 11, 16, 21, 0))
+    var written: List<Reminder>? = null
+
+    deliver(listOf(delivered, next), 2, at(2026, 11, 15, 20, 1), paris) { written = it }
+
+    assertEquals(listOf(next), written)
+  }
+
+  @Test
+  fun deliversNothingForAReminderNoLongerPlanned() {
+    var written = false
+
+    val shown = deliver(emptyList(), 2, at(2026, 11, 15, 20, 1), paris) { written = true }
+
+    assertNull(shown)
+    assertFalse(written)
   }
 }

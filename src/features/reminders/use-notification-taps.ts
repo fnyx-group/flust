@@ -9,7 +9,7 @@ import { notifier } from '@/features/reminders/notifier';
 export function useNotificationTaps(): void {
   useEffect(() => {
     function open(route: NotificationRoute) {
-      if (isLocked()) hold({ kind: 'route', route });
+      if (isLocked()) hold(route);
       else router.navigate(route);
     }
     void notifier.takeLaunchTap().then((route) => {

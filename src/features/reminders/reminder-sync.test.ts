@@ -137,6 +137,25 @@ describe('syncReminders', () => {
     expect(days).not.toContain(today);
   });
 
+  it('reports a plan left partial, and plans everything again on the next sync', async () => {
+    const storage = await setUp();
+    unwrap(await storage.reminders.save(CHECK_IN_ON));
+    const { notifier, planned } = fakeNotifier();
+    const failing = {
+      ...notifier,
+      replace: async () => {
+        throw new Error('Some reminders were not scheduled.');
+      },
+    };
+
+    expect(await sync(storage, failing)).toBe('notifier-failed');
+    expect(await sync(storage, notifier)).toBe('planned');
+
+    const notifications = planned[0] ?? [];
+    expect(notifications.length).toBeGreaterThan(1);
+    expect(notifications.map((n) => n.id)).toEqual(notifications.map((_, index) => index + 1));
+  });
+
   it('keeps what is planned when storage cannot be read', async () => {
     const storage = await setUp();
     await storage.close();

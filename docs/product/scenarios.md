@@ -52,18 +52,18 @@ A clock set forwards can unlock ranks early. This is accepted: the app is person
 
 ## Journal
 
-| Case                         | Expected behavior                                                                                                                                                                               |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| New note left empty          | The note is never saved and the screen closes without asking. A title without text is never saved, but leaving asks first, so the title is not lost by mistake.                                 |
-| Leaving with unsaved changes | The close button, Android back and gestures ask whether to keep writing or discard the changes.                                                                                                 |
-| Note too long                | Typing stops at the limit: 120 characters for the title, 10,000 for the text, in UTF-16 units, so an emoji can count twice. A prompt that would not fit is not inserted, and a message says so. |
-| Note deleted                 | Deleting asks for confirmation and says it is permanent. The note is removed from the encrypted database.                                                                                       |
-| Note deleted while edited    | Saving says the note no longer exists and offers to save the text as a new note.                                                                                                                |
-| Note cannot be opened        | A calm message replaces the editor: the note no longer exists, or it could not be read, with a retry.                                                                                           |
-| Note opened from a link      | Closing goes back to the journal when there is no screen to go back to.                                                                                                                         |
-| Save or delete fails         | A message says so, the text stays on screen and the user can try again.                                                                                                                         |
-| Journal cannot be read       | A calm message offers to try again. It never leads to a reset.                                                                                                                                  |
-| App closed while writing     | Unsaved text is lost: nothing is written outside the encrypted database before "Save".                                                                                                          |
+| Case                               | Expected behavior                                                                                                                                                                               |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New note left empty                | The note is never saved and the screen closes without asking. A title without text is never saved, but leaving asks first, so the title is not lost by mistake.                                 |
+| Leaving with unsaved changes       | The close button, Android back and gestures ask whether to keep writing or discard the changes.                                                                                                 |
+| Note too long                      | Typing stops at the limit: 120 characters for the title, 10,000 for the text, in UTF-16 units, so an emoji can count twice. A prompt that would not fit is not inserted, and a message says so. |
+| Note deleted                       | Deleting asks for confirmation and says it is permanent. The note is removed from the encrypted database.                                                                                       |
+| Note deleted while edited          | Saving says the note no longer exists and offers to save the text as a new note.                                                                                                                |
+| Note cannot be opened              | A calm message replaces the editor: the note no longer exists, or it could not be read, with a retry.                                                                                           |
+| Note opened with nothing behind it | Closing goes back to the journal when there is no screen to go back to.                                                                                                                         |
+| Save or delete fails               | A message says so, the text stays on screen and the user can try again.                                                                                                                         |
+| Journal cannot be read             | A calm message offers to try again. It never leads to a reset.                                                                                                                                  |
+| App closed while writing           | Unsaved text is lost: nothing is written outside the encrypted database before "Save".                                                                                                          |
 
 ## Notifications
 
@@ -93,11 +93,11 @@ Notification text is always neutral and never reveals what the app is about.
 | Failed unlock attempts           | The first two are free. Then each one waits longer: 30 seconds, 1, 5 and 15 minutes, up to 1 hour. Changing the clock does not shorten it, and a restart resumes it. A system interruption does not count.    |
 | Device screen lock removed       | The lock is paused, and the settings say so. It works again once a screen lock is set.                                                                                                                        |
 | App sent to the background       | Its content is covered at once. Coming back within the chosen delay uncovers it; after it, the app asks again.                                                                                                |
-| Link opened while locked         | Nothing opens before the unlock. The link is followed after it.                                                                                                                                               |
+| Link to flust                    | Production builds register no URL scheme, so a web page can neither detect flust nor open it. A link that still reaches the app opens home at launch and is ignored while it runs.                            |
 | Reinstall on iOS                 | The iOS keychain keeps keys after uninstall. On reinstall, the app detects a stale key with no matching data and replaces it.                                                                                 |
 | Phone restored without the key   | The data cannot be decrypted. The app offers a reset.                                                                                                                                                         |
 | Any write to storage             | Every write runs in a transaction, so an interrupted write never leaves partial data.                                                                                                                         |
-| Schema migration                 | A backup of the data is made on the device before every schema migration.                                                                                                                                     |
+| Schema migration                 | A backup of the data is made on the device before every schema migration. A backup that cannot be read, such as one cut short by a crash, is deleted and never replaces the data.                             |
 
 ## Emergency screen
 

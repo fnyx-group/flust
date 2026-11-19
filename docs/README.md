@@ -57,6 +57,8 @@
 - [0032 Accessibility pass](decisions/0032-accessibility-pass.md): a muted color for dimmed text, contrast tests, 44 point calendar days, fades with Reduce Motion, layouts that change with large text and documented caps.
 - [0033 Network access of the Android filter](decisions/0033-android-filter-network-access.md): from V0.2, `INTERNET` for the DNS filter only, network code in its module alone, no query logged, an audit before release.
 - [0034 Visual refresh](decisions/0034-visual-refresh.md): a color per circle and per meaning, red only for destructive actions and emergency numbers, no separators in text, French times as "21 h".
+- [0035 No URL scheme in production](decisions/0035-no-url-scheme-in-production.md): no scheme or URL type in production builds, a release check that fails on one, incoming links sent home or ignored.
+- [0036 Keyboard learning](decisions/0036-keyboard-learning.md): Android text fields ask the keyboard not to learn their content; iOS has no such API.
 
 ## Development
 

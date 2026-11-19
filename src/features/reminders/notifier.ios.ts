@@ -3,6 +3,7 @@ import {
   cancelAllScheduledNotificationsAsync,
   clearLastNotificationResponse,
   dismissAllNotificationsAsync,
+  getAllScheduledNotificationsAsync,
   getLastNotificationResponse,
   getPermissionsAsync,
   requestPermissionsAsync,
@@ -53,7 +54,9 @@ export const notifier: Notifier = {
     await setNotificationCategoryAsync(CATEGORY, [], { previewPlaceholder });
   },
   // A calendar trigger without a time zone floats: it keeps its wall time when the zone or the
-  // clocks change. A fixed reminder keeps its instant.
+  // clocks change. A fixed reminder keeps its instant. iOS has no way to replace the plan at
+  // once: a plan left partial, by a failure or a check that does not find every notification,
+  // throws, and the next sync, on the next return to the app, plans everything again.
   async replace(notifications) {
     await cancelAllScheduledNotificationsAsync();
     for (const { id, body, route, local, floating, at } of notifications) {
@@ -64,6 +67,12 @@ export const notifier: Notifier = {
           ? { type: SchedulableTriggerInputTypes.CALENDAR, repeats: false, ...local }
           : { type: SchedulableTriggerInputTypes.DATE, date: at },
       });
+    }
+    const scheduled = new Set(
+      (await getAllScheduledNotificationsAsync()).map((request) => request.identifier),
+    );
+    if (notifications.some(({ id }) => !scheduled.has(String(id)))) {
+      throw new Error('Some reminders were not scheduled.');
     }
   },
   clearDelivered: () => dismissAllNotificationsAsync(),

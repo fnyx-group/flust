@@ -873,6 +873,11 @@
         "cancel": "Cancel",
         "clear": "Clear"
       }
+    },
+    "notFound": {
+      "title": "This screen does not exist",
+      "body": "flust could not find what was asked for. Nothing has been opened or changed.",
+      "home": "Back to home"
     }
   }
 }

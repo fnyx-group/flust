@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { AppState } from 'react-native';
 
+import { recordError } from '@/features/errors/report-error';
 import { notificationLabels, notificationText } from '@/features/reminders/labels';
 import { notifier } from '@/features/reminders/notifier';
 import { createSerialRunner, syncReminders } from '@/features/reminders/reminder-sync';
@@ -17,8 +18,8 @@ import { i18n } from '@/lib/i18n';
 
 // Reads the language when a sync runs, so a change of language is used by the next one.
 function createSync(storage: Storage) {
-  return createSerialRunner(() =>
-    syncReminders({
+  return createSerialRunner(async () => {
+    const outcome = await syncReminders({
       storage,
       notifier,
       now: Date.now(),
@@ -26,8 +27,9 @@ function createSync(storage: Storage) {
       labels: notificationLabels(i18n.t),
       bodyOf: (kind) => notificationText(i18n.t, kind),
       paused: reminderSyncPaused,
-    }),
-  );
+    });
+    if (outcome === 'notifier-failed') await recordError(undefined, { kind: 'notifier-failed' });
+  });
 }
 
 // Plans reminders again whenever what they depend on changes: on launch and on each return to

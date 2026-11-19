@@ -2,7 +2,9 @@
 # Fails when an Android build contains Firebase, Google Play services or Play Install Referrer
 # code, or their manifest entries (docs/decisions/0021-local-notifications.md), or when its merged
 # manifest requests a permission that is blocked in production or not expected
-# (docs/decisions/0030-production-android-permissions.md). Lists the merged permissions.
+# (docs/decisions/0030-production-android-permissions.md), or when a component has an intent filter
+# that opens a URL scheme (docs/decisions/0035-no-url-scheme-in-production.md). Lists the merged
+# permissions.
 # An APK is read with aapt2, from $AAPT2, the PATH or $ANDROID_HOME/build-tools. A bundle is read
 # with the bundletool jar at $BUNDLETOOL, run by the Java of $JAVA_HOME or the PATH.
 # Exits with 1 when the build contains something flust must not ship, 2 when it cannot be checked.
@@ -127,6 +129,35 @@ permissions=$(requested_permissions | sort -u) || cannot_check "Cannot read the 
 echo "Permissions in $build:"
 sed 's/^/  /' <<<"$permissions"
 
+# Schemes of the intent filters that open URLs: a VIEW action with a data scheme. The <queries>
+# entry that lets flust open web links is an <intent>, not an <intent-filter>, so it is not one.
+url_schemes() {
+  if [[ $build == *.apk ]]; then
+    "$aapt2" dump xmltree --file AndroidManifest.xml "$build" | awk '
+      function flush(  i) {
+        if (inside && view) for (i = 1; i <= count; i++) print schemes[i]
+        inside = 0; view = 0; count = 0
+      }
+      { match($0, /^ */); indent = RLENGTH }
+      inside && indent <= depth { flush() }
+      /^ *E: intent-filter / { inside = 1; depth = indent; next }
+      inside && /:name\(0x01010003\)="android\.intent\.action\.VIEW"/ { view = 1 }
+      inside && /:scheme\(0x01010027\)="/ {
+        scheme = $0
+        sub(/.*:scheme\(0x01010027\)="/, "", scheme)
+        sub(/".*/, "", scheme)
+        schemes[++count] = scheme
+      }
+      END { flush() }
+    '
+  else
+    "$java" -jar "$BUNDLETOOL" dump manifest --bundle="$build" \
+      --xpath="//intent-filter[action/@android:name='android.intent.action.VIEW']/data/@android:scheme"
+  fi
+}
+
+schemes=$(url_schemes | sort -u) || cannot_check "Cannot read the intent filters of $build"
+
 listed() {
   local item=$1 candidate
   shift
@@ -163,6 +194,11 @@ if [[ ${#unexpected_found[@]} -gt 0 ]]; then
   printf '  %s\n' "${unexpected_found[@]}" >&2
   failed=1
 fi
+if [[ -n $schemes ]]; then
+  echo "$build opens URL schemes, which let any web page detect or open flust:" >&2
+  sed 's/^/  /' <<<"$schemes" >&2
+  failed=1
+fi
 [[ $failed -eq 0 ]] || exit 1
 
-echo "$build: no Firebase, Google Play services or Install Referrer code or manifest entries, and only expected permissions."
+echo "$build: no Firebase, Google Play services or Install Referrer code or manifest entries, only expected permissions, and no URL scheme."

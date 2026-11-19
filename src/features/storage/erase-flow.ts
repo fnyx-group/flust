@@ -36,15 +36,25 @@ export function createEraseFlow(deps: EraseFlowDeps) {
     const resumeDiagnostics = deps.pauseDiagnostics();
     try {
       deps.show('erasing');
-      resumeReminders = await deps.pauseReminders();
-      await deps.clearReminders().catch(() => undefined);
-      const result = await erase();
-      await deps.clearReminders().catch(() => undefined);
-      if (!result.ok || !(await deps.eraseDiagnostics())) {
+      let erased = false;
+      // Whatever throws, the screen leaves "erasing". An erase that did not finish shows the
+      // failure, whose retry erases again.
+      try {
+        resumeReminders = await deps.pauseReminders();
+        await deps.clearReminders().catch(() => undefined);
+        const result = await erase();
+        await deps.clearReminders().catch(() => undefined);
+        erased = result.ok && (await deps.eraseDiagnostics());
+      } catch {
+        erased = false;
+      }
+      if (!erased) {
         deps.show('erase-failed');
         return;
       }
-      await deps.applyDeviceLanguage();
+      // Everything is gone by now: a language that cannot be applied stays until the next launch,
+      // which reads the device language anyway.
+      await deps.applyDeviceLanguage().catch(() => undefined);
       deps.show('erased');
     } finally {
       resumeReminders();

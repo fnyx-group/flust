@@ -1,16 +1,15 @@
-import { router, type Href } from 'expo-router';
+import { router } from 'expo-router';
 import { useEffect } from 'react';
 
 import { onReleased, takeHeld } from '@/features/lock/held-navigation';
 
-// Goes where a link or a notification tap asked while the app was locked, once it is unlocked.
+// Goes where a notification tap asked while the app was locked, once it is unlocked.
 export function useHeldNavigation(): void {
   useEffect(
     () =>
       onReleased(() => {
-        const held = takeHeld();
-        if (held === null) return;
-        router.navigate((held.kind === 'link' ? held.url : held.route) as Href);
+        const route = takeHeld();
+        if (route !== null) router.navigate(route);
       }),
     [],
   );
