@@ -88,7 +88,7 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
   // saved over the real one.
   useEffect(() => {
     let active = true;
-    storage.profile.load().then((result) => {
+    void storage.profile.load().then((result) => {
       if (!active || !result.ok) return;
       setProfile(result.value);
       setPlan(result.value.plans[0] ?? DEFAULT_PLAN);

@@ -1,10 +1,11 @@
 import type { Database, Executor, Row } from '@/data/database';
 import { parseJson } from '@/data/json-codec';
+import { attempt, type StorageError } from '@/data/storage-error';
 import { parseCheckIn, type CheckIn, type CheckInAnswers } from '@/domain/check-in';
-import { err, ok, type Result } from '@/domain/result';
+import { ok, type Result } from '@/domain/result';
 import type { Timestamp } from '@/domain/time';
 
-export type CheckInStorageError = 'storage-failed';
+export type CheckInStorageError = StorageError;
 
 export type CheckInRepository = {
   // Stores the check-in of `day`, or updates it when that day already has one.
@@ -22,25 +23,17 @@ const COLUMNS = 'local_day, recorded_at, updated_at, mood, urge_level, context, 
 
 export function createCheckInRepository(db: Database): CheckInRepository {
   return {
-    async save(day, at, answers) {
-      try {
-        return ok(await db.transaction((tx) => upsert(tx, day, at, answers)));
-      } catch {
-        return err('storage-failed');
-      }
-    },
+    save: (day, at, answers) =>
+      attempt(async () => ok(await db.transaction((tx) => upsert(tx, day, at, answers)))),
 
-    async since(firstDay) {
-      try {
+    since: (firstDay) =>
+      attempt(async () => {
         const rows = await db.all(
           `SELECT ${COLUMNS} FROM check_in WHERE local_day >= ? ORDER BY local_day DESC`,
           [firstDay],
         );
         return ok(rows.flatMap((row) => toCheckIn(row) ?? []));
-      } catch {
-        return err('storage-failed');
-      }
-    },
+      }),
   };
 }
 

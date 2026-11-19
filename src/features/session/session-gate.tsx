@@ -30,7 +30,8 @@ export function SessionGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    loadSession(storage, localDayNumber(Date.now(), deviceOffsetAt)).then((result) => {
+    // loadSession turns every error into a Result, so this never rejects.
+    void loadSession(storage, localDayNumber(Date.now(), deviceOffsetAt)).then((result) => {
       if (!active) return;
       if (result.ok) setState({ status: 'ready', data: result.value });
       else reportFailure(result.error);

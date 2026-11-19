@@ -9,7 +9,7 @@ import {
   type StartChoice,
 } from '@/domain/onboarding';
 import { isReasonId, RISK_MOMENT_IDS, type RiskMomentId } from '@/domain/presets';
-import { isValidTimestamp } from '@/domain/time';
+import { isTimestamp } from '@/domain/time';
 
 export type EncodedDraft = { step: string; answers: string };
 
@@ -72,8 +72,4 @@ function decodeStart(value: unknown): StartChoice {
 function decodeProtection(value: unknown): Protection {
   if (!isRecord(value)) return EMPTY_DRAFT.answers.protection;
   return { lock: value.lock === true, checkInReminder: value.checkInReminder === true };
-}
-
-function isTimestamp(value: unknown): value is number {
-  return typeof value === 'number' && isValidTimestamp(value);
 }

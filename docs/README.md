@@ -59,6 +59,7 @@
 - [0034 Visual refresh](decisions/0034-visual-refresh.md): a color per circle and per meaning, red only for destructive actions and emergency numbers, no separators in text, French times as "21 h".
 - [0035 No URL scheme in production](decisions/0035-no-url-scheme-in-production.md): no scheme or URL type in production builds, a release check that fails on one, incoming links sent home or ignored.
 - [0036 Keyboard learning](decisions/0036-keyboard-learning.md): Android text fields ask the keyboard not to learn their content; iOS has no such API.
+- [0037 Native builds and supply chain checks in CI](decisions/0037-ci-native-builds.md): production Android and iOS builds checked in CI when native paths change, secret scanning, dependency audit and review, CodeQL.
 
 ## Development
 

@@ -1,0 +1,153 @@
+name: Native builds
+
+# Production builds of both apps, checked like a release. Separate from CI so that editing a pull
+# request's title does not start them again. They also run weekly, so that a runner image change
+# that breaks a build shows before a release. See docs/decisions/0037-ci-native-builds.md.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+  schedule:
+    - cron: '41 4 * * 2'
+
+permissions: {}
+
+concurrency:
+  group: native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-paths:
+    # A skipped job counts as passed for a required check, while a workflow filtered by paths would
+    # leave it pending, so the builds are skipped here instead. This job must be required too:
+    # when it fails, the builds are skipped.
+    name: native-paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name == 'pull_request'
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [[ $EVENT != pull_request ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          files=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
+          native=$(grep -E '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.node-version|app\.json|app\.config\.ts|eas\.json|plugins/|modules/|scripts/check-(android|ios)-release\.sh|scripts/url-schemes\.awk|\.github/workflows/native\.yml)' <<<"$files" || true)
+          if [[ -n $native ]]; then
+            echo "Native paths changed:"
+            echo "$native"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No native path changed: the builds are skipped."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  android-release:
+    name: android-release
+    needs: native-paths
+    if: needs.native-paths.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    env:
+      APP_VARIANT: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Uses the wrapper of the generated project. The cache is written from main only.
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+
+      - run: pnpm expo prebuild --platform android --clean --no-install
+
+      # One ABI is enough: the check reads the manifest and the dex files, the same for every ABI,
+      # and the native code of the others doubles the build time.
+      - name: assembleRelease
+        working-directory: android
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+
+      - run: scripts/check-android-release.sh android/app/build/outputs/apk/release/app-release.apk
+
+  ios-build:
+    name: ios-build
+    needs: native-paths
+    if: needs.native-paths.outputs.changed == 'true'
+    runs-on: macos-26
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      APP_VARIANT: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm expo prebuild --platform ios --clean --no-install
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/Library/Caches/CocoaPods
+          key: cocoapods-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'modules/**/*.podspec') }}
+          restore-keys: cocoapods-${{ runner.os }}-
+
+      - name: pod install
+        working-directory: ios
+        run: pod install
+
+      # Release for the simulator needs no signing, and bundles the JavaScript as a store build
+      # does. The runner's architecture only.
+      - name: xcodebuild
+        working-directory: ios
+        run: |
+          xcodebuild build -quiet \
+            -workspace flust.xcworkspace \
+            -scheme flust \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/derived-data" \
+            ARCHS=arm64 \
+            CODE_SIGNING_ALLOWED=NO
+
+      - run: scripts/check-ios-release.sh "$RUNNER_TEMP/derived-data/Build/Products/Release-iphonesimulator/flust.app"

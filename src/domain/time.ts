@@ -12,6 +12,11 @@ export function isValidTimestamp(value: number): boolean {
   return Number.isSafeInteger(value) && value >= 0 && value <= MAX_DATE_MS;
 }
 
+// Narrows a value read back from storage.
+export function isTimestamp(value: unknown): value is Timestamp {
+  return typeof value === 'number' && isValidTimestamp(value);
+}
+
 // A clock moved backwards must never produce a negative duration.
 // Callers must pass valid timestamps: NaN is not checked and propagates.
 export function elapsedMs(from: Timestamp, to: Timestamp): number {

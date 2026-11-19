@@ -16,7 +16,7 @@ export function useErrorReport() {
 
   useEffect(() => {
     let active = true;
-    errorLog.entries().then((entries) => {
+    void errorLog.entries().then((entries) => {
       if (!active) return;
       const text = formatReport(entries, {
         now: Date.now(),

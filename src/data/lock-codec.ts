@@ -6,7 +6,7 @@ import {
   type LockSettings,
   type SavedAttempts,
 } from '@/domain/lock';
-import { isValidTimestamp, MS_PER_HOUR } from '@/domain/time';
+import { isTimestamp, MS_PER_HOUR } from '@/domain/time';
 
 export function encodeLockSettings(settings: LockSettings): string {
   return JSON.stringify(settings);
@@ -38,7 +38,7 @@ export function decodeAttempts(text: string | null): SavedAttempts | null {
   if (!isRecord(value)) return null;
   const { failures, waitMs, savedAt } = value;
   if (!isCount(failures) || !isCount(waitMs) || waitMs > MS_PER_HOUR) return null;
-  if (typeof savedAt !== 'number' || !isValidTimestamp(savedAt)) return null;
+  if (!isTimestamp(savedAt)) return null;
   const attempts: Attempts = { failures, waitMs };
   return { attempts, savedAt };
 }

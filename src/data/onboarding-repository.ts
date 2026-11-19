@@ -2,9 +2,10 @@ import type { Database, Executor } from '@/data/database';
 import { insertJourney } from '@/data/journey-repository';
 import { encodeLockSettings } from '@/data/lock-codec';
 import { decodeDraft, encodeDraft } from '@/data/onboarding-draft-codec';
-import { writeRiskMoments } from '@/data/profile-repository';
+import { insertPlan, reasonColumns, writeRiskMoments } from '@/data/profile-repository';
 import { encodeReminderSettings } from '@/data/reminder-settings-codec';
 import { SETTING_KEYS, writeSetting } from '@/data/setting-store';
+import { attempt, type StorageError } from '@/data/storage-error';
 import {
   EMPTY_DRAFT,
   type OnboardingDraft,
@@ -12,9 +13,9 @@ import {
   type Plan,
   type Reason,
 } from '@/domain/onboarding';
-import { err, ok, type Result } from '@/domain/result';
+import { ok, type Result } from '@/domain/result';
 
-export type OnboardingStorageError = 'storage-failed';
+export type OnboardingStorageError = StorageError;
 
 export type OnboardingRepository = {
   loadDraft(): Promise<Result<OnboardingDraft, OnboardingStorageError>>;
@@ -24,21 +25,18 @@ export type OnboardingRepository = {
 
 export function createOnboardingRepository(db: Database): OnboardingRepository {
   return {
-    async loadDraft() {
-      try {
+    loadDraft: () =>
+      attempt(async () => {
         const rows = await db.all('SELECT step, answers FROM onboarding_draft WHERE id = 1');
         const row = rows[0];
         return ok(row === undefined ? EMPTY_DRAFT : decodeDraft(row.step, row.answers));
-      } catch {
-        return err('storage-failed');
-      }
-    },
+      }),
 
     // A save queued behind the end of the onboarding, such as a back press while it finishes,
     // must not bring the draft back once a journey exists: nothing would ever delete it.
-    async saveDraft(draft) {
+    saveDraft(draft) {
       const { step, answers } = encodeDraft(draft);
-      try {
+      return attempt(async () => {
         await db.transaction((tx) =>
           tx.run(
             `INSERT INTO onboarding_draft (id, step, answers)
@@ -48,16 +46,14 @@ export function createOnboardingRepository(db: Database): OnboardingRepository {
           ),
         );
         return ok(undefined);
-      } catch {
-        return err('storage-failed');
-      }
+      });
     },
 
     // One transaction: either the journey exists with every answer saved and the draft is gone,
     // or nothing changed and the onboarding resumes where it was. An existing journey makes it
     // fail rather than be replaced.
-    async complete(result) {
-      try {
+    complete: (result) =>
+      attempt(async () => {
         await db.transaction(async (tx) => {
           await insertJourney(tx, result.journey);
           await writeReasons(tx, result.reasons);
@@ -68,10 +64,7 @@ export function createOnboardingRepository(db: Database): OnboardingRepository {
           await tx.run('DELETE FROM onboarding_draft');
         });
         return ok(undefined);
-      } catch {
-        return err('storage-failed');
-      }
-    },
+      }),
   };
 }
 
@@ -80,24 +73,14 @@ async function writeReasons(tx: Executor, reasons: readonly Reason[]): Promise<v
   for (const [position, reason] of reasons.entries()) {
     await tx.run('INSERT INTO reason (position, preset_id, custom_text) VALUES (?, ?, ?)', [
       position,
-      reason.kind === 'preset' ? reason.id : null,
-      reason.kind === 'custom' ? reason.text : null,
+      ...reasonColumns(reason),
     ]);
   }
 }
 
 async function writePlans(tx: Executor, plans: readonly Plan[]): Promise<void> {
   await tx.run('DELETE FROM plan');
-  for (const [position, { trigger, action }] of plans.entries()) {
-    await tx.run(
-      `INSERT INTO plan (position, trigger_id, action_preset_id, action_custom_text)
-       VALUES (?, ?, ?, ?)`,
-      [
-        position,
-        trigger,
-        action.kind === 'preset' ? action.id : null,
-        action.kind === 'custom' ? action.text : null,
-      ],
-    );
+  for (const [position, plan] of plans.entries()) {
+    await insertPlan(tx, position, plan);
   }
 }

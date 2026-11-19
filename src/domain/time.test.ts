@@ -2,6 +2,7 @@ import * as fc from 'fast-check';
 
 import {
   elapsedMs,
+  isTimestamp,
   isValidTimestamp,
   MS_PER_DAY,
   MS_PER_MINUTE,
@@ -19,6 +20,16 @@ describe('isValidTimestamp', () => {
 
   it.each([-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, 8.64e15 + 1])('refuses %p', (value) => {
     expect(isValidTimestamp(value)).toBe(false);
+  });
+});
+
+describe('isTimestamp', () => {
+  it('accepts a valid timestamp', () => {
+    expect(isTimestamp(Date.UTC(2026, 10, 14))).toBe(true);
+  });
+
+  it.each([-1, Number.NaN, '1700000000000', null, undefined])('refuses %p', (value) => {
+    expect(isTimestamp(value)).toBe(false);
   });
 });
 

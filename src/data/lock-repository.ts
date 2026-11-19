@@ -6,11 +6,12 @@ import {
   encodeLockSettings,
 } from '@/data/lock-codec';
 import { readSetting, SETTING_KEYS, writeSetting } from '@/data/setting-store';
+import { attempt, type StorageError } from '@/data/storage-error';
 import { NO_ATTEMPTS, resumeAttempts, type Attempts, type LockSettings } from '@/domain/lock';
-import { err, ok, type Result } from '@/domain/result';
+import { ok, type Result } from '@/domain/result';
 import type { Timestamp } from '@/domain/time';
 
-export type LockStorageError = 'storage-failed';
+export type LockStorageError = StorageError;
 
 export type LockRepository = {
   loadSettings(): Promise<Result<LockSettings, LockStorageError>>;
@@ -21,32 +22,22 @@ export type LockRepository = {
 };
 
 export function createLockRepository(db: Database): LockRepository {
-  async function save(key: string, value: string): Promise<Result<void, LockStorageError>> {
-    try {
+  function save(key: string, value: string): Promise<Result<void, LockStorageError>> {
+    return attempt(async () => {
       await db.transaction((tx) => writeSetting(tx, key, value));
       return ok(undefined);
-    } catch {
-      return err('storage-failed');
-    }
+    });
   }
 
   return {
-    async loadSettings() {
-      try {
-        return ok(decodeLockSettings(await readSetting(db, SETTING_KEYS.lock)));
-      } catch {
-        return err('storage-failed');
-      }
-    },
+    loadSettings: () =>
+      attempt(async () => ok(decodeLockSettings(await readSetting(db, SETTING_KEYS.lock)))),
     saveSettings: (settings) => save(SETTING_KEYS.lock, encodeLockSettings(settings)),
-    async loadAttempts(now) {
-      try {
+    loadAttempts: (now) =>
+      attempt(async () => {
         const saved = decodeAttempts(await readSetting(db, SETTING_KEYS.lockAttempts));
         return ok(saved === null ? NO_ATTEMPTS : resumeAttempts(saved, now));
-      } catch {
-        return err('storage-failed');
-      }
-    },
+      }),
     saveAttempts: (attempts, now) =>
       save(SETTING_KEYS.lockAttempts, encodeAttempts({ attempts, savedAt: now })),
   };

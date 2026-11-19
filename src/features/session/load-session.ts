@@ -48,7 +48,20 @@ export async function applyStoredLanguage(storage: Pick<Storage, 'settings'>): P
   await i18n.changeLanguage(languageOf(preference, getDeviceLanguage()));
 }
 
+// Repositories report their own failures; anything else, such as a language that fails to
+// apply, ends on the retry screen rather than on a splash screen that never goes away.
 export async function loadSession(
+  storage: Storage,
+  today: number,
+): Promise<Result<SessionData, LoadSessionError>> {
+  try {
+    return await readSession(storage, today);
+  } catch {
+    return err('storage-failed');
+  }
+}
+
+async function readSession(
   storage: Storage,
   today: number,
 ): Promise<Result<SessionData, LoadSessionError>> {

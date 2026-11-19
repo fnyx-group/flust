@@ -101,6 +101,13 @@ matches() {
   grep "$@" || [[ $? -eq 1 ]]
 }
 
+indent() {
+  local prefix=$1 line
+  while IFS= read -r line; do
+    printf '%s%s\n' "$prefix" "$line"
+  done
+}
+
 # Class names are plain text in dex files. The manifest is binary XML, with UTF-16 or UTF-8
 # strings, or protobuf in a bundle: without the NUL bytes, its names read as text either way.
 classes=$(
@@ -129,7 +136,7 @@ permissions=$(requested_permissions | sort -u) || cannot_check "Cannot read the 
 # Every production build requests some, so an empty list means the output was not understood.
 [[ -n $permissions ]] || cannot_check "No permission read from $build: check the output of the tool that reads it."
 echo "Permissions in $build:"
-sed 's/^/  /' <<<"$permissions"
+indent '  ' <<<"$permissions"
 
 # Schemes of the intent filters that open URLs, parsed by url-schemes.awk for an APK.
 url_schemes() {
@@ -165,8 +172,8 @@ done <<<"$permissions"
 failed=0
 if [[ -n $classes || -n $entries ]]; then
   echo "$build contains code or manifest entries that flust must not ship:" >&2
-  [[ -n $classes ]] && sed 's/^/  class /' <<<"$classes" >&2
-  [[ -n $entries ]] && sed 's/^/  manifest /' <<<"$entries" >&2
+  [[ -n $classes ]] && indent '  class ' <<<"$classes" >&2
+  [[ -n $entries ]] && indent '  manifest ' <<<"$entries" >&2
   failed=1
 fi
 if [[ ${#blocked_found[@]} -gt 0 ]]; then
@@ -181,7 +188,7 @@ if [[ ${#unexpected_found[@]} -gt 0 ]]; then
 fi
 if [[ -n $schemes ]]; then
   echo "$build opens URL schemes, which let any web page detect or open flust:" >&2
-  sed 's/^/  /' <<<"$schemes" >&2
+  indent '  ' <<<"$schemes" >&2
   failed=1
 fi
 [[ $failed -eq 0 ]] || exit 1

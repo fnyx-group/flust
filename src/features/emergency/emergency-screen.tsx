@@ -61,7 +61,7 @@ export function EmergencyScreen() {
 
   useEffect(() => {
     let active = true;
-    storage.profile.load().then((result) => {
+    void storage.profile.load().then((result) => {
       if (active && result.ok) setProfile(result.value);
     });
     return () => {

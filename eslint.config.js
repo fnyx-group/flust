@@ -292,6 +292,31 @@ module.exports = defineConfig([
     files: ['*.{js,cjs,mjs}'],
     languageOptions: { globals: globals.node },
   },
+  // Rules that need type information, kept to those that catch real bugs: a rejected promise
+  // nobody handles, a promise passed where a void callback is expected, a switch that misses a
+  // case of a union, and a try that returns a promise its catch never sees.
+  {
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      parserOptions: { projectService: true, tsconfigRootDir: __dirname },
+    },
+    rules: {
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+      '@typescript-eslint/switch-exhaustiveness-check': [
+        'error',
+        { considerDefaultExhaustiveForUnions: false, requireDefaultForNonUnion: false },
+      ],
+      '@typescript-eslint/return-await': ['error', 'in-try-catch'],
+      '@typescript-eslint/await-thenable': 'error',
+      '@typescript-eslint/only-throw-error': 'error',
+      '@typescript-eslint/prefer-promise-reject-errors': 'error',
+      '@typescript-eslint/no-base-to-string': 'error',
+      '@typescript-eslint/restrict-template-expressions': 'error',
+      '@typescript-eslint/no-meaningless-void-operator': 'error',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+    },
+  },
   {
     files: sourceFiles,
     rules: {

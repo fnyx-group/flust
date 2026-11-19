@@ -1,8 +1,9 @@
 import type { Database } from '@/data/database';
+import { attempt, type StorageError } from '@/data/storage-error';
 import { isRankId, type RankId } from '@/domain/ranks';
-import { err, ok, type Result } from '@/domain/result';
+import { ok, type Result } from '@/domain/result';
 
-export type RankStorageError = 'storage-failed';
+export type RankStorageError = StorageError;
 
 export type RankRepository = {
   loadUnlocked(): Promise<Result<RankId[], RankStorageError>>;
@@ -13,26 +14,20 @@ export type RankRepository = {
 export function createRankRepository(db: Database): RankRepository {
   return {
     // Unknown ids are dropped rather than reported: rankProgress fills any gap they leave.
-    async loadUnlocked() {
-      try {
+    loadUnlocked: () =>
+      attempt(async () => {
         const rows = await db.all('SELECT rank_id FROM unlocked_rank');
         return ok(rows.map((row) => row.rank_id).filter(isRankId));
-      } catch {
-        return err('storage-failed');
-      }
-    },
+      }),
 
-    async unlock(ids) {
-      try {
+    unlock: (ids) =>
+      attempt(async () => {
         await db.transaction(async (tx) => {
           for (const id of ids) {
             await tx.run('INSERT OR IGNORE INTO unlocked_rank (rank_id) VALUES (?)', [id]);
           }
         });
         return ok(undefined);
-      } catch {
-        return err('storage-failed');
-      }
-    },
+      }),
   };
 }

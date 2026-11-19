@@ -1,4 +1,5 @@
 import { openStorage } from '@/data/open-storage';
+import { insertPlan, readPlanEntries } from '@/data/profile-repository';
 import { parseCustomText } from '@/domain/custom-text';
 import { MAX_PLANS, MAX_REASONS } from '@/domain/profile';
 import type { OnboardingResult, Plan } from '@/domain/onboarding';
@@ -210,5 +211,30 @@ describe('profile repository', () => {
     const { storage } = await setUp();
     await storage.close();
     expect(await storage.profile.load()).toEqual(err('storage-failed'));
+  });
+});
+
+describe('insertPlan', () => {
+  const STRESS: Plan = { trigger: 'stress', action: { kind: 'custom', text: CALL } };
+  const URGE: Plan = { trigger: 'urge', action: { kind: 'preset', id: 'guided-breathing' } };
+  const BORED: Plan = { trigger: 'boredom', action: { kind: 'preset', id: 'guided-breathing' } };
+
+  it('puts a plan first, last or at a given position, and returns its id', async () => {
+    const { storage, rawDatabase } = await setUp();
+    await storage.close();
+    const db = await rawDatabase();
+
+    const entries = await db.transaction(async (tx) => {
+      const middle = await insertPlan(tx, 5, STRESS);
+      const last = await insertPlan(tx, 'last', URGE);
+      const first = await insertPlan(tx, 'first', BORED);
+      return { ids: [first, middle, last], plans: await readPlanEntries(tx) };
+    });
+
+    expect(entries.plans).toEqual([
+      { id: entries.ids[0], plan: BORED },
+      { id: entries.ids[1], plan: STRESS },
+      { id: entries.ids[2], plan: URGE },
+    ]);
   });
 });

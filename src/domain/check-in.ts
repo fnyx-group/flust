@@ -1,7 +1,7 @@
 import { isOneOf } from '@/domain/guards';
 import { isRiskMomentId, type RiskMomentId } from '@/domain/presets';
 import { err, ok, type Result } from '@/domain/result';
-import { isValidTimestamp, type Timestamp } from '@/domain/time';
+import { isTimestamp, type Timestamp } from '@/domain/time';
 
 export const MOODS = [1, 2, 3, 4, 5] as const;
 export type Mood = (typeof MOODS)[number];
@@ -86,10 +86,6 @@ function parseContext(value: unknown): RiskMomentId[] | null {
   const ids: unknown[] = value;
   if (!ids.every(isRiskMomentId) || new Set(ids).size !== ids.length) return null;
   return ids;
-}
-
-function isTimestamp(value: unknown): value is Timestamp {
-  return typeof value === 'number' && isValidTimestamp(value);
 }
 
 export function todaysCheckIn(checkIns: readonly CheckIn[], today: number): CheckIn | null {

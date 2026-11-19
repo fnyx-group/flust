@@ -25,14 +25,17 @@ export function LaunchGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    launch.begin().then((mode) => active && setState({ status: mode }));
+    // The guard counts an unreadable or unwritable file as a normal launch, so this never rejects.
+    void launch.begin().then((mode) => {
+      if (active) setState({ status: mode });
+    });
     return () => {
       active = false;
     };
   }, [launch]);
 
   useEffect(() => {
-    if (state.status === 'safe-mode') SplashScreen.hideAsync();
+    if (state.status === 'safe-mode') void SplashScreen.hideAsync();
   }, [state.status]);
 
   if (state.status === 'checking') return null;
