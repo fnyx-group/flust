@@ -79,7 +79,19 @@ describe('checkLists', () => {
     );
 
     expect(checkLists(root)).toEqual([
-      'sources/aegis/PROVENANCE: excluded source https://github.com/hagezi/dns-blocklists',
+      'sources/aegis/PROVENANCE: excluded source in "url: https://github.com/hagezi/dns-blocklists"',
+    ]);
+  });
+
+  it('fails on a file of the provenance taken from an excluded list', () => {
+    edit('sources/aegis/PROVENANCE', (text) =>
+      text.replace(/^file: \S+ vpn /m, 'file: hagezi/doh-vpn-proxy-bypass.txt vpn '),
+    );
+
+    expect(checkLists(root)).toEqual([
+      expect.stringMatching(
+        /^sources\/aegis\/PROVENANCE: excluded source in "file: hagezi\/doh-vpn-proxy-bypass\.txt vpn sha256:[0-9a-f]{64}"$/,
+      ),
     ]);
   });
 
@@ -135,6 +147,14 @@ describe('checkLists', () => {
       'lists/sources/oisd: not part of the lists layout',
       'lists/flust/extra.txt: not part of the lists layout',
       'sources/aegis/porn: not part of the lists layout',
+    ]);
+  });
+
+  it('fails on an entry of our own lists with an empty source', () => {
+    write('flust/ai-nudify.txt', 'deepfake.example # , checked 2026-11-19\n');
+
+    expect(checkLists(root)).toEqual([
+      'flust/ai-nudify.txt:1: expected "domain  # source, checked YYYY-MM-DD"',
     ]);
   });
 

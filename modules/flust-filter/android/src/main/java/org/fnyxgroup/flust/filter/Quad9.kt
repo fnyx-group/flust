@@ -9,7 +9,8 @@ object Quad9 {
   const val HOST = "dns.quad9.net"
   const val PORT = 853
 
-  private val LITERAL = Regex("^[0-9a-f.:]+$")
+  private val IPV4 = Regex("^(25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])){3}$")
+  private val IPV6 = Regex("^[0-9a-f]*(:[0-9a-f]*){2,7}$")
 
   // IPv4 first: an IPv6-only network still reaches it through the phone's 464XLAT, and an IPv4
   // failure there is immediate.
@@ -19,9 +20,10 @@ object Quad9 {
     listOf("9.9.9.9", "149.112.112.112", "2620:fe::fe", "2620:fe::9").map(::literal),
   )
 
-  // getByName only parses a literal address, it never resolves one: the check keeps it that way.
-  private fun literal(address: String): InetAddress {
-    require(LITERAL.matches(address)) { "Not an IP literal: $address" }
+  // getByName parses a literal address and looks up anything else: only IPv4 dotted digits and
+  // IPv6 with colons reach it, never a name.
+  internal fun literal(address: String): InetAddress {
+    require(IPV4.matches(address) || IPV6.matches(address)) { "Not an IP literal: $address" }
     return InetAddress.getByName(address)
   }
 }

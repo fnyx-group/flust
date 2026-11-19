@@ -78,9 +78,10 @@ class FlustFilterModule : Module() {
     }
 
     AsyncFunction("stop") {
+      if (!available()) return@AsyncFunction
       val store = FilterConfigStore(context)
       store.save(store.load().copy(enabled = false))
-      if (available()) FilterVpnService.stop(context)
+      FilterVpnService.stop(context)
     }
 
     // Brings the tunnel back when flust opens, after Android refused to start it at boot or

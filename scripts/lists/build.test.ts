@@ -64,6 +64,23 @@ describe('buildLists', () => {
     }
   });
 
+  it('refuses an exception under a name that stays blocked', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'filter-lists-'));
+    try {
+      fs.cpSync(fixture, root, { recursive: true });
+      fs.appendFileSync(
+        path.join(root, 'flust/exceptions.txt'),
+        'video.adult-two.example # fixture, checked 2026-11-19\n',
+      );
+
+      expect(() => buildLists(root)).toThrow(
+        'Exceptions under a name that stays blocked: video.adult-two.example',
+      );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it('refuses a domain in both AI nudify and AI companions', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'filter-lists-'));
     try {

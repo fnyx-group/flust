@@ -18,14 +18,17 @@ type Provenance = {
   fields: Map<string, string>;
   files: { upstream: string; name: string; sha256: string }[];
   malformed: string[];
+  excluded: string[];
 };
 
 function readProvenance(text: string): Provenance {
   const fields = new Map<string, string>();
   const files: Provenance['files'] = [];
   const malformed: string[] = [];
+  const excluded: string[] = [];
   for (const line of text.split('\n')) {
     if (line.trim() === '') continue;
+    if (EXCLUDED_SOURCES.test(line)) excluded.push(line);
     const match = /^([a-z]+):\s*(.*)$/.exec(line);
     const [, key = '', value = ''] = match ?? [];
     if (key === 'file') {
@@ -38,7 +41,7 @@ function readProvenance(text: string): Provenance {
       malformed.push(line);
     }
   }
-  return { fields, files, malformed };
+  return { fields, files, malformed, excluded };
 }
 
 function entriesOf(folder: string): string[] {
@@ -87,7 +90,9 @@ function checkSource(root: string, source: Source): string[] {
   );
   const url = provenance.fields.get('url') ?? '';
   if (!/^https:\/\/\S+$/.test(url)) problems.push(`${label}/PROVENANCE: no source URL`);
-  if (EXCLUDED_SOURCES.test(url)) problems.push(`${label}/PROVENANCE: excluded source ${url}`);
+  problems.push(
+    ...provenance.excluded.map((line) => `${label}/PROVENANCE: excluded source in "${line}"`),
+  );
   if (!/^[0-9a-f]{40}$/.test(provenance.fields.get('commit') ?? '')) {
     problems.push(`${label}/PROVENANCE: no commit`);
   }

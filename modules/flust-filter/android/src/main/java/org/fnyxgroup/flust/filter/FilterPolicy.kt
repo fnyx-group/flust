@@ -6,7 +6,7 @@ sealed interface Decision {
   data class Rewrite(val target: String) : Decision
 }
 
-// What the filter does with a name. The strict guard comes first, so that no exception can
+// What the filter does with a name. The strict guard comes first, so that no user exception can
 // reopen a bypass; SafeSearch next, so that an exception for a search domain keeps it restricted.
 class FilterPolicy(private val lists: Blocklist, private val config: FilterConfig) {
   fun decide(queried: String): Decision {

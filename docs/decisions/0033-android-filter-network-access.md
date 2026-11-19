@@ -18,7 +18,7 @@ V0.1 makes no network calls and blocks `INTERNET` in production Android builds (
 - Strict mode blocks `dns.quad9.net` with the other DoH and DoT provider names, for every app. flust's own lookups are not affected, since they go by address.
 - There is no fallback to plain DNS. Some networks block port 853, and lookups fail there. A DNS over HTTPS fallback can be added later if the tests on real networks show it is needed.
 - The VPN service never touches the database or its key. Its settings are encrypted under a key of their own.
-- No DNS query is logged, not even in memory: the filter keeps no cache, and a name is held only while it is answered.
+- No DNS query is logged, and no reference to a queried name is kept after its answer: the filter keeps no cache.
 - The allowlist of `scripts/check-android-release.sh` gains `INTERNET` only in the version that ships the filter. Every other blocked permission stays blocked. Until then the VPN service is declared in the development build only, and the release check fails on a build that has the service without `INTERNET`, `INTERNET` without the service, or any other VPN service.
 - Detecting strict Private DNS, which sends lookups around the filter, needs `ACCESS_NETWORK_STATE` in the production build. It is blocked today ([0030](0030-production-android-permissions.md)) and is decided in lot 2.
 - An independent security audit of the filter takes place before the public release.

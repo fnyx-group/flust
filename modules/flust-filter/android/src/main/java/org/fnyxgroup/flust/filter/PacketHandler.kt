@@ -42,7 +42,7 @@ class PacketHandler(
           ),
         )
       },
-      busy = { Dns.parseQuery(datagram.payload)?.let { Dns.answer(it, Dns.SERVFAIL) } },
+      failed = { servfail(datagram.payload) },
     )
   }
 
@@ -50,16 +50,35 @@ class PacketHandler(
     run(
       task = { queries.answer(query, overUdp = false) },
       reply = reply,
-      busy = { Dns.parseQuery(query)?.let { Dns.answer(it, Dns.SERVFAIL) } },
+      failed = { servfail(query) },
     )
 
   // When every worker is busy and the queue is full, the client gets SERVFAIL at once and tries
-  // again, rather than waiting for its own timeout.
-  private fun run(task: () -> ByteArray?, reply: (ByteArray?) -> Unit, busy: () -> ByteArray?) {
+  // again, rather than waiting for its own timeout. A lookup that fails in any way gets SERVFAIL
+  // too: an uncaught exception would end the process, and the filter with it.
+  private fun run(task: () -> ByteArray?, reply: (ByteArray?) -> Unit, failed: () -> ByteArray?) {
     try {
-      executor.execute { reply(task()) }
+      executor.execute {
+        val answer = try {
+          task()
+        } catch (error: Exception) {
+          failed()
+        }
+        try {
+          reply(answer)
+        } catch (lost: Exception) {
+          // The answer is lost, as a dropped packet would be, and the client asks again.
+        }
+      }
     } catch (error: RejectedExecutionException) {
-      reply(busy())
+      reply(failed())
     }
   }
+
+  private fun servfail(bytes: ByteArray): ByteArray? =
+    try {
+      Dns.parseQuery(bytes)?.let { Dns.answer(it, Dns.SERVFAIL) }
+    } catch (error: Exception) {
+      null
+    }
 }

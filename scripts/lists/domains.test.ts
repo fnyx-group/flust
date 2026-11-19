@@ -60,12 +60,15 @@ describe('ownLine', () => {
     expect(ownLine('# Header')).toBeNull();
   });
 
-  it.each(['cloth-off.io', 'cloth-off.io # aegis', 'cloth-off.io # aegis, checked yesterday'])(
-    'rejects an entry without its source and date: %j',
-    (line) => {
-      expect(ownLine(line)).toBe('invalid');
-    },
-  );
+  it.each([
+    'cloth-off.io',
+    'cloth-off.io # aegis',
+    'cloth-off.io # aegis, checked yesterday',
+    'cloth-off.io # , checked 2026-11-19',
+    'cloth-off.io #   , checked 2026-11-19',
+  ])('rejects an entry without its source and date: %j', (line) => {
+    expect(ownLine(line)).toBe('invalid');
+  });
 });
 
 describe('withParents', () => {

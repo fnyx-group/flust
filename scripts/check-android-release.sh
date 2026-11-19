@@ -157,13 +157,15 @@ url_schemes() {
 
 schemes=$(url_schemes | sort -u) || cannot_check "Cannot read the intent filters of $build"
 
-# Services that can act as a VPN, parsed by vpn-services.awk for an APK.
+# Services that can act as a VPN, parsed by vpn-services.awk for an APK. In both, a permission or
+# an action given as a resource reference counts as a VPN, so that the check fails rather than
+# miss one.
 vpn_services() {
   if [[ $build == *.apk ]]; then
     "$aapt2" dump xmltree --file AndroidManifest.xml "$build" | awk -f "$script_dir/vpn-services.awk"
   else
     "$java" -jar "$BUNDLETOOL" dump manifest --bundle="$build" \
-      --xpath="//service[@android:permission='android.permission.BIND_VPN_SERVICE' or intent-filter/action/@android:name='android.net.VpnService']/@android:name"
+      --xpath="//service[@android:permission='android.permission.BIND_VPN_SERVICE' or starts-with(@android:permission, '@') or intent-filter/action[@android:name='android.net.VpnService' or starts-with(@android:name, '@')]]/@android:name"
   fi
 }
 

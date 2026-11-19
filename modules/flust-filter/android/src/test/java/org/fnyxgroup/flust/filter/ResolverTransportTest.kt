@@ -122,4 +122,22 @@ class ResolverTransportTest {
     assertFalse(CertificateCheck.matches("*.net", "quad9.net"))
     assertFalse(CertificateCheck.matches("dns.quad9.net", "dns.quad9.net.evil.example"))
   }
+
+  @Test
+  fun buildsTheResolverAddressesFromLiteralsOnly() {
+    assertEquals("9.9.9.9", Quad9.literal("9.9.9.9").hostAddress)
+    assertEquals("2620:fe:0:0:0:0:0:fe", Quad9.literal("2620:fe::fe").hostAddress)
+    for (name in listOf("cafe.fade", "dns.quad9.net", "9.9.9.999", "9.9.9", "fe", "")) {
+      assertThrows(IllegalArgumentException::class.java) { Quad9.literal(name) }
+    }
+  }
+
+  @Test
+  fun keepsTls12AndLaterOnly() {
+    assertEquals(
+      listOf("TLSv1.3", "TLSv1.2"),
+      ResolverTransport.modernProtocols(arrayOf("TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1")).toList(),
+    )
+    assertThrows(IOException::class.java) { ResolverTransport.modernProtocols(arrayOf("TLSv1.1", "TLSv1")) }
+  }
 }

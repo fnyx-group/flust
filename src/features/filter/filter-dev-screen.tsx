@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import type { TFunction } from 'i18next';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -29,11 +29,14 @@ export function FilterDevScreen() {
   const [settings, setSettings] = useState<FilterSettings>(DEFAULT_FILTER_SETTINGS);
   const [measure, setMeasure] = useState<FilterMeasure | null>(null);
   const [busy, setBusy] = useState(false);
+  // Switches changed here and not saved yet: the filter saves them when it starts, and until then
+  // the periodic refresh must not put the saved values back.
+  const edited = useRef(false);
 
   const refresh = useCallback(() => {
     const next = filterBridge.status();
     setStatus(next);
-    if (next.available) setSettings(next.settings);
+    if (next.available && !edited.current) setSettings(next.settings);
   }, []);
 
   useFocusEffect(
@@ -52,15 +55,20 @@ export function FilterDevScreen() {
     setBusy(false);
   }
 
+  async function save(next: FilterSettings) {
+    if (await filterBridge.start(next)) edited.current = false;
+  }
+
   async function turn(on: boolean) {
     if (!on) return filterBridge.stop();
-    if (await filterBridge.requestConsent()) await filterBridge.start(settings);
+    if (await filterBridge.requestConsent()) await save(settings);
   }
 
   function change(key: (typeof CATEGORIES)[number], value: boolean) {
     const next = { ...settings, [key]: value };
+    edited.current = true;
     setSettings(next);
-    if (status.available && status.enabled) void run(() => filterBridge.start(next));
+    if (status.available && status.enabled) void run(() => save(next));
   }
 
   return (

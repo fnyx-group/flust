@@ -30,7 +30,11 @@ class FilterVpnService : VpnService() {
     // The always-on setting starts the service itself: the person chose the filter there.
     if (intent?.action == SERVICE_INTERFACE && !config.enabled) {
       config = config.copy(enabled = true)
-      store.save(config)
+      // The filter still starts if the choice cannot be saved: always-on asked for it.
+      try {
+        store.save(config)
+      } catch (unsaved: Exception) {
+      }
     }
     if (!config.enabled) {
       stopSelf()
@@ -54,37 +58,48 @@ class FilterVpnService : VpnService() {
   }
 
   private fun startTunnel(config: FilterConfig): Boolean {
-    val established = try {
+    var descriptor: ParcelFileDescriptor? = null
+    try {
       val lists = Blocklist.read(assets.open(LISTS_ASSET).use { it.readBytes() })
-      val descriptor = builder().establish()
-      if (descriptor == null) {
+      val established = builder().establish()
+      descriptor = established
+      if (established == null) {
         FilterStatus.recordStop(this, StopReason.NO_CONSENT)
         stopSelf()
         return false
       }
-      descriptor to lists
+      val transport = ResolverTransport(Quad9.ENDPOINT, { socket -> protect(socket) }, SystemTrust.context())
+      val upstream = DotClient(transport::connect, System::currentTimeMillis)
+      val running = FilterEngine(lists, config, upstream, upstream::close)
+      val reader = Thread({
+        running.run(FileInputStream(established.fileDescriptor), FileOutputStream(established.fileDescriptor))
+        // The loop ends by itself only when the tunnel fails: the service then stops, so the app
+        // shows the filter as inactive.
+        main.post {
+          if (engine === running) {
+            stopTunnel(StopReason.FAILED)
+            stopSelf()
+          }
+        }
+      }, "flust-filter")
+      tunnel = established
+      engine = running
+      thread = reader
+      reader.start()
     } catch (error: Exception) {
+      // An established tunnel that no thread reads would swallow every lookup.
+      try {
+        descriptor?.close()
+      } catch (ignored: Exception) {
+      }
+      engine?.stop()
+      engine = null
+      tunnel = null
+      thread = null
       FilterStatus.recordStop(this, StopReason.FAILED)
       stopSelf()
       return false
     }
-    val (descriptor, lists) = established
-    val transport = ResolverTransport(Quad9.ENDPOINT, { socket -> protect(socket) }, SystemTrust.context())
-    val upstream = DotClient(transport::connect, System::currentTimeMillis)
-    val running = FilterEngine(lists, config, upstream, upstream::close)
-    tunnel = descriptor
-    engine = running
-    thread = Thread({
-      running.run(FileInputStream(descriptor.fileDescriptor), FileOutputStream(descriptor.fileDescriptor))
-      // The loop ends by itself only when the tunnel fails: the service then stops, so the app
-      // shows the filter as inactive.
-      main.post {
-        if (engine === running) {
-          stopTunnel(StopReason.FAILED)
-          stopSelf()
-        }
-      }
-    }, "flust-filter").apply { start() }
     FilterStatus.running = true
     FilterStatus.recordStop(this, null)
     return true

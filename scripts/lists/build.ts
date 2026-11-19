@@ -64,7 +64,7 @@ function countOnlyIn(adultSources: Map<string, Set<string>>): Record<string, num
 
 // Reads, normalizes and merges every list, after checking the layout and the licenses. AI
 // companions leave the AI nudify category, and an exception removes a domain and every name under
-// it from the blocking categories.
+// it from the blocking categories. Fails on an exception that a blocked parent would cancel.
 export function buildLists(root: string): BuiltLists {
   const problems = checkLists(root);
   if (problems.length > 0) throw new Error(`The lists cannot be built:\n${problems.join('\n')}`);
@@ -107,6 +107,17 @@ export function buildLists(root: string): BuiltLists {
     if ((bits & BLOCKING) !== 0) removedByExceptions += 1;
     if (kept === 0) entries.delete(name);
     else entries.set(name, kept);
+  }
+
+  // The filter also matches a name's parents (Blocklist.kt): an exception under a parent that
+  // stays blocked would unblock nothing.
+  const shadowed = [...exceptions].filter((exception) =>
+    withParents(exception)
+      .slice(1)
+      .some((parent) => ((entries.get(parent) ?? 0) & BLOCKING) !== 0),
+  );
+  if (shadowed.length > 0) {
+    throw new Error(`Exceptions under a name that stays blocked: ${shadowed.join(', ')}`);
   }
 
   const categories = Object.fromEntries(

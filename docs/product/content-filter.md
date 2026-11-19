@@ -6,7 +6,7 @@ This document records the design for both platforms. Android ships first. iPhone
 
 ## Principles
 
-1. No one sees the browsing. There is no remote filtering service, and no query is logged, not even in memory ([0033](../decisions/0033-android-filter-network-access.md)).
+1. No one sees the browsing. There is no remote filtering service, and no query is logged, and no reference to a queried name is kept after its answer ([0033](../decisions/0033-android-filter-network-access.md)).
 2. Anything that weakens the filter waits 20 minutes on the continuous clock ([0024](../decisions/0024-lock-wait.md)). Anything that strengthens it is immediate.
 3. The filter stops the impulse, not a determined adult. A second phone or a factory reset will always get through, and flust says so.
 4. The same lists on both platforms, under permissive licenses only.
@@ -38,7 +38,10 @@ A local VpnService that carries DNS only. It is the only way to apply our own li
 3. A blocked name gets NXDOMAIN.
 4. An allowed name is sent over DNS over TLS to the resolver, with sockets marked by `protect()` so they leave the tunnel.
 5. Queries arrive over UDP and over TCP. An answer too large for UDP is cut with the truncation flag, and the app asks again over TCP.
-6. The service never touches the database or its key, and logs no query. It keeps no cache: a name is held only while it is answered, and the system's own DNS cache does the rest. Its settings are encrypted under a key of their own.
+6. The service never touches the database or its key, and logs no query. It keeps no cache, and no reference to a queried name is kept after its answer: the system's own DNS cache does the rest. Its settings are encrypted under a key of their own.
+7. DNS on port 53 to the fake address or to a routed resolver address is answered by flust. Other TCP connections to these addresses are reset at once and other UDP is dropped, so encrypted DNS to a known resolver fails fast and apps fall back to the system resolver. This does not depend on strict mode. A resolver missing from the list stays reachable.
+
+Android's automatic Private DNS tries DNS over TLS to the VPN's DNS address first. The tunnel resets that connection at once, so Android falls back to plain DNS through the filter without waiting.
 
 ### Resolver
 
@@ -52,16 +55,13 @@ DNS over TLS is an addition to [0033](../decisions/0033-android-filter-network-a
 
 ### Strict mode
 
-On by default. It closes the easy bypasses, and its guard wins over user exceptions, so an exception for a resolver name cannot reopen one.
+On by default. It blocks the bypass category: the names of DoH and DoT providers, of VPN and proxy providers, and the Firefox canary domain. Its guard wins over user exceptions, so a user exception for a resolver name cannot reopen a bypass. Routing the public resolvers' addresses into the tunnel does not depend on it (step 7 of [How it works](#how-it-works)).
 
-| Bypass                                                   | What flust does                                                                                                                                                    | What stays open                                       |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
-| Browser DoH in Chrome, Edge, Brave, Opera                | Blocks the bootstrap names of DoH providers. In automatic mode, Chromium only upgrades to DoH when the system resolver is on its list, and our fake address is not | DoH to a hand-typed IP address                        |
-| Firefox DoH on by default                                | NXDOMAIN for the canary domain `use-application-dns.net`                                                                                                           | DoH turned on by hand, covered by the bootstrap names |
-| An app that queries 8.8.8.8 or another resolver directly | Routes those addresses into the tunnel and filters DNS to them over UDP and TCP. Other TCP connections to them are reset at once, other UDP is dropped             | Resolvers missing from the list                       |
-| Browser with a built-in VPN, proxy or Tor                | Blocks VPN and proxy provider names from the bypass category                                                                                                       | Tor bridges and unknown proxies                       |
-
-Android's automatic Private DNS tries DNS over TLS to the VPN's DNS address first. The tunnel resets that connection at once, so Android falls back to plain DNS through the filter without waiting.
+| Bypass                                    | What flust does                                                                                                                                                    | What stays open                                       |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| Browser DoH in Chrome, Edge, Brave, Opera | Blocks the bootstrap names of DoH providers. In automatic mode, Chromium only upgrades to DoH when the system resolver is on its list, and our fake address is not | DoH to a hand-typed IP address                        |
+| Firefox DoH on by default                 | NXDOMAIN for the canary domain `use-application-dns.net`                                                                                                           | DoH turned on by hand, covered by the bootstrap names |
+| Browser with a built-in VPN, proxy or Tor | Blocks VPN and proxy provider names from the bypass category                                                                                                       | Tor bridges and unknown proxies                       |
 
 ### SafeSearch
 
@@ -83,6 +83,8 @@ flust detects and shows these, with the reason and what to do.
 3. The VPN is turned off in the settings, or the app is force stopped. flust restarts the tunnel and guides people to the always-on VPN setting, which only they can enable.
 4. Clear data in the Android settings resets the lock and the delay.
 5. flust can be uninstalled. Nothing prevents it without Device Owner.
+
+One limit is not detected. An allowed name that is a CNAME to a blocked name still resolves, since flust matches the name asked, not the names in the resolver's answer.
 
 ### Containment
 
@@ -162,7 +164,7 @@ AI companions are general companion apps only. Companions built for sexual chat,
 
 ### Excluded
 
-These are never committed, compiled or copied by hand. The check of the build step fails when a source's provenance points to one, when a license carries copyleft or share-alike terms, or when a comment in any list names one. A domain copied by hand without naming its origin cannot be told apart: every entry of our own lists carries its source, and review does the rest.
+These are never committed, compiled or copied by hand. The check of the build step fails when any line of a source's provenance names one, when a license carries copyleft or share-alike terms, or when a comment in any list names one. A domain copied by hand without naming its origin cannot be told apart: every entry of our own lists carries its source, and review does the rest.
 
 | Source       | Why                                                                          |
 | ------------ | ---------------------------------------------------------------------------- |
@@ -197,7 +199,7 @@ lists/
 cloth-off.io    # aegis ai-adult, checked 2026-11-19
 ```
 
-An exception removes a domain and every name under it from the blocking categories.
+An exception removes a domain and every name under it from the blocking categories. Since the filter also matches a name's parents, the build fails on an exception under a name that stays blocked: it would unblock nothing.
 
 ### Categories
 
@@ -228,12 +230,12 @@ In lot 1 only the development build compiles the lists, so `lists/` and `scripts
 
 ## Delivery
 
-| Lot            | Content                                                                                                                                                                                                                                                            | Done when                                                      |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| 1, the engine  | This design in the repository, the lists and their build step, the Kotlin filter module, strict mode, SafeSearch, the release check that pairs `INTERNET` with the filter's VPN service, all behind a development setting                                          | The filter blocks on the emulator behind a development setting |
-| 2, the product | Onboarding step, settings screen, 20-minute delay, filter inactive states, `INTERNET` and the VPN service in the production build, the decision on `ACCESS_NETWORK_STATE`, `lists/` in the native build triggers, Maestro flows, Licenses screen, Play declaration | Someone who does not know the app turns the filter on alone    |
-| 3, iPhone      | Screen Time module in Swift, the 45 domains, removal block, launch check, the same screens as lot 2                                                                                                                                                                | The filter works on a test iPhone through TestFlight           |
-| 4, the field   | The test plan on real phones, website wording per platform, store declarations                                                                                                                                                                                     | Both platforms pass the test plan                              |
+| Lot            | Content                                                                                                                                                                                                                                                                                                                                        | Done when                                                      |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| 1, the engine  | This design in the repository, the lists and their build step, the Kotlin filter module, strict mode, SafeSearch, the release check that pairs `INTERNET` with the filter's VPN service, all behind a development setting                                                                                                                      | The filter blocks on the emulator behind a development setting |
+| 2, the product | Onboarding step, settings screen, 20-minute delay, filter inactive states, `INTERNET` and the VPN service in the production build, the decision on `ACCESS_NETWORK_STATE`, `lists/` in the native build triggers, Maestro flows, Licenses screen, Play declaration, a start at boot that Android refuses shown as such rather than as an error | Someone who does not know the app turns the filter on alone    |
+| 3, iPhone      | Screen Time module in Swift, the 45 domains, removal block, launch check, the same screens as lot 2                                                                                                                                                                                                                                            | The filter works on a test iPhone through TestFlight           |
+| 4, the field   | The test plan on real phones, website wording per platform, store declarations, the lookup timeouts when Quad9 cannot be reached, where a queued query can wait about 12 seconds after its app gave up                                                                                                                                         | Both platforms pass the test plan                              |
 
 ## Store requirements
 

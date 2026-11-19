@@ -26,12 +26,12 @@ Sites whose main purpose is adult content are blocked, not general platforms tha
 
 ## Never
 
-oisd, HaGeZi, Bon-Appetit, StevenBlack and UT1 are never committed, compiled or copied, not even one domain. The check fails when a provenance points to one or a comment names one. Bypass names come from primary sources, such as Chromium's DoH provider list and provider documentation.
+oisd, HaGeZi, Bon-Appetit, StevenBlack and UT1 are never committed, compiled or copied, not even one domain. The check fails when any line of a provenance or a comment names one. Bypass names come from primary sources, such as Chromium's DoH provider list and provider documentation.
 
 ## Changing a list
 
 - Add a domain to our own lists with its source and the date, in lowercase ASCII. Internationalized names go in Punycode.
-- Remove a domain wrongly blocked by a source by adding it to `flust/exceptions.txt`, with the reason. Sources are never edited by hand: their checksum would no longer match.
+- Remove a domain wrongly blocked by a source by adding it to `flust/exceptions.txt`, with the reason. The filter also matches a name's parents, so the build fails on an exception under a name that stays blocked. Sources are never edited by hand: their checksum would no longer match.
 - Update a source to its latest commit:
 
       scripts/update-list-source.sh shadowwhisperer

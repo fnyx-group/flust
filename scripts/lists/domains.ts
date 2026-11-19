@@ -37,6 +37,7 @@ export function ownLine(line: string): OwnEntry | null | 'invalid' {
   const match = OWN_LINE.exec(text);
   if (match === null) return 'invalid';
   const [, name = '', source = '', checked = ''] = match;
+  if (source.trim() === '') return 'invalid';
   return { name, source: source.trim(), checked };
 }
 

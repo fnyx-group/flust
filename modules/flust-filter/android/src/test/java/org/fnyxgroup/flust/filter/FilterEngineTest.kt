@@ -23,9 +23,14 @@ class FilterEngineTest {
     override fun read(): Int = throw UnsupportedOperationException()
   }
 
-  private class Output : java.io.OutputStream() {
+  // Fails the first `failures` writes with an unexpected exception.
+  private class Output(private var failures: Int = 0) : java.io.OutputStream() {
     val packets = LinkedBlockingQueue<ByteArray>()
     override fun write(packet: ByteArray) {
+      if (failures > 0) {
+        failures -= 1
+        throw IllegalStateException("unexpected")
+      }
       packets.put(packet.copyOf())
     }
     override fun write(byte: Int) = throw UnsupportedOperationException()
@@ -76,5 +81,44 @@ class FilterEngineTest {
     tunnel.incoming.put(ByteArray(0))
     thread.join(5_000)
     assertTrue(output.packets.isEmpty())
+  }
+
+  @Test
+  fun answersServfailWhenALookupFailsUnexpectedly() {
+    val tunnel = Tunnel()
+    val output = Output()
+    val engine = FilterEngine(
+      TestData.lists,
+      FilterConfig(enabled = true),
+      Upstream { throw IllegalStateException("unexpected") },
+      closeUpstream = {},
+    )
+    val thread = Thread { engine.run(tunnel, output) }.apply { start() }
+
+    tunnel.incoming.put(Packets.buildUdp(4, TestData.CLIENT_V4, TestData.DNS_V4, 40000, 53, TestData.query("example.org")))
+    val answer = output.packets.poll(5, TimeUnit.SECONDS)!!
+
+    assertEquals(Dns.SERVFAIL, TestData.rcode(Packets.udp(Packets.parse(answer, answer.size)!!)!!.payload))
+    tunnel.incoming.put(ByteArray(0))
+    thread.join(5_000)
+  }
+
+  @Test
+  fun dropsAPacketItCannotHandleAndKeepsReading() {
+    val tunnel = Tunnel()
+    val output = Output(failures = 1)
+    val engine = FilterEngine(TestData.lists, FilterConfig(enabled = true), Upstream { ByteArray(0) }, closeUpstream = {})
+    val thread = Thread { engine.run(tunnel, output) }.apply { start() }
+    val quad9 = byteArrayOf(9, 9, 9, 9)
+
+    // The reset is written on the reading thread, and its write fails.
+    tunnel.incoming.put(Packets.buildTcp(4, TestData.CLIENT_V4, quad9, 40000, 853, 1, 0, Packets.TCP_SYN))
+    tunnel.incoming.put(Packets.buildTcp(4, TestData.CLIENT_V4, quad9, 40001, 853, 1, 0, Packets.TCP_SYN))
+    val reset = output.packets.poll(5, TimeUnit.SECONDS)!!
+
+    assertEquals(40001, Packets.tcp(Packets.parse(reset, reset.size)!!)!!.destinationPort)
+    assertTrue(thread.isAlive)
+    tunnel.incoming.put(ByteArray(0))
+    thread.join(5_000)
   }
 }

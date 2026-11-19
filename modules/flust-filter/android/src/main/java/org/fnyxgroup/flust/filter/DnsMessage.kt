@@ -39,6 +39,7 @@ object Dns {
   private const val FLAG_RA = 0x0080
   private const val OPCODE_MASK = 0x7800
   private const val MAX_POINTERS = 16
+  private const val MAX_NAME_BYTES = 255
 
   // Null for anything other than a standard query with one question and an uncompressed name.
   fun parseQuery(bytes: ByteArray): DnsQuery? {
@@ -188,19 +189,21 @@ object Dns {
 
   // The name at `start`, lowercase, and where it ends in the message. A label holding a dot or a
   // byte outside printable ASCII makes the name unreadable: matching it against the lists could
-  // be fooled.
+  // be fooled. Reading stops as soon as the name passes 255 bytes, the limit of RFC 1035, so that
+  // pointers cannot make it grow with the message.
   private fun readName(bytes: ByteArray, start: Int, allowPointers: Boolean): Pair<String, Int>? {
     val name = StringBuilder()
     var offset = start
     var end = -1
     var pointers = 0
+    var wireLength = 1
     while (true) {
       if (offset >= bytes.size) return null
       val length = bytes[offset].toInt() and 0xff
       when {
         length == 0 -> {
           if (end < 0) end = offset + 1
-          return if (name.length <= 253) name.toString() to end else null
+          return name.toString() to end
         }
         length and 0xc0 == 0xc0 -> {
           if (!allowPointers || offset + 1 >= bytes.size || ++pointers > MAX_POINTERS) return null
@@ -209,6 +212,8 @@ object Dns {
         }
         length > 63 || offset + 1 + length > bytes.size -> return null
         else -> {
+          wireLength += 1 + length
+          if (wireLength > MAX_NAME_BYTES) return null
           if (name.isNotEmpty()) name.append('.')
           for (index in offset + 1..offset + length) {
             val char = (bytes[index].toInt() and 0xff).toChar()

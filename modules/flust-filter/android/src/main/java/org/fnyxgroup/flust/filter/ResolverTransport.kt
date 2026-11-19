@@ -6,6 +6,7 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import javax.net.ssl.SNIHostName
 import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLException
 import javax.net.ssl.SSLPeerUnverifiedException
 import javax.net.ssl.SSLSocket
 
@@ -53,6 +54,7 @@ class ResolverTransport(
       secure.sslParameters = secure.sslParameters.apply {
         endpointIdentificationAlgorithm = "HTTPS"
         serverNames = listOf(SNIHostName(endpoint.host))
+        protocols = modernProtocols(protocols)
       }
       secure.startHandshake()
       if (!CertificateCheck.names(secure.session.peerCertificates, endpoint.host)) {
@@ -62,6 +64,17 @@ class ResolverTransport(
     } catch (error: Exception) {
       socket.close()
       throw error
+    }
+  }
+
+  companion object {
+    private val MODERN_PROTOCOLS = setOf("TLSv1.2", "TLSv1.3")
+
+    // TLS 1.2 and later only. Older Android versions still enable 1.0 and 1.1 by default.
+    internal fun modernProtocols(enabled: Array<String>): Array<String> {
+      val kept = enabled.filter { it in MODERN_PROTOCOLS }
+      if (kept.isEmpty()) throw SSLException("Neither TLS 1.2 nor TLS 1.3 is enabled")
+      return kept.toTypedArray()
     }
   }
 }

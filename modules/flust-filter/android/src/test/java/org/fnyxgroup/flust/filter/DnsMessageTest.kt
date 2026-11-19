@@ -110,4 +110,34 @@ class DnsMessageTest {
     val small = TestData.response(bytes, emptyList())
     assertArrayEquals(small, Dns.fitForUdp(small, query))
   }
+
+  @Test
+  fun refusesANameLongerThan255Bytes() {
+    val longest = List(4) { "a".repeat(63) }.joinToString(".").dropLast(2)
+    assertEquals(253, longest.length)
+    assertEquals(longest, Dns.parseQuery(TestData.query(longest))!!.name)
+    assertNull(Dns.parseQuery(TestData.query(longest + "a")))
+  }
+
+  @Test
+  fun stopsReadingANameThatPointersMakeLonger() {
+    // The answer's name is a 63-byte label and a pointer back to it: following the pointers would
+    // repeat the label 16 times.
+    val query = TestData.query("example.org")
+    val response = TestData.response(query, emptyList())
+    val labelAt = response.size + 12
+    val record = java.io.ByteArrayOutputStream()
+    TestData.u16(record, 0xc000 or labelAt)
+    TestData.u16(record, Dns.TYPE_A)
+    TestData.u16(record, Dns.CLASS_IN)
+    TestData.u16(record, 0)
+    TestData.u16(record, 60)
+    TestData.u16(record, 0)
+    record.write(63)
+    record.write(ByteArray(63) { 'a'.code.toByte() })
+    TestData.u16(record, 0xc000 or labelAt)
+    val looping = (response + record.toByteArray()).also { it[7] = 1 }
+
+    assertNull(Dns.records(looping, query, Dns.TYPE_A))
+  }
 }

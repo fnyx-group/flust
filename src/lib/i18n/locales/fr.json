@@ -899,7 +899,7 @@
       "stopped": "Désactivé dans flust.",
       "revoked": "Désactivé. Un autre VPN a pris la place, ou le VPN a été coupé dans les réglages.",
       "no-consent": "Désactivé. Android n'autorise plus le VPN. Réactive le filtre.",
-      "failed": "Désactivé. Le filtre s'est arrêté après une erreur. Ouvre flust pour le relancer."
+      "failed": "Désactivé. Le filtre s'est arrêté après une erreur. Active-le pour le relancer."
     },
     "measure": "Mesurer les listes",
     "measured": "{{entries}} domaines, {{kilobytes}} Ko, chargés en {{load}} ms, {{decide}} µs par nom.",

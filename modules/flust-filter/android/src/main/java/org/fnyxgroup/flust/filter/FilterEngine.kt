@@ -43,7 +43,7 @@ class FilterEngine(
       while (!Thread.currentThread().isInterrupted) {
         val length = input.read(buffer)
         if (length < 0) break
-        if (length > 0) handler.handle(buffer.copyOf(length), length)
+        if (length > 0) handle(handler, buffer.copyOf(length), length)
         if (now() - lastExpiry > EXPIRY_MILLIS) {
           handler.expire()
           lastExpiry = now()
@@ -53,6 +53,15 @@ class FilterEngine(
       // The tunnel was closed: the service is stopping.
     } finally {
       stop()
+    }
+  }
+
+  // A packet that cannot be handled is dropped, as the network would drop it: an uncaught
+  // exception would end the process, and the filter with it.
+  private fun handle(handler: PacketHandler, packet: ByteArray, length: Int) {
+    try {
+      handler.handle(packet, length)
+    } catch (dropped: Exception) {
     }
   }
 

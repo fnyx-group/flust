@@ -899,7 +899,7 @@
       "stopped": "Off, turned off in flust.",
       "revoked": "Off. Another VPN took over, or the VPN was turned off in the settings.",
       "no-consent": "Off. Android no longer allows the VPN. Turn the filter on again.",
-      "failed": "Off. The filter stopped after an error. Open flust to start it again."
+      "failed": "Off. The filter stopped after an error. Turn it on to start it again."
     },
     "measure": "Measure the lists",
     "measured": "{{entries}} domains, {{kilobytes}} KB, loaded in {{load}} ms, {{decide}} µs per name.",

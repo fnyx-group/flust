@@ -11,7 +11,8 @@ fun interface Upstream {
 }
 
 // Answers one query: NXDOMAIN for a blocked name, the restricted version of a search engine, or
-// the resolver's answer. Holds the name only while it answers: nothing is logged or cached.
+// the resolver's answer. Keeps no reference to the name after its answer: nothing is logged or
+// cached.
 class QueryProcessor(policy: FilterPolicy, private val upstream: Upstream) {
   private val policy = AtomicReference(policy)
 
