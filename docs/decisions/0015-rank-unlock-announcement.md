@@ -10,7 +10,7 @@ The rank unlock screen must appear when a rank is reached, whether the app was o
 - A rank is stored when its unlock screen is opened. Unlocked and announced are therefore the same thing: a stored rank is never announced again.
 - The session owns an announcer that records announced ranks in a set updated synchronously, before the session state and the storage write. A second check before React commits finds the ranks already announced and does nothing.
 - A failed write is not retried. The ranks stay in the session for this run and are announced again on the next launch. No rank is lost, since the total still reaches them.
-- The unlock screen receives the ranks and the total as route parameters and only displays them. Malformed parameters, such as from a deep link, redirect to Home.
+- The unlock screen receives the ranks and the total as route parameters and only displays them. Malformed parameters redirect to Home. Production builds register no URL scheme, so no link can open it ([0035](0035-no-url-scheme-in-production.md)).
 
 ## Consequences
 

@@ -31,12 +31,23 @@ export type ReminderSyncDeps = {
   readonly paused: () => boolean;
 };
 
-export type ReminderSyncOutcome = 'planned' | 'off' | 'not-allowed' | 'storage-failed' | 'paused';
+export type ReminderSyncOutcome =
+  'planned' | 'off' | 'not-allowed' | 'storage-failed' | 'notifier-failed' | 'paused';
 
 // Plans every reminder again from now. When storage cannot be read, the reminders already
 // planned stay as they are rather than being lost. Once notifications are no longer allowed,
-// every reminder is stored as off, so allowing them again never turns one back on unasked.
+// every reminder is stored as off, so allowing them again never turns one back on unasked. A
+// notifier that fails, which can leave part of a plan, is reported: every sync plans everything
+// again, so the next one repairs it.
 export async function syncReminders(deps: ReminderSyncDeps): Promise<ReminderSyncOutcome> {
+  try {
+    return await plan(deps);
+  } catch {
+    return 'notifier-failed';
+  }
+}
+
+async function plan(deps: ReminderSyncDeps): Promise<ReminderSyncOutcome> {
   const { storage, notifier, now, offsetAt, paused } = deps;
   const settings = await storage.reminders.load();
   if (!settings.ok) return 'storage-failed';

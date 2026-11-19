@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import type { ExpoConfig } from 'expo/config';
+import type { ModConfig } from 'expo/config-plugins';
 
 import createConfig, {
   PRODUCTION_ANDROID_PERMISSIONS,
@@ -58,6 +59,29 @@ describe('app config', () => {
   it('never expects a permission it blocks', () => {
     const blocked = [...blockedInEveryVariant, ...PRODUCTION_BLOCKED_PERMISSIONS];
     expect(PRODUCTION_ANDROID_PERMISSIONS.filter((p) => blocked.includes(p))).toEqual([]);
+  });
+});
+
+// Plugins register their mods on the config, which the ExpoConfig type leaves out.
+function modsOf(config: ExpoConfig): ModConfig | undefined {
+  return (config as ExpoConfig & { mods?: ModConfig }).mods;
+}
+
+describe('URL schemes', () => {
+  it.each([['production'], [undefined]])(
+    'are removed from the native projects in the %s variant',
+    (variant) => {
+      const mods = modsOf(configFor(variant));
+      expect(mods?.android?.finalized).toBeDefined();
+      expect(mods?.ios?.finalized).toBeDefined();
+    },
+  );
+
+  it('stay in the development variant, which the dev client opens through flust-dev', () => {
+    const config = configFor('development');
+    expect(config.scheme).toBe('flust-dev');
+    expect(modsOf(config)?.android?.finalized).toBeUndefined();
+    expect(modsOf(config)?.ios?.finalized).toBeUndefined();
   });
 });
 

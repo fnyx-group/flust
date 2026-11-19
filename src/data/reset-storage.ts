@@ -1,4 +1,9 @@
-import { BACKUP_NAME, DATABASE_NAME, type StorageDeps } from '@/data/storage-deps';
+import {
+  BACKUP_NAME,
+  BACKUP_TEMP_NAME,
+  DATABASE_NAME,
+  type StorageDeps,
+} from '@/data/storage-deps';
 import { err, ok, type Result } from '@/domain/result';
 
 export type ResetStorageError = 'reset-failed';
@@ -10,6 +15,7 @@ export async function resetStorage(
   deps: Pick<StorageDeps, 'files' | 'keyStore'>,
 ): Promise<Result<void, ResetStorageError>> {
   try {
+    await deps.files.remove(BACKUP_TEMP_NAME);
     await deps.files.remove(BACKUP_NAME);
     await deps.files.remove(DATABASE_NAME);
     await deps.keyStore.remove();

@@ -41,10 +41,9 @@ class ReminderScheduler(private val context: Context) {
   // Null when the reminder is no longer planned, such as after a new plan replaced it.
   fun takeDelivered(id: Int): Reminder? = synchronized(ReminderStore.LOCK) {
     val contents = store.read()
-    val reminder = contents.reminders.find { it.id == id } ?: return null
-    val rest = afterDelivery(contents.reminders, id, System.currentTimeMillis(), currentOffsets())
-    store.write(contents.copy(reminders = rest))
-    reminder
+    deliver(contents.reminders, id, System.currentTimeMillis(), currentOffsets()) { rest ->
+      store.write(contents.copy(reminders = rest))
+    }
   }
 
   private fun schedule(reminders: List<Reminder>) {

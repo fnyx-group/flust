@@ -4,11 +4,13 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 
 // The planned list and the channel's name, kept in the no-backup directory so they never reach a
 // backup. The text is the neutral notification wording, nothing from the user's data. The file
-// is written whole to a temporary file and renamed, so an interrupted write never leaves half.
+// is written whole to a temporary file, synced to the disk, then renamed, so neither an
+// interrupted write nor a power loss after the rename leaves half a file.
 // Every instance shares one lock: the module, the alarm receiver and the reschedule receiver each
 // make their own, from different threads.
 class ReminderStore(context: Context) {
@@ -32,7 +34,10 @@ class ReminderStore(context: Context) {
   fun write(contents: Contents) = synchronized(LOCK) {
     val temporary = File.createTempFile(FILE_NAME, ".tmp", file.parentFile)
     try {
-      temporary.writeText(encode(contents).toString())
+      FileOutputStream(temporary).use { stream ->
+        stream.write(encode(contents).toString().toByteArray(Charsets.UTF_8))
+        stream.fd.sync()
+      }
       if (!temporary.renameTo(file)) throw IOException("Could not replace $FILE_NAME")
     } finally {
       temporary.delete()

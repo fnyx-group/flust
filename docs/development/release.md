@@ -4,11 +4,11 @@ The checks before each store release, in order. A release that fails one is not 
 
 1. `main` is green in CI: typecheck, tests with coverage, lint, knip, format check, and the Kotlin tests.
 2. The builds come from the `production` profile on EAS (see [Setup](setup.md#development-build)).
-3. The Android build contains no Firebase, Google Play services or Install Referrer code, and no manifest entries for them ([0021](../decisions/0021-local-notifications.md)). It requests the expected permissions only, none of those blocked in production ([0030](../decisions/0030-production-android-permissions.md)). Run the check on the bundle EAS produced, with `BUNDLETOOL` set (see [Setup](setup.md#android-build-tools)):
+3. The Android build contains no Firebase, Google Play services or Install Referrer code, and no manifest entries for them ([0021](../decisions/0021-local-notifications.md)). It requests the expected permissions only, none of those blocked in production ([0030](../decisions/0030-production-android-permissions.md)). It registers no URL scheme: no intent filter with a `VIEW` action and a data scheme ([0035](../decisions/0035-no-url-scheme-in-production.md)). Run the check on the bundle EAS produced, with `BUNDLETOOL` set (see [Setup](setup.md#android-build-tools)):
 
        scripts/check-android-release.sh path/to/flust.aab
 
-   It lists the permissions the build requests. It exits with 1 and lists what it found when the build has something it must not ship, including a permission outside the expected list, and with 2 when it cannot read the build. A new permission is either blocked, or added to `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts` and to the script, with a reason.
+   It lists the permissions the build requests. It exits with 1 and lists what it found when the build has something it must not ship, including a permission outside the expected list or a URL scheme, and with 2 when it cannot read the build. A new permission is either blocked, or added to `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts` and to the script, with a reason.
 
 4. Every help number was checked against its official sources within the last 400 days, which the review test enforces. Check them again every year ([0027](../decisions/0027-offline-help-resources.md)).
 5. The Maestro flows pass on a local production release APK built from the release commit ([Testing](testing.md#end-to-end)), and the [manual checklist](manual-checklist.md) is done for the platforms being released.
@@ -26,7 +26,7 @@ To check a production build before EAS, or after a dependency change, build a re
 
        (cd android && ./gradlew assembleRelease)
 
-3. Run the check on it. It prints every permission the build requests, then fails on Firebase or Google Play services code, a blocked permission or an unexpected one:
+3. Run the check on it. It prints every permission the build requests, then fails on Firebase or Google Play services code, a blocked permission, an unexpected one or a URL scheme:
 
        scripts/check-android-release.sh android/app/build/outputs/apk/release/app-release.apk
 

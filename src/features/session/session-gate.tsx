@@ -1,19 +1,14 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { withCheckIn, type CheckIn } from '@/domain/check-in';
-import type { Journey } from '@/domain/journey';
-import type { LapseRecord } from '@/domain/lapse';
 import { localDayNumber } from '@/domain/local-time';
-import { withUnlocked, type RankId } from '@/domain/ranks';
 import { useFirstScreenShown } from '@/features/errors/launch-context';
 import { createUnlockAnnouncer } from '@/features/ranks/unlock-announcer';
-import { loadSession, type SessionData } from '@/features/session/load-session';
+import { loadSession } from '@/features/session/load-session';
 import { SessionContext } from '@/features/session/session-context';
+import { sessionSetters, type SessionState } from '@/features/session/session-state';
 import { useFollowDeviceLanguage } from '@/features/session/use-follow-device-language';
 import { deviceOffsetAt } from '@/features/shared/device-time';
 import { useReportStorageFailure, useStorage } from '@/features/storage/storage-context';
-
-type SessionState = { status: 'loading' } | { status: 'ready'; data: SessionData };
 
 // Loads what decides the first screen, the journey, the onboarding draft and the chosen language,
 // before hiding the splash screen, so nothing blank or wrong flashes before the first screen. A
@@ -23,10 +18,11 @@ export function SessionGate({ children }: { children: ReactNode }) {
   const reportFailure = useReportStorageFailure();
   const firstScreenShown = useFirstScreenShown();
   const [state, setState] = useState<SessionState>({ status: 'loading' });
+  const [setters] = useState(() => sessionSetters(setState));
   const [announcer] = useState(() =>
     createUnlockAnnouncer({
       persist: (ids) => storage.ranks.unlock(ids),
-      addToSession: (ids) => setState((previous) => addUnlocked(previous, ids)),
+      addToSession: setters.addUnlocked,
     }),
   );
 
@@ -58,30 +54,11 @@ export function SessionGate({ children }: { children: ReactNode }) {
     latestLapse: data.latestLapse,
     checkIns: data.checkIns,
     lowMoodDismissedDay: data.lowMoodDismissedDay,
-    setJourney: (journey: Journey) => setState({ status: 'ready', data: { ...data, journey } }),
-    setLapses: (journey: Journey, latestLapse: LapseRecord | null) =>
-      setState({ status: 'ready', data: { ...data, journey, latestLapse } }),
+    setJourney: setters.setJourney,
+    setLapses: setters.setLapses,
     announceUnlock: announcer.announce,
-    setCheckIn: (checkIn: CheckIn) =>
-      setState((previous) =>
-        update(previous, (ready) => ({
-          checkIns: withCheckIn(ready.checkIns, checkIn),
-        })),
-      ),
-    dismissLowMood: (day: number) =>
-      setState((previous) => update(previous, () => ({ lowMoodDismissedDay: day }))),
+    setCheckIn: setters.setCheckIn,
+    dismissLowMood: setters.dismissLowMood,
   };
   return <SessionContext value={session}>{children}</SessionContext>;
-}
-
-function addUnlocked(state: SessionState, ids: readonly RankId[]): SessionState {
-  return update(state, (data) => ({ unlockedRanks: withUnlocked(data.unlockedRanks, ids) }));
-}
-
-function update(
-  state: SessionState,
-  change: (data: SessionData) => Partial<SessionData>,
-): SessionState {
-  if (state.status !== 'ready') return state;
-  return { status: 'ready', data: { ...state.data, ...change(state.data) } };
 }

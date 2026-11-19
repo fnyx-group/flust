@@ -10,7 +10,8 @@ export const expoDriver: DatabaseDriver = {
       // The raw hex form skips SQLCipher's key derivation: the key is already 256 random bits.
       await db.execAsync(`PRAGMA key = "x'${key}'"`);
     } catch (error) {
-      await db.closeAsync();
+      // The key error is what callers act on: a close that fails too must not replace it.
+      await db.closeAsync().catch(() => undefined);
       throw error;
     }
     return toConnection(db);

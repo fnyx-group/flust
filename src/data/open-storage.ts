@@ -17,6 +17,7 @@ import { createReminderRepository, type ReminderRepository } from '@/data/remind
 import { createSettingsRepository, type SettingsRepository } from '@/data/settings-repository';
 import {
   BACKUP_NAME,
+  BACKUP_TEMP_NAME,
   DATABASE_NAME,
   type DatabaseFiles,
   type StorageDeps,
@@ -65,15 +66,27 @@ export async function openStorage(
 }
 
 async function open(deps: StorageDeps, migrations: readonly Migration[]): Promise<StorageResult> {
-  await restoreInterruptedMigration(deps.files);
+  // A copy cut short is never restored: only a backup that was renamed once complete is.
+  await deps.files.remove(BACKUP_TEMP_NAME);
 
   const key = await readKey(deps.keyStore);
   if (!key.ok) return key;
 
-  if (!(await deps.files.exists(DATABASE_NAME))) {
+  const hasDatabase = await deps.files.exists(DATABASE_NAME);
+  if (await deps.files.exists(BACKUP_NAME)) {
+    // Without the key the backup cannot be checked, and it may be the only copy left.
+    if (key.value === null) return err('key-missing');
+    const restored = await restoreInterruptedMigration(deps, key.value, migrations, hasDatabase);
+    if (!restored.ok) return restored;
+    return openWithKey(deps, key.value, migrations);
+  }
+
+  if (!hasDatabase) {
     // A key without a database is stale: the iOS keychain outlives an uninstall, and a first
-    // launch can stop between storing the key and creating the file.
+    // launch can stop between storing the key and creating the file. Side files left by a
+    // database deleted halfway must not be applied to the new one.
     if (key.value !== null) await deps.keyStore.remove();
+    await deps.files.remove(DATABASE_NAME);
     const created = await createKey(deps.keyStore, deps.randomBytes);
     if (!created.ok) return created;
     return openWithKey(deps, created.value, migrations);
@@ -84,15 +97,41 @@ async function open(deps: StorageDeps, migrations: readonly Migration[]): Promis
 }
 
 // Writes only happen once storage is open, and the backup is gone by then, so a backup found at
-// startup always holds the latest data.
-async function restoreInterruptedMigration(files: DatabaseFiles): Promise<void> {
-  if (await files.exists(BACKUP_NAME)) await restoreBackup(files);
+// startup holds the latest data. It replaces the database only once it opens with the key,
+// passes quick_check and has a schema version this build knows: a backup damaged by a crash or
+// the disk must never replace an intact database. Without a database, as after a restore cut
+// short, the backup may be the only copy: a check that fails, perhaps for a passing reason,
+// keeps every file and the key for the next launch to try again.
+async function restoreInterruptedMigration(
+  deps: StorageDeps,
+  key: StorageKey,
+  migrations: readonly Migration[],
+  hasDatabase: boolean,
+): Promise<Result<void, OpenStorageError>> {
+  const checked = await connect(deps, key, BACKUP_NAME);
+  if (checked.ok) {
+    await closeQuietly(checked.value.db);
+    const { version } = checked.value;
+    if (version >= 1 && version <= latestVersion(migrations)) {
+      await restoreBackup(deps.files);
+      return ok(undefined);
+    }
+  }
+  if (!checked.ok && checked.error === 'cipher-unavailable') return checked;
+  if (!hasDatabase) return err('storage-unavailable');
+  await deps.files.remove(BACKUP_NAME);
+  deps.onBackupDiscarded?.();
+  return ok(undefined);
 }
 
-// The database is removed first so that its journal files are never applied to the backup.
+// The database and its side files go before the backup takes its name: a journal left behind
+// would be applied to the backup as its own. Removing the database also clears side files it
+// left when deleted halfway. The last remove clears the side files that opening the backup may
+// have left under its name.
 async function restoreBackup(files: DatabaseFiles): Promise<void> {
   await files.remove(DATABASE_NAME);
   await files.move(BACKUP_NAME, DATABASE_NAME);
+  await files.remove(BACKUP_NAME);
 }
 
 async function openWithKey(
@@ -113,7 +152,8 @@ async function openWithKey(
   if (version === 0) return migrateNew(deps.files, db, migrations);
 
   await db.close();
-  await deps.files.copy(DATABASE_NAME, BACKUP_NAME);
+  await deps.files.copy(DATABASE_NAME, BACKUP_TEMP_NAME);
+  await deps.files.move(BACKUP_TEMP_NAME, BACKUP_NAME);
   return migrateWithBackup(deps, key, migrations, version);
 }
 
@@ -124,10 +164,11 @@ type Connected = { db: Database; version: number };
 async function connect(
   deps: StorageDeps,
   key: StorageKey,
+  name: string = DATABASE_NAME,
 ): Promise<Result<Connected, OpenStorageError>> {
   let db: Database;
   try {
-    db = createDatabase(await deps.driver.open(DATABASE_NAME, key));
+    db = createDatabase(await deps.driver.open(name, key));
   } catch {
     return err('database-unreadable');
   }

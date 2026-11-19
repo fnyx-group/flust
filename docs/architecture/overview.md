@@ -32,7 +32,7 @@ Folders are created when their first code lands.
 
 Reminders on Android use `modules/flust-reminders`, a Kotlin module that sets local alarms and shows notifications, so the app links no Firebase code ([0021](../decisions/0021-local-notifications.md)). iOS uses `expo-notifications`.
 
-`modules/flust-privacy`, in Swift and Kotlin, reads a clock that keeps running while the phone sleeps, for the wait between unlock attempts ([0024](../decisions/0024-lock-wait.md)). On Android, it also sets `FLAG_SECURE` on the app's window, in place of `expo-screen-capture`, which is not linked there ([0025](../decisions/0025-screen-privacy.md)).
+`modules/flust-privacy`, in Swift and Kotlin, reads a clock that keeps running while the phone sleeps, for the wait between unlock attempts and the relock after time away ([0023](../decisions/0023-app-lock.md), [0024](../decisions/0024-lock-wait.md)). On Android, it also sets `FLAG_SECURE` on the app's window as the activity is created, in place of `expo-screen-capture`, which is not linked there ([0025](../decisions/0025-screen-privacy.md)), and asks the keyboard not to learn what is typed in text fields ([0036](../decisions/0036-keyboard-learning.md)).
 
 The content filter of V0.2 will need platform APIs that Expo does not expose: a Swift module using the Screen Time API on iOS, and a Kotlin module providing VPN-based DNS filtering on Android ([0033](../decisions/0033-android-filter-network-access.md)). Neither exists yet.
 

@@ -1,7 +1,9 @@
 import { MIGRATIONS } from '@/data/migrations';
 import type { Migration } from '@/data/migrations/migration';
 import { openStorage } from '@/data/open-storage';
-import { BACKUP_NAME, DATABASE_NAME } from '@/data/storage-deps';
+import { createDatabase } from '@/data/database';
+import { BACKUP_NAME, BACKUP_TEMP_NAME, DATABASE_NAME } from '@/data/storage-deps';
+import { isStorageKey } from '@/data/storage-key';
 import { parseNoteContent } from '@/domain/journal';
 import { err } from '@/domain/result';
 import { journeyOf, unwrap } from '@test/arbitraries';
@@ -40,6 +42,38 @@ async function installed() {
   await storage.close();
   await seedJourney(fake, journeyOf(START, [START + 1000]));
   return fake;
+}
+
+const JOURNEY = journeyOf(START, [START + 1000]);
+
+async function withBackup() {
+  const fake = await installed();
+  await fake.disk.files.copy(DATABASE_NAME, BACKUP_NAME);
+  const discarded = jest.fn();
+  return { fake, discarded, deps: { ...fake.deps, onBackupDiscarded: discarded } };
+}
+
+async function setBackupVersion(fake: ReturnType<typeof createFakeStorage>, version: number) {
+  const key = fake.keyStore.value;
+  if (!isStorageKey(key)) throw new Error('Expected a key');
+  const backup = createDatabase(await fake.disk.driver.open(BACKUP_NAME, key));
+  await backup.exec(`PRAGMA user_version = ${version}`);
+  await backup.close();
+}
+
+// Makes the database differ from a backup taken before.
+async function addHalfDoneTable(fake: ReturnType<typeof createFakeStorage>) {
+  const raw = await fake.rawDatabase();
+  await raw.exec('CREATE TABLE half_done (value INTEGER) STRICT');
+  await raw.close();
+}
+
+function hasHalfDoneTable(fake: ReturnType<typeof createFakeStorage>): boolean {
+  const rows = fake.disk.query(
+    DATABASE_NAME,
+    "SELECT name FROM sqlite_master WHERE name = 'half_done'",
+  );
+  return rows.length > 0;
 }
 
 describe('openStorage', () => {
@@ -237,7 +271,7 @@ describe('openStorage', () => {
 
       const storage = unwrap(await openStorage(fake.deps, [...MIGRATIONS, addExtraTable]));
 
-      expect(copy).toHaveBeenCalledWith(DATABASE_NAME, BACKUP_NAME);
+      expect(copy).toHaveBeenCalledWith(DATABASE_NAME, BACKUP_TEMP_NAME);
       expect(userVersion(fake)).toBe(NEXT);
       expect(fake.disk.stored.has(BACKUP_NAME)).toBe(false);
       expect(unwrap(await storage.journey.load())).toEqual(journeyOf(START, [START + 1000]));
@@ -250,7 +284,7 @@ describe('openStorage', () => {
       expect(await openStorage(fake.deps, [...MIGRATIONS, failHalfway])).toEqual(
         err('migration-failed'),
       );
-      expect(fake.disk.stored.get(DATABASE_NAME)).toBe(before);
+      expect(fake.disk.stored.get(DATABASE_NAME)).toEqual(before);
       expect(fake.disk.stored.has(BACKUP_NAME)).toBe(false);
       expect(fake.disk.openConnections()).toBe(0);
 
@@ -297,6 +331,267 @@ describe('openStorage', () => {
       const storage = unwrap(await openStorage(fake.deps, migrations));
       expect(userVersion(fake)).toBe(NEXT);
       expect(unwrap(await storage.journey.load())).toEqual(journeyOf(START, [START + 1000]));
+    });
+  });
+
+  describe('backup left by an interrupted migration', () => {
+    const migrations = [...MIGRATIONS, addExtraTable];
+
+    // Reproduces a backup copy cut short by the process dying: restoring it replaced the intact
+    // database with a file that cannot be read.
+    it('keeps the database and deletes a truncated backup', async () => {
+      const { fake, discarded, deps } = await withBackup();
+      fake.disk.damage(BACKUP_NAME, 'truncated');
+
+      const storage = unwrap(await openStorage(deps));
+
+      expect(unwrap(await storage.journey.load())).toEqual(JOURNEY);
+      expect(fake.disk.stored.has(BACKUP_NAME)).toBe(false);
+      expect(discarded).toHaveBeenCalledTimes(1);
+      expect(fake.disk.openConnections()).toBe(1);
+    });
+
+    it('never restores a copy cut short, and migrates again on next launch', async () => {
+      const fake = await installed();
+      fake.disk.interruptNextCopy(DATABASE_NAME);
+
+      expect(await openStorage(fake.deps, migrations)).toEqual(err('storage-unavailable'));
+      expect(fake.disk.stored.has(BACKUP_TEMP_NAME)).toBe(true);
+      expect(fake.disk.stored.has(BACKUP_NAME)).toBe(false);
+
+      const storage = unwrap(await openStorage(fake.deps, migrations));
+      expect(userVersion(fake)).toBe(NEXT);
+      expect(unwrap(await storage.journey.load())).toEqual(JOURNEY);
+      expect(fake.disk.stored.has(BACKUP_TEMP_NAME)).toBe(false);
+      expect(fake.disk.stored.has(BACKUP_NAME)).toBe(false);
+    });
+
+    it('deletes a backup made with another key', async () => {
+      const { fake, discarded, deps } = await withBackup();
+      const backup = fake.disk.stored.get(BACKUP_NAME);
+      if (!backup) throw new Error('Expected a backup');
+      fake.disk.stored.set(BACKUP_NAME, { ...backup, key: OTHER_KEY });
+
+      const storage = unwrap(await openStorage(deps));
+
+      expect(unwrap(await storage.journey.load())).toEqual(JOURNEY);
+      expect(fake.disk.stored.has(BACKUP_NAME)).toBe(false);
+      expect(discarded).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['0', 0],
+      ['above the latest known', CURRENT + 1],
+    ])('deletes a backup at schema version %s', async (_, version) => {
+      const { fake, discarded, deps } = await withBackup();
+      await setBackupVersion(fake, version);
+
+      const storage = unwrap(await openStorage(deps));
+
+      expect(unwrap(await storage.journey.load())).toEqual(JOURNEY);
+      expect(userVersion(fake)).toBe(CURRENT);
+      expect(fake.disk.stored.has(BACKUP_NAME)).toBe(false);
+      expect(discarded).toHaveBeenCalledTimes(1);
+    });
+
+    it('restores a readable backup without reporting it', async () => {
+      const { fake, discarded, deps } = await withBackup();
+      const raw = await fake.rawDatabase();
+      await raw.exec('CREATE TABLE half_done (value INTEGER) STRICT');
+      await raw.close();
+
+      unwrap(await openStorage(deps));
+
+      expect(
+        fake.disk.query(DATABASE_NAME, "SELECT name FROM sqlite_master WHERE name = 'half_done'"),
+      ).toEqual([]);
+      expect(fake.disk.stored.has(BACKUP_NAME)).toBe(false);
+      expect(discarded).not.toHaveBeenCalled();
+    });
+
+    it('touches neither file while the key is missing', async () => {
+      const { fake, discarded, deps } = await withBackup();
+      await addHalfDoneTable(fake);
+      const database = fake.disk.stored.get(DATABASE_NAME);
+      const backup = fake.disk.stored.get(BACKUP_NAME);
+      fake.keyStore.value = null;
+
+      expect(await openStorage(deps)).toEqual(err('key-missing'));
+      expect(fake.disk.stored.get(DATABASE_NAME)).toBe(database);
+      expect(hasHalfDoneTable(fake)).toBe(true);
+      expect(fake.disk.stored.get(BACKUP_NAME)).toBe(backup);
+      expect(discarded).not.toHaveBeenCalled();
+    });
+
+    it('touches neither file while the keystore cannot be read', async () => {
+      const { fake, deps } = await withBackup();
+      const backup = fake.disk.stored.get(BACKUP_NAME);
+      fake.keyStore.failGet = true;
+
+      expect(await openStorage(deps)).toEqual(err('key-unavailable'));
+      expect(fake.disk.stored.get(BACKUP_NAME)).toBe(backup);
+    });
+
+    it('keeps the backup on a build without SQLCipher', async () => {
+      const { fake } = await withBackup();
+      const plain = createFakeStorage({ withoutCipher: true });
+      for (const [name, file] of fake.disk.stored) plain.disk.stored.set(name, file);
+      plain.keyStore.value = fake.keyStore.value;
+
+      expect(await openStorage(plain.deps)).toEqual(err('cipher-unavailable'));
+      expect(plain.disk.stored.has(BACKUP_NAME)).toBe(true);
+      expect(plain.disk.openConnections()).toBe(0);
+    });
+
+    it('keeps a backup left without a key or a database, and never starts fresh', async () => {
+      const { fake, deps } = await withBackup();
+      const backup = fake.disk.stored.get(BACKUP_NAME);
+      fake.disk.stored.delete(DATABASE_NAME);
+      fake.keyStore.value = null;
+
+      expect(await openStorage(deps)).toEqual(err('key-missing'));
+      expect(fake.disk.stored.get(BACKUP_NAME)).toBe(backup);
+      expect(fake.disk.stored.has(DATABASE_NAME)).toBe(false);
+      expect(fake.keyStore.value).toBeNull();
+    });
+  });
+
+  // A restore cut short between removing the database and renaming the backup leaves the backup
+  // as the only copy of the data.
+  describe('backup left without a database', () => {
+    async function onlyBackup() {
+      const { fake, discarded, deps } = await withBackup();
+      fake.disk.stored.delete(DATABASE_NAME);
+      return { fake, discarded, deps, key: fake.keyStore.value };
+    }
+
+    function expectUntouched(
+      fake: ReturnType<typeof createFakeStorage>,
+      key: string | null,
+      backup: unknown,
+    ) {
+      expect(fake.disk.stored.get(BACKUP_NAME)).toBe(backup);
+      expect(fake.disk.stored.has(DATABASE_NAME)).toBe(false);
+      expect(fake.keyStore.value).toBe(key);
+      expect(fake.randomBytes.calls).toBe(1);
+      expect(fake.disk.openConnections()).toBe(0);
+    }
+
+    it('restores the backup', async () => {
+      const { fake, discarded, deps, key } = await onlyBackup();
+
+      const storage = unwrap(await openStorage(deps));
+
+      expect(unwrap(await storage.journey.load())).toEqual(JOURNEY);
+      expect(fake.keyStore.value).toBe(key);
+      expect(fake.disk.stored.has(BACKUP_NAME)).toBe(false);
+      expect(discarded).not.toHaveBeenCalled();
+    });
+
+    it('keeps every file and the key when the backup cannot be read for now', async () => {
+      const { fake, discarded, deps, key } = await onlyBackup();
+      const backup = fake.disk.stored.get(BACKUP_NAME);
+      fake.disk.failNext('open', BACKUP_NAME);
+
+      expect(await openStorage(deps)).toEqual(err('storage-unavailable'));
+      expectUntouched(fake, key, backup);
+      expect(discarded).not.toHaveBeenCalled();
+
+      const storage = unwrap(await openStorage(deps));
+      expect(unwrap(await storage.journey.load())).toEqual(JOURNEY);
+    });
+
+    it.each(['truncated', 'pages'] as const)(
+      'keeps every file and the key when the backup is damaged (%s)',
+      async (damage) => {
+        const { fake, discarded, deps, key } = await onlyBackup();
+        fake.disk.damage(BACKUP_NAME, damage);
+        const backup = fake.disk.stored.get(BACKUP_NAME);
+
+        expect(await openStorage(deps)).toEqual(err('storage-unavailable'));
+        expectUntouched(fake, key, backup);
+        expect(await openStorage(deps)).toEqual(err('storage-unavailable'));
+        expectUntouched(fake, key, backup);
+        expect(discarded).not.toHaveBeenCalled();
+      },
+    );
+
+    it('keeps every file and the key when the backup has a schema this build does not know', async () => {
+      const { fake, deps, key } = await onlyBackup();
+      await setBackupVersion(fake, CURRENT + 1);
+      const backup = fake.disk.stored.get(BACKUP_NAME);
+
+      expect(await openStorage(deps)).toEqual(err('storage-unavailable'));
+      expectUntouched(fake, key, backup);
+    });
+
+    it('recovers from a restore cut short after a failed migration', async () => {
+      const fake = await installed();
+      fake.disk.failNext('move', BACKUP_NAME);
+
+      expect(await openStorage(fake.deps, [...MIGRATIONS, failHalfway])).toEqual(
+        err('storage-unavailable'),
+      );
+      expect(fake.disk.stored.has(DATABASE_NAME)).toBe(false);
+
+      const storage = unwrap(await openStorage(fake.deps));
+      expect(unwrap(await storage.journey.load())).toEqual(JOURNEY);
+      expect(userVersion(fake)).toBe(CURRENT);
+    });
+  });
+
+  // SQLite applies a journal it finds next to a database to that database, whatever file it was
+  // written for.
+  describe('side files', () => {
+    const JOURNAL = `${DATABASE_NAME}-journal`;
+
+    // A journal holding pages of the half-migrated database.
+    async function halfMigratedJournal(fake: ReturnType<typeof createFakeStorage>) {
+      const database = fake.disk.stored.get(DATABASE_NAME);
+      await addHalfDoneTable(fake);
+      const journal = fake.disk.stored.get(DATABASE_NAME);
+      if (!database || !journal) throw new Error('Expected a database');
+      fake.disk.stored.set(DATABASE_NAME, database);
+      fake.disk.stored.set(JOURNAL, journal);
+    }
+
+    it('restores the backup cleanly after the app died between deleting the database and its journal', async () => {
+      const { fake, deps } = await withBackup();
+      await halfMigratedJournal(fake);
+      fake.disk.stored.delete(DATABASE_NAME);
+
+      const storage = unwrap(await openStorage(deps));
+
+      expect(hasHalfDoneTable(fake)).toBe(false);
+      expect(fake.disk.stored.has(JOURNAL)).toBe(false);
+      expect(unwrap(await storage.journey.load())).toEqual(JOURNEY);
+    });
+
+    it('removes the journal before the database, so dying in between leaves none behind', async () => {
+      const { fake, deps } = await withBackup();
+      await halfMigratedJournal(fake);
+      fake.disk.failNext('remove', DATABASE_NAME);
+
+      expect(await openStorage(deps)).toEqual(err('storage-unavailable'));
+      expect(fake.disk.stored.has(JOURNAL)).toBe(false);
+      expect(fake.disk.stored.has(DATABASE_NAME)).toBe(true);
+      expect(fake.disk.stored.has(BACKUP_NAME)).toBe(true);
+
+      const storage = unwrap(await openStorage(deps));
+      expect(hasHalfDoneTable(fake)).toBe(false);
+      expect(unwrap(await storage.journey.load())).toEqual(JOURNEY);
+    });
+
+    it('starts fresh without applying a journal left by a database deleted halfway', async () => {
+      const fake = await installed();
+      await halfMigratedJournal(fake);
+      fake.disk.stored.delete(DATABASE_NAME);
+
+      const storage = unwrap(await openStorage(fake.deps));
+
+      expect(fake.disk.stored.has(JOURNAL)).toBe(false);
+      expect(hasHalfDoneTable(fake)).toBe(false);
+      expect(unwrap(await storage.journey.load())).toBeNull();
     });
   });
 

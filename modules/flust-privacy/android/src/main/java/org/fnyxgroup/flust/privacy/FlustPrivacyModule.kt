@@ -1,17 +1,21 @@
 package org.fnyxgroup.flust.privacy
 
+import android.app.Activity
 import android.os.SystemClock
 import android.view.WindowManager
+import expo.modules.kotlin.exception.CodedException
 import expo.modules.kotlin.functions.Queues
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
 // FLAG_SECURE without expo-screen-capture, which registers a screenshot observer as it loads and
 // crashes without DETECT_SCREEN_CAPTURE, a permission flust blocks since it detects nothing.
+// ActivityPrivacy sets it as the activity is created; setSecure confirms it from JavaScript and
+// reports a failure there.
 class FlustPrivacyModule : Module() {
   // Applied again to each activity that comes to the foreground, so a recreated one is covered.
   // Null until setSecure is called, so a build that never calls it, such as the development
-  // build, never touches the window.
+  // build, never touches the window from here.
   private var secure: Boolean? = null
 
   override fun definition() = ModuleDefinition {
@@ -23,23 +27,27 @@ class FlustPrivacyModule : Module() {
 
     AsyncFunction("setSecure") { on: Boolean ->
       secure = on
-      applySecure()
+      val activity = appContext.currentActivity ?: throw NoActivityException()
+      apply(activity, on)
     }.runOnQueue(Queues.MAIN)
 
-    OnActivityEntersForeground { applySecure() }
-  }
-
-  // OnActivityEntersForeground can fire on the JS thread, and only the UI thread may touch the
-  // window.
-  private fun applySecure() {
-    val on = secure ?: return
-    val activity = appContext.currentActivity ?: return
-    activity.runOnUiThread {
-      if (on) {
-        activity.window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-      } else {
-        activity.window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
-      }
+    // OnActivityEntersForeground can fire on the JS thread, and only the UI thread may touch the
+    // window.
+    OnActivityEntersForeground {
+      val on = secure ?: return@OnActivityEntersForeground
+      val activity = appContext.currentActivity ?: return@OnActivityEntersForeground
+      activity.runOnUiThread { apply(activity, on) }
     }
   }
+
+  private fun apply(activity: Activity, on: Boolean) {
+    if (on) {
+      activity.window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+    } else {
+      activity.window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+    }
+  }
+
+  private class NoActivityException :
+    CodedException("No activity to protect from screenshots")
 }

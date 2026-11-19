@@ -25,3 +25,21 @@ fun instantOf(reminder: Reminder, offsetAt: OffsetAt): Long =
 // The stored list after one reminder was delivered: it and anything already past are removed.
 fun afterDelivery(reminders: List<Reminder>, deliveredId: Int, now: Long, offsetAt: OffsetAt): List<Reminder> =
   upcoming(reminders.filter { it.id != deliveredId }, now, offsetAt).map { (reminder, _) -> reminder }
+
+// The delivered reminder, taken off the stored list. It is returned even when the list cannot be
+// written, so its notification is still shown: it is past, and the next plan or restore drops it.
+fun deliver(
+  reminders: List<Reminder>,
+  id: Int,
+  now: Long,
+  offsetAt: OffsetAt,
+  write: (List<Reminder>) -> Unit,
+): Reminder? {
+  val reminder = reminders.find { it.id == id } ?: return null
+  try {
+    write(afterDelivery(reminders, id, now, offsetAt))
+  } catch (error: Exception) {
+    // An exception would crash the app in the background, and the notification would be lost.
+  }
+  return reminder
+}

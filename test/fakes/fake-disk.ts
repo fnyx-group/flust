@@ -7,9 +7,10 @@ type StoredFile = { readonly bytes: Uint8Array; readonly key: string };
 
 type FileOperation = keyof DatabaseFiles | 'open';
 
-// 'garbage' replaces the whole file, 'pages' wipes a page after the header, and 'freelist' leaves
-// every page readable but makes the header inconsistent, which only an integrity check notices.
-type Damage = 'garbage' | 'pages' | 'freelist';
+// 'garbage' replaces the whole file, 'pages' wipes a page after the header, 'freelist' leaves
+// every page readable but makes the header inconsistent, which only an integrity check notices,
+// and 'truncated' keeps only the first half, as a copy cut short does.
+type Damage = 'garbage' | 'pages' | 'freelist' | 'truncated';
 
 export type FakeDiskOptions = {
   // Simulates a build where the SQLCipher plugin is missing: PRAGMA cipher_version returns nothing.
@@ -22,16 +23,25 @@ export type FakeDisk = {
   stored: Map<string, StoredFile>;
   openConnections(): number;
   failNext(operation: FileOperation, name?: string): void;
+  // The next copy from `name` writes half the file to its destination, then fails, like a
+  // process killed while copying.
+  interruptNextCopy(name?: string): void;
   damage(name: string, damage: Damage): void;
   query(name: string, sql: string): Row[];
 };
 
+// SQLite's side files, removed before the database as the app's own files do.
+const SIDE_SUFFIXES = ['-journal', '-wal', '-shm'];
+
 // An in-memory stand-in for the database directory and SQLCipher. Each file is a serialized
 // SQLite database tagged with the key it was created with; opening it with another key fails the
 // way SQLCipher does, on the first read. Writes reach the "file" as soon as they are committed.
+// A `-journal` file holds the pages a transaction cut short would roll back to: opening a
+// database next to one applies it, as SQLite does with a hot journal.
 export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}): FakeDisk {
   const stored = new Map<string, StoredFile>();
   const failures: { operation: FileOperation; name: string | undefined }[] = [];
+  const interruptedCopies: (string | undefined)[] = [];
   let open = 0;
 
   function failIfPlanned(operation: FileOperation, name: string) {
@@ -50,6 +60,13 @@ export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}):
     return file;
   }
 
+  function rollBackHotJournal(name: string) {
+    const journal = stored.get(`${name}-journal`);
+    if (!journal) return;
+    stored.set(name, journal);
+    stored.delete(`${name}-journal`);
+  }
+
   const files: DatabaseFiles = {
     async exists(name) {
       failIfPlanned('exists', name);
@@ -57,7 +74,16 @@ export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}):
     },
     async copy(from, to) {
       failIfPlanned('copy', from);
-      stored.set(to, existing(from));
+      const file = existing(from);
+      const interrupted = interruptedCopies.findIndex(
+        (name) => name === undefined || name === from,
+      );
+      if (interrupted !== -1) {
+        interruptedCopies.splice(interrupted, 1);
+        stored.set(to, { key: file.key, bytes: damaged(file.bytes, 'truncated') });
+        throw new Error(`Copy of ${from} interrupted`);
+      }
+      stored.set(to, { key: file.key, bytes: file.bytes.slice() });
     },
     async move(from, to) {
       failIfPlanned('move', from);
@@ -65,14 +91,17 @@ export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}):
       stored.delete(from);
     },
     async remove(name) {
-      failIfPlanned('remove', name);
-      stored.delete(name);
+      for (const file of [...SIDE_SUFFIXES.map((suffix) => `${name}${suffix}`), name]) {
+        failIfPlanned('remove', file);
+        stored.delete(file);
+      }
     },
   };
 
   const driver: DatabaseDriver = {
     async open(name, key) {
       failIfPlanned('open', name);
+      rollBackHotJournal(name);
       const file = stored.get(name);
       const db = new DatabaseSync(':memory:');
       const readable = file === undefined || (file.key === key && deserialize(db, file.bytes));
@@ -113,6 +142,9 @@ export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}):
     failNext(operation, name) {
       failures.push({ operation, name });
     },
+    interruptNextCopy(name) {
+      interruptedCopies.push(name);
+    },
     damage(name, damage) {
       const file = existing(name);
       stored.set(name, { key: file.key, bytes: damaged(file.bytes, damage) });
@@ -141,6 +173,7 @@ function deserialize(db: DatabaseSync, bytes: Uint8Array): boolean {
 
 function damaged(bytes: Uint8Array, damage: Damage): Uint8Array {
   if (damage === 'garbage') return new Uint8Array(bytes.length).fill(7);
+  if (damage === 'truncated') return bytes.slice(0, Math.floor(bytes.length / 2));
   const copy = new Uint8Array(bytes);
   if (damage === 'pages') copy.fill(0xff, PAGE_SIZE, 2 * PAGE_SIZE);
   else copy[FREELIST_COUNT_OFFSET] = 3;
