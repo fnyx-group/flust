@@ -47,7 +47,8 @@ export function StorageGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    storageService.open().then((result) => {
+    // openStorage turns every error into a Result, so this never rejects.
+    void storageService.open().then((result) => {
       if (!active) return;
       setState(
         result.ok
@@ -108,7 +109,7 @@ export function StorageGate({ children }: { children: ReactNode }) {
 
   const screen = failureScreen(state.failure);
   return screen.kind === 'reset' ? (
-    <ResetScreen reason={screen.reason} onRetry={retry} onReset={reset} />
+    <ResetScreen reason={screen.reason} onRetry={retry} onReset={() => void reset()} />
   ) : (
     <RetryScreen reason={screen.reason} onRetry={retry} />
   );

@@ -4,7 +4,7 @@
 
 - TypeScript in strict mode, with `noUncheckedIndexedAccess`, `noImplicitOverride`, `noFallthroughCasesInSwitch` and `noImplicitReturns`. Type errors are fixed, not silenced: no casts or non-null assertions unless there is no other way.
 - Prettier formats everything: single quotes, trailing commas, 100 columns.
-- ESLint uses `eslint-config-expo`, with `eslint-config-prettier` turning off formatting rules, plus the project rules below (`eslint.config.js`).
+- ESLint uses `eslint-config-expo`, with `eslint-config-prettier` turning off formatting rules, plus the project rules below (`eslint.config.js`). TypeScript files are linted with type information, through the TypeScript project service.
 - Self-explanatory code. Comments are written in English and only explain a non-obvious reason (why, not what). No commented-out code, no banner comments, no emojis.
 - Small, focused functions and files.
 
@@ -32,6 +32,8 @@ Code in `src/domain/` does not throw for expected failures, such as a start date
 
 Unexpected errors are caught by the error boundary each route exports, and recorded in the local error log without their message ([0028](../decisions/0028-error-boundaries-and-safe-mode.md), [0029](../decisions/0029-local-error-log.md)). A new route exports `ScreenErrorBoundary` as `ErrorBoundary`; a test checks it.
 
+Repositories in `src/data/` never reject either: `attempt` (`src/data/storage-error.ts`) turns an error thrown by the database into `'storage-failed'`, and a new repository method goes through it. A promise is awaited, or handled with a rejection handler. `void` marks one left on its own, such as a repository call in an effect, only when it cannot reject or its rejection does not matter; a comment gives the reason when it is not a repository call. ESLint rejects a promise left without either.
+
 Domain functions never read the clock. They take the current time, `now`, as a UTC timestamp in milliseconds, so they stay deterministic and testable.
 
 ## Lint rules
@@ -43,6 +45,7 @@ Domain functions never read the clock. They take the current time, `now`, as a U
 - Every `Pressable` has an `accessibilityRole` (or `role`), and every `TextInput` an `accessibilityLabel` (or `aria-label`). A `Pressable` hidden from screen readers with `importantForAccessibility="no"` and `accessibilityElementsHidden`, such as a sheet backdrop, is exempt. The `Touchable` components, a `Text` with `onPress`, and `Pressable` or `TextInput` animated or under another name are rejected, so that the rule sees every control ([0032](../decisions/0032-accessibility-pass.md)).
 - `colors.locked` is used only by `src/ui/rank-emblem.tsx`, for the outline of locked emblems: it is too dark for text or a control's outline. Dimmed text and control outlines use `colors.muted`.
 - `colors.danger` is only for destructive actions and emergency numbers ([0034](../decisions/0034-visual-refresh.md)), used by `src/ui/button.tsx`, `src/ui/nav-row.tsx`, the settings and erase screens, and the help screen. Elsewhere, a destructive control goes through `Button` or `NavRow`.
+- Type-aware rules from `typescript-eslint`, chosen for the bugs they catch: a promise left unhandled (`no-floating-promises`) or passed where a callback returns nothing (`no-misused-promises`), a `switch` on a union that misses a case even with a `default` (`switch-exhaustiveness-check`), a promise returned from a `try` without `await`, so that its `catch` never sees the error (`return-await`), and `await-thenable`, `only-throw-error`, `prefer-promise-reject-errors`, `no-base-to-string`, `restrict-template-expressions`, `no-meaningless-void-operator` and `no-unnecessary-type-assertion`. They make `pnpm lint` about 30 percent slower.
 - React hooks rules and the React Compiler rules from `eslint-plugin-react-hooks` (included by `eslint-config-expo`) are errors, including `exhaustive-deps`.
 
 ## React Compiler
@@ -53,6 +56,7 @@ The React Compiler is enabled by `experiments.reactCompiler` in `app.json`; `bab
 
 - pnpm installs only versions published at least one day earlier (`minimumReleaseAge: 1440` in `pnpm-workspace.yaml`), so a compromised release has time to be caught and pulled before it reaches the lockfile.
 - Dependency build scripts are denied, and new dependencies are added with `pnpm expo install` ([Setup](setup.md#dependencies)).
+- CI fails on a moderate or worse advisory in a production dependency (`pnpm audit --prod --audit-level moderate`), and on a pull request that adds a dependency with one. An advisory that does not apply is ignored in `auditConfig.ignoreGhsas` of `pnpm-workspace.yaml`, with its reason, and reviewed at each Expo update ([0037](../decisions/0037-ci-native-builds.md)).
 
 ## Unused code
 
@@ -78,7 +82,7 @@ commitlint (`commitlint.config.mjs`) enforces these rules in the `commit-msg` ho
 
 lefthook (`lefthook.yml`) runs on every commit:
 
-- pre-commit: Prettier and ESLint on staged files plus a full typecheck, then gitleaks on staged changes.
+- pre-commit: Prettier and ESLint on staged files plus a full typecheck, then gitleaks on staged changes. ESLint with type information takes about three seconds on a few files, and runs alongside the typecheck, which takes longer.
 - commit-msg: commitlint.
 
 ## Branches
@@ -90,5 +94,12 @@ lefthook (`lefthook.yml`) runs on every commit:
 
 - One topic per pull request, targeting `main`.
 - Pull requests are merged by squash only. The pull request title becomes the commit message on `main`, so it follows the commit rules above.
-- CI must pass: typecheck, tests with coverage, lint, knip, format check, and commitlint on the commits and the pull request title.
+- CI must pass. The required checks, by job name:
+  - `checks`: typecheck, tests with coverage, lint, knip, format check, and commitlint on the commits and the pull request title.
+  - `kotlin`: the Kotlin JVM tests.
+  - `secrets`: gitleaks on the commits of the pull request.
+  - `shellcheck`: the scripts in `scripts/`.
+  - `audit` and `dependency-review`: advisories in production dependencies and in the dependencies the pull request adds.
+  - `codeql (javascript-typescript)` and `codeql (actions)`: CodeQL on the code and the workflows.
+  - `native-paths`, `android-release` and `ios-build`: production builds of both apps, checked like a release, when a native path changes ([0037](../decisions/0037-ci-native-builds.md)).
 - Architecture decisions come with a new file in `docs/decisions/`.

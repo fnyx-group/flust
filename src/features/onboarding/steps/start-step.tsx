@@ -99,7 +99,7 @@ export function StartStep({ answers, onChange, progress, onBack }: StartStepProp
       subtitle={t('onboarding.start.subtitle')}
       onBack={onBack}
       backDisabled={busy}
-      action={{ label: t('onboarding.start.finish'), onPress: submit, disabled: busy }}
+      action={{ label: t('onboarding.start.finish'), onPress: () => void submit(), disabled: busy }}
       footer={
         <>
           {error !== null && (

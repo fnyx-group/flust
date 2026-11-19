@@ -9,6 +9,22 @@ Jest with the `jest-expo` preset, configured in `jest.config.js`. Run the suite 
 
 CI runs it with coverage right after the typecheck. Network access fails any test, and `src/domain/` and `src/data/` have coverage thresholds: see [Conventions](conventions.md#tests).
 
+## CI
+
+Three workflows run on pull requests and on `main`. Each job has a timeout and only the permissions it needs.
+
+- `ci.yml`:
+  - `checks`: typecheck, tests with coverage, lint, knip, format check and commitlint.
+  - `kotlin`: the Kotlin JVM tests (see [Network](#network)).
+  - `secrets`: gitleaks on the commits of the pull request, or on the full history on `main`.
+  - `shellcheck`: `scripts/*.sh`.
+  - `audit`: `pnpm audit --prod --audit-level moderate`.
+  - `dependency-review`: the dependencies a pull request adds, failing on a moderate or worse advisory.
+- `codeql.yml`: `codeql (javascript-typescript)` and `codeql (actions)`, also weekly.
+- `native.yml`, also weekly, and on pull requests only when a native path changes (`native-paths` decides; see [0037](../decisions/0037-ci-native-builds.md)):
+  - `android-release`: a production release APK, checked with `scripts/check-android-release.sh`.
+  - `ios-build`: a production Release build for the simulator, without signing, checked with `scripts/check-ios-release.sh`. It is the only place the Swift code of `modules/` compiles before an EAS build.
+
 ## Network
 
 flust makes no network calls ([0006](../decisions/0006-no-network-access.md)), checked three ways:
@@ -18,6 +34,8 @@ flust makes no network calls ([0006](../decisions/0006-no-network-access.md)), c
 - `app.config.test.ts` checks that production builds block `INTERNET` and the other unused permissions, and that `scripts/check-android-release.sh` blocks and expects the same permissions as `app.config.ts` ([0030](../decisions/0030-production-android-permissions.md)). The script itself runs on the built APK or bundle: see [Release](release.md).
 
 These checks cover flust's own code, against mistakes rather than deliberate evasion. Dependencies are not scanned.
+
+The release builds themselves are checked in CI on every change to a native path: see [CI](#ci).
 
 The Kotlin tests of `modules/flust-reminders` run in their own CI job, on the JVM without the Android SDK:
 

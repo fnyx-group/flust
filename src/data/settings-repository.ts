@@ -1,8 +1,9 @@
 import type { Database } from '@/data/database';
 import { readSetting, SETTING_KEYS, writeSetting } from '@/data/setting-store';
-import { err, ok, type Result } from '@/domain/result';
+import { attempt, type StorageError } from '@/data/storage-error';
+import { ok, type Result } from '@/domain/result';
 
-export type SettingsStorageError = 'storage-failed';
+export type SettingsStorageError = StorageError;
 
 // The language is stored as written. Storage does not know which languages exist: the feature
 // that applies it validates it, and anything unknown reads as no choice.
@@ -16,21 +17,15 @@ export type SettingsRepository = {
 };
 
 export function createSettingsRepository(db: Database): SettingsRepository {
-  async function load(key: string): Promise<Result<string | null, SettingsStorageError>> {
-    try {
-      return ok(await readSetting(db, key));
-    } catch {
-      return err('storage-failed');
-    }
+  function load(key: string): Promise<Result<string | null, SettingsStorageError>> {
+    return attempt(async () => ok(await readSetting(db, key)));
   }
 
-  async function save(key: string, value: string): Promise<Result<void, SettingsStorageError>> {
-    try {
+  function save(key: string, value: string): Promise<Result<void, SettingsStorageError>> {
+    return attempt(async () => {
       await db.transaction((tx) => writeSetting(tx, key, value));
       return ok(undefined);
-    } catch {
-      return err('storage-failed');
-    }
+    });
   }
 
   return {

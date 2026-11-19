@@ -1,6 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
 
-import { createDatabase, type Connection, type Row, type SqlValue } from '@/data/database';
+import { createDatabase, lastInsertId, type Connection, type SqlValue } from '@/data/database';
 
 function memoryConnection(): Connection & { log: string[] } {
   const db = new DatabaseSync(':memory:');
@@ -17,7 +17,7 @@ function memoryConnection(): Connection & { log: string[] } {
     },
     async all(sql, params = []) {
       log.push(sql);
-      return db.prepare(sql).all(...(params as SqlValue[])) as Row[];
+      return db.prepare(sql).all(...(params as SqlValue[]));
     },
     async close() {
       db.close();
@@ -98,5 +98,26 @@ describe('createDatabase', () => {
     await db.run('INSERT INTO item (value) VALUES (?)', [3]);
 
     expect(await values(db)).toEqual([3]);
+  });
+});
+
+describe('lastInsertId', () => {
+  it('reads the id of the row just inserted', async () => {
+    const { db } = await setUp();
+
+    const ids = await db.transaction(async (tx) => {
+      await tx.run('INSERT INTO item (value) VALUES (?)', [7]);
+      const first = await lastInsertId(tx);
+      await tx.run('INSERT INTO item (value) VALUES (?)', [8]);
+      return [first, await lastInsertId(tx)];
+    });
+
+    expect(ids).toEqual([1, 2]);
+  });
+
+  it('throws when the connection gives no id, so the transaction rolls back', async () => {
+    const noId = { exec: jest.fn(), run: jest.fn(), all: async () => [] };
+
+    await expect(lastInsertId(noId)).rejects.toThrow('The new row has no id.');
   });
 });

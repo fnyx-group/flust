@@ -1,4 +1,4 @@
-import type { Database, Executor } from '@/data/database';
+import { lastInsertId, type Database, type Executor } from '@/data/database';
 import { decodePlan, parseJson } from '@/data/json-codec';
 import {
   deletePlan,
@@ -7,6 +7,7 @@ import {
   updatePlan,
   writeFirstPlan,
 } from '@/data/profile-repository';
+import { attempt, type StorageError } from '@/data/storage-error';
 import {
   hasDetails,
   planToRestore,
@@ -16,9 +17,9 @@ import {
 } from '@/domain/lapse';
 import { samePlan, type Plan } from '@/domain/onboarding';
 import { err, ok, type Result } from '@/domain/result';
-import { isValidTimestamp, type Timestamp } from '@/domain/time';
+import { isTimestamp, type Timestamp } from '@/domain/time';
 
-export type LapseStorageError = 'storage-failed';
+export type LapseStorageError = StorageError;
 export type UndoLapseError = LapseStorageError | 'lapse-not-found';
 
 export type NewLapse = {
@@ -41,47 +42,34 @@ export type LapseRepository = {
 // new ids and lose the details that point at them.
 export function createLapseRepository(db: Database): LapseRepository {
   return {
-    async record(lapse) {
-      try {
-        return ok(await db.transaction((tx) => insertLapse(tx, lapse)));
-      } catch {
-        return err('storage-failed');
-      }
-    },
+    record: (lapse) =>
+      attempt(async () => ok(await db.transaction((tx) => insertLapse(tx, lapse)))),
 
     // One transaction: the plan the lapse changed comes back, or the plan it added goes, then its
     // detail and the lapse go.
-    async undo(id) {
-      try {
+    undo: (id) =>
+      attempt(async () => {
         const found = await db.transaction((tx) => deleteLapse(tx, id));
         return found ? ok(undefined) : err('lapse-not-found');
-      } catch {
-        return err('storage-failed');
-      }
-    },
+      }),
 
     // The last lapse logged, by insertion order rather than by time, since a backdated lapse
     // logged now is the one an undo is about.
-    async latest() {
-      try {
+    latest: () =>
+      attempt(async () => {
         const rows = await db.all('SELECT id, at, recorded_at FROM lapse ORDER BY id DESC LIMIT 1');
         const row = rows[0];
         if (row === undefined) return ok(null);
         const { id, at, recorded_at: recordedAt } = row;
         if (typeof id !== 'number' || !isTimestamp(at)) return ok(null);
         return ok({ id, at, recordedAt: isTimestamp(recordedAt) ? recordedAt : null });
-      } catch {
-        return err('storage-failed');
-      }
-    },
+      }),
   };
 }
 
 async function insertLapse(tx: Executor, lapse: NewLapse): Promise<LapseRecord> {
   await tx.run('INSERT INTO lapse (at, recorded_at) VALUES (?, ?)', [lapse.at, lapse.recordedAt]);
-  const rows = await tx.all('SELECT last_insert_rowid() AS id');
-  const id = rows[0]?.id;
-  if (typeof id !== 'number') throw new Error('The new lapse has no id.');
+  const id = await lastInsertId(tx);
   const details = lapse.details !== null && hasDetails(lapse.details) ? lapse.details : null;
   const planChange = await changePlan(tx, lapse.plan);
   if (details !== null || planChange !== null) {
@@ -136,8 +124,4 @@ async function readPlanChange(tx: Executor, id: number): Promise<PlanChange | nu
   if (row.previous_plan === null) return { previous: null, next, planId };
   const previous = decodePlan(parseJson(row.previous_plan));
   return previous === null ? null : { previous, next, planId };
-}
-
-function isTimestamp(value: unknown): value is number {
-  return typeof value === 'number' && isValidTimestamp(value);
 }

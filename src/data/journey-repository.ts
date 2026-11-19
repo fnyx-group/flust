@@ -1,8 +1,9 @@
 import type { Database, Executor } from '@/data/database';
+import { attempt, type StorageError } from '@/data/storage-error';
 import { restoreJourney, type Journey } from '@/domain/journey';
 import { err, ok, type Result } from '@/domain/result';
 
-export type LoadJourneyError = 'storage-failed' | 'journey-corrupted';
+export type LoadJourneyError = StorageError | 'journey-corrupted';
 
 export type JourneyRepository = {
   load(): Promise<Result<Journey | null, LoadJourneyError>>;
@@ -13,14 +14,10 @@ type StoredJourney = { start: unknown; lapses: unknown[] } | null;
 export function createJourneyRepository(db: Database): JourneyRepository {
   return {
     async load() {
-      let stored: StoredJourney;
-      try {
-        stored = await db.transaction(readJourney);
-      } catch {
-        return err('storage-failed');
-      }
-      if (stored === null) return ok(null);
-      const { start, lapses } = stored;
+      const read = await attempt(async () => ok(await db.transaction(readJourney)));
+      if (!read.ok) return read;
+      if (read.value === null) return ok(null);
+      const { start, lapses } = read.value;
       if (typeof start !== 'number' || !lapses.every((lapse) => typeof lapse === 'number')) {
         return err('journey-corrupted');
       }

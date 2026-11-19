@@ -2,13 +2,13 @@
 
 The checks before each store release, in order. A release that fails one is not submitted.
 
-1. `main` is green in CI: typecheck, tests with coverage, lint, knip, format check, and the Kotlin tests.
+1. `main` is green in CI, every job of the three workflows ([Testing](testing.md#ci)), the native builds included: the Android check and the iOS URL type check have passed on a production build of the release commit.
 2. The builds come from the `production` profile on EAS (see [Setup](setup.md#development-build)).
 3. The Android build contains no Firebase, Google Play services or Install Referrer code, and no manifest entries for them ([0021](../decisions/0021-local-notifications.md)). It requests the expected permissions only, none of those blocked in production ([0030](../decisions/0030-production-android-permissions.md)). It registers no URL scheme: no intent filter with a `VIEW` action and a data scheme ([0035](../decisions/0035-no-url-scheme-in-production.md)). Run the check on the bundle EAS produced, with `BUNDLETOOL` set (see [Setup](setup.md#android-build-tools)):
 
        scripts/check-android-release.sh path/to/flust.aab
 
-   It lists the permissions the build requests. It exits with 1 and lists what it found when the build has something it must not ship, including a permission outside the expected list or a URL scheme, and with 2 when it cannot read the build. A new permission is either blocked, or added to `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts` and to the script, with a reason.
+   CI already runs it on a release APK built from each change to a native path; this run is on what EAS built. It lists the permissions the build requests. It exits with 1 and lists what it found when the build has something it must not ship, including a permission outside the expected list or a URL scheme, and with 2 when it cannot read the build. A new permission is either blocked, or added to `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts` and to the script, with a reason.
 
 4. Every help number was checked against its official sources within the last 400 days, which the review test enforces. Check them again every year ([0027](../decisions/0027-offline-help-resources.md)).
 5. The Maestro flows pass on a local production release APK built from the release commit ([Testing](testing.md#end-to-end)), and the [manual checklist](manual-checklist.md) is done for the platforms being released.
@@ -39,3 +39,16 @@ To check a production build before EAS, or after a dependency change, build a re
 5. Go back to the development variant before working with Metro again:
 
        APP_VARIANT=development pnpm expo prebuild --platform android --clean
+
+## Local iOS build
+
+On a Mac with Xcode and CocoaPods, the same build as the `ios-build` job:
+
+    APP_VARIANT=production pnpm expo prebuild --platform ios --clean --no-install
+    (cd ios && pod install)
+    (cd ios && xcodebuild build -workspace flust.xcworkspace -scheme flust -configuration Release \
+      -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+      -derivedDataPath build CODE_SIGNING_ALLOWED=NO)
+    scripts/check-ios-release.sh ios/build/Build/Products/Release-iphonesimulator/flust.app
+
+The script exits with 1 when the app registers a URL scheme, and with 2 when it cannot read the build.

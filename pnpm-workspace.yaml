@@ -2,3 +2,9 @@ allowBuilds:
   '@parcel/watcher': false
   lefthook: false
 minimumReleaseAge: 1440
+auditConfig:
+  ignoreGhsas:
+    # minimatch in @expo/fingerprint, which Expo runs at build time to hash the native project. It
+    # is not in the app bundle, and its globs come from Expo, not from users. Reviewed at each Expo
+    # update; remove once Expo depends on minimatch 11.0.1 or later.
+    - GHSA-g3hv-75wg-m249

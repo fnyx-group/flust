@@ -20,4 +20,4 @@ Any web page can try to open a scheme and see whether something answers, which t
 
 - No web page or other app can detect flust through a scheme, or open one of its screens.
 - Sharing a link into flust, or a widget that opens a screen, would need this decision revisited, for example with verified App Links bound to a domain.
-- iOS has no release check yet: the absence of URL types is checked by hand on the first iOS build ([Manual checklist](../development/manual-checklist.md#ios)).
+- `scripts/check-ios-release.sh` fails on a `CFBundleURLTypes` in the `Info.plist` of the built app. CI runs it on a production simulator build ([0037](0037-ci-native-builds.md)). That opening `flust://emergency` in Safari does nothing is still checked by hand ([Manual checklist](../development/manual-checklist.md#ios)).

@@ -6,7 +6,7 @@ import {
   type Weekday,
 } from '@/domain/local-time';
 import { err, ok, type Result } from '@/domain/result';
-import { isValidTimestamp, type Timestamp } from '@/domain/time';
+import { isTimestamp, type Timestamp } from '@/domain/time';
 
 declare const noteIdBrand: unique symbol;
 declare const titleBrand: unique symbol;
@@ -211,10 +211,6 @@ function isNoteId(value: unknown): value is NoteId {
 
 function isDay(value: unknown): value is number {
   return typeof value === 'number' && Number.isSafeInteger(value);
-}
-
-function isTimestamp(value: unknown): value is Timestamp {
-  return typeof value === 'number' && isValidTimestamp(value);
 }
 
 function isOffset(value: unknown): value is number {

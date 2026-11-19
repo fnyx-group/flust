@@ -14,7 +14,8 @@ const resources = {
 export function createI18n(language: Language) {
   ensurePluralRules();
   const instance = createInstance();
-  instance.use(initReactI18next).init({
+  // With initAsync off, init is done when it returns: the promise it also returns adds nothing.
+  void instance.use(initReactI18next).init({
     resources,
     lng: language,
     fallbackLng: fallbackLanguage,

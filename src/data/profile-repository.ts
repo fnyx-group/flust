@@ -1,5 +1,6 @@
-import type { Database, Executor, Row } from '@/data/database';
+import { lastInsertId, type Database, type Executor, type Row } from '@/data/database';
 import { decodeAction, decodeText } from '@/data/json-codec';
+import { attempt, type StorageError } from '@/data/storage-error';
 import type { Plan, Reason } from '@/domain/onboarding';
 import { isPlanTrigger, isReasonId, isRiskMomentId, type RiskMomentId } from '@/domain/presets';
 import {
@@ -14,7 +15,7 @@ import {
 } from '@/domain/profile';
 import { err, ok, type Result } from '@/domain/result';
 
-export type ProfileStorageError = 'storage-failed';
+export type ProfileStorageError = StorageError;
 export type SaveReasonStorageError = SaveReasonError | 'not-found' | ProfileStorageError;
 export type SavePlanStorageError = SavePlanError | 'not-found' | ProfileStorageError;
 export type RemovePlanStorageError = RemovePlanError | ProfileStorageError;
@@ -50,19 +51,15 @@ export type ProfileRepository = {
 // A row that cannot be read is left out rather than reported: one damaged reason must not hide
 // the others, or the plan, from someone going through an urge.
 export function createProfileRepository(db: Database): ProfileRepository {
-  async function attempt<T, E>(
+  function inTransaction<T, E>(
     task: (tx: Executor) => Promise<Result<T, E>>,
   ): Promise<Result<T, E | ProfileStorageError>> {
-    try {
-      return await db.transaction(task);
-    } catch {
-      return err('storage-failed');
-    }
+    return attempt(() => db.transaction(task));
   }
 
   return {
     async load() {
-      const entries = await attempt(async (tx) => ok(await readEntries(tx)));
+      const entries = await inTransaction(async (tx) => ok(await readEntries(tx)));
       if (!entries.ok) return entries;
       const { reasons, riskMoments, plans } = entries.value;
       return ok({
@@ -72,10 +69,10 @@ export function createProfileRepository(db: Database): ProfileRepository {
       });
     },
 
-    loadEntries: () => attempt(async (tx) => ok(await readEntries(tx))),
+    loadEntries: () => inTransaction(async (tx) => ok(await readEntries(tx))),
 
     saveReason: (id, reason) =>
-      attempt(async (tx) => {
+      inTransaction(async (tx) => {
         const reasons = await readReasonEntries(tx);
         if (id !== null && !reasons.some((entry) => entry.id === id)) return err('not-found');
         const checked = checkReason(reasons, id, reason);
@@ -84,19 +81,19 @@ export function createProfileRepository(db: Database): ProfileRepository {
       }),
 
     removeReason: (id) =>
-      attempt(async (tx) => {
+      inTransaction(async (tx) => {
         await tx.run('DELETE FROM reason WHERE id = ?', [id]);
         return ok(undefined);
       }),
 
     saveRiskMoments: (moments) =>
-      attempt(async (tx) => {
+      inTransaction(async (tx) => {
         await writeRiskMoments(tx, moments);
         return ok(undefined);
       }),
 
     savePlan: (id, plan) =>
-      attempt(async (tx) => {
+      inTransaction(async (tx) => {
         const plans = await readPlanEntries(tx);
         if (id !== null && !plans.some((entry) => entry.id === id)) return err('not-found');
         const checked = checkPlan(plans, id, plan);
@@ -105,17 +102,12 @@ export function createProfileRepository(db: Database): ProfileRepository {
           await updatePlan(tx, id, plan);
           return ok(id);
         }
-        await tx.run(
-          `INSERT INTO plan (position, trigger_id, action_preset_id, action_custom_text)
-           VALUES ((SELECT coalesce(max(position), -1) + 1 FROM plan), ?, ?, ?)`,
-          planColumns(plan),
-        );
-        return ok(await lastInsertId(tx));
+        return ok(await insertPlan(tx, 'last', plan));
       }),
 
     // Only readable plans count, so a damaged row never stands in for the last plan.
     removePlan: (id) =>
-      attempt(async (tx) => {
+      inTransaction(async (tx) => {
         const allowed = checkPlanRemoval(await readPlanEntries(tx), id);
         if (!allowed.ok) return allowed;
         await deletePlan(tx, id);
@@ -164,10 +156,25 @@ export async function writeFirstPlan(tx: Executor, plan: Plan): Promise<number> 
     await updatePlan(tx, current.id, plan);
     return current.id;
   }
+  return insertPlan(tx, 'first', plan);
+}
+
+const PLAN_POSITIONS = {
+  first: '(SELECT coalesce(min(position), 1) - 1 FROM plan)',
+  last: '(SELECT coalesce(max(position), -1) + 1 FROM plan)',
+} as const;
+
+// Before the first plan, after the last, or at a given position. Returns the id of the new row.
+export async function insertPlan(
+  tx: Executor,
+  position: 'first' | 'last' | number,
+  plan: Plan,
+): Promise<number> {
+  const at = typeof position === 'number' ? '?' : PLAN_POSITIONS[position];
   await tx.run(
     `INSERT INTO plan (position, trigger_id, action_preset_id, action_custom_text)
-     VALUES ((SELECT coalesce(min(position), 1) - 1 FROM plan), ?, ?, ?)`,
-    planColumns(plan),
+     VALUES (${at}, ?, ?, ?)`,
+    typeof position === 'number' ? [position, ...planColumns(plan)] : planColumns(plan),
   );
   return lastInsertId(tx);
 }
@@ -194,10 +201,7 @@ export async function writeRiskMoments(
 }
 
 async function writeReason(tx: Executor, id: number | null, reason: Reason): Promise<number> {
-  const values = [
-    reason.kind === 'preset' ? reason.id : null,
-    reason.kind === 'custom' ? reason.text : null,
-  ];
+  const values = reasonColumns(reason);
   if (id !== null) {
     await tx.run('UPDATE reason SET preset_id = ?, custom_text = ? WHERE id = ?', [...values, id]);
     return id;
@@ -210,11 +214,11 @@ async function writeReason(tx: Executor, id: number | null, reason: Reason): Pro
   return lastInsertId(tx);
 }
 
-async function lastInsertId(tx: Executor): Promise<number> {
-  const rows = await tx.all('SELECT last_insert_rowid() AS id');
-  const id = rows[0]?.id;
-  if (typeof id !== 'number') throw new Error('The new row has no id.');
-  return id;
+export function reasonColumns(reason: Reason): [string | null, string | null] {
+  return [
+    reason.kind === 'preset' ? reason.id : null,
+    reason.kind === 'custom' ? reason.text : null,
+  ];
 }
 
 function toReason(row: Row): Reason | null {

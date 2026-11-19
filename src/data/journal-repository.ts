@@ -1,4 +1,5 @@
-import type { Database, Executor, Row } from '@/data/database';
+import { lastInsertId, type Database, type Executor, type Row } from '@/data/database';
+import { attempt, type StorageError } from '@/data/storage-error';
 import {
   parseNote,
   parseNoteSummary,
@@ -10,7 +11,7 @@ import {
 import { err, ok, type Result } from '@/domain/result';
 import type { Timestamp } from '@/domain/time';
 
-export type JournalStorageError = 'storage-failed';
+export type JournalStorageError = StorageError;
 
 // Where and when a new note is written: the local day and the UTC offset at that moment.
 export type NoteOrigin = { readonly day: number; readonly at: Timestamp; readonly offset: number };
@@ -40,8 +41,8 @@ const COLUMNS = 'id, local_day, created_at, utc_offset, updated_at, title, body'
 
 export function createJournalRepository(db: Database): JournalRepository {
   return {
-    async list() {
-      try {
+    list: () =>
+      attempt(async () => {
         const rows = await db.all(
           `SELECT id, local_day, created_at, utc_offset, updated_at, title,
              substr(body, 1, ?) AS excerpt, length(body) AS body_code_points,
@@ -50,44 +51,24 @@ export function createJournalRepository(db: Database): JournalRepository {
           [EXCERPT_LENGTH],
         );
         return ok(rows.flatMap((row) => toSummary(row) ?? []));
-      } catch {
-        return err('storage-failed');
-      }
-    },
+      }),
 
-    async get(id) {
-      try {
-        return ok(await select(db, id));
-      } catch {
-        return err('storage-failed');
-      }
-    },
+    get: (id) => attempt(async () => ok(await select(db, id))),
 
-    async create(origin, content) {
-      try {
-        return ok(await db.transaction((tx) => insert(tx, origin, content)));
-      } catch {
-        return err('storage-failed');
-      }
-    },
+    create: (origin, content) =>
+      attempt(async () => ok(await db.transaction((tx) => insert(tx, origin, content)))),
 
-    async update(id, at, content) {
-      try {
+    update: (id, at, content) =>
+      attempt(async () => {
         const saved = await db.transaction((tx) => change(tx, id, at, content));
         return saved === null ? err('not-found') : ok(saved);
-      } catch {
-        return err('storage-failed');
-      }
-    },
+      }),
 
-    async remove(id) {
-      try {
+    remove: (id) =>
+      attempt(async () => {
         await db.run('DELETE FROM journal_note WHERE id = ?', [id]);
         return ok(undefined);
-      } catch {
-        return err('storage-failed');
-      }
-    },
+      }),
   };
 }
 
@@ -99,9 +80,7 @@ async function insert(tx: Executor, origin: NoteOrigin, content: NoteContent): P
      VALUES (?, ?, ?, ?, ?, ?)`,
     [origin.day, origin.at, origin.offset, origin.at, content.title, content.body],
   );
-  const rows = await tx.all('SELECT last_insert_rowid() AS id');
-  const id = rows[0]?.id;
-  const saved = typeof id === 'number' ? await select(tx, id) : null;
+  const saved = await select(tx, await lastInsertId(tx));
   if (saved === null) throw new Error('The new note cannot be read back.');
   return saved;
 }

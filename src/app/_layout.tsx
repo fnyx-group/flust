@@ -24,7 +24,8 @@ import { StorageGate } from '@/features/storage/storage-gate';
 import { i18n } from '@/lib/i18n';
 import { colors, fonts } from '@/ui/theme';
 
-SplashScreen.preventAutoHideAsync();
+// A splash screen that could not be held only hides early.
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 installErrorHandlers();
 
 export { RootErrorBoundary as ErrorBoundary } from '@/features/errors/root-error-boundary';

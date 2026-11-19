@@ -144,7 +144,7 @@ After the first iOS build:
 1. Face ID: the system asks for permission with the flust text, and unlocking works; the passcode works as a fallback.
 2. Notification previews: hidden on the lock screen when Show Previews is set to When Unlocked.
 3. App switcher: the preview is hidden.
-4. The built `Info.plist` has no `CFBundleURLTypes`, and opening `flust://emergency` in Safari does nothing ([0035](../decisions/0035-no-url-scheme-in-production.md)).
+4. Opening `flust://emergency` in Safari does nothing. The absence of `CFBundleURLTypes` in the built `Info.plist` is checked in CI ([0035](../decisions/0035-no-url-scheme-in-production.md)).
 5. The relock after a sleep with the date moved back, as on Android ([Lock](#lock), items 3 and 4), which also checks that the clock of `modules/flust-privacy` counts sleep on iOS.
 6. A reinstall with a stale key, and the keychain before the first unlock: [Testing](testing.md#storage), items 4 and 9.
 7. VoiceOver and Dynamic Type at the largest sizes: the checks of [Testing](testing.md#accessibility).

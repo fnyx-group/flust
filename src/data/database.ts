@@ -53,3 +53,12 @@ async function inTransaction<T>(
     throw error;
   }
 }
+
+// The id of the row the last INSERT on this connection wrote. Called inside the transaction that
+// inserted it, so no other insert can come between.
+export async function lastInsertId(tx: Executor): Promise<number> {
+  const rows = await tx.all('SELECT last_insert_rowid() AS id');
+  const id = rows[0]?.id;
+  if (typeof id !== 'number') throw new Error('The new row has no id.');
+  return id;
+}

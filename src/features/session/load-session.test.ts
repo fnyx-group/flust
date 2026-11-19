@@ -218,4 +218,16 @@ describe('loadSession', () => {
 
     expect(await loadSession(storage, TODAY)).toEqual(err('storage-failed'));
   });
+
+  it('reports an unexpected error as a storage failure, so the retry screen shows', async () => {
+    const { storage } = await setUp();
+    const failing = {
+      ...storage,
+      journey: {
+        load: () => Promise.reject(new Error('unexpected')),
+      },
+    };
+
+    expect(await loadSession(failing, TODAY)).toEqual(err('storage-failed'));
+  });
 });
