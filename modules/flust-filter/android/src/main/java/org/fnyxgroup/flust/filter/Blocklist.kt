@@ -7,7 +7,6 @@ import java.security.MessageDigest
 object Categories {
   const val ADULT = 1
   const val AI_NUDIFY = 2
-  const val AI_COMPANIONS = 4
   const val BYPASS = 8
   const val GOOGLE = 16
 }

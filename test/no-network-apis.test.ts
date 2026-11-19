@@ -18,8 +18,13 @@ const guards = new Set([
 
 // Pages that flust hands to the browser or the phone app through Linking: that app makes the
 // connection. Any other URL in the app's code could be loaded by flust itself, for example as an
-// image source, a font or a download.
-const linkFiles = new Set(['src/domain/help-resources.ts', 'src/features/settings/labels.ts']);
+// image source, a font or a download. The license texts of the list sources quote their URLs as
+// text to read, shown in a Text and never opened.
+const linkFiles = new Set([
+  'src/domain/help-resources.ts',
+  'src/features/settings/labels.ts',
+  'src/features/settings/list-licenses.ts',
+]);
 
 const scannedFolders = ['src', 'test', 'plugins', 'modules'];
 const ignoredFolders = new Set(['node_modules', 'build', '.gradle', '.kotlin', 'Pods']);

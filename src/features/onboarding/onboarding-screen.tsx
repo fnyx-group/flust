@@ -1,5 +1,13 @@
-import { nextStep, previousStep, stepProgress, type OnboardingStep } from '@/domain/onboarding';
+import {
+  nextStep,
+  previousStep,
+  shownStep,
+  stepProgress,
+  type OnboardingStep,
+} from '@/domain/onboarding';
+import { filterOffered } from '@/features/filter/filter-native';
 import type { StepProps } from '@/features/onboarding/step-props';
+import { FilterStep } from '@/features/onboarding/steps/filter-step';
 import { PlanStep } from '@/features/onboarding/steps/plan-step';
 import { ReasonsStep } from '@/features/onboarding/steps/reasons-step';
 import { RiskMomentsStep } from '@/features/onboarding/steps/risk-moments-step';
@@ -11,22 +19,24 @@ import { useOnboardingDraft } from '@/features/onboarding/use-onboarding-draft';
 // it, and going back works the same whether or not the earlier steps were shown in this session.
 export function OnboardingScreen() {
   const { draft, change, type, flush } = useOnboardingDraft();
-  const { step, answers } = draft;
+  const { answers } = draft;
+  const hasFilter = filterOffered();
+  const step = shownStep(draft.step, hasFilter);
 
   function goTo(target: OnboardingStep | null) {
     if (target !== null) change({ step: target, answers });
   }
 
-  if (step === 'welcome') return <WelcomeStep onStart={() => goTo(nextStep(step))} />;
+  if (step === 'welcome') return <WelcomeStep onStart={() => goTo(nextStep(step, hasFilter))} />;
 
   const props: StepProps = {
     answers,
-    progress: stepProgress(step),
+    progress: stepProgress(step, hasFilter),
     onChange: (next) => change({ step, answers: next }),
     onType: (next) => type({ step, answers: next }),
     onTypingEnd: flush,
-    onBack: () => goTo(previousStep(step)),
-    onContinue: () => goTo(nextStep(step)),
+    onBack: () => goTo(previousStep(step, hasFilter)),
+    onContinue: () => goTo(nextStep(step, hasFilter)),
   };
 
   switch (step) {
@@ -36,6 +46,8 @@ export function OnboardingScreen() {
       return <RiskMomentsStep {...props} />;
     case 'plan':
       return <PlanStep {...props} />;
+    case 'filter':
+      return <FilterStep {...props} />;
     case 'start':
       return <StartStep {...props} />;
   }

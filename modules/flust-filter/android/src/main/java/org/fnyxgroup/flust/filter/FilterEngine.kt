@@ -10,9 +10,9 @@ import kotlin.random.Random
 
 // The tunnel's work, apart from Android: one thread reads packets, a few workers answer queries,
 // and every answer is written back as one packet. Runs until the tunnel is closed or stop() is
-// called.
+// called. Its settings never change: a new configuration gets a new tunnel (FilterVpnService).
 class FilterEngine(
-  private val lists: Blocklist,
+  lists: Blocklist,
   config: FilterConfig,
   upstream: Upstream,
   private val closeUpstream: () -> Unit,
@@ -26,8 +26,6 @@ class FilterEngine(
     TimeUnit.SECONDS,
     ArrayBlockingQueue(QUEUE),
   ).apply { allowCoreThreadTimeOut(true) }
-
-  fun update(config: FilterConfig) = queries.update(FilterPolicy(lists, config))
 
   fun run(input: InputStream, output: OutputStream) {
     val handler = PacketHandler(

@@ -2,6 +2,7 @@ import {
   addFilterComponents,
   FILTER_BOOT_RECEIVER,
   FILTER_LISTS_PROPERTY,
+  FILTER_PERMISSIONS,
   FILTER_VPN_SERVICE,
   setFilterLists,
 } from './with-android-filter';
@@ -47,12 +48,21 @@ describe('the Android filter plugin', () => {
     ]);
   });
 
-  it('declares each component once when it runs again', () => {
-    const application = addFilterComponents(addFilterComponents(manifest())).manifest
-      .application?.[0];
+  it('requests INTERNET and ACCESS_NETWORK_STATE', () => {
+    const permissions = addFilterComponents(manifest()).manifest['uses-permission'];
+
+    expect(permissions?.map((permission) => permission.$['android:name'])).toEqual(
+      FILTER_PERMISSIONS,
+    );
+  });
+
+  it('declares each component and permission once when it runs again', () => {
+    const twice = addFilterComponents(addFilterComponents(manifest())).manifest;
+    const application = twice.application?.[0];
 
     expect(application?.service).toHaveLength(1);
     expect(application?.receiver).toHaveLength(1);
+    expect(twice['uses-permission']).toHaveLength(FILTER_PERMISSIONS.length);
   });
 
   it('asks the module to compile the lists', () => {

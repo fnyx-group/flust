@@ -2,7 +2,7 @@
 
 flust 0.2 adds a filter that blocks pornography and AI-generated pornography across the whole phone. It is built only from what Android and iOS provide. There is no server of ours, no subscription, and flust always says when the filter is not protecting.
 
-This document records the design for both platforms. Android ships first. iPhone follows once the association has a paid Apple developer account. The decisions are [0038](../decisions/0038-content-filter.md) for the filter on both platforms, [0039](../decisions/0039-filter-lists-and-licenses.md) for the lists, and [0033](../decisions/0033-android-filter-network-access.md) for the network access of the Android filter.
+This document records the design for both platforms. Android ships first. iPhone follows once the association has a paid Apple developer account. The decisions are [0038](../decisions/0038-content-filter.md) for the filter on both platforms, [0039](../decisions/0039-filter-lists-and-licenses.md) for the lists, [0033](../decisions/0033-android-filter-network-access.md) and [0041](../decisions/0041-filter-network-permissions.md) for the network access of the Android filter, [0040](../decisions/0040-filter-delay.md) for the delay, and [0042](../decisions/0042-filter-onboarding-and-disclosure.md) for the onboarding step and the disclosure.
 
 ## Principles
 
@@ -17,8 +17,9 @@ This document records the design for both platforms. Android ships first. iPhone
 
 | Feature                                         | Android                                         | iPhone                                               |
 | ----------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------- |
+| Controls in the app                             | Filter, Strict YouTube                          | Filter                                               |
 | Adult sites                                     | Our lists, about 304,000 domains                | Apple's automatic adult filter                       |
-| AI nudify and deepfake sites                    | Our AI list                                     | Our 45 priority domains                              |
+| AI porn: nudify, deepfakes, sexual AI chat      | Our AI list                                     | Our 45 priority domains                              |
 | SafeSearch on Google, Bing, DuckDuckGo, YouTube | Forced through DNS                              | Not available                                        |
 | Browsers covered                                | Every app that uses the system DNS              | Every app that uses WebKit, to be checked one by one |
 | Turning the filter off in flust                 | Waits 20 minutes                                | Waits 20 minutes                                     |
@@ -26,6 +27,41 @@ This document records the design for both platforms. Android ships first. iPhone
 | Bypass detected                                 | At once, the app shows filter inactive          | When flust is opened again                           |
 | Blocking the removal of flust                   | Not possible without Device Owner               | Possible, off by default                             |
 | What leaves the phone                           | Allowed DNS lookups, encrypted, to the resolver | Nothing                                              |
+
+## Controls
+
+The app has two switches and nothing more: Filter, and Strict YouTube on Android. While the filter is on, everything else is fixed: adult sites, AI porn (nudify, deepfakes, sexual AI chat), strict mode against bypasses, and SafeSearch on Google, Bing, DuckDuckGo and YouTube, moderate on YouTube and strict with the switch. Each extra switch would be a way to weaken the filter in a weak moment. The engine keeps its categories internally, for its tests and a later version.
+
+Turning either switch on is immediate. Turning either off starts a 20-minute wait on the continuous clock, shown as a countdown that can be cancelled at any time. When it ends, flust asks for one last confirmation, and the request expires if it is not confirmed within 10 minutes. The wait survives a restart of the app, a change of the date and time, and a reboot, which never credits the time the phone was off ([0040](../decisions/0040-filter-delay.md)).
+
+DNS has no equivalent of Strict YouTube for X, TikTok, Reddit or Instagram: none of them offers a restricted name to rewrite to. Blocking a whole network is a possible later feature, not part of V0.2.
+
+## In the app
+
+- Settings has a Filter row with its state: on, off or inactive. It opens the filter screen: the state at the top, with the reason and what to do when inactive and the request while it waits, then the two switches, one line on what the filter blocks, one line saying that allowed lookups go encrypted to Quad9, which also blocks malware, a help line for Chrome's secure DNS, and links to the always-on VPN setting and to the licenses of the lists.
+- The onboarding presents the filter in a step of its own before the start point, with the disclosure in full, "Accepter et activer" and "Plus tard" ([0042](../decisions/0042-filter-onboarding-and-disclosure.md)).
+- Turning the filter on from the filter screen shows the same disclosure in a sheet whenever Android's VPN dialog will follow.
+- Home shows an inactive filter with a neutral chip, a shield and "Filtre inactif", in place of the circle name in the header row. It takes no height, so home keeps its fit at 667 points, and it opens the filter screen.
+- About has a Licenses row with the license texts of the list sources.
+- The iPhone shows none of this until lot 3.
+
+### Inactive states
+
+| State                                 | How flust knows                                                                 | What flust says and offers                                                     |
+| ------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Strict Private DNS                    | A network with a Private DNS hostname, read with `ACCESS_NETWORK_STATE`         | Choose Automatic in the network settings, with a button that opens them        |
+| Another VPN                           | The tunnel stopped while another app's VPN network exists                       | Android keeps one VPN at a time. Turn the filter back on, after the disclosure |
+| Consent lost                          | Android's VPN consent no longer holds                                           | Turn the filter back on, after the disclosure                                  |
+| VPN turned off in the system settings | The system revoked the tunnel                                                   | Turn the filter back on, and the always-on VPN link                            |
+| Lists unreadable                      | The compiled lists failed to load                                               | Update flust or reinstall it. No button                                        |
+| Start refused at boot                 | Android refused to start the service after a reboot. Not shown as an error      | The filter resumes when flust opens, and always-on avoids the wait             |
+| Stopped                               | Any other stop, such as an error in the tunnel or the app stopped by the system | Turn the filter back on                                                        |
+
+flust reads these when a screen comes into focus and when the app returns to the foreground, and every two seconds on the filter screen.
+
+### Chrome's secure DNS
+
+With secure DNS set to a custom provider, Chrome does not fall back to the system resolver: strict mode blocks the provider's name and the tunnel resets its address, so browsing in Chrome stops. The filter screen says to set it back to Automatic in Chrome's settings, Privacy and security, Use secure DNS.
 
 ## Android
 
@@ -39,7 +75,8 @@ A local VpnService that carries DNS only. It is the only way to apply our own li
 4. An allowed name is sent over DNS over TLS to the resolver, with sockets marked by `protect()` so they leave the tunnel.
 5. Queries arrive over UDP and over TCP. An answer too large for UDP is cut with the truncation flag, and the app asks again over TCP.
 6. The service never touches the database or its key, and logs no query. It keeps no cache, and no reference to a queried name is kept after its answer: the system's own DNS cache does the rest. Its settings are encrypted under a key of their own.
-7. DNS on port 53 to the fake address or to a routed resolver address is answered by flust. Other TCP connections to these addresses are reset at once and other UDP is dropped, so encrypted DNS to a known resolver fails fast and apps fall back to the system resolver. This does not depend on strict mode. A resolver missing from the list stays reachable.
+7. Each change of the settings from the app sets up a new tunnel, then closes the one it replaces, so lookups never leave the filter in between. The two tunnels use different fake DNS addresses, and Android empties a network's DNS cache when its DNS servers change, so a stronger setting applies at once rather than when the cached answers expire.
+8. DNS on port 53 to a fake address or to a routed resolver address is answered by flust. Other TCP connections to these addresses are reset at once and other UDP is dropped, so encrypted DNS to a known resolver fails fast and apps fall back to the system resolver. This does not depend on strict mode. A resolver missing from the list stays reachable.
 
 Android's automatic Private DNS tries DNS over TLS to the VPN's DNS address first. The tunnel resets that connection at once, so Android falls back to plain DNS through the filter without waiting.
 
@@ -55,7 +92,7 @@ DNS over TLS is an addition to [0033](../decisions/0033-android-filter-network-a
 
 ### Strict mode
 
-On by default. It blocks the bypass category: the names of DoH and DoT providers, of VPN and proxy providers, and the Firefox canary domain. Its guard wins over user exceptions, so a user exception for a resolver name cannot reopen a bypass. Routing the public resolvers' addresses into the tunnel does not depend on it (step 7 of [How it works](#how-it-works)).
+On by default. It blocks the bypass category: the names of DoH and DoT providers, of VPN and proxy providers, and the Firefox canary domain. Its guard wins over user exceptions, so a user exception for a resolver name cannot reopen a bypass. Routing the public resolvers' addresses into the tunnel does not depend on it (step 8 of [How it works](#how-it-works)).
 
 | Bypass                                    | What flust does                                                                                                                                                    | What stays open                                       |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
@@ -78,13 +115,17 @@ flust rewrites search engine names with a CNAME to their restricted version and 
 
 flust detects and shows these, with the reason and what to do.
 
-1. Private DNS in strict mode sends lookups around the VPN. flust detects it and explains how to switch to Automatic. Refusing port 853 would break all resolution instead of filtering. Detecting it needs `ACCESS_NETWORK_STATE` in the production build, which is blocked today ([0030](../decisions/0030-production-android-permissions.md)): that permission is decided in lot 2.
+1. Private DNS in strict mode sends lookups around the VPN. flust detects it and explains how to switch to Automatic. Refusing port 853 would break all resolution instead of filtering. Detecting it needs `ACCESS_NETWORK_STATE`, which the production build requests from lot 2 ([0041](../decisions/0041-filter-network-permissions.md)).
 2. Another VPN app takes over, since Android runs one VPN at a time.
 3. The VPN is turned off in the settings, or the app is force stopped. flust restarts the tunnel and guides people to the always-on VPN setting, which only they can enable.
 4. Clear data in the Android settings resets the lock and the delay.
 5. flust can be uninstalled. Nothing prevents it without Device Owner.
 
-One limit is not detected. An allowed name that is a CNAME to a blocked name still resolves, since flust matches the name asked, not the names in the resolver's answer.
+These are not detected.
+
+1. An allowed name that is a CNAME to a blocked name still resolves, since flust matches the name asked, not the names in the resolver's answer.
+2. A browser's own DNS cache, about a minute in Chrome, and connections already open, such as the YouTube app's, keep their answers after Strict YouTube is turned on. A new tunnel only empties Android's cache.
+3. Chrome's secure DNS set to a custom provider stops browsing in Chrome rather than going around the filter. The filter screen explains how to set it back.
 
 ### Containment
 
@@ -92,7 +133,7 @@ These rules from [0033](../decisions/0033-android-filter-network-access.md) and 
 
 1. Network code lives only in the filter's Kotlin module. The source scan allows network APIs there alone, each file only for its part. The lint rules, which read the TypeScript, stay as they are.
 2. The filter opens sockets only to the resolver, from one file, and tests check it.
-3. `INTERNET` enters the allowlist of `scripts/check-android-release.sh` in the version that ships the filter. Every other blocked permission stays blocked. Until then, the VPN service is declared in the development build only, and the release check fails on a build that has the service without `INTERNET`, `INTERNET` without the service, or any other VPN service.
+3. From lot 2, `INTERNET` and `ACCESS_NETWORK_STATE` are in the allowlist of `scripts/check-android-release.sh`, for the filter only. Every other blocked permission stays blocked. The release check fails on a build without the filter's VPN service, without one of these two permissions, or with any other VPN service ([0041](../decisions/0041-filter-network-permissions.md)).
 4. An independent security audit of the filter takes place before the public release.
 
 ### Rejected
@@ -149,18 +190,17 @@ Permissive licenses only, committed in this repository and compiled at build. Th
 | ShadowWhisperer                    | Adult sites, from its author's script and manual additions                                                    | 213,982 domains, 191,346 of them in no other adult source | Unlicense |
 | Sinfonietta                        | Adult sites                                                                                                   | 61,155 domains, 32,245 in no other                        | MIT       |
 | 4skinSkywalker                     | Adult sites                                                                                                   | 70,174 domains, 46,778 in no other                        | MIT       |
-| aegis, ai-adult and VPN categories | AI adult sites and AI companions, VPN and proxy providers                                                     | 69 AI domains, 235 VPN domains                            | CC0       |
+| aegis, ai-adult and VPN categories | AI adult sites, VPN and proxy providers                                                                       | 69 AI domains, 235 VPN domains                            | CC0       |
 | flust AI list                      | AI nudify and deepfake sites no source covers. The known ones, such as Clothoff and DeepNude, come from aegis | Empty to start                                            | MPL-2.0   |
-| flust AI companions list           | Companions taken out of aegis's AI category, so that they follow their own switch                             | 16 domains                                                | MPL-2.0   |
 | flust bypass list                  | DoH and DoT providers from Chromium's and Firefox's provider lists, and the Firefox canary domain             | 37 names                                                  | MPL-2.0   |
 
-Together 304,099 domains, 2.7 MB once compiled. The 20 large sites tested while designing the filter are all blocked. What is missing is mostly the long tail of small sites and mirrors, filled over time by our own lists and user reports. Sizes measured on 19 November 2026 by the build step.
+Together 304,083 domains, 2.7 MB once compiled. The 20 large sites tested while designing the filter are all blocked. What is missing is mostly the long tail of small sites and mirrors, filled over time by our own lists and user reports. Sizes measured on 19 November 2026 by the build step.
 
 Sinfonietta and 4skinSkywalker do not document their sources. They stay in, since their MIT license is explicit and without them two large sites tested get through.
 
-The lists block sites whose main purpose is adult content, not general platforms that hold some, as with Reddit and X. The exceptions therefore take out `vk.com`, `ok.ru`, `4chan.org`, `9gag.com` and `deviantart.com`, which the MIT sources list. They also take out domains that aegis's VPN category lists but that carry far more than a VPN: antivirus vendors, whose updates and accounts use them, and `proton.me`, shared by Proton Mail, Drive and Pass. `protonvpn.com` stays blocked. Together the 17 exceptions remove 27 names.
+The lists block sites whose main purpose is adult content, not general platforms that hold some, as with Reddit and X. The exceptions therefore take out `vk.com`, `ok.ru`, `4chan.org`, `9gag.com` and `deviantart.com`, which the MIT sources list. They also take out domains that aegis's VPN category lists but that carry far more than a VPN: antivirus vendors, whose updates and accounts use them, and `proton.me`, shared by Proton Mail, Drive and Pass. `protonvpn.com` stays blocked. The same rule takes out 16 general AI chat and companion apps that aegis's AI category lists, such as `character.ai`, `replika.com` and `novelai.net`: their main purpose is not sexual. Together the 33 exceptions remove 43 names.
 
-AI companions are general companion apps only. Companions built for sexual chat, such as JanitorAI and chub.ai, stay under AI nudify, on by default.
+AI chat built for sex, such as JanitorAI and chub.ai, stays blocked under AI porn. Lot 1 had a separate AI companions category, off by default. Lot 2 removed it with its list and its strings, and its domains became exceptions.
 
 ### Excluded
 
@@ -187,7 +227,6 @@ lists/
     aegis/             ai-adult, vpn, LICENSE, PROVENANCE
   flust/
     ai-nudify.txt
-    ai-companions.txt
     bypass.txt
     exceptions.txt
     google-domains.txt
@@ -203,12 +242,11 @@ An exception removes a domain and every name under it from the blocking categori
 
 ### Categories
 
-| Category      | Default             | Platforms                                        |
-| ------------- | ------------------- | ------------------------------------------------ |
-| Adult         | On                  | Android, iPhone through Apple's filter           |
-| AI nudify     | On                  | Android, iPhone within the 45 domains            |
-| AI companions | Off                 | Android only, so they take no place among the 45 |
-| Bypass        | Part of strict mode | Android                                          |
+| Category  | While the filter is on | Platforms                              |
+| --------- | ---------------------- | -------------------------------------- |
+| Adult     | Always blocked         | Android, iPhone through Apple's filter |
+| AI nudify | Always blocked         | Android, iPhone within the 45 domains  |
+| Bypass    | Always blocked         | Android, as strict mode                |
 
 ### Build step
 
@@ -222,11 +260,11 @@ An exception removes a domain and every name under it from the blocking categori
 
 `pnpm test` runs the same check on every pull request.
 
-In lot 1 only the development build compiles the lists, so `lists/` and `scripts/lists/` do not trigger the native builds of [0037](../decisions/0037-ci-native-builds.md), which use the production variant. They join the native build triggers in lot 2, when production compiles the lists.
+Every build compiles the lists from lot 2, so `lists/`, `scripts/lists/` and `scripts/build-lists.ts` trigger the native builds of [0037](../decisions/0037-ci-native-builds.md).
 
 ### Updating
 
-`scripts/update-list-source.sh` fetches the latest version of a source and updates its `PROVENANCE`. The change is reviewed in a pull request like code. Our own lists change by adding a line with its source. A Licenses screen in the app keeps the MIT texts.
+`scripts/update-list-source.sh` fetches the latest version of a source and updates its `PROVENANCE`. The change is reviewed in a pull request like code. Our own lists change by adding a line with its source. A Licenses screen in About shows the license text of every source, and a test fails when a source's `LICENSE` changes until the app's copy follows.
 
 ## Delivery
 
@@ -235,11 +273,11 @@ In lot 1 only the development build compiles the lists, so `lists/` and `scripts
 | 1, the engine  | This design in the repository, the lists and their build step, the Kotlin filter module, strict mode, SafeSearch, the release check that pairs `INTERNET` with the filter's VPN service, all behind a development setting                                                                                                                      | The filter blocks on the emulator behind a development setting |
 | 2, the product | Onboarding step, settings screen, 20-minute delay, filter inactive states, `INTERNET` and the VPN service in the production build, the decision on `ACCESS_NETWORK_STATE`, `lists/` in the native build triggers, Maestro flows, Licenses screen, Play declaration, a start at boot that Android refuses shown as such rather than as an error | Someone who does not know the app turns the filter on alone    |
 | 3, iPhone      | Screen Time module in Swift, the 45 domains, removal block, launch check, the same screens as lot 2                                                                                                                                                                                                                                            | The filter works on a test iPhone through TestFlight           |
-| 4, the field   | The test plan on real phones, website wording per platform, store declarations, the lookup timeouts when Quad9 cannot be reached, where a queued query can wait about 12 seconds after its app gave up                                                                                                                                         | Both platforms pass the test plan                              |
+| 4, the field   | The test plan on real phones, website wording per platform, store declarations, the lookup timeouts when Quad9 cannot be reached, where a queued query can wait about 12 seconds after its app gave up. Before the store release, the Licenses screen also covers the JavaScript and native dependencies shipped in the APK                    | Both platforms pass the test plan                              |
 
 ## Store requirements
 
-Every app that uses VpnService fills a declaration in the Play Console, with an in-app disclosure shown before consent and two videos of 90 seconds or less, one of the VPN in use and one of the disclosure. The category is chosen in lot 2, between parental control and device security, after looking at what comparable apps declare.
+Every app that uses VpnService fills a declaration in the Play Console, with an in-app disclosure shown before consent and two videos of 90 seconds or less, one of the VPN in use and one of the disclosure. [Google Play VpnService declaration](../release/google-play-vpn-declaration.md) holds the proposed category, the disclosure, the Data safety answers and the video scripts. The category stays open until comparable apps are compared.
 
 On Apple's side, the association enrolls in the Apple Developer Program and asks for the fee waiver, then requests the Family Controls (Distribution) entitlement. Both take weeks and start as soon as the association is registered.
 
@@ -249,11 +287,11 @@ Real phones, with a fixed set of domains. It holds about a hundred common adult 
 
 ### Android
 
-1. Chrome, Firefox, Brave, Edge, Samsung Internet and Opera, each with DoH off, automatic and custom.
+1. Chrome, Firefox, Brave, Edge, Samsung Internet and Opera, each with DoH off, automatic and custom. Chrome with a custom provider stops browsing, and the help line says how to fix it.
 2. Private DNS off, automatic and strict, and flust detects strict.
 3. An app that queries 8.8.8.8 directly.
 4. Another VPN app installed and turned on.
-5. Reboot, force stop, Clear data, clock changed during the delay.
+5. Reboot, force stop, Clear data, clock changed during the delay, reboot during the delay.
 6. Wi-Fi, mobile data, an IPv6-only network, and a network that blocks port 853.
 7. SafeSearch shows its restricted mode on Google, Bing, YouTube and DuckDuckGo.
 8. The module opens sockets only to the resolver.

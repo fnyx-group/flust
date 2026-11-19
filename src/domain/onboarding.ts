@@ -19,8 +19,9 @@ import {
 import { err, ok, type Result } from '@/domain/result';
 import type { Timestamp } from '@/domain/time';
 
-// The welcome step has no progress bar: it is the door, not a question.
-export const QUESTION_STEPS = ['reasons', 'risk-moments', 'plan', 'start'] as const;
+// The welcome step has no progress bar: it is the door, not a question. The filter step shows only
+// where the filter exists, on Android until lot 3 (docs/decisions/0042-filter-onboarding-and-disclosure.md).
+export const QUESTION_STEPS = ['reasons', 'risk-moments', 'plan', 'filter', 'start'] as const;
 
 export const ONBOARDING_STEPS = ['welcome', ...QUESTION_STEPS] as const;
 
@@ -86,16 +87,32 @@ export const EMPTY_DRAFT: OnboardingDraft = {
 
 export const isOnboardingStep = isOneOf(ONBOARDING_STEPS);
 
-export function nextStep(step: OnboardingStep): OnboardingStep | null {
-  return ONBOARDING_STEPS[ONBOARDING_STEPS.indexOf(step) + 1] ?? null;
+function stepsFor(hasFilter: boolean): readonly OnboardingStep[] {
+  return hasFilter ? ONBOARDING_STEPS : ONBOARDING_STEPS.filter((step) => step !== 'filter');
 }
 
-export function previousStep(step: OnboardingStep): OnboardingStep | null {
-  return ONBOARDING_STEPS[ONBOARDING_STEPS.indexOf(step) - 1] ?? null;
+// The step to show for a stored one: a draft saved on the filter step, where there is no filter,
+// goes on to the start.
+export function shownStep(step: OnboardingStep, hasFilter: boolean): OnboardingStep {
+  return step === 'filter' && !hasFilter ? 'start' : step;
 }
 
-export function stepProgress(step: QuestionStep): StepProgress {
-  return { current: QUESTION_STEPS.indexOf(step) + 1, total: QUESTION_STEPS.length };
+export function nextStep(step: OnboardingStep, hasFilter: boolean): OnboardingStep | null {
+  const steps = stepsFor(hasFilter);
+  return steps[steps.indexOf(shownStep(step, hasFilter)) + 1] ?? null;
+}
+
+export function previousStep(step: OnboardingStep, hasFilter: boolean): OnboardingStep | null {
+  const steps = stepsFor(hasFilter);
+  return steps[steps.indexOf(shownStep(step, hasFilter)) - 1] ?? null;
+}
+
+export function stepProgress(step: QuestionStep, hasFilter: boolean): StepProgress {
+  const questions = stepsFor(hasFilter).slice(1);
+  return {
+    current: questions.indexOf(shownStep(step, hasFilter)) + 1,
+    total: questions.length,
+  };
 }
 
 export function toggleReason(reasons: readonly Reason[], id: ReasonId): Reason[] {

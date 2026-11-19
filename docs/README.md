@@ -61,8 +61,11 @@
 - [0035 No URL scheme in production](decisions/0035-no-url-scheme-in-production.md): no scheme or URL type in production builds, a release check that fails on one, incoming links sent home or ignored.
 - [0036 Keyboard learning](decisions/0036-keyboard-learning.md): Android text fields ask the keyboard not to learn their content; iOS has no such API.
 - [0037 Native builds and supply chain checks in CI](decisions/0037-ci-native-builds.md): production Android and iOS builds checked in CI when native paths change, secret scanning, dependency audit and review, CodeQL.
-- [0038 Content filter](decisions/0038-content-filter.md): a DNS-only local VPN on Android, Screen Time on iOS, a fixed decision order, strict mode and SafeSearch, a 20 minute delay to weaken it.
+- [0038 Content filter](decisions/0038-content-filter.md): a DNS-only local VPN on Android, Screen Time on iOS, two controls only, a fixed decision order, strict mode and SafeSearch, a 20 minute delay to weaken it.
 - [0039 Filter lists and licenses](decisions/0039-filter-lists-and-licenses.md): MIT, Unlicense and CC0 sources with their provenance, excluded lists checked, hashed lists compiled at build.
+- [0040 Filter delay](decisions/0040-filter-delay.md): 20 minutes to weaken the filter, then a confirmation that expires after 10, on the elapsed clock and the boot count.
+- [0041 Network permissions of the filter in production](decisions/0041-filter-network-permissions.md): `INTERNET` and `ACCESS_NETWORK_STATE` for the filter only, a release check that requires the filter.
+- [0042 Filter onboarding step and disclosure](decisions/0042-filter-onboarding-and-disclosure.md): an Android-only step before the start point, Google Play's disclosure before every VPN consent.
 
 ## Development
 
@@ -71,3 +74,7 @@
 - [Testing](development/testing.md): what to test, where, and how.
 - [Release](development/release.md): the checks before each store release, and a local production build.
 - [Manual checklist](development/manual-checklist.md): the device checks before each release that tests cannot cover.
+
+## Release
+
+- [Google Play VpnService declaration](release/google-play-vpn-declaration.md): the proposed category, the disclosure, the Data safety answers and the scripts of the two videos.

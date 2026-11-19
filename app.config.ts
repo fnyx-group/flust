@@ -18,18 +18,19 @@ const variants: Record<string, typeof production> = {
 // only. scripts/check-android-release.sh fails on a build that still has one. See
 // docs/decisions/0030-production-android-permissions.md.
 export const PRODUCTION_BLOCKED_PERMISSIONS = [
-  'android.permission.INTERNET',
   'android.permission.SYSTEM_ALERT_WINDOW',
   'android.permission.WRITE_EXTERNAL_STORAGE',
-  'android.permission.ACCESS_NETWORK_STATE',
   'android.permission.CHANGE_WIFI_MULTICAST_STATE',
   'android.permission.ACCESS_LOCAL_NETWORK',
 ];
 
 // Everything a production build requests, the other half of the policy above. The config does not
 // apply it: scripts/check-android-release.sh fails on any other permission, so a dependency that
-// adds one is noticed before the release.
+// adds one is noticed before the release. The first two are the content filter's, which
+// plugins/with-android-filter.ts declares (docs/decisions/0041-filter-network-permissions.md).
 export const PRODUCTION_ANDROID_PERMISSIONS = [
+  'android.permission.INTERNET',
+  'android.permission.ACCESS_NETWORK_STATE',
   'android.permission.POST_NOTIFICATIONS',
   'android.permission.RECEIVE_BOOT_COMPLETED',
   'android.permission.USE_BIOMETRIC',
@@ -47,10 +48,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   }
   const production = name === 'production';
   const screenPrivacy = name !== 'development';
-  // The Android content filter runs behind a development setting until the release that ships it
-  // (docs/decisions/0033-android-filter-network-access.md): only the development variant declares
-  // its VPN service and carries its lists.
-  const filter = name === 'development';
   const configured = withScreenPrivacy(
     withAndroidNoBackup({
       ...config,
@@ -70,11 +67,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       // Hides the app from screenshots and the app switcher, except in the development build,
       // where screenshots are part of the work. See docs/decisions/0025-screen-privacy.md.
-      extra: { ...config.extra, screenPrivacy, filterDevSetting: filter },
+      // The measure of the filter's lists is a development tool.
+      extra: { ...config.extra, screenPrivacy, filterMeasure: name === 'development' },
     }),
     screenPrivacy,
   );
-  const withFilter = withAndroidFilter(configured, filter);
+  // The Android content filter ships in every variant (docs/decisions/0038-content-filter.md).
+  const withFilter = withAndroidFilter(configured);
   // The development build keeps flust-dev, which the dev client is opened with.
   return production ? withNoUrlScheme(withFilter) : withFilter;
 };

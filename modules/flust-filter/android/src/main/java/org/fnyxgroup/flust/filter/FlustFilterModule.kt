@@ -13,22 +13,15 @@ import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record
 
+// The two choices the app offers (docs/decisions/0038-content-filter.md). Adult sites, AI porn,
+// strict mode and SafeSearch are always on while the filter runs: a switch for each would be a way
+// to weaken the filter in a weak moment.
 class FilterSettingsRecord : Record {
-  @Field val adult: Boolean = true
-  @Field val aiNudify: Boolean = true
-  @Field val aiCompanions: Boolean = false
-  @Field val strict: Boolean = true
   @Field val youtubeStrict: Boolean = false
-  @Field val exceptions: List<String> = emptyList()
 
   fun toConfig(enabled: Boolean) = FilterConfig(
     enabled = enabled,
-    adult = adult,
-    aiNudify = aiNudify,
-    aiCompanions = aiCompanions,
-    strict = strict,
     youtube = if (youtubeStrict) YouTubeLevel.STRICT else YouTubeLevel.MODERATE,
-    exceptions = exceptions.mapNotNull(FilterConfig::exceptionName).toSet(),
   )
 }
 
@@ -45,18 +38,17 @@ class FlustFilterModule : Module() {
 
     Function("getStatus") {
       val config = FilterConfigStore(context).load()
+      val running = FilterStatus.running
+      val networks = NetworkState.networks(context)
       mapOf(
         "available" to available(),
         "consent" to (available() && VpnService.prepare(context) == null),
-        "running" to FilterStatus.running,
+        "running" to running,
         "stopReason" to FilterStatus.stopReason(context),
         "enabled" to config.enabled,
-        "adult" to config.adult,
-        "aiNudify" to config.aiNudify,
-        "aiCompanions" to config.aiCompanions,
-        "strict" to config.strict,
         "youtubeStrict" to (config.youtube == YouTubeLevel.STRICT),
-        "exceptions" to config.exceptions.sorted(),
+        "strictPrivateDns" to NetworkChecks.strictPrivateDns(networks),
+        "otherVpn" to NetworkChecks.otherVpn(networks, running),
       )
     }
 
@@ -97,7 +89,7 @@ class FlustFilterModule : Module() {
     }
 
     // The size of the compiled lists, the time to load them and the mean time to match a name,
-    // for the development setting.
+    // shown in the development build only.
     AsyncFunction("measure") {
       val started = SystemClock.elapsedRealtimeNanos()
       val bytes = context.assets.open(FilterVpnService.LISTS_ASSET).use { it.readBytes() }

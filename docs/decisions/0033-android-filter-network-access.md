@@ -1,6 +1,6 @@
 # 0033 Network access of the Android filter
 
-Status: accepted. The resolver and its transport were settled in V0.2, lot 1; `INTERNET` reaches the production build in lot 2.
+Status: accepted. The resolver and its transport were settled in V0.2, lot 1. `INTERNET` and `ACCESS_NETWORK_STATE` reached the production build in lot 2 ([0041](0041-filter-network-permissions.md)).
 
 ## Context
 
@@ -19,8 +19,7 @@ V0.1 makes no network calls and blocks `INTERNET` in production Android builds (
 - There is no fallback to plain DNS. Some networks block port 853, and lookups fail there. A DNS over HTTPS fallback can be added later if the tests on real networks show it is needed.
 - The VPN service never touches the database or its key. Its settings are encrypted under a key of their own.
 - No DNS query is logged, and no reference to a queried name is kept after its answer: the filter keeps no cache.
-- The allowlist of `scripts/check-android-release.sh` gains `INTERNET` only in the version that ships the filter. Every other blocked permission stays blocked. Until then the VPN service is declared in the development build only, and the release check fails on a build that has the service without `INTERNET`, `INTERNET` without the service, or any other VPN service.
-- Detecting strict Private DNS, which sends lookups around the filter, needs `ACCESS_NETWORK_STATE` in the production build. It is blocked today ([0030](0030-production-android-permissions.md)) and is decided in lot 2.
+- The allowlist of `scripts/check-android-release.sh` gains `INTERNET` only in the version that ships the filter, V0.2 lot 2. Every other permission blocked by [0030](0030-production-android-permissions.md) stays blocked, except `ACCESS_NETWORK_STATE`, which detects strict Private DNS and another VPN. In lot 1 the VPN service was declared in the development build only; from lot 2 the release check fails on a build without the service or one of the two permissions, or with any other VPN service ([0041](0041-filter-network-permissions.md)).
 - An independent security audit of the filter takes place before the public release.
 
 ### Rejected
@@ -32,7 +31,7 @@ V0.1 makes no network calls and blocks `INTERNET` in production Android builds (
 
 ## Open points for V0.2
 
-- Which Google Play `VpnService` declaration category fits a filter that people set on themselves, decided in lot 2.
+- Which Google Play `VpnService` declaration category fits a filter that people set on themselves. [Google Play VpnService declaration](../release/google-play-vpn-declaration.md) proposes one; the choice waits for a comparison with similar apps.
 
 ## Consequences
 

@@ -9,7 +9,7 @@ import createConfig, {
   PRODUCTION_BLOCKED_PERMISSIONS,
 } from './app.config';
 import appJson from './app.json';
-import { FILTER_VPN_SERVICE } from './plugins/with-android-filter';
+import { FILTER_PERMISSIONS, FILTER_VPN_SERVICE } from './plugins/with-android-filter';
 
 const staticConfig = appJson.expo as ExpoConfig;
 const blockedInEveryVariant = staticConfig.android?.blockedPermissions ?? [];
@@ -39,18 +39,21 @@ function scriptList(name: string): string[] {
 
 describe('app config', () => {
   it.each([['production'], [undefined]])(
-    'blocks INTERNET and the other unused permissions in the %s variant',
+    'blocks the unused permissions in the %s variant, not those of the filter',
     (variant) => {
       const blocked = configFor(variant).android?.blockedPermissions;
-      expect(blocked).toContain('android.permission.INTERNET');
       expect(blocked).toEqual([...blockedInEveryVariant, ...PRODUCTION_BLOCKED_PERMISSIONS]);
+      expect(blocked?.filter((p) => FILTER_PERMISSIONS.includes(p))).toEqual([]);
     },
   );
 
   it('keeps them in the development variant, which reaches Metro over the network', () => {
     const blocked = configFor('development').android?.blockedPermissions;
-    expect(blocked).not.toContain('android.permission.INTERNET');
     expect(blocked).toEqual(blockedInEveryVariant);
+  });
+
+  it('expects the permissions of the filter in production', () => {
+    expect(PRODUCTION_ANDROID_PERMISSIONS).toEqual(expect.arrayContaining(FILTER_PERMISSIONS));
   });
 
   it('rejects an unknown variant', () => {
@@ -87,16 +90,18 @@ describe('URL schemes', () => {
 });
 
 describe('the Android filter', () => {
-  it.each([['production'], [undefined]])('is left out of the %s variant', (variant) => {
-    const config = configFor(variant);
-    expect(config.extra?.filterDevSetting).toBe(false);
-    expect(modsOf(config)?.android?.gradleProperties).toBeUndefined();
-  });
+  it.each([['production'], [undefined], ['development']])(
+    'ships with its lists in the %s variant',
+    (variant) => {
+      const mods = modsOf(configFor(variant))?.android;
+      expect(mods?.manifest).toBeDefined();
+      expect(mods?.gradleProperties).toBeDefined();
+    },
+  );
 
-  it('runs behind a setting of the development variant, which declares its service', () => {
-    const config = configFor('development');
-    expect(config.extra?.filterDevSetting).toBe(true);
-    expect(modsOf(config)?.android?.gradleProperties).toBeDefined();
+  it('measures its lists in the development variant only', () => {
+    expect(configFor('development').extra?.filterMeasure).toBe(true);
+    expect(configFor('production').extra?.filterMeasure).toBe(false);
   });
 });
 

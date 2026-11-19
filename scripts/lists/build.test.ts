@@ -23,8 +23,7 @@ describe('buildLists', () => {
     });
   });
 
-  it('moves AI companions out of AI nudify', () => {
-    expect(entries.get('companion.example')).toBe(Category.aiCompanions);
+  it('blocks the AI source and the own AI list under AI nudify', () => {
     expect(entries.get('nudify.example')).toBe(Category.aiNudify);
     expect(entries.get('deepfake.example')).toBe(Category.aiNudify);
   });
@@ -32,7 +31,8 @@ describe('buildLists', () => {
   it('removes an exception and every name under it', () => {
     expect(entries.has('safe.excepted.example')).toBe(false);
     expect(entries.has('antivirus.example')).toBe(false);
-    expect(stats.removedByExceptions).toBe(2);
+    expect(entries.has('companion.example')).toBe(false);
+    expect(stats.removedByExceptions).toBe(3);
   });
 
   it('keeps the bypass names and the Google domains', () => {
@@ -80,21 +80,6 @@ describe('buildLists', () => {
       fs.rmSync(root, { recursive: true, force: true });
     }
   });
-
-  it('refuses a domain in both AI nudify and AI companions', () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'filter-lists-'));
-    try {
-      fs.cpSync(fixture, root, { recursive: true });
-      fs.appendFileSync(
-        path.join(root, 'flust/ai-nudify.txt'),
-        'companion.example # fixture, checked 2026-11-19\n',
-      );
-
-      expect(() => buildLists(root)).toThrow('Both AI nudify and AI companions: companion.example');
-    } finally {
-      fs.rmSync(root, { recursive: true, force: true });
-    }
-  });
 });
 
 describe('the committed lists', () => {
@@ -107,6 +92,8 @@ describe('the committed lists', () => {
 
   // aegis's ai-adult list brings them, so flust/ai-nudify.txt holds only the names no source has.
   it.each([
+    'janitorai.com',
+    'chub.ai',
     'cloth-off.io',
     'cloth-off.ai',
     'clothoff.info',
@@ -126,12 +113,18 @@ describe('the committed lists', () => {
   });
 
   // Sites whose main purpose is adult content are blocked, not general platforms that hold some.
-  it.each(['vk.com', 'ok.ru', '4chan.org', '9gag.com', 'deviantart.com', 'www.deviantart.com'])(
-    'leave the general platform %s open',
-    (name) => {
-      expect(entries.has(name)).toBe(false);
-    },
-  );
+  it.each([
+    'vk.com',
+    'ok.ru',
+    '4chan.org',
+    '9gag.com',
+    'deviantart.com',
+    'www.deviantart.com',
+    'character.ai',
+    'replika.com',
+  ])('leave the general platform %s open', (name) => {
+    expect(entries.has(name)).toBe(false);
+  });
 
   // flust reaches Quad9 by address, so strict mode can block its name for every app.
   it('block the names of DoH providers in strict mode, Quad9 included', () => {

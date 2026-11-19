@@ -2,6 +2,7 @@ package org.fnyxgroup.flust.privacy
 
 import android.app.Activity
 import android.os.SystemClock
+import android.provider.Settings
 import android.view.WindowManager
 import expo.modules.kotlin.exception.CodedException
 import expo.modules.kotlin.functions.Queues
@@ -24,6 +25,13 @@ class FlustPrivacyModule : Module() {
     // elapsedRealtime keeps counting while the phone sleeps, unlike the clock behind
     // performance.now(), and changing the date and time does not move it.
     Function("elapsedMs") { SystemClock.elapsedRealtime().toDouble() }
+
+    // elapsedRealtime starts again from zero at each boot. The boot count tells a wait saved with
+    // it whether the phone restarted since. -1 when Android does not say.
+    Function("bootCount") {
+      val resolver = appContext.reactContext?.contentResolver ?: return@Function -1
+      Settings.Global.getInt(resolver, Settings.Global.BOOT_COUNT, -1)
+    }
 
     AsyncFunction("setSecure") { on: Boolean ->
       secure = on

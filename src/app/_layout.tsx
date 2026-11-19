@@ -110,7 +110,8 @@ function RootStack() {
         <Stack.Screen name="erase" />
         <Stack.Screen name="reminders" />
         <Stack.Screen name="lock-settings" />
-        <Stack.Screen name="filter-dev" />
+        <Stack.Screen name="filter" />
+        <Stack.Screen name="licenses" />
         <Stack.Screen name="lapse" options={covering} />
         <Stack.Screen name="rank-unlocked" options={covering} />
       </Stack.Protected>

@@ -5,14 +5,20 @@ import {
   type ConfigPlugin,
 } from 'expo/config-plugins';
 
-// The Android content filter of modules/flust-filter. Its VPN service and boot receiver are
-// declared here rather than in the module's manifest, so that only the builds that ship the
-// filter carry them, with the compiled lists. scripts/check-android-release.sh fails on a build
-// that has the service without INTERNET, or INTERNET without the service, or any other VPN
-// service. See docs/decisions/0033-android-filter-network-access.md.
+// The Android content filter of modules/flust-filter: its VPN service, its boot receiver, the two
+// permissions it needs and the compiled lists. scripts/check-android-release.sh fails on a build
+// without the service or one of the permissions, or with any other VPN service. See
+// docs/decisions/0033-android-filter-network-access.md and
+// docs/decisions/0041-filter-network-permissions.md.
 export const FILTER_VPN_SERVICE = 'org.fnyxgroup.flust.filter.FilterVpnService';
 export const FILTER_BOOT_RECEIVER = 'org.fnyxgroup.flust.filter.FilterBootReceiver';
 export const FILTER_LISTS_PROPERTY = 'flust.filterLists';
+
+// INTERNET reaches the resolver; ACCESS_NETWORK_STATE reads strict Private DNS and another VPN.
+export const FILTER_PERMISSIONS = [
+  'android.permission.INTERNET',
+  'android.permission.ACCESS_NETWORK_STATE',
+];
 
 type Manifest = AndroidConfig.Manifest.AndroidManifest;
 type Application = AndroidConfig.Manifest.ManifestApplication;
@@ -25,6 +31,7 @@ function withoutComponent<T extends { $: { 'android:name': string } }>(
 }
 
 export function addFilterComponents(manifest: Manifest): Manifest {
+  AndroidConfig.Permissions.ensurePermissions(manifest, FILTER_PERMISSIONS);
   const application: Application = AndroidConfig.Manifest.getMainApplicationOrThrow(manifest);
   application.service = [
     ...withoutComponent(application.service, FILTER_VPN_SERVICE),
@@ -65,8 +72,7 @@ export function setFilterLists(
   ];
 }
 
-export const withAndroidFilter: ConfigPlugin<boolean> = (config, on) => {
-  if (!on) return config;
+export const withAndroidFilter: ConfigPlugin = (config) => {
   const withComponents = withAndroidManifest(config, (mod) => {
     mod.modResults = addFilterComponents(mod.modResults);
     return mod;

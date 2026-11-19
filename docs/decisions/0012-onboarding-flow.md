@@ -14,6 +14,7 @@ The onboarding runs once, before anything else. It must resume at the same step 
 - Continue is always enabled. A step left empty keeps its default: no reasons, no risk moments, the plan "when an urge hits, start the guided breathing", and a start now. A plan whose risk moment was unselected afterwards falls back to "when an urge hits".
 - The chosen language is a setting, saved only when the user picks one. Without one, the device language applies.
 - This version has the steps up to the start point. The app lock step, with the warning that a forgotten passcode cannot be recovered, and the evening check-in step from [Features](../product/features.md#onboarding) come with the lock and the reminders. They are appended after `start`; a draft saved on `start` by an earlier version then resumes there and continues to the new steps.
+- From V0.2, lot 2, a `filter` step sits between `plan` and `start` where the filter exists, on Android for now. The step list depends on the platform; a draft saved on `filter` where there is no filter resumes on `start`. A draft saved on `start` by V0.1 resumes there and skips the new step, which stays in the settings ([0042](0042-filter-onboarding-and-disclosure.md)).
 
 ## Consequences
 

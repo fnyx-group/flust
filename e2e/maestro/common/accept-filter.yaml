@@ -1,0 +1,15 @@
+# Accepts flust's disclosure and Android's VPN dialog when they show. Android keeps the VPN consent
+# across a clear of the app's data, so after a first run neither may show.
+appId: org.fnyxgroup.flust
+---
+- runFlow:
+    when:
+      visible: Before turning the filter on
+    commands:
+      - tapOn: Accept and turn on
+# Android's own dialog, in the system's language: the emulator runs in English.
+- runFlow:
+    when:
+      visible: Connection request
+    commands:
+      - tapOn: OK

@@ -6,12 +6,15 @@ import { useTranslation } from 'react-i18next';
 import type { Journey } from '@/domain/journey';
 import type { LapseRecord } from '@/domain/lapse';
 import type { RankId } from '@/domain/ranks';
+import { filterView, isFilterInactive } from '@/domain/filter-state';
 import { streakStart } from '@/domain/streak';
 import { ClockContext } from '@/features/clock/clock-context';
 import { createMinuteClock } from '@/features/clock/minute-clock';
+import { useFilterStatus } from '@/features/filter/use-filter-status';
 import { nativeClockDeps } from '@/features/clock/native-clock';
 import { CheckInLine } from '@/features/home/check-in-line';
 import { CircleName } from '@/features/home/circle-name';
+import { FilterChip } from '@/features/home/filter-chip';
 import { DailyQuote } from '@/features/home/daily-quote';
 import { fitHome, homeSpacing, type HomeFit } from '@/features/home/home-fit';
 import { SupportLine, UndoLine } from '@/features/home/lapse-lines';
@@ -56,6 +59,7 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
       previous[part] === height ? previous : { ...previous, [part]: height },
     );
   };
+  const filterInactive = isFilterInactive(filterView(useFilterStatus().status));
   const fit = fitOf(measured, fontScale, ringMax);
   return (
     <Screen>
@@ -67,7 +71,11 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
         />
         <View style={styles.header}>
           <BrandHeader />
-          <CircleName journey={journey} unlockedRanks={unlockedRanks} />
+          {filterInactive ? (
+            <FilterChip />
+          ) : (
+            <CircleName journey={journey} unlockedRanks={unlockedRanks} />
+          )}
         </View>
         <ScrollView
           style={styles.scroll}

@@ -74,14 +74,6 @@ class QueryProcessorTest {
   }
 
   @Test
-  fun followsANewPolicy() {
-    processor.update(FilterPolicy(TestData.lists, FilterConfig(adult = false)))
-
-    processor.answer(TestData.query("adult.example"), overUdp = true)
-    assertEquals(1, sent.size)
-  }
-
-  @Test
   fun answersWhatItCannotRead() {
     assertNull(processor.answer(ByteArray(3), overUdp = true))
     assertEquals(Dns.NOTIMP, TestData.rcode(processor.answer(TestData.query("example.org", flags = 0x2000), overUdp = true)!!))

@@ -84,7 +84,7 @@ The settings show only what works in this version:
 - "À propos": the version, the MPL-2.0 license, links to the website and the source code, the privacy promise in one line, and the error report.
 - "Tout effacer": erases every piece of data and the key after two confirmations, then returns to the onboarding.
 
-The filter joins the settings with its feature.
+On Android, the filter has its row in the settings, with its state.
 
 ### Reminders
 
@@ -142,18 +142,19 @@ French and English.
 
 The content filter blocks pornographic sites across the whole phone. The design is in [Content filter](content-filter.md).
 
-- Android uses a local `VpnService` for DNS filtering. Only DNS lookups go through it: blocked ones are answered on the device, allowed ones are sent to Quad9 over DNS over TLS, and no query is logged. The Android build requests `INTERNET` from this version, for the filter only ([0033](../decisions/0033-android-filter-network-access.md)).
+- Android uses a local `VpnService` for DNS filtering. Only DNS lookups go through it: blocked ones are answered on the device, allowed ones are sent to Quad9 over DNS over TLS, and no query is logged. The Android build requests `INTERNET` and `ACCESS_NETWORK_STATE` from this version, for the filter only ([0033](../decisions/0033-android-filter-network-access.md), [0041](../decisions/0041-filter-network-permissions.md)).
 - iOS uses the Screen Time APIs (`FamilyControls`, `ManagedSettings`) with Apple's automatic adult filter and up to 45 of our domains. They need an entitlement from Apple. Blocking the removal of flust is possible but off by default.
 
-The filter includes:
+The filter has two controls only, Filter and Strict YouTube. While it is on, it always includes:
 
 - adult site lists under permissive licenses, bundled with the app ([0039](../decisions/0039-filter-lists-and-licenses.md)),
-- a category for AI nudify and deepfake sites, on by default, and one for AI companions, off by default and on Android only,
-- a strict mode, on by default, that blocks the usual bypasses on Android,
-- enforced SafeSearch on Google, Bing, DuckDuckGo and YouTube through DNS, on Android only,
-- a 20 minute delay before the filter can be weakened or turned off.
+- AI porn: nudify, deepfake and sexual AI chat sites,
+- a strict mode that blocks the usual bypasses on Android,
+- enforced SafeSearch on Google, Bing, DuckDuckGo and YouTube through DNS, on Android only, with YouTube moderate, or strict with the switch.
 
-The onboarding gets a filter step.
+Turning the filter or Strict YouTube on is immediate. Turning either off waits 20 minutes, then asks once more, and the request expires after 10 minutes without an answer ([0040](../decisions/0040-filter-delay.md)). flust says when the filter is inactive and why, on the filter screen and with a chip on home. A Licenses screen in About shows the license texts of the lists.
+
+The onboarding gets a filter step on Android, with Google Play's disclosure before the VPN consent and a "Plus tard" choice ([0042](../decisions/0042-filter-onboarding-and-disclosure.md)).
 
 ## V0.3
 

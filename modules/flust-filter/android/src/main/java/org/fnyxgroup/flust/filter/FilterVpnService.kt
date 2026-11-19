@@ -14,9 +14,15 @@ import java.io.FileOutputStream
 // A local VPN that carries DNS only (docs/product/content-filter.md). It reads its settings from
 // FilterConfigStore and the compiled lists from the app's assets, never from the database.
 class FilterVpnService : VpnService() {
-  private var tunnel: ParcelFileDescriptor? = null
-  private var engine: FilterEngine? = null
-  private var thread: Thread? = null
+  private class Tunnel(
+    val descriptor: ParcelFileDescriptor,
+    val engine: FilterEngine,
+    val thread: Thread,
+    val config: FilterConfig,
+  )
+
+  private var tunnel: Tunnel? = null
+  private var generation = 0
   private val main = Handler(Looper.getMainLooper())
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -37,13 +43,11 @@ class FilterVpnService : VpnService() {
       }
     }
     if (!config.enabled) {
+      stopTunnel(StopReason.STOPPED)
       stopSelf()
       return START_NOT_STICKY
     }
-    engine?.let {
-      it.update(config)
-      return START_STICKY
-    }
+    if (tunnel?.config == config) return START_STICKY
     return if (startTunnel(config)) START_STICKY else START_NOT_STICKY
   }
 
@@ -57,64 +61,71 @@ class FilterVpnService : VpnService() {
     super.onDestroy()
   }
 
+  // Sets up a new tunnel, then closes the one it replaces, so lookups never leave the filter in
+  // between. A new tunnel also empties Android's DNS cache (TunnelRoutes.DNS): a name cached
+  // before a stronger setting would otherwise still resolve until its answer expires.
   private fun startTunnel(config: FilterConfig): Boolean {
+    val lists = try {
+      Blocklist.read(assets.open(LISTS_ASSET).use { it.readBytes() })
+    } catch (unreadable: Exception) {
+      return fail(StopReason.LISTS)
+    }
     var descriptor: ParcelFileDescriptor? = null
+    var started: FilterEngine? = null
     try {
-      val lists = Blocklist.read(assets.open(LISTS_ASSET).use { it.readBytes() })
-      val established = builder().establish()
+      generation = (generation + 1) % TunnelRoutes.DNS.size
+      val established = builder(TunnelRoutes.DNS[generation]).establish() ?: return fail(StopReason.NO_CONSENT)
       descriptor = established
-      if (established == null) {
-        FilterStatus.recordStop(this, StopReason.NO_CONSENT)
-        stopSelf()
-        return false
-      }
       val transport = ResolverTransport(Quad9.ENDPOINT, { socket -> protect(socket) }, SystemTrust.context())
       val upstream = DotClient(transport::connect, System::currentTimeMillis)
-      val running = FilterEngine(lists, config, upstream, upstream::close)
+      val engine = FilterEngine(lists, config, upstream, upstream::close)
+      started = engine
       val reader = Thread({
-        running.run(FileInputStream(established.fileDescriptor), FileOutputStream(established.fileDescriptor))
-        // The loop ends by itself only when the tunnel fails: the service then stops, so the app
-        // shows the filter as inactive.
+        engine.run(FileInputStream(established.fileDescriptor), FileOutputStream(established.fileDescriptor))
+        // The loop ends by itself when the tunnel fails, or when a newer tunnel replaced it. Only
+        // the first stops the service, so the app shows the filter as inactive.
         main.post {
-          if (engine === running) {
+          if (tunnel?.engine === engine) {
             stopTunnel(StopReason.FAILED)
             stopSelf()
           }
         }
       }, "flust-filter")
-      tunnel = established
-      engine = running
-      thread = reader
+      val previous = tunnel
+      tunnel = Tunnel(established, engine, reader, config)
       reader.start()
+      previous?.let(::close)
     } catch (error: Exception) {
       // An established tunnel that no thread reads would swallow every lookup.
+      started?.stop()
       try {
         descriptor?.close()
       } catch (ignored: Exception) {
       }
-      engine?.stop()
-      engine = null
-      tunnel = null
-      thread = null
-      FilterStatus.recordStop(this, StopReason.FAILED)
-      stopSelf()
-      return false
+      return fail(StopReason.FAILED)
     }
     FilterStatus.running = true
     FilterStatus.recordStop(this, null)
     return true
   }
 
-  private fun builder(): Builder = Builder().apply {
+  private fun fail(reason: StopReason): Boolean {
+    stopTunnel(null)
+    FilterStatus.recordStop(this, reason)
+    stopSelf()
+    return false
+  }
+
+  private fun builder(dns: DnsAddresses): Builder = Builder().apply {
     setSession(TunnelRoutes.SESSION)
     setMtu(TunnelRoutes.MTU)
     setBlocking(true)
     addAddress(TunnelRoutes.INTERFACE_V4, 32)
     addAddress(TunnelRoutes.INTERFACE_V6, 128)
-    addDnsServer(TunnelRoutes.DNS_V4)
-    addDnsServer(TunnelRoutes.DNS_V6)
-    addRoute(TunnelRoutes.DNS_V4, 32)
-    addRoute(TunnelRoutes.DNS_V6, 128)
+    addDnsServer(dns.v4)
+    addDnsServer(dns.v6)
+    addRoute(dns.v4, 32)
+    addRoute(dns.v6, 128)
     TunnelRoutes.RESOLVERS.forEach { addRoute(it, TunnelRoutes.prefixLength(it)) }
     // A VPN is metered by default from Android 10, which would make apps hold back on Wi-Fi.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) setMetered(false)
@@ -126,18 +137,20 @@ class FilterVpnService : VpnService() {
   }
 
   private fun stopTunnel(reason: StopReason?) {
-    val wasRunning = tunnel != null
-    engine?.stop()
+    val running = tunnel ?: return
+    tunnel = null
+    close(running)
+    FilterStatus.running = false
+    if (reason != null) FilterStatus.recordStop(this, reason)
+  }
+
+  private fun close(old: Tunnel) {
+    old.engine.stop()
     try {
-      tunnel?.close()
+      old.descriptor.close()
     } catch (ignored: Exception) {
     }
-    thread?.interrupt()
-    engine = null
-    tunnel = null
-    thread = null
-    FilterStatus.running = false
-    if (wasRunning && reason != null) FilterStatus.recordStop(this, reason)
+    old.thread.interrupt()
   }
 
   companion object {

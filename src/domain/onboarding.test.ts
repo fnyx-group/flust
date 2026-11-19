@@ -13,11 +13,13 @@ import {
   QUESTION_STEPS,
   samePlan,
   setCustomReason,
+  shownStep,
   stepProgress,
   toggleReason,
   toggleRiskMoment,
   triggerOptions,
   type OnboardingAnswers,
+  type OnboardingStep,
 } from '@/domain/onboarding';
 import { DEFAULT_LOCK_SETTINGS } from '@/domain/lock';
 import { DEFAULT_REMINDER_SETTINGS } from '@/domain/reminders';
@@ -38,30 +40,45 @@ function answers(overrides: Partial<OnboardingAnswers> = {}): OnboardingAnswers 
 
 describe('steps', () => {
   it('go forward and back in order, and stop at both ends', () => {
-    expect(ONBOARDING_STEPS.map(nextStep)).toEqual([
+    const next = (step: OnboardingStep) => nextStep(step, true);
+    const previous = (step: OnboardingStep) => previousStep(step, true);
+    expect(ONBOARDING_STEPS.map(next)).toEqual([
       'reasons',
       'risk-moments',
       'plan',
+      'filter',
       'start',
       null,
     ]);
-    expect(ONBOARDING_STEPS.map(previousStep)).toEqual([
+    expect(ONBOARDING_STEPS.map(previous)).toEqual([
       null,
       'welcome',
       'reasons',
       'risk-moments',
       'plan',
+      'filter',
     ]);
+  });
+
+  it('skip the filter step where there is no filter', () => {
+    expect(nextStep('plan', false)).toBe('start');
+    expect(previousStep('start', false)).toBe('plan');
+    expect(nextStep('filter', false)).toBeNull();
+    expect(shownStep('filter', false)).toBe('start');
+    expect(shownStep('filter', true)).toBe('filter');
   });
 
   it('show progress on every step but the welcome', () => {
     expect(ONBOARDING_STEPS).toEqual(['welcome', ...QUESTION_STEPS]);
-    expect(QUESTION_STEPS.map(stepProgress)).toEqual([
-      { current: 1, total: 4 },
-      { current: 2, total: 4 },
-      { current: 3, total: 4 },
-      { current: 4, total: 4 },
+    expect(QUESTION_STEPS.map((step) => stepProgress(step, true))).toEqual([
+      { current: 1, total: 5 },
+      { current: 2, total: 5 },
+      { current: 3, total: 5 },
+      { current: 4, total: 5 },
+      { current: 5, total: 5 },
     ]);
+    expect(stepProgress('start', false)).toEqual({ current: 4, total: 4 });
+    expect(stepProgress('plan', false)).toEqual({ current: 3, total: 4 });
   });
 
   it('recognize only known steps', () => {

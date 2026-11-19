@@ -139,23 +139,32 @@ TalkBack is in Settings, Accessibility, TalkBack. The font scale can be set with
 
 ### Content filter on the emulator
 
-Until the filter ships ([Content filter](../product/content-filter.md#delivery)), these run on the development build, not the production APK: `APP_VARIANT=development pnpm expo prebuild --platform android --clean --no-install`, then `git restore package.json`, `./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64` from `android/`, `adb install -r android/app/build/outputs/apk/debug/app-debug.apk` and `pnpm dev`. The `adb` commands use `org.fnyxgroup.flust.dev`. The measurements on a real phone, a network that blocks port 853 and an app that queries a resolver directly belong to the field tests of lot 4.
+These run on the production APK of [Release](release.md#local-production-build), installed with `adb install -r android/app/build/outputs/apk/release/app-release.apk`. The `adb` commands use `org.fnyxgroup.flust`. Steps 2 and 3 need the development build, which has the measure of the lists. The measurements on a real phone, a network that blocks port 853 and an app that queries a resolver directly belong to the field tests of lot 4.
 
-1. Settings, Content filter (development): the status reads Off, and every switch is enabled.
-2. Measure the lists: 304,099 domains, 2,673 KB. Write down the load time and the cost per name.
-3. Turn the filter on: Android asks for the VPN consent once. After OK, the status reads On and the key icon shows in the status bar.
-4. Blocking: `adb shell ping -c 1 pornhub.com` and `www.pornhub.com` answer `unknown host`, and Chrome shows `ERR_NAME_NOT_RESOLVED`. `adb shell ping -c 1 wikipedia.org` resolves, and Wikipedia loads in Chrome.
-5. SafeSearch: `adb shell ping -c 1 www.google.com` resolves to `forcesafesearch.google.com`'s address, and a Google search shows SafeSearch locked on. `www.bing.com` resolves to `strict.bing.com`'s address and `duckduckgo.com` to `safe.duckduckgo.com`'s. With Strict YouTube on, `www.youtube.com` resolves to `restrict.youtube.com`'s address, `restrictmoderate.youtube.com`'s when off.
-6. Strict mode: `dns.google`, `dns.quad9.net` and `use-application-dns.net` answer `unknown host`, while other names still resolve. In Chrome, Settings, Privacy and security, Use secure DNS, set a custom provider `https://dns.google/dns-query`: blocked sites stay blocked and allowed ones still load. Strict mode off: `dns.google` resolves.
-7. Categories: AI companions on, `character.ai` answers `unknown host`; off, it resolves. Adult sites off, `pornhub.com` resolves.
-8. Private DNS: Settings, Network, Private DNS, Automatic: names still resolve without delay, blocked ones stay blocked. Hostname `dns.google`: lookups go around the filter, which is the known limit that lot 2 detects. Set it back to Automatic.
-9. Nothing about the lookups is logged: `adb logcat -d | grep -i -E 'pornhub|wikipedia'` finds nothing from flust.
-10. Always-on: Settings, Network, VPN lists flust dev, and its gear offers Always-on VPN and Block connections without VPN.
-11. Force stop: `adb shell am force-stop org.fnyxgroup.flust.dev` removes the key icon. Open flust: the filter comes back on.
-12. Reboot: `adb reboot`, then, without opening flust, `adb shell ping -c 1 pornhub.com` answers `unknown host` once the phone is up.
-13. Revoked: disconnect the VPN in Settings, Network, VPN. The development screen reads that another VPN took over or the VPN was turned off. Close and open flust: the consent still holds, so the filter comes back on.
-14. Turn the filter off in flust: the status reads Off, the key icon goes away and `pornhub.com` resolves.
-15. Production is untouched: the production APK of [Release](release.md#local-production-build) passes `scripts/check-android-release.sh`, with no VPN service and no `INTERNET`.
+1. A fresh install: the onboarding shows "Un filtre pour tout le téléphone" after the plan, with the disclosure in full. "Plus tard" goes on to the start, and Settings, Filtre reads Désactivé.
+2. Development build: Filtre, Mesurer les listes: 304,083 domains, 2,673 KB. Write down the load time and the cost per name.
+3. Development build: the Filtre row and screen work as in production, with the measure at the bottom.
+4. Turn the filter on from its screen: the disclosure sheet shows first, then Android's VPN dialog. After OK, the state reads that the filter protects, and the key icon shows in the status bar.
+5. Blocking: `adb shell ping -c 1 pornhub.com` and `www.pornhub.com` answer `unknown host`, and Chrome shows `ERR_NAME_NOT_RESOLVED`. `cloth-off.io` and `janitorai.com` too. `adb shell ping -c 1 wikipedia.org` and `character.ai` resolve, and Wikipedia loads in Chrome.
+6. SafeSearch: `adb shell ping -c 1 www.google.com` resolves to `forcesafesearch.google.com`'s address, and a Google search shows SafeSearch locked on. `www.bing.com` resolves to `strict.bing.com`'s address and `duckduckgo.com` to `safe.duckduckgo.com`'s. `www.youtube.com` resolves to `restrictmoderate.youtube.com`'s address.
+7. Strict YouTube, at once: resolve `www.youtube.com` once, then turn Strict YouTube on, and resolve it again right away: it gives `restrict.youtube.com`'s address, not the cached one. `adb shell dumpsys connectivity | grep -i -A3 'VPN'` shows the other fake DNS address, `10.111.222.3` or `.2`, after each change.
+8. Strict mode: `dns.google`, `dns.quad9.net` and `use-application-dns.net` answer `unknown host`, while other names still resolve.
+9. Chrome's secure DNS: in Chrome, Settings, Privacy and security, Use secure DNS, choose a custom provider `https://dns.google/dns-query`. Browsing in Chrome stops. The filter screen's help line says how to fix it; set it back to Automatic and pages load again.
+10. Private DNS: Settings, Network and internet, Private DNS, Automatic: names still resolve without delay, blocked ones stay blocked. Hostname `dns.google`: within two seconds the filter screen reads that the filter does not protect, with the Private DNS reason and "Ouvrir les réglages", which opens the network settings, and home shows the "Filtre inactif" chip in place of the circle name. Set it back to Automatic: both go back to normal.
+11. Home at 667 points: on an emulator 667 points tall (a 1334 by 750 pixel screen at 320 dpi, `adb shell wm size 750x1334` and `adb shell wm density 320`), home with the chip does not scroll. `adb shell wm size reset` and `adb shell wm density reset` after.
+12. Delay, then confirm: turn the filter off. The state reads "Le filtre se désactive dans 20 min." and the filter still blocks. Wait 20 minutes with the screen off for part of it: "Les 20 minutes sont passées" shows with "Confirmer". Confirm in the sheet: the key icon goes away and `pornhub.com` resolves.
+13. Expiry: turn the filter on, ask to turn it off, wait 31 minutes away from flust, then open it: the request is gone and the filter is on.
+14. Clock changes during the wait: `adb root`, ask to turn the filter off, then `adb shell date 010100002030` (forward) and `adb shell am force-stop org.fnyxgroup.flust`; open flust: the wait has not moved. Set the date back with `adb shell date` to the real time, or turn automatic time back on.
+15. Reboot during the wait: ask to turn the filter off, wait 2 minutes, `adb reboot`, wait 5 minutes, open flust: the wait left is about 18 minutes minus the time since boot, never less.
+16. Strict YouTube's delay: turning it off waits like the filter, and its switch stays on until confirmed.
+17. Nothing about the lookups is logged: `adb logcat -d | grep -i -E 'pornhub|wikipedia'` finds nothing from flust.
+18. Always-on: the "VPN permanent" row opens Settings, Network, VPN, where flust's gear offers Always-on VPN and Block connections without VPN.
+19. Force stop: `adb shell am force-stop org.fnyxgroup.flust` removes the key icon. Open flust: the filter comes back on.
+20. Reboot: `adb reboot`, then, without opening flust, `adb shell ping -c 1 pornhub.com` answers `unknown host` once the phone is up. If Android refused the start, flust reads that the filter resumes when it opens, not an error, and opening it brings the filter back.
+21. Turned off in the system: disconnect the VPN in Settings, Network, VPN. The filter screen reads that it was turned off in Android's settings, with "Réactiver le filtre", which brings it back without a dialog.
+22. Another VPN: install a second VPN app and connect it. The filter screen reads that another VPN took over; "Réactiver le filtre" shows the disclosure, then Android's dialog, and the other VPN disconnects.
+23. Licenses: About, Licences shows ShadowWhisperer (Unlicense), Sinfonietta and 4skinSkywalker (MIT) and aegis (CC0-1.0) with their full texts.
+24. The release check passes on the production APK: `scripts/check-android-release.sh android/app/build/outputs/apk/release/app-release.apk` lists `INTERNET` and `ACCESS_NETWORK_STATE`, and the filter's VPN service.
 
 ## iOS
 
