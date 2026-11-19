@@ -3,5 +3,6 @@
   "entry": ["src/app/**/*.{ts,tsx}"],
   "project": ["src/**/*.{ts,tsx}", "*.{js,ts}"],
   "ignoreDependencies": ["expo-updates"],
+  "ignoreBinaries": ["awk"],
   "ignoreExportsUsedInFile": { "interface": true, "type": true }
 }

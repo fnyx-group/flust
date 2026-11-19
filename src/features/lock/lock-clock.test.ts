@@ -1,3 +1,7 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import * as ts from 'typescript';
+
 import { MS_PER_MINUTE } from '@/domain/time';
 import type { ElapsedClockDeps } from '@/features/clock/elapsed-clock';
 import type { AppActivity } from '@/features/clock/minute-clock';
@@ -38,6 +42,25 @@ function sleepThenMoveDateBack(deps: ElapsedClockDeps) {
   return controller.status();
 }
 
+// The clock argument of every createLockController call in the lock gate.
+function lockGateClocks(): string[] {
+  const file = path.join(__dirname, 'lock-gate.tsx');
+  const source = ts.createSourceFile(file, fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest);
+  const clocks: string[] = [];
+  const visit = (node: ts.Node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'createLockController'
+    ) {
+      clocks.push(node.arguments[1]?.getText(source) ?? '');
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  return clocks;
+}
+
 describe('lock clock', () => {
   afterEach(() => {
     jest.restoreAllMocks();
@@ -49,5 +72,12 @@ describe('lock clock', () => {
 
   it('is needed: the clock that stops during sleep would open the app', () => {
     expect(sleepThenMoveDateBack(nativeElapsedClockDeps)).toBe('unlocked');
+  });
+
+  it('is the one the lock gate gives the lock controller', () => {
+    const gate = fs.readFileSync(path.join(__dirname, 'lock-gate.tsx'), 'utf8');
+
+    expect(gate).toContain("import { lockClockDeps } from '@/features/lock/lock-clock';");
+    expect(lockGateClocks()).toEqual(['lockClockDeps']);
   });
 });

@@ -117,8 +117,6 @@ Taps on a notification ([0021](../decisions/0021-local-notifications.md)), with 
 
        adb shell dumpsys input_method | grep -o 'imeOptions=0x[0-9a-f]*'
 
-   Other keyboards may ignore the request: the docs say flust asks the keyboard not to learn, never that it prevents it.
-
 ### Accessibility
 
 The text size, TalkBack and Remove animations checks of [Testing](testing.md#accessibility), plus:

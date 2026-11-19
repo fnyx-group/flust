@@ -14,6 +14,7 @@ import {
   type NotificationResponse,
 } from 'expo-notifications';
 
+import { MS_PER_MINUTE } from '@/domain/time';
 import type { Notifier } from '@/features/reminders/notifier-types';
 import {
   isNotificationRoute,
@@ -21,6 +22,7 @@ import {
 } from '@/features/reminders/notification-route';
 
 const CATEGORY = 'reminder';
+const CHECK_MARGIN_MS = MS_PER_MINUTE;
 
 // The person is already in the app: a reminder arriving now shows nothing.
 setNotificationHandler({
@@ -56,7 +58,8 @@ export const notifier: Notifier = {
   // A calendar trigger without a time zone floats: it keeps its wall time when the zone or the
   // clocks change. A fixed reminder keeps its instant. iOS has no way to replace the plan at
   // once: a plan left partial, by a failure or a check that does not find every notification,
-  // throws, and the next sync, on the next return to the app, plans everything again.
+  // throws, and the next sync, on the next return to the app, plans everything again. iOS lists
+  // only notifications still to come, so one due within a minute is not looked for.
   async replace(notifications) {
     await cancelAllScheduledNotificationsAsync();
     for (const { id, body, route, local, floating, at } of notifications) {
@@ -71,7 +74,12 @@ export const notifier: Notifier = {
     const scheduled = new Set(
       (await getAllScheduledNotificationsAsync()).map((request) => request.identifier),
     );
-    if (notifications.some(({ id }) => !scheduled.has(String(id)))) {
+    // Read after the list: a reminder due by then may have fired and left it.
+    const checkedAfter = Date.now() + CHECK_MARGIN_MS;
+    const missing = notifications.some(
+      ({ id, at }) => at > checkedAfter && !scheduled.has(String(id)),
+    );
+    if (missing) {
       throw new Error('Some reminders were not scheduled.');
     }
   },

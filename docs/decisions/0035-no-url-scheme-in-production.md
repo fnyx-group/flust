@@ -12,7 +12,7 @@ Any web page can try to open a scheme and see whether something answers, which t
 - The `<queries>` entry for `https`, which lets flust open the help links in the browser, stays: it declares what flust may open, not what opens flust.
 - `scheme` stays in the JavaScript config, because expo-linking reads it at run time. It can go once a release build shows that nothing needs it.
 - The development build keeps `flust-dev`, which the dev client is opened with.
-- `scripts/check-android-release.sh` fails on any intent filter with a `VIEW` action and a data scheme.
+- `scripts/check-android-release.sh` fails on any intent filter with a `VIEW` action and a data scheme. In an APK, a scheme or action given as a resource reference is not resolved: the check fails on it rather than miss it.
 - As a second line of defense, `+native-intent.tsx` sends a link that launches the app to home and ignores a link that arrives while the app runs. A link that arrives while the app runs could otherwise close a note being written, so it is not sent to home either. Links are no longer held while the app is locked: only notification taps are ([0023](0023-app-lock.md)).
 - A route that does not exist shows `+not-found.tsx`, in the app's style, with a way back home.
 

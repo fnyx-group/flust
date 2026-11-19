@@ -11,22 +11,23 @@
 - The app refuses to open or create a database when `PRAGMA cipher_version` is empty, so a build without SQLCipher can never write plain data.
 - Startup is a state machine (`src/data/open-storage.ts`) with one outcome per case:
 
-  | Case                                    | Outcome                                                            |
-  | --------------------------------------- | ------------------------------------------------------------------ |
-  | No key, no database                     | First launch: create the key, then the database.                   |
-  | Key and database                        | Normal launch: open, check with `quick_check`, migrate if needed.  |
-  | Database but no key                     | `key-missing`: a reset is offered.                                 |
-  | Key but no database                     | The stale key is replaced and the app starts fresh.                |
-  | Wrong key or damaged file               | `database-unreadable`: a reset is offered.                         |
-  | Keystore not readable yet               | `key-unavailable`: retry only. A reset here could erase good data. |
-  | Database from a newer app version       | `schema-too-new`: retry only, the data is kept for the update.     |
-  | Migration failed                        | `migration-failed`: the backup is restored, retry only.            |
-  | File system or keystore error otherwise | `storage-unavailable`: retry only.                                 |
-  | Journey stored but invalid              | `journey-corrupted`: a reset is offered, after storage is closed.  |
+  | Case                                    | Outcome                                                                                            |
+  | --------------------------------------- | -------------------------------------------------------------------------------------------------- |
+  | No key, no database                     | First launch: create the key, then the database.                                                   |
+  | Key and database                        | Normal launch: open, check with `quick_check`, migrate if needed.                                  |
+  | Database but no key                     | `key-missing`: a reset is offered.                                                                 |
+  | Key but no database                     | The stale key is replaced and the app starts fresh.                                                |
+  | Backup but no database                  | Restored if it passes the checks, otherwise `storage-unavailable`, or `key-missing` without a key. |
+  | Wrong key or damaged file               | `database-unreadable`: a reset is offered.                                                         |
+  | Keystore not readable yet               | `key-unavailable`: retry only. A reset here could erase good data.                                 |
+  | Database from a newer app version       | `schema-too-new`: retry only, the data is kept for the update.                                     |
+  | Migration failed                        | `migration-failed`: the backup is restored, retry only.                                            |
+  | File system or keystore error otherwise | `storage-unavailable`: retry only.                                                                 |
+  | Journey stored but invalid              | `journey-corrupted`: a reset is offered, after storage is closed.                                  |
 
-  Each step is ordered so that a process killed at any point leads to one of these cases on next launch.
+Each step is ordered so that a process killed at any point leads to one of these cases on next launch.
 
-- The schema version is `PRAGMA user_version`. Before migrating a database that holds data, the app closes it, copies the file to `flust.db.pre-migration.tmp`, then renames the copy to `flust.db.pre-migration`: a copy cut short never takes the backup's name, and a leftover temporary copy is deleted at the next launch. Each migration runs in a transaction together with its version number. On failure the database is replaced by the backup. A backup found at startup means a migration was interrupted. Once the key is read, the backup is restored only if it opens with the key, passes `quick_check` and has a schema version between 1 and the latest this build knows; otherwise the database is kept and the backup deleted, which the local error log records as `backup-discarded`, kind only. While the key is missing or cannot be read, neither file is touched. This is safe because no write happens before storage is open, and the backup is removed before it opens. Removing a backup or its temporary copy also removes their `-journal`, `-wal` and `-shm` files.
+- The schema version is `PRAGMA user_version`. Before migrating a database that holds data, the app closes it, copies the file to `flust.db.pre-migration.tmp`, then renames the copy to `flust.db.pre-migration`: a copy cut short never takes the backup's name, and a leftover temporary copy is deleted at the next launch. Each migration runs in a transaction together with its version number. On failure the database is replaced by the backup. A backup found at startup means a migration was interrupted. Once the key is read, the backup is restored only if it opens with the key, passes `quick_check` and has a schema version between 1 and the latest this build knows; otherwise the database is kept and the backup deleted, which the local error log records as `backup-discarded`, kind only. A backup is deleted only when `flust.db` exists: without it, as after a restore cut short, the backup may be the only copy, so a backup that fails the check, perhaps for a passing reason, leaves every file and the key in place and opening reports `storage-unavailable`, for the next launch to try again. While the key is missing or cannot be read, neither file is touched. This is safe because no write happens before storage is open, and the backup is removed before it opens. Removing a database, a backup or its temporary copy also removes their `-journal`, `-wal` and `-shm` files, before the file itself, so that a process killed halfway never leaves a journal that SQLite would apply to the next file of that name; a fresh start removes any left by older builds. The temporary copy is not synced to disk before the rename, so a power loss can leave a renamed backup that is empty or incomplete. That is acceptable: `quick_check` rejects it, and the database it was copied from is still there, kept consistent by SQLite.
 - Published migrations are frozen: a test records the SHA-256 of each migration file and fails if one changes.
 - Every write runs in a transaction. All statements go through a single connection and a queue, so a transaction never picks up a statement issued elsewhere. expo-sqlite's exclusive transactions are not used: each one opens a new connection, which SQLCipher would need to key again.
 - Repositories (`src/data/*-repository.ts`) read rows through the domain validators (`restoreJourney`, `isRankId`) and return `Result` types. Features reach them through `useStorage()`, provided by `StorageGate` in the root layout, which also shows the reset and retry screens.

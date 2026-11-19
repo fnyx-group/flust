@@ -11,6 +11,8 @@
 # Usage: scripts/check-android-release.sh <app.apk|app.aab>
 set -euo pipefail
 
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
 # Must match PRODUCTION_BLOCKED_PERMISSIONS in app.config.ts, which app.config.test.ts checks.
 blocked_permissions=(
   android.permission.INTERNET
@@ -129,27 +131,10 @@ permissions=$(requested_permissions | sort -u) || cannot_check "Cannot read the 
 echo "Permissions in $build:"
 sed 's/^/  /' <<<"$permissions"
 
-# Schemes of the intent filters that open URLs: a VIEW action with a data scheme. The <queries>
-# entry that lets flust open web links is an <intent>, not an <intent-filter>, so it is not one.
+# Schemes of the intent filters that open URLs, parsed by url-schemes.awk for an APK.
 url_schemes() {
   if [[ $build == *.apk ]]; then
-    "$aapt2" dump xmltree --file AndroidManifest.xml "$build" | awk '
-      function flush(  i) {
-        if (inside && view) for (i = 1; i <= count; i++) print schemes[i]
-        inside = 0; view = 0; count = 0
-      }
-      { match($0, /^ */); indent = RLENGTH }
-      inside && indent <= depth { flush() }
-      /^ *E: intent-filter / { inside = 1; depth = indent; next }
-      inside && /:name\(0x01010003\)="android\.intent\.action\.VIEW"/ { view = 1 }
-      inside && /:scheme\(0x01010027\)="/ {
-        scheme = $0
-        sub(/.*:scheme\(0x01010027\)="/, "", scheme)
-        sub(/".*/, "", scheme)
-        schemes[++count] = scheme
-      }
-      END { flush() }
-    '
+    "$aapt2" dump xmltree --file AndroidManifest.xml "$build" | awk -f "$script_dir/url-schemes.awk"
   else
     "$java" -jar "$BUNDLETOOL" dump manifest --bundle="$build" \
       --xpath="//intent-filter[action/@android:name='android.intent.action.VIEW']/data/@android:scheme"

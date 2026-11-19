@@ -7,7 +7,8 @@ export type DatabaseDriver = {
 };
 
 // File operations on databases, by name, in the driver's database directory. `remove` also
-// deletes the journal files SQLite keeps next to a database, and does nothing if none exist.
+// deletes the journal files SQLite keeps next to a database, before the database itself and
+// even when it is already gone, and does nothing if none exist.
 export type DatabaseFiles = {
   exists(name: string): Promise<boolean>;
   copy(from: string, to: string): Promise<void>;

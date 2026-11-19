@@ -97,7 +97,7 @@ Notification text is always neutral and never reveals what the app is about.
 | Reinstall on iOS                 | The iOS keychain keeps keys after uninstall. On reinstall, the app detects a stale key with no matching data and replaces it.                                                                                 |
 | Phone restored without the key   | The data cannot be decrypted. The app offers a reset.                                                                                                                                                         |
 | Any write to storage             | Every write runs in a transaction, so an interrupted write never leaves partial data.                                                                                                                         |
-| Schema migration                 | A backup of the data is made on the device before every schema migration. A backup that cannot be read, such as one cut short by a crash, is deleted and never replaces the data.                             |
+| Schema migration                 | A backup of the data is made on the device before every schema migration. A backup that cannot be read never replaces the data, and is deleted only when the data is still there.                             |
 
 ## Emergency screen
 

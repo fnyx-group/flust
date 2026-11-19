@@ -3,7 +3,9 @@ import { defaultDatabaseDirectory } from 'expo-sqlite';
 
 import type { DatabaseFiles } from '@/data/storage-deps';
 
-const JOURNAL_SUFFIXES = ['', '-journal', '-wal', '-shm'];
+// The database goes last: a process killed halfway must not leave a journal without its
+// database, which SQLite would apply to the next file given that name.
+const JOURNAL_SUFFIXES = ['-journal', '-wal', '-shm', ''];
 
 export const expoFiles: DatabaseFiles = {
   async exists(name) {

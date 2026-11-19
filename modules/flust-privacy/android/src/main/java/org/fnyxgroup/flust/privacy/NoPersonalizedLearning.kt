@@ -9,8 +9,8 @@ import android.widget.EditText
 
 // Asks the keyboard not to learn what is typed in flust's text fields, nor to suggest it
 // elsewhere. Keyboards may ignore the flag. Set on focus rather than once per field: React
-// Native rewrites imeOptions whenever returnKeyType changes, and a field added later is covered
-// too. See docs/decisions/0036-keyboard-learning.md.
+// Native rewrites imeOptions when some props are set, and a field added later is covered too.
+// See docs/decisions/0036-keyboard-learning.md.
 internal class NoPersonalizedLearning(private val root: View) :
   ViewTreeObserver.OnGlobalFocusChangeListener {
 
@@ -27,8 +27,13 @@ internal class NoPersonalizedLearning(private val root: View) :
   override fun onGlobalFocusChanged(oldFocus: View?, newFocus: View?) {
     val field = newFocus as? EditText ?: return
     if (field.imeOptions and FLAG != 0) return
+    // React Native rewrites imeOptions when returnKeyType or disableFullscreenUI is set: a change
+    // to either while the field has focus would drop the flag until it takes focus again. flust's
+    // fields set both once, when mounted.
     field.imeOptions = field.imeOptions or FLAG
-    // The keyboard may already have read the field's options as it took focus.
+    // This listener runs before the field starts the keyboard's input, so the restart is likely
+    // not needed. It is kept in case the input had already started, and runs at most once per
+    // field since the flag is then set.
     val keyboard = field.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
     keyboard?.restartInput(field)
   }

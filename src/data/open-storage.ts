@@ -72,17 +72,21 @@ async function open(deps: StorageDeps, migrations: readonly Migration[]): Promis
   const key = await readKey(deps.keyStore);
   if (!key.ok) return key;
 
-  if (key.value !== null) {
-    const restored = await restoreInterruptedMigration(deps, key.value, migrations);
+  const hasDatabase = await deps.files.exists(DATABASE_NAME);
+  if (await deps.files.exists(BACKUP_NAME)) {
+    // Without the key the backup cannot be checked, and it may be the only copy left.
+    if (key.value === null) return err('key-missing');
+    const restored = await restoreInterruptedMigration(deps, key.value, migrations, hasDatabase);
     if (!restored.ok) return restored;
+    return openWithKey(deps, key.value, migrations);
   }
 
-  if (!(await deps.files.exists(DATABASE_NAME))) {
+  if (!hasDatabase) {
     // A key without a database is stale: the iOS keychain outlives an uninstall, and a first
-    // launch can stop between storing the key and creating the file. A backup left over can
-    // never be read with the new key.
+    // launch can stop between storing the key and creating the file. Side files left by a
+    // database deleted halfway must not be applied to the new one.
     if (key.value !== null) await deps.keyStore.remove();
-    await deps.files.remove(BACKUP_NAME);
+    await deps.files.remove(DATABASE_NAME);
     const created = await createKey(deps.keyStore, deps.randomBytes);
     if (!created.ok) return created;
     return openWithKey(deps, created.value, migrations);
@@ -95,15 +99,16 @@ async function open(deps: StorageDeps, migrations: readonly Migration[]): Promis
 // Writes only happen once storage is open, and the backup is gone by then, so a backup found at
 // startup holds the latest data. It replaces the database only once it opens with the key,
 // passes quick_check and has a schema version this build knows: a backup damaged by a crash or
-// the disk must never replace an intact database.
+// the disk must never replace an intact database. Without a database, as after a restore cut
+// short, the backup may be the only copy: a check that fails, perhaps for a passing reason,
+// keeps every file and the key for the next launch to try again.
 async function restoreInterruptedMigration(
   deps: StorageDeps,
   key: StorageKey,
   migrations: readonly Migration[],
+  hasDatabase: boolean,
 ): Promise<Result<void, OpenStorageError>> {
-  if (!(await deps.files.exists(BACKUP_NAME))) return ok(undefined);
   const checked = await connect(deps, key, BACKUP_NAME);
-  if (!checked.ok && checked.error === 'cipher-unavailable') return checked;
   if (checked.ok) {
     await closeQuietly(checked.value.db);
     const { version } = checked.value;
@@ -112,13 +117,17 @@ async function restoreInterruptedMigration(
       return ok(undefined);
     }
   }
+  if (!checked.ok && checked.error === 'cipher-unavailable') return checked;
+  if (!hasDatabase) return err('storage-unavailable');
   await deps.files.remove(BACKUP_NAME);
   deps.onBackupDiscarded?.();
   return ok(undefined);
 }
 
-// The database is removed first so that its journal files are never applied to the backup. The
-// last remove clears the side files that opening the backup may have left under its name.
+// The database and its side files go before the backup takes its name: a journal left behind
+// would be applied to the backup as its own. Removing the database also clears side files it
+// left when deleted halfway. The last remove clears the side files that opening the backup may
+// have left under its name.
 async function restoreBackup(files: DatabaseFiles): Promise<void> {
   await files.remove(DATABASE_NAME);
   await files.move(BACKUP_NAME, DATABASE_NAME);

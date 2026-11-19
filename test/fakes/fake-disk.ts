@@ -30,9 +30,14 @@ export type FakeDisk = {
   query(name: string, sql: string): Row[];
 };
 
+// SQLite's side files, removed before the database as the app's own files do.
+const SIDE_SUFFIXES = ['-journal', '-wal', '-shm'];
+
 // An in-memory stand-in for the database directory and SQLCipher. Each file is a serialized
 // SQLite database tagged with the key it was created with; opening it with another key fails the
 // way SQLCipher does, on the first read. Writes reach the "file" as soon as they are committed.
+// A `-journal` file holds the pages a transaction cut short would roll back to: opening a
+// database next to one applies it, as SQLite does with a hot journal.
 export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}): FakeDisk {
   const stored = new Map<string, StoredFile>();
   const failures: { operation: FileOperation; name: string | undefined }[] = [];
@@ -55,6 +60,13 @@ export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}):
     return file;
   }
 
+  function rollBackHotJournal(name: string) {
+    const journal = stored.get(`${name}-journal`);
+    if (!journal) return;
+    stored.set(name, journal);
+    stored.delete(`${name}-journal`);
+  }
+
   const files: DatabaseFiles = {
     async exists(name) {
       failIfPlanned('exists', name);
@@ -71,7 +83,7 @@ export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}):
         stored.set(to, { key: file.key, bytes: damaged(file.bytes, 'truncated') });
         throw new Error(`Copy of ${from} interrupted`);
       }
-      stored.set(to, file);
+      stored.set(to, { key: file.key, bytes: file.bytes.slice() });
     },
     async move(from, to) {
       failIfPlanned('move', from);
@@ -79,14 +91,17 @@ export function createFakeDisk({ withoutCipher = false }: FakeDiskOptions = {}):
       stored.delete(from);
     },
     async remove(name) {
-      failIfPlanned('remove', name);
-      stored.delete(name);
+      for (const file of [...SIDE_SUFFIXES.map((suffix) => `${name}${suffix}`), name]) {
+        failIfPlanned('remove', file);
+        stored.delete(file);
+      }
     },
   };
 
   const driver: DatabaseDriver = {
     async open(name, key) {
       failIfPlanned('open', name);
+      rollBackHotJournal(name);
       const file = stored.get(name);
       const db = new DatabaseSync(':memory:');
       const readable = file === undefined || (file.key === key && deserialize(db, file.bytes));
