@@ -77,6 +77,7 @@ logcat_pid=
 logcat_file=
 status=1
 
+# shellcheck disable=SC2329 # Called by trap restore EXIT, which shellcheck does not follow.
 restore() {
   if [[ -n $logcat_pid ]]; then
     kill "$logcat_pid" 2>/dev/null || true
