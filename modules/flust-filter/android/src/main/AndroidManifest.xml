@@ -1,0 +1,3 @@
+<!-- The VPN service and the boot receiver are declared by plugins/with-android-filter.ts, in the
+     builds that ship the filter only. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" />

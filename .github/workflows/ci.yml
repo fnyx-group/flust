@@ -58,8 +58,8 @@ jobs:
         run: printf '%s\n' "$PR_TITLE" | pnpm commitlint --verbose
 
   kotlin:
-    # The Kotlin module's tests that need no Android SDK: wall time conversion, rescheduling and
-    # the cases shared with the JS tests.
+    # The Kotlin modules' tests that need no Android SDK: wall time conversion, rescheduling and
+    # the cases shared with the JS tests; the filter's packets, DNS, lists, policy and TLS.
     name: kotlin
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -80,6 +80,8 @@ jobs:
           gradle-version: '8.14.3'
 
       - run: gradle --project-dir modules/flust-reminders/jvm-test test
+
+      - run: gradle --project-dir modules/flust-filter/jvm-test test
 
   secrets:
     # The gitleaks action needs a paid license for organizations, so the release binary is used,

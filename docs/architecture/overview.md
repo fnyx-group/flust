@@ -34,7 +34,7 @@ Reminders on Android use `modules/flust-reminders`, a Kotlin module that sets lo
 
 `modules/flust-privacy`, in Swift and Kotlin, reads a clock that keeps running while the phone sleeps, for the wait between unlock attempts and the relock after time away ([0023](../decisions/0023-app-lock.md), [0024](../decisions/0024-lock-wait.md)). On Android, it also sets `FLAG_SECURE` on the app's window as the activity is created, in place of `expo-screen-capture`, which is not linked there ([0025](../decisions/0025-screen-privacy.md)), and asks the keyboard not to learn what is typed in text fields ([0036](../decisions/0036-keyboard-learning.md)).
 
-The content filter of V0.2 will need platform APIs that Expo does not expose: a Swift module using the Screen Time API on iOS, and a Kotlin module providing VPN-based DNS filtering on Android ([0033](../decisions/0033-android-filter-network-access.md)). Neither exists yet.
+The content filter of V0.2 needs platform APIs that Expo does not expose ([0038](../decisions/0038-content-filter.md)). On Android, `modules/flust-filter` runs a local VPN that carries DNS only, matches names against lists compiled at build from `lists/` ([0039](../decisions/0039-filter-lists-and-licenses.md)) and sends allowed lookups to Quad9 over DNS over TLS ([0033](../decisions/0033-android-filter-network-access.md)). It is declared in the development build only until the filter ships. The Swift module using the Screen Time API on iOS does not exist yet.
 
 They live in `modules/` as local Expo modules. Any native code requires a development build, Expo Go cannot load it.
 

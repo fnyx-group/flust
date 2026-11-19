@@ -47,7 +47,7 @@ jobs:
             exit 0
           fi
           files=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
-          native=$(grep -E '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.node-version|app\.json|app\.config\.ts|eas\.json|plugins/|modules/|scripts/check-(android|ios)-release\.sh|scripts/url-schemes\.awk|\.github/workflows/native\.yml)' <<<"$files" || true)
+          native=$(grep -E '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.node-version|app\.json|app\.config\.ts|eas\.json|plugins/|modules/|scripts/check-(android|ios)-release\.sh|scripts/(url-schemes|vpn-services)\.awk|\.github/workflows/native\.yml)' <<<"$files" || true)
           if [[ -n $native ]]; then
             echo "Native paths changed:"
             echo "$native"

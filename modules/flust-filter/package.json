@@ -1,0 +1,6 @@
+{
+  "name": "flust-filter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Android content filter: a local VPN that carries DNS only, with the compiled lists and DNS over TLS to the resolver."
+}

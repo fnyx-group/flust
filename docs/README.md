@@ -8,6 +8,7 @@
 - [Relapse](product/relapse.md): how the app responds to a lapse.
 - [Scenarios](product/scenarios.md): edge cases and expected behavior.
 - [Quotes](product/quotes.md): the daily quotes, their order and their sources.
+- [Content filter](product/content-filter.md): the V0.2 filter on Android and iPhone, its lists, limits, delivery and test plan.
 
 ## Design
 
@@ -55,11 +56,13 @@
 - [0030 Production Android permissions](decisions/0030-production-android-permissions.md): network and storage permissions blocked in production only, checked in the source and in the release build.
 - [0031 End-to-end tests](decisions/0031-end-to-end-tests.md): Maestro flows on the production release APK, on a local emulator before each release, not in CI.
 - [0032 Accessibility pass](decisions/0032-accessibility-pass.md): a muted color for dimmed text, contrast tests, 44 point calendar days, fades with Reduce Motion, layouts that change with large text and documented caps.
-- [0033 Network access of the Android filter](decisions/0033-android-filter-network-access.md): from V0.2, `INTERNET` for the DNS filter only, network code in its module alone, no query logged, an audit before release.
+- [0033 Network access of the Android filter](decisions/0033-android-filter-network-access.md): from V0.2, `INTERNET` for the DNS filter only, network code in its module alone, Quad9 over DNS over TLS, no query logged, an audit before release.
 - [0034 Visual refresh](decisions/0034-visual-refresh.md): a color per circle and per meaning, red only for destructive actions and emergency numbers, no separators in text, French times as "21 h".
 - [0035 No URL scheme in production](decisions/0035-no-url-scheme-in-production.md): no scheme or URL type in production builds, a release check that fails on one, incoming links sent home or ignored.
 - [0036 Keyboard learning](decisions/0036-keyboard-learning.md): Android text fields ask the keyboard not to learn their content; iOS has no such API.
 - [0037 Native builds and supply chain checks in CI](decisions/0037-ci-native-builds.md): production Android and iOS builds checked in CI when native paths change, secret scanning, dependency audit and review, CodeQL.
+- [0038 Content filter](decisions/0038-content-filter.md): a DNS-only local VPN on Android, Screen Time on iOS, a fixed decision order, strict mode and SafeSearch, a 20 minute delay to weaken it.
+- [0039 Filter lists and licenses](decisions/0039-filter-lists-and-licenses.md): MIT, Unlicense and CC0 sources with their provenance, excluded lists checked, hashed lists compiled at build.
 
 ## Development
 

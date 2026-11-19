@@ -218,7 +218,8 @@
     "languageSaveFailed": "La langue n'a pas pu être enregistrée.",
     "reminders": "Rappels",
     "lock": "Verrouillage",
-    "help": "Besoin d'aide"
+    "help": "Besoin d'aide",
+    "filterDev": "Filtre (développement)"
   },
   "about": {
     "title": "À propos",
@@ -879,5 +880,29 @@
       "body": "flust n'a pas trouvé ce qui était demandé. Rien n'a été ouvert ni modifié.",
       "home": "Retour à l'accueil"
     }
+  },
+  "filterDev": {
+    "back": "Retour",
+    "title": "Filtre",
+    "filter": "Filtre",
+    "categories": {
+      "adult": "Sites pour adultes",
+      "aiNudify": "Sites IA de déshabillage et de deepfake",
+      "aiCompanions": "Compagnons IA",
+      "strict": "Mode strict",
+      "youtubeStrict": "YouTube strict"
+    },
+    "status": {
+      "unavailable": "Indisponible dans cette version.",
+      "running": "Activé. Les recherches passent par le filtre.",
+      "off": "Désactivé.",
+      "stopped": "Désactivé dans flust.",
+      "revoked": "Désactivé. Un autre VPN a pris la place, ou le VPN a été coupé dans les réglages.",
+      "no-consent": "Désactivé. Android n'autorise plus le VPN. Réactive le filtre.",
+      "failed": "Désactivé. Le filtre s'est arrêté après une erreur. Active-le pour le relancer."
+    },
+    "measure": "Mesurer les listes",
+    "measured": "{{entries}} domaines, {{kilobytes}} Ko, chargés en {{load}} ms, {{decide}} µs par nom.",
+    "note": "Réglage de développement. Le filtre ne transporte que le DNS, bloque sur l'appareil et envoie les recherches autorisées à Quad9, chiffrées. Rien n'est enregistré."
   }
 }

@@ -1,0 +1,4 @@
+# AI nudify and deepfake sites that no source covers, on by default.
+# Only names missing from every source go here: aegis's ai-adult list already brings the known
+# ones, and a test checks the main ones stay blocked.
+# One name per line, with its source and the day it was checked.

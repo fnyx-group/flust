@@ -1,5 +1,6 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
+import { withAndroidFilter } from './plugins/with-android-filter.ts';
 import { withAndroidNoBackup } from './plugins/with-android-no-backup.ts';
 import { withNoUrlScheme } from './plugins/with-no-url-scheme.ts';
 import { withScreenPrivacy } from './plugins/with-screen-privacy.ts';
@@ -46,6 +47,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   }
   const production = name === 'production';
   const screenPrivacy = name !== 'development';
+  // The Android content filter runs behind a development setting until the release that ships it
+  // (docs/decisions/0033-android-filter-network-access.md): only the development variant declares
+  // its VPN service and carries its lists.
+  const filter = name === 'development';
   const configured = withScreenPrivacy(
     withAndroidNoBackup({
       ...config,
@@ -65,10 +70,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       // Hides the app from screenshots and the app switcher, except in the development build,
       // where screenshots are part of the work. See docs/decisions/0025-screen-privacy.md.
-      extra: { ...config.extra, screenPrivacy },
+      extra: { ...config.extra, screenPrivacy, filterDevSetting: filter },
     }),
     screenPrivacy,
   );
+  const withFilter = withAndroidFilter(configured, filter);
   // The development build keeps flust-dev, which the dev client is opened with.
-  return production ? withNoUrlScheme(configured) : configured;
+  return production ? withNoUrlScheme(withFilter) : withFilter;
 };

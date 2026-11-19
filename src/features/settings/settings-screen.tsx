@@ -4,6 +4,7 @@ import { AccessibilityInfo, Platform, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { DEFAULT_REMINDER_SETTINGS, type ReminderSettings } from '@/domain/reminders';
+import { filterDevSettingOn } from '@/features/filter/filter-native';
 import { lockValue } from '@/features/lock/labels';
 import { useLock } from '@/features/lock/lock-context';
 import { remindersValue } from '@/features/reminders/labels';
@@ -26,6 +27,7 @@ import { BellIcon } from '@/ui/icons/bell-icon';
 import { HeartIcon } from '@/ui/icons/heart-icon';
 import { InfoIcon } from '@/ui/icons/info-icon';
 import { LockIcon } from '@/ui/icons/lock-icon';
+import { CodeIcon } from '@/ui/icons/code-icon';
 import { SparkleIcon } from '@/ui/icons/sparkle-icon';
 import { TrashIcon } from '@/ui/icons/trash-icon';
 import { NavRow } from '@/ui/nav-row';
@@ -36,8 +38,9 @@ import { ScreenTitle } from '@/ui/screen-title';
 import { ScrollView } from '@/ui/scroll-view';
 import { colors, spacing, typography } from '@/ui/theme';
 
-// Only what works in this version: the filter comes with its feature. The values are read again
-// each time the tab comes into focus, since the screens behind the rows change them.
+// Only what works in this version: the filter shows only in the development build until its
+// release. The values are read again each time the tab comes into focus, since the screens behind
+// the rows change them.
 export function SettingsScreen() {
   const { t, i18n: translation } = useTranslation();
   const storage = useStorage();
@@ -129,6 +132,13 @@ export function SettingsScreen() {
             onPress={() => router.push('/lock-settings')}
           />
           <LanguageRow preference={preference} onChoose={(next) => void choose(next)} />
+          {filterDevSettingOn() && (
+            <NavRow
+              label={t('settings.filterDev')}
+              icon={{ icon: CodeIcon, color: colors.textSecondary }}
+              onPress={() => router.push('/filter-dev')}
+            />
+          )}
         </RowGroup>
         {saveFailed && (
           <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>

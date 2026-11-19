@@ -1,0 +1,2 @@
+google.com          # fixture, checked 2026-11-19
+google.fr           # fixture, checked 2026-11-19

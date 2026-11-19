@@ -1,0 +1,66 @@
+import javax.inject.Inject
+
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'org.fnyxgroup.flust'
+version = '0.1.0'
+
+android {
+  namespace "org.fnyxgroup.flust.filter"
+  defaultConfig {
+    versionCode 1
+    versionName '0.1.0'
+  }
+  sourceSets {
+    // The compiled lists fixture shared with the JS tests of the build step.
+    test.resources.srcDir "$projectDir/../../../test/fixtures"
+  }
+}
+
+dependencies {
+  testImplementation 'junit:junit:4.13.2'
+}
+
+// Compiles lists/ into the asset the VPN service reads, with scripts/build-lists.ts. Only in the
+// builds that ship the filter, which plugins/with-android-filter.ts marks with this property, so
+// that no other build carries the lists.
+abstract class BuildFilterLists extends DefaultTask {
+  @InputDirectory
+  abstract DirectoryProperty getLists()
+
+  @InputFiles
+  abstract ConfigurableFileCollection getScripts()
+
+  @OutputDirectory
+  abstract DirectoryProperty getOutputDirectory()
+
+  @Inject
+  abstract ExecOperations getExecOperations()
+
+  @TaskAction
+  void build() {
+    def script = scripts.files.find { it.name == 'build-lists.ts' }
+    execOperations.exec {
+      commandLine 'node', '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON', script.absolutePath,
+        '--lists', lists.get().asFile.absolutePath,
+        '--out', outputDirectory.file('filter-lists.bin').get().asFile.absolutePath
+    }
+  }
+}
+
+if ((findProperty('flust.filterLists') ?: 'false').toBoolean()) {
+  def repository = file('../../..')
+  def buildFilterLists = tasks.register('buildFilterLists', BuildFilterLists) {
+    lists = new File(repository, 'lists')
+    scripts.from(new File(repository, 'scripts/build-lists.ts'), new File(repository, 'scripts/lists'))
+    outputDirectory = layout.buildDirectory.dir('generated/filter-lists')
+  }
+  androidComponents {
+    onVariants(selector().all()) { variant ->
+      variant.sources.assets?.addGeneratedSourceDirectory(buildFilterLists) { it.outputDirectory }
+    }
+  }
+}

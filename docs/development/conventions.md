@@ -96,10 +96,10 @@ lefthook (`lefthook.yml`) runs on every commit:
 - Pull requests are merged by squash only. The pull request title becomes the commit message on `main`, so it follows the commit rules above.
 - CI must pass. The required checks, by job name:
   - `checks`: typecheck, tests with coverage, lint, knip, format check, and commitlint on the commits and the pull request title.
-  - `kotlin`: the Kotlin JVM tests.
+  - `kotlin`: the Kotlin JVM tests of the reminders and the filter.
   - `secrets`: gitleaks on the commits of the pull request.
   - `shellcheck`: the scripts in `scripts/`.
   - `audit` and `dependency-review`: advisories in production dependencies and in the dependencies the pull request adds.
   - `codeql (javascript-typescript)` and `codeql (actions)`: CodeQL on the code and the workflows.
-  - `native-paths`, `android-release` and `ios-build`: production builds of both apps, checked like a release, when a native path changes ([0037](../decisions/0037-ci-native-builds.md)).
+  - `native-paths` and `android-release`: the production Android build, checked like a release, when a native path changes ([0037](../decisions/0037-ci-native-builds.md)). `ios-build` runs on the same changes but is not required.
 - Architecture decisions come with a new file in `docs/decisions/`.

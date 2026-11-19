@@ -13,6 +13,7 @@ import { I18nextProvider } from 'react-i18next';
 
 import { LaunchGate } from '@/features/errors/launch-gate';
 import { installErrorHandlers } from '@/features/errors/report-error';
+import { useFilterResume } from '@/features/filter/use-filter-resume';
 import { LockGate } from '@/features/lock/lock-gate';
 import { useHeldNavigation } from '@/features/lock/use-held-navigation';
 import { useNotificationTaps } from '@/features/reminders/use-notification-taps';
@@ -92,6 +93,7 @@ function RootStack() {
   useReminderSync();
   useNotificationTaps();
   useHeldNavigation();
+  useFilterResume();
   return (
     <Stack screenOptions={{ headerShown: false, ...(reduceMotion && { animation: 'fade' }) }}>
       <Stack.Protected guard={started}>
@@ -108,6 +110,7 @@ function RootStack() {
         <Stack.Screen name="erase" />
         <Stack.Screen name="reminders" />
         <Stack.Screen name="lock-settings" />
+        <Stack.Screen name="filter-dev" />
         <Stack.Screen name="lapse" options={covering} />
         <Stack.Screen name="rank-unlocked" options={covering} />
       </Stack.Protected>

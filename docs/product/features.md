@@ -140,17 +140,18 @@ French and English.
 
 ### Content filter
 
-The content filter blocks pornographic sites on the device.
+The content filter blocks pornographic sites across the whole phone. The design is in [Content filter](content-filter.md).
 
-- Android uses a local `VpnService` for DNS filtering. Only DNS lookups go through it: blocked ones are answered on the device, allowed ones are forwarded to a DNS resolver, and no query is logged. The Android build requests `INTERNET` from this version, for the filter only ([0033](../decisions/0033-android-filter-network-access.md)).
-- iOS uses the Screen Time APIs (`FamilyControls`, `ManagedSettings`). They require an entitlement from Apple and cannot fully prevent the app from being removed.
+- Android uses a local `VpnService` for DNS filtering. Only DNS lookups go through it: blocked ones are answered on the device, allowed ones are sent to Quad9 over DNS over TLS, and no query is logged. The Android build requests `INTERNET` from this version, for the filter only ([0033](../decisions/0033-android-filter-network-access.md)).
+- iOS uses the Screen Time APIs (`FamilyControls`, `ManagedSettings`) with Apple's automatic adult filter and up to 45 of our domains. They need an entitlement from Apple. Blocking the removal of flust is possible but off by default.
 
 The filter includes:
 
-- public NSFW blocklists (HaGeZi, oisd), bundled with the app,
-- a separate toggle for AI generators and "nudify" sites,
-- enforced SafeSearch on Google, Bing and YouTube through DNS,
-- a 20 minute delay before the filter can be turned off.
+- adult site lists under permissive licenses, bundled with the app ([0039](../decisions/0039-filter-lists-and-licenses.md)),
+- a category for AI nudify and deepfake sites, on by default, and one for AI companions, off by default and on Android only,
+- a strict mode, on by default, that blocks the usual bypasses on Android,
+- enforced SafeSearch on Google, Bing, DuckDuckGo and YouTube through DNS, on Android only,
+- a 20 minute delay before the filter can be weakened or turned off.
 
 The onboarding gets a filter step.
 

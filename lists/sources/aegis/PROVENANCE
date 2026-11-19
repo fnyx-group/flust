@@ -1,0 +1,6 @@
+url: https://github.com/0xDarkMatter/aegis-blocklist
+commit: 87e8f71e04635317b89fa64beb4e756829734508
+date: 2026-11-19
+license: CC0-1.0
+file: categories/ai-adult.txt ai-adult sha256:318fcfc49089f3f4abccfe21693f7ce4f6e5c44cf27d716edf148225da33cd36
+file: categories/vpn-bypass.txt vpn sha256:f54ee741a0575a922249f0eb0c67c61b4da5a0822de602e833d9c17568d7f440

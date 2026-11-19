@@ -1,0 +1,5 @@
+url: https://example.org/HOSTS.txt
+commit: 0123456789abcdef0123456789abcdef01234567
+date: 2026-11-19
+license: MIT
+file: HOSTS.txt list sha256:c9732bcbf1d8669bc5a64b17bfc515935e61598ddda92de4102fecdc4ee31d8c

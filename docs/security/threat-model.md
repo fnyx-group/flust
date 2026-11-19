@@ -7,7 +7,8 @@ flust helps people quit pornography. Its data reveals intimate behavior: exposur
 - Journal entries.
 - Streak and lapse history, with where, when and in what context each lapse happened.
 - Emergency screen visits: when they started and ended, and how.
-- Blocking configuration (blocked categories and domains), planned with the content filter of V0.2.
+- Blocking configuration (blocked categories and domains), from the content filter of V0.2. On Android it lives outside the database, encrypted under its own key, so the filter can start at boot.
+- The DNS lookups that pass through the Android filter, which reveal the sites visited. They are neither logged nor cached.
 - The error report: no user content, but the times of errors show when the app was used.
 
 ## Threats and mitigations
@@ -37,7 +38,9 @@ flust helps people quit pornography. Its data reveals intimate behavior: exposur
 - iOS has no API that asks the system keyboard not to learn what is typed, so notes, check-in notes and custom reasons and plans may feed its suggestions. flust does not work around it. On Android, the request not to learn is only a request: a keyboard may ignore it ([0036](../decisions/0036-keyboard-learning.md)).
 - The planned reminders are stored outside the encrypted database, in Android's no-backup storage and in iOS's notification center: their times and neutral texts only.
 - In development builds only, expo-sqlite registers open databases with the Expo dev tools, which talk to the local development server. Release builds do not.
-- From V0.2, the Android content filter forwards allowed DNS lookups, so the production build will request `INTERNET`. Network code is then confined to the filter's Kotlin module, sockets go only to the DNS resolver, the VPN service never touches the database or its key, and no query is logged. An independent audit comes before the public release ([0033](../decisions/0033-android-filter-network-access.md)).
+- From V0.2, the Android content filter forwards allowed DNS lookups, so the production build will request `INTERNET`. Network code is then confined to the filter's Kotlin module, sockets go only to Quad9 over DNS over TLS, checked against the system certificates only, the VPN service never touches the database or its key, and no query is logged or cached. Until the filter ships, the VPN service is declared in the development build only, and the release check fails on a build that pairs one without the other. An independent audit comes before the public release ([0033](../decisions/0033-android-filter-network-access.md)).
+- Quad9 sees the names that the filter allows, with the phone's IP address, as any resolver would. Its policy is not to log client addresses; flust cannot verify it.
+- The filter stops the impulse, not a determined adult: strict Private DNS, another VPN, a second phone or uninstalling flust get around it. flust shows when the filter is not protecting ([Content filter](../product/content-filter.md#known-limits)).
 - iOS has no permission to remove for network access, and no check runs on the iOS build. The source scan and the lint rules catch network APIs in flust's own code only; dependencies and their native code rely on review.
 
 ## Out of scope
