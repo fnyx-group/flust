@@ -1,0 +1,2 @@
+doh.example         # fixture, checked 2026-11-19
+use-application-dns.net # fixture, checked 2026-11-19

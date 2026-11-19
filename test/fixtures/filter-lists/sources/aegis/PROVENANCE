@@ -1,0 +1,6 @@
+url: https://example.org/ai-adult.txt
+commit: 0123456789abcdef0123456789abcdef01234567
+date: 2026-11-19
+license: CC0-1.0
+file: ai-adult.txt ai-adult sha256:34069a35e2d38e7ccb91b89bb45e80771c3eddf942a02d3fa2da26610a4891a6
+file: vpn.txt vpn sha256:f1fbaa922fd18652b485a6373a4e770cfa6333bb4291f56e16992862dd2806a8

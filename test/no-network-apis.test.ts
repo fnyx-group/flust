@@ -43,6 +43,9 @@ const nativeNetworkApis: Record<string, readonly RegExp[]> = {
     /\borg\.chromium\.net\b/,
     /\bio\.ktor\b/,
     /\bretrofit2\b/,
+    /\bInetAddress\b/,
+    /\bInetSocketAddress\b/,
+    /\bVpnService\b/,
   ],
   '.swift': [
     /\bURLSession\b/,
@@ -60,6 +63,27 @@ const nativeNetworkApis: Record<string, readonly RegExp[]> = {
     /\bASWebAuthenticationSession\b/,
   ],
 };
+
+// The Android content filter is the only native code allowed to reach the network
+// (docs/decisions/0033-android-filter-network-access.md), and each of its files only for its part:
+// sockets in ResolverTransport.kt alone, which connects to the resolver's addresses and nothing
+// else. Its tests run a local TLS server.
+const filterSource = 'modules/flust-filter/android/src/main/java/org/fnyxgroup/flust/filter/';
+const filterTests = 'modules/flust-filter/android/src/test/';
+const filterAllowances: Record<string, readonly string[]> = {
+  'ResolverTransport.kt': ['java.net', 'javax.net', 'Socket', 'InetAddress', 'InetSocketAddress'],
+  'SystemTrust.kt': ['javax.net'],
+  'Quad9.kt': ['java.net', 'InetAddress'],
+  'FilterVpnService.kt': ['VpnService'],
+  'FilterBootReceiver.kt': ['VpnService'],
+  'FlustFilterModule.kt': ['VpnService'],
+};
+
+function allowedNative(file: string): readonly string[] | 'all' {
+  if (file.startsWith(filterTests)) return 'all';
+  if (!file.startsWith(filterSource)) return [];
+  return filterAllowances[file.slice(filterSource.length)] ?? [];
+}
 
 function walk(relative: string): string[] {
   const absolute = path.join(root, relative);
@@ -186,14 +210,22 @@ function nativeReferences(file: string, source: string): string[] {
   const patterns = nativeNetworkApis[path.extname(file)] ?? [];
   const code = withoutComments(source);
   return patterns.flatMap((pattern) => {
-    const match = pattern.exec(code);
-    return match === null ? [] : [`${file} ${match[0]}`];
+    const match = new RegExp(pattern.source, 'g');
+    return [...code.matchAll(match)].map((found) => `${file} ${found[0]}`);
   });
+}
+
+function disallowedNativeReferences(file: string, source: string): string[] {
+  const allowed = allowedNative(file);
+  if (allowed === 'all') return [];
+  return [...new Set(nativeReferences(file, source))].filter(
+    (reference) => !allowed.includes(reference.slice(file.length + 1)),
+  );
 }
 
 function references(file: string): string[] {
   const source = fs.readFileSync(path.join(root, file), 'utf8');
-  if (/\.(kt|swift)$/.test(file)) return nativeReferences(file, source);
+  if (/\.(kt|swift)$/.test(file)) return disallowedNativeReferences(file, source);
   const urls = isAppCode(file) && !linkFiles.has(file) ? urlLiterals(file, source) : [];
   return [...scriptReferences(file, source), ...urls];
 }
@@ -217,6 +249,43 @@ describe('source files', () => {
       .flatMap(references);
 
     expect(found).toEqual([]);
+  });
+});
+
+describe('the Android filter', () => {
+  const sources = sourceFiles().filter((file) => file.startsWith(filterSource));
+
+  it('is scanned', () => {
+    expect(sources).toContain(`${filterSource}ResolverTransport.kt`);
+  });
+
+  // The filter opens sockets only to the resolver: one file opens them, to an endpoint that only
+  // Quad9.kt builds outside the tests.
+  it('opens sockets in ResolverTransport.kt alone', () => {
+    const opening = sources.filter((file) =>
+      /\b(Socket|SSLSocket|SocketFactory|DatagramSocket|SocketChannel)\b/.test(
+        withoutComments(fs.readFileSync(path.join(root, file), 'utf8')),
+      ),
+    );
+    expect(opening).toEqual([`${filterSource}ResolverTransport.kt`]);
+  });
+
+  it('builds the resolver endpoint in Quad9.kt alone', () => {
+    const building = sources.filter((file) =>
+      /\bResolverEndpoint\(/.test(withoutComments(fs.readFileSync(path.join(root, file), 'utf8'))),
+    );
+    expect(building.sort()).toEqual([
+      `${filterSource}Quad9.kt`,
+      `${filterSource}ResolverTransport.kt`,
+    ]);
+  });
+
+  it('is the only native code that may use the network', () => {
+    expect(allowedNative('modules/flust-reminders/android/src/main/java/a/A.kt')).toEqual([]);
+    expect(allowedNative(`${filterSource}DotClient.kt`)).toEqual([]);
+    expect(
+      disallowedNativeReferences(`${filterSource}DotClient.kt`, 'val s = java.net.Socket()'),
+    ).toEqual([`${filterSource}DotClient.kt java.net`, `${filterSource}DotClient.kt Socket`]);
   });
 });
 

@@ -3,7 +3,9 @@
 # code, or their manifest entries (docs/decisions/0021-local-notifications.md), or when its merged
 # manifest requests a permission that is blocked in production or not expected
 # (docs/decisions/0030-production-android-permissions.md), or when a component has an intent filter
-# that opens a URL scheme (docs/decisions/0035-no-url-scheme-in-production.md). Lists the merged
+# that opens a URL scheme (docs/decisions/0035-no-url-scheme-in-production.md), or when it declares
+# a VPN service other than the content filter's, or the filter's without INTERNET, or INTERNET
+# without the filter's (docs/decisions/0033-android-filter-network-access.md). Lists the merged
 # permissions.
 # An APK is read with aapt2, from $AAPT2, the PATH or $ANDROID_HOME/build-tools. A bundle is read
 # with the bundletool jar at $BUNDLETOOL, run by the Java of $JAVA_HOME or the PATH.
@@ -31,6 +33,11 @@ expected_permissions=(
   android.permission.VIBRATE
   org.fnyxgroup.flust.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 )
+
+# The content filter's VPN service, declared by plugins/with-android-filter.ts. It needs INTERNET
+# to reach the resolver, and INTERNET is there for it alone.
+filter_service=org.fnyxgroup.flust.filter.FilterVpnService
+internet=android.permission.INTERNET
 
 cannot_check() {
   echo "$1" >&2
@@ -150,6 +157,23 @@ url_schemes() {
 
 schemes=$(url_schemes | sort -u) || cannot_check "Cannot read the intent filters of $build"
 
+# Services that can act as a VPN, parsed by vpn-services.awk for an APK.
+vpn_services() {
+  if [[ $build == *.apk ]]; then
+    "$aapt2" dump xmltree --file AndroidManifest.xml "$build" | awk -f "$script_dir/vpn-services.awk"
+  else
+    "$java" -jar "$BUNDLETOOL" dump manifest --bundle="$build" \
+      --xpath="//service[@android:permission='android.permission.BIND_VPN_SERVICE' or intent-filter/action/@android:name='android.net.VpnService']/@android:name"
+  fi
+}
+
+services=$(vpn_services | sort -u) || cannot_check "Cannot read the services of $build"
+foreign_services=$(matches -v -x -F "$filter_service" <<<"$services")
+has_filter=0
+has_internet=0
+grep -q -x -F "$filter_service" <<<"$services" && has_filter=1
+grep -q -x -F "$internet" <<<"$permissions" && has_internet=1
+
 listed() {
   local item=$1 candidate
   shift
@@ -186,6 +210,16 @@ if [[ ${#unexpected_found[@]} -gt 0 ]]; then
   printf '  %s\n' "${unexpected_found[@]}" >&2
   failed=1
 fi
+if [[ -n $foreign_services ]]; then
+  echo "$build declares VPN services other than the content filter's:" >&2
+  indent '  ' <<<"$foreign_services" >&2
+  failed=1
+fi
+if [[ $has_filter -ne $has_internet ]]; then
+  echo "$build must declare the content filter's VPN service and $internet together, or neither:" >&2
+  echo "  $filter_service: $has_filter, $internet: $has_internet (1 present, 0 absent)" >&2
+  failed=1
+fi
 if [[ -n $schemes ]]; then
   echo "$build opens URL schemes, which let any web page detect or open flust:" >&2
   indent '  ' <<<"$schemes" >&2
@@ -193,4 +227,4 @@ if [[ -n $schemes ]]; then
 fi
 [[ $failed -eq 0 ]] || exit 1
 
-echo "$build: no Firebase, Google Play services or Install Referrer code or manifest entries, only expected permissions, and no URL scheme."
+echo "$build: no Firebase, Google Play services or Install Referrer code or manifest entries, only expected permissions, no URL scheme, no VPN service but the filter's, and the filter's service and INTERNET together or neither."

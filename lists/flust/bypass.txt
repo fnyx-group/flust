@@ -1,0 +1,39 @@
+# DoH and DoT provider names and the Firefox canary domain, blocked in strict mode.
+# One name per line, with its primary source and the day it was checked.
+chrome.cloudflare-dns.com                # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+family.cloudflare-dns.com                # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+security.cloudflare-dns.com              # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+one.one.one.one                          # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+1dot1dot1dot1.cloudflare-dns.com         # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+doh.cleanbrowsing.org                    # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+adult-filter-dns.cleanbrowsing.org       # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+family-filter-dns.cleanbrowsing.org      # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+security-filter-dns.cleanbrowsing.org    # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+doh.xfinity.com                          # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+dot.xfinity.com                          # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+doh.cox.net                              # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+dot.cox.net                              # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+odvr.nic.cz                              # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+protective.joindns4.eu                   # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+dns.sb                                   # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+doh.dns.sb                               # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+dns.google                               # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+dns64.dns.google                         # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+public.dns.iij.jp                        # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+dns.levonet.sk                           # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+chromium.dns.nextdns.io                  # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+doh.opendns.com                          # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+doh.familyshield.opendns.com             # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+dns.quad9.net                            # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+dns9.quad9.net                           # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+dns10.quad9.net                          # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+dns11.quad9.net                          # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+doh.quickline.ch                         # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+dot.quickline.ch                         # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+doh-01.spectrum.com                      # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+doh-02.spectrum.com                      # chromium net/dns/public/doh_provider_entry.cc, checked 2026-11-19
+mozilla.cloudflare-dns.com               # firefox remote settings doh-providers, checked 2026-11-19
+dns.shaw.ca                              # firefox remote settings doh-providers, checked 2026-11-19
+firefox.dns.nextdns.io                   # firefox remote settings doh-providers, checked 2026-11-19
+private.canadianshield.cira.ca           # firefox remote settings doh-providers, checked 2026-11-19
+use-application-dns.net                  # mozilla canary domain documentation, checked 2026-11-19

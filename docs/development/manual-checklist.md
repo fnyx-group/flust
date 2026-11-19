@@ -137,6 +137,26 @@ TalkBack is in Settings, Accessibility, TalkBack. The font scale can be set with
 2. With "Device language" chosen, change the phone's language while flust runs: flust follows it ([Scenarios](../product/scenarios.md)).
 3. Times, in both languages, with the phone on a 24 hour then a 12 hour clock: the reminders value and time chips, a note's date and the lapse time. French on 24 hours reads "21 h" and "21 h 14", English "21:14", and a 12 hour clock the platform's "9:14 PM" in both. Unit tests format times with Node's locale data, which can differ from the phone's.
 
+### Content filter on the emulator
+
+Until the filter ships ([Content filter](../product/content-filter.md#delivery)), these run on the development build, not the production APK: `APP_VARIANT=development pnpm expo prebuild --platform android --clean --no-install`, then `git restore package.json`, `./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64` from `android/`, `adb install -r android/app/build/outputs/apk/debug/app-debug.apk` and `pnpm dev`. The `adb` commands use `org.fnyxgroup.flust.dev`. The measurements on a real phone, a network that blocks port 853 and an app that queries a resolver directly belong to the field tests of lot 4.
+
+1. Settings, Content filter (development): the status reads Off, and every switch is enabled.
+2. Measure the lists: 304,099 domains, 2,673 KB. Write down the load time and the cost per name.
+3. Turn the filter on: Android asks for the VPN consent once. After OK, the status reads On and the key icon shows in the status bar.
+4. Blocking: `adb shell ping -c 1 pornhub.com` and `www.pornhub.com` answer `unknown host`, and Chrome shows `ERR_NAME_NOT_RESOLVED`. `adb shell ping -c 1 wikipedia.org` resolves, and Wikipedia loads in Chrome.
+5. SafeSearch: `adb shell ping -c 1 www.google.com` resolves to `forcesafesearch.google.com`'s address, and a Google search shows SafeSearch locked on. `www.bing.com` resolves to `strict.bing.com`'s address and `duckduckgo.com` to `safe.duckduckgo.com`'s. With Strict YouTube on, `www.youtube.com` resolves to `restrict.youtube.com`'s address, `restrictmoderate.youtube.com`'s when off.
+6. Strict mode: `dns.google`, `dns.quad9.net` and `use-application-dns.net` answer `unknown host`, while other names still resolve. In Chrome, Settings, Privacy and security, Use secure DNS, set a custom provider `https://dns.google/dns-query`: blocked sites stay blocked and allowed ones still load. Strict mode off: `dns.google` resolves.
+7. Categories: AI companions on, `character.ai` answers `unknown host`; off, it resolves. Adult sites off, `pornhub.com` resolves.
+8. Private DNS: Settings, Network, Private DNS, Automatic: names still resolve without delay, blocked ones stay blocked. Hostname `dns.google`: lookups go around the filter, which is the known limit that lot 2 detects. Set it back to Automatic.
+9. Nothing about the lookups is logged: `adb logcat -d | grep -i -E 'pornhub|wikipedia'` finds nothing from flust.
+10. Always-on: Settings, Network, VPN lists flust dev, and its gear offers Always-on VPN and Block connections without VPN.
+11. Force stop: `adb shell am force-stop org.fnyxgroup.flust.dev` removes the key icon. Open flust: the filter comes back on.
+12. Reboot: `adb reboot`, then, without opening flust, `adb shell ping -c 1 pornhub.com` answers `unknown host` once the phone is up.
+13. Revoked: disconnect the VPN in Settings, Network, VPN. The development screen reads that another VPN took over or the VPN was turned off. Close and open flust: the consent still holds, so the filter comes back on.
+14. Turn the filter off in flust: the status reads Off, the key icon goes away and `pornhub.com` resolves.
+15. Production is untouched: the production APK of [Release](release.md#local-production-build) passes `scripts/check-android-release.sh`, with no VPN service and no `INTERNET`.
+
 ## iOS
 
 After the first iOS build:

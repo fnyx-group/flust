@@ -218,7 +218,8 @@
     "languageSaveFailed": "The language could not be saved.",
     "reminders": "Reminders",
     "lock": "App lock",
-    "help": "Need help"
+    "help": "Need help",
+    "filterDev": "Content filter (development)"
   },
   "about": {
     "title": "About",
@@ -879,5 +880,29 @@
       "body": "flust could not find what was asked for. Nothing has been opened or changed.",
       "home": "Back to home"
     }
+  },
+  "filterDev": {
+    "back": "Back",
+    "title": "Content filter",
+    "filter": "Filter",
+    "categories": {
+      "adult": "Adult sites",
+      "aiNudify": "AI nudify and deepfake sites",
+      "aiCompanions": "AI companions",
+      "strict": "Strict mode",
+      "youtubeStrict": "Strict YouTube"
+    },
+    "status": {
+      "unavailable": "Not available in this build.",
+      "running": "On. Lookups go through the filter.",
+      "off": "Off.",
+      "stopped": "Off, turned off in flust.",
+      "revoked": "Off. Another VPN took over, or the VPN was turned off in the settings.",
+      "no-consent": "Off. Android no longer allows the VPN. Turn the filter on again.",
+      "failed": "Off. The filter stopped after an error. Open flust to start it again."
+    },
+    "measure": "Measure the lists",
+    "measured": "{{entries}} domains, {{kilobytes}} KB, loaded in {{load}} ms, {{decide}} µs per name.",
+    "note": "Development setting. The filter carries DNS only, blocks on the device and sends allowed lookups to Quad9, encrypted. Nothing is logged."
   }
 }

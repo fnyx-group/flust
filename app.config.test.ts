@@ -9,6 +9,7 @@ import createConfig, {
   PRODUCTION_BLOCKED_PERMISSIONS,
 } from './app.config';
 import appJson from './app.json';
+import { FILTER_VPN_SERVICE } from './plugins/with-android-filter';
 
 const staticConfig = appJson.expo as ExpoConfig;
 const blockedInEveryVariant = staticConfig.android?.blockedPermissions ?? [];
@@ -85,7 +86,29 @@ describe('URL schemes', () => {
   });
 });
 
+describe('the Android filter', () => {
+  it.each([['production'], [undefined]])('is left out of the %s variant', (variant) => {
+    const config = configFor(variant);
+    expect(config.extra?.filterDevSetting).toBe(false);
+    expect(modsOf(config)?.android?.gradleProperties).toBeUndefined();
+  });
+
+  it('runs behind a setting of the development variant, which declares its service', () => {
+    const config = configFor('development');
+    expect(config.extra?.filterDevSetting).toBe(true);
+    expect(modsOf(config)?.android?.gradleProperties).toBeDefined();
+  });
+});
+
 describe('the release check', () => {
+  it('knows the VPN service of the filter', () => {
+    const script = fs.readFileSync(
+      path.join(__dirname, 'scripts/check-android-release.sh'),
+      'utf8',
+    );
+    expect(script).toContain(`filter_service=${FILTER_VPN_SERVICE}\n`);
+  });
+
   it('blocks the same permissions as the production config', () => {
     expect(scriptList('blocked_permissions')).toEqual(PRODUCTION_BLOCKED_PERMISSIONS);
   });

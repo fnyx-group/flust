@@ -1,0 +1,2 @@
+excepted.example    # fixture, checked 2026-11-19
+antivirus.example   # fixture, checked 2026-11-19

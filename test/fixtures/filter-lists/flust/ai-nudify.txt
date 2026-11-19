@@ -1,0 +1,1 @@
+deepfake.example    # fixture, checked 2026-11-19

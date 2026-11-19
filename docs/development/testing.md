@@ -30,18 +30,19 @@ Three workflows run on pull requests and on `main`. Each job has a timeout and o
 flust makes no network calls ([0006](../decisions/0006-no-network-access.md)), checked three ways:
 
 - `test/setup.ts` makes `fetch`, `XMLHttpRequest`, `WebSocket` and `EventSource` throw in every test, and fails the test even if the error is caught.
-- `test/no-network-apis.test.ts` fails if any source file references them: TypeScript and JavaScript are parsed, so comments and longer names such as `prefetch` do not count. It also fails on a URL in the app's code outside the links handed to other apps. Kotlin and Swift sources are searched for the platform network APIs, and Java, Objective-C or C sources fail the test since they are not searched. Only the test setup is excluded.
-- `app.config.test.ts` checks that production builds block `INTERNET` and the other unused permissions, and that `scripts/check-android-release.sh` blocks and expects the same permissions as `app.config.ts` ([0030](../decisions/0030-production-android-permissions.md)). The script itself runs on the built APK or bundle: see [Release](release.md).
+- `test/no-network-apis.test.ts` fails if any source file references them: TypeScript and JavaScript are parsed, so comments and longer names such as `prefetch` do not count. It also fails on a URL in the app's code outside the links handed to other apps. Kotlin and Swift sources are searched for the platform network APIs, and Java, Objective-C or C sources fail the test since they are not searched. Only the test setup is excluded. The Android content filter is the one exception ([0033](../decisions/0033-android-filter-network-access.md)): each of its files may use only the APIs its part needs, sockets are opened in `ResolverTransport.kt` alone, and the resolver endpoint is built in `Quad9.kt` alone.
+- `app.config.test.ts` checks that production builds block `INTERNET` and the other unused permissions, that the filter's VPN service is declared in the development build only, and that `scripts/check-android-release.sh` blocks and expects the same permissions as `app.config.ts` ([0030](../decisions/0030-production-android-permissions.md)). The script itself runs on the built APK or bundle: see [Release](release.md).
 
 These checks cover flust's own code, against mistakes rather than deliberate evasion. Dependencies are not scanned.
 
 The release builds themselves are checked in CI on every change to a native path: see [CI](#ci).
 
-The Kotlin tests of `modules/flust-reminders` run in their own CI job, on the JVM without the Android SDK:
+The Kotlin tests of `modules/flust-reminders` and `modules/flust-filter` run in their own CI job, on the JVM without the Android SDK:
 
     gradle --project-dir modules/flust-reminders/jvm-test test
+    gradle --project-dir modules/flust-filter/jvm-test test
 
-They also run in the Android project, with `./gradlew :flust-reminders:testDebugUnitTest` from `android/`. The wall time cases in `test/fixtures/local-to-utc.tsv` are shared with the JS tests of `localToUtc`.
+They also run in the Android project, with `./gradlew :flust-reminders:testDebugUnitTest` from `android/`. The filter's tests cover packets, DNS messages, the lists, the decision order and DNS over TLS against a local server, with certificates made by `keytool` at run time; they read the compiled fixture `test/fixtures/filter-lists.bin`, which a Jest test builds from `test/fixtures/filter-lists/` and compares. The wall time cases in `test/fixtures/local-to-utc.tsv` are shared with the JS tests of `localToUtc`.
 
 ## What to test
 
