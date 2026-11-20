@@ -2,6 +2,7 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 import { withAndroidFilter } from './plugins/with-android-filter.ts';
 import { withAndroidNoBackup } from './plugins/with-android-no-backup.ts';
+import { withAndroidUploadSigning } from './plugins/with-android-upload-signing.ts';
 import { withNoUrlScheme } from './plugins/with-no-url-scheme.ts';
 import { withProductionModules } from './plugins/with-production-modules.ts';
 import { withScreenPrivacy } from './plugins/with-screen-privacy.ts';
@@ -77,5 +78,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   // Its log of why the tunnel stopped is a development tool.
   const withFilter = withAndroidFilter(configured, { logs: name === 'development' });
   // The development build keeps flust-dev, which the dev client is opened with, and the dev client.
-  return production ? withProductionModules(withNoUrlScheme(withFilter)) : withFilter;
+  // Only production builds are signed for Google Play
+  // (docs/decisions/0046-android-bundle-and-upload-key.md).
+  return production
+    ? withAndroidUploadSigning(withProductionModules(withNoUrlScheme(withFilter)))
+    : withFilter;
 };

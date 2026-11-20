@@ -1,27 +1,17 @@
 # Manual checklist
 
-The device checks before each release that unit tests and the [Maestro flows](testing.md#end-to-end) cannot cover. Run them on the production release APK ([Release](release.md#local-production-build)), on the `Medium_Phone_API_37.0` emulator unless a step asks for something else. `adb` commands use the production identifier, `org.fnyxgroup.flust`; the checks in [Testing](testing.md) that name `org.fnyxgroup.flust.dev` work the same with it.
+The device checks before each release that unit tests and the [Maestro flows](testing.md#end-to-end) cannot cover. Run them on the field APK of the release bundle ([Release](release.md#field-tests)), on the `Medium_Phone_API_37.0` emulator unless a step asks for something else. `adb` commands use the production identifier, `org.fnyxgroup.flust`; the checks in [Testing](testing.md) that name `org.fnyxgroup.flust.dev` work the same with it.
 
 Write down the build, the device and any failure in the merge request of the release. A failure blocks the release, like a failing test.
 
 ## Android
 
-### First EAS bundle
+### First bundle
 
-Once, on the first bundle EAS builds for the stores, then again whenever the build setup changes:
+Once, on the first bundle built for Google Play, then again whenever the build setup changes:
 
-1. Run the release check on the bundle, with `BUNDLETOOL` set ([Setup](setup.md#android-build-tools)). It reads the bundle with `bundletool dump manifest`, a path no local build has used yet:
-
-       scripts/check-android-release.sh path/to/flust.aab
-
-2. It lists the same permissions as the local release APK. Compare them with the list it prints for `android/app/build/outputs/apk/release/app-release.apk`.
-3. Turn the bundle into an APK that installs on the emulator, signed with the debug key of the generated project, the same as the local release APK, and run the flows on it. Without `--ks`, bundletool looks for `~/.android/debug.keystore`, which the container's home folder does not have:
-
-       out=$(mktemp -d)
-       java -jar "$BUNDLETOOL" build-apks --bundle=path/to/flust.aab --output="$out/flust.apks" --mode=universal \
-         --ks=android/app/debug.keystore --ks-pass=pass:android --ks-key-alias=androiddebugkey --key-pass=pass:android
-       unzip -o "$out/flust.apks" universal.apk -d "$out"
-       scripts/e2e-android.sh --apk "$out/universal.apk"
+1. Build it with `scripts/build-android-bundle.sh --field-apk` ([Release](release.md#android-bundle)). The permissions the check lists for the bundle are the same as for the local release APK.
+2. Install the field APK on the emulator and run the flows on it, as in [Field tests](release.md#field-tests).
 
 ### Install and update
 

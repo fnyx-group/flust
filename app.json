@@ -16,6 +16,7 @@
     },
     "android": {
       "package": "org.fnyxgroup.flust",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#111116",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

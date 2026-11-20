@@ -1,0 +1,64 @@
+// Runs the release signing decision of plugins/android-upload-signing.gradle with plain Gradle, no
+// Android Gradle plugin and no network. CI runs it (.github/workflows/ci.yml).
+apply from: '../android-upload-signing.gradle'
+
+def uploadKey = [
+    flustUploadStoreFile: '/keys/flust-upload.jks',
+    flustUploadStorePassword: 'store secret',
+    flustUploadKeyAlias: 'flust-upload',
+    flustUploadKeyPassword: 'key secret',
+]
+
+def signingFor = { Map properties -> flustUploadKeyFrom { properties[it] } }
+
+def failureFor = { Map properties ->
+    try {
+        signingFor(properties)
+        return null
+    } catch (GradleException error) {
+        return error.message
+    }
+}
+
+def cases = [
+    'signs with the debug key when nothing is set': {
+        assert signingFor([:]) == null
+    },
+    'signs with the debug key when the upload key is set but not required': {
+        assert signingFor(uploadKey) == null
+        assert signingFor(uploadKey + [flustRequireUploadKey: 'false']) == null
+    },
+    'signs with the debug key when only some upload properties are set, without the requirement': {
+        assert signingFor([flustUploadStoreFile: '/keys/flust-upload.jks']) == null
+    },
+    'signs with the upload key when it is required and set': {
+        assert signingFor(uploadKey + [flustRequireUploadKey: 'true']) == uploadKey
+    },
+    'fails when the upload key is required and not set': {
+        def message = failureFor([flustRequireUploadKey: 'true'])
+        assert message?.contains(uploadKey.keySet().join(', ') + ' missing')
+    },
+    'fails when the upload key is required and only some properties are set': {
+        def message = failureFor(uploadKey.findAll { it.key != 'flustUploadKeyPassword' } +
+            [flustRequireUploadKey: 'true'])
+        assert message?.contains('flustUploadKeyPassword missing')
+        assert !message.contains('flustUploadStoreFile')
+    },
+    'counts an empty property as missing': {
+        def message = failureFor(uploadKey + [flustUploadStorePassword: '', flustRequireUploadKey: 'true'])
+        assert message?.contains('flustUploadStorePassword missing')
+    },
+    'never puts a password in its error': {
+        def message = failureFor(uploadKey + [flustUploadKeyAlias: '', flustRequireUploadKey: 'true'])
+        assert !message.contains('store secret') && !message.contains('key secret')
+    },
+]
+
+tasks.register('test') {
+    doLast {
+        cases.each { name, run ->
+            run()
+            println "passed: $name"
+        }
+    }
+}

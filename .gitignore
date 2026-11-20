@@ -13,6 +13,8 @@ expo-env.d.ts
 .kotlin/
 *.orig.*
 *.jks
+*.keystore
+keystore.properties
 *.p8
 *.p12
 *.key
@@ -20,6 +22,10 @@ expo-env.d.ts
 
 # Metro
 .metro-health-check*
+
+# Android bundles and the APK sets built from them
+*.aab
+*.apks
 
 # debug
 npm-debug.*
@@ -52,3 +58,5 @@ modules/*/android/build/
 modules/*/jvm-test/build/
 modules/*/jvm-test/.gradle/
 modules/*/jvm-test/.kotlin/
+plugins/jvm-test/.gradle/
+plugins/jvm-test/build/

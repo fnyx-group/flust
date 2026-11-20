@@ -69,13 +69,14 @@
 - [0043 Third-party licenses](decisions/0043-third-party-licenses.md): notices generated from what the release build ships, committed, with an allowlist checked in CI.
 - [0044 Development modules out of production](decisions/0044-production-modules.md): the development client and the DOM web view are not linked into production builds.
 - [0045 Resolver chain of the Android filter](decisions/0045-resolver-chain.md): Quad9, then Cloudflare, then DNS4EU over DNS over TLS, probed in the background, never plain DNS.
+- [0046 Android App Bundle and upload key](decisions/0046-android-bundle-and-upload-key.md): the Play bundle built and signed locally with an upload key kept outside the repository, and checked for what Google Play refuses.
 
 ## Development
 
 - [Setup](development/setup.md): local environment, first run and development builds.
 - [Conventions](development/conventions.md): code style, layers, lint rules, commits, branches, pull requests.
 - [Testing](development/testing.md): what to test, where, and how.
-- [Release](development/release.md): the checks before each store release, and a local production build.
+- [Release](development/release.md): the checks before each store release, the upload key, the Android bundle and its field APK, and a local production build.
 - [Manual checklist](development/manual-checklist.md): the device checks before each release that tests cannot cover.
 
 ## Release

@@ -47,7 +47,7 @@ jobs:
             exit 0
           fi
           files=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
-          native=$(grep -E '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.node-version|app\.json|app\.config\.ts|eas\.json|plugins/|modules/|lists/|scripts/lists/|scripts/build-lists\.ts|scripts/check-(android|ios)-release\.sh|scripts/(url-schemes|vpn-services)\.awk|licenses/|scripts/licenses/|scripts/(build|update)-licenses\.(ts|sh)|src/features/settings/third-party-licenses\.json|\.github/workflows/native\.yml)' <<<"$files" || true)
+          native=$(grep -E '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.node-version|app\.json|app\.config\.ts|eas\.json|plugins/|modules/|lists/|scripts/lists/|scripts/build-lists\.ts|scripts/check-(android|ios)-release\.sh|scripts/bundletool\.sh|scripts/(url-schemes|vpn-services)\.awk|licenses/|scripts/licenses/|scripts/(build|update)-licenses\.(ts|sh)|src/features/settings/third-party-licenses\.json|\.github/workflows/native\.yml)' <<<"$files" || true)
           if [[ -n $native ]]; then
             echo "Native paths changed:"
             echo "$native"
@@ -62,7 +62,8 @@ jobs:
     needs: native-paths
     if: needs.native-paths.outputs.changed == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # The four ABIs of the bundle about double the native build of one.
+    timeout-minutes: 75
     permissions:
       contents: read
     env:
@@ -91,17 +92,31 @@ jobs:
 
       - run: pnpm expo prebuild --platform android --clean --no-install
 
-      # One ABI is enough: the check reads the manifest and the dex files, the same for every ABI,
-      # and the native code of the others doubles the build time.
-      - name: assembleRelease
+      # The bundle for Google Play comes from the same build type, R8 and JavaScript as the APK.
+      # With no upload key here, both are signed with the template's debug key. Both hold the four
+      # ABIs, as the Play bundle must: the check fails on a bundle without one, and checks the 16 KB
+      # alignment of arm64-v8a and x86_64 alike.
+      - name: assembleRelease bundleRelease
         working-directory: android
-        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+        run: ./gradlew assembleRelease bundleRelease -PreactNativeArchitectures=armeabi-v7a,arm64-v8a,x86,x86_64
+
+      # The version and the hash come from scripts/bundletool.sh, which the release scripts check
+      # the jar against too.
+      - name: Install bundletool
+        run: |
+          source scripts/bundletool.sh
+          jar="$RUNNER_TEMP/bundletool-$BUNDLETOOL_VERSION.jar"
+          curl -fsSL --retry 3 -o "$jar" \
+            "https://github.com/google/bundletool/releases/download/$BUNDLETOOL_VERSION/bundletool-all-$BUNDLETOOL_VERSION.jar"
+          echo "$BUNDLETOOL_SHA256  $jar" | sha256sum --check --strict
+          echo "BUNDLETOOL=$jar" >> "$GITHUB_ENV"
 
       - run: scripts/check-android-release.sh android/app/build/outputs/apk/release/app-release.apk
 
-      # The notices of the Licenses screen must match what this build ships, every dependency
-      # under an allowed license with its text (docs/decisions/0043-third-party-licenses.md).
-      - run: scripts/update-licenses.sh --check
+      # The bundle, then its universal APK, through the same checks. The notices of the Licenses
+      # screen must match that APK, every dependency under an allowed license with its text
+      # (docs/decisions/0043-third-party-licenses.md, 0046-android-bundle-and-upload-key.md).
+      - run: scripts/check-android-release.sh android/app/build/outputs/bundle/release/app-release.aab
 
   ios-build:
     name: ios-build

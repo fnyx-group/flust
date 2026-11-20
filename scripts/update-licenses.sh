@@ -7,19 +7,43 @@
 #   APP_VARIANT=production pnpm expo prebuild --platform android --clean --no-install
 #   (cd android && ./gradlew assembleRelease)
 #
+# --apk reads the native libraries from another APK of the same build, such as the universal APK
+# of its bundle, which scripts/check-android-release.sh checks this way.
+#
 # Exits with 1 when a dependency has no license text or a license not allowed, or when the file
 # is out of date, and with 2 when the build is missing or is not the production one.
-# Usage: scripts/update-licenses.sh [--check]
+# Usage: scripts/update-licenses.sh [--check] [--apk <app.apk>]
 set -euo pipefail
 
 repository=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 android="$repository/android"
 apk="$android/app/build/outputs/apk/release/app-release.apk"
+check=()
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --check)
+      check=(--check)
+      shift
+      ;;
+    --apk)
+      if [[ $# -lt 2 ]]; then
+        echo "--apk needs a path." >&2
+        exit 2
+      fi
+      apk=$2
+      shift 2
+      ;;
+    *)
+      echo "Usage: $0 [--check] [--apk <app.apk>]" >&2
+      exit 2
+      ;;
+  esac
+done
 sourcemap="$android/app/build/generated/sourcemaps/react/release/index.android.bundle.map"
 report="$android/app/build/licenses/report.json"
 
 if [[ ! -f $apk || ! -f $sourcemap ]]; then
-  echo "No release APK or source map: build the production release first." >&2
+  echo "No release APK at $apk or no source map: build the production release first." >&2
   exit 2
 fi
 
@@ -34,4 +58,4 @@ fi
   --no-configuration-cache :app:flustLicenseReport "-PflustLicenseReport=$report")
 
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON "$repository/scripts/build-licenses.ts" \
-  --sourcemap "$sourcemap" --android-report "$report" --apk "$apk" "$@"
+  --sourcemap "$sourcemap" --android-report "$report" --apk "$apk" "${check[@]}"

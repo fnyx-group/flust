@@ -15,14 +15,14 @@ Three workflows run on pull requests and on `main`. Each job has a timeout and o
 
 - `ci.yml`:
   - `checks`: typecheck, tests with coverage, lint, knip, format check and commitlint.
-  - `kotlin`: the Kotlin JVM tests (see [Network](#network)).
+  - `kotlin`: the Kotlin JVM tests (see [Network](#network)), and the tests of the Gradle script that picks the release signing key.
   - `secrets`: gitleaks on the commits of the pull request, or on the full history on `main`.
   - `shellcheck`: `scripts/*.sh`.
   - `audit`: `pnpm audit --prod --audit-level moderate`.
   - `dependency-review`: the dependencies a pull request adds, failing on a moderate or worse advisory.
 - `codeql.yml`: `codeql (javascript-typescript)` and `codeql (actions)`, also weekly.
 - `native.yml`, also weekly, and on pull requests only when a native path changes (`native-paths` decides; see [0037](../decisions/0037-ci-native-builds.md)):
-  - `android-release`: a production release APK, checked with `scripts/check-android-release.sh`, and its third-party notices with `scripts/update-licenses.sh --check` ([0043](../decisions/0043-third-party-licenses.md)).
+  - `android-release`: a production release APK and bundle, for the four ABIs and signed with the template's debug key, both checked with `scripts/check-android-release.sh`. The bundle's check builds its universal APK, checks it the same way, and checks the third-party notices against it ([0043](../decisions/0043-third-party-licenses.md), [0046](../decisions/0046-android-bundle-and-upload-key.md)).
   - `ios-build`: a production Release build for the simulator, without signing, checked with `scripts/check-ios-release.sh`. It is the only place the Swift code of `modules/` compiles before an EAS build.
 
 ## Network
@@ -31,16 +31,17 @@ flust makes no network calls ([0006](../decisions/0006-no-network-access.md)), c
 
 - `test/setup.ts` makes `fetch`, `XMLHttpRequest`, `WebSocket` and `EventSource` throw in every test, and fails the test even if the error is caught.
 - `test/no-network-apis.test.ts` fails if any source file references them: TypeScript and JavaScript are parsed, so comments and longer names such as `prefetch` do not count. It also fails on a URL in the app's code outside the links handed to other apps. Kotlin and Swift sources are searched for the platform network APIs, and Java, Objective-C or C sources fail the test since they are not searched. Only the test setup is excluded. The Android content filter is the one exception ([0033](../decisions/0033-android-filter-network-access.md)): each of its files may use only the APIs its part needs, sockets are opened in `ResolverTransport.kt` alone, and the resolver endpoints are built in `Resolvers.kt` alone.
-- `app.config.test.ts` checks that production builds block `INTERNET` and the other unused permissions, that the filter's VPN service is declared in the development build only, and that `scripts/check-android-release.sh` blocks and expects the same permissions as `app.config.ts` ([0030](../decisions/0030-production-android-permissions.md)). The script itself runs on the built APK or bundle: see [Release](release.md). `scripts/check-android-release.test.ts` runs it on a small APK with `aapt2` replaced by a script, for the rule that pairs the filter's VPN service with `INTERNET` and refuses any other VPN service; `zip` must be installed.
+- `app.config.test.ts` checks that production builds block `INTERNET` and the other unused permissions, that the filter's VPN service is declared in the development build only, and that `scripts/check-android-release.sh` blocks and expects the same permissions as `app.config.ts` ([0030](../decisions/0030-production-android-permissions.md)). The script itself runs on the built APK or bundle: see [Release](release.md). `scripts/check-android-release.test.ts` runs a copy of it, in a repository of its own with its own `app.json`, on small APKs and bundles, with `aapt2`, `zipalign`, `llvm-readelf`, bundletool, `keytool` and the licenses check replaced by scripts. The copy pins the fake bundletool jar, and some copies set the upload certificate in place of the placeholder, which the script itself never takes from outside. It covers the rule that pairs the filter's VPN service with `INTERNET` and refuses any other VPN service, what Google Play refuses: the version, the target API level, 16 KB alignment, the bundle's ABIs and its signer, and the missing tools that stop the check. `scripts/build-android-bundle.test.ts` runs the build script with pnpm, Gradle, bundletool and the check replaced by scripts: what an upload build refuses, how the upload key reaches Gradle, the archive and the cleanup after a failure. `zip` must be installed.
 
 These checks cover flust's own code, against mistakes rather than deliberate evasion. Dependencies are not scanned.
 
 The release builds themselves are checked in CI on every change to a native path: see [CI](#ci).
 
-The Kotlin tests of `modules/flust-reminders` and `modules/flust-filter` run in their own CI job, on the JVM without the Android SDK:
+The Kotlin tests of `modules/flust-reminders` and `modules/flust-filter` run in their own CI job, on the JVM without the Android SDK, with the tests of `plugins/android-upload-signing.gradle`, which pick the release signing key without the Android Gradle plugin:
 
     gradle --project-dir modules/flust-reminders/jvm-test test
     gradle --project-dir modules/flust-filter/jvm-test test
+    gradle --project-dir plugins/jvm-test test
 
 They also run in the Android project, with `./gradlew :flust-reminders:testDebugUnitTest` from `android/`. The filter's tests cover packets, DNS messages, the lists, the decision order and DNS over TLS against a local server, with certificates made by `keytool` at run time; they read the compiled fixture `test/fixtures/filter-lists.bin`, which a Jest test builds from `test/fixtures/filter-lists/` and compares. The wall time cases in `test/fixtures/local-to-utc.tsv` are shared with the JS tests of `localToUtc`.
 
