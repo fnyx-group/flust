@@ -1,13 +1,20 @@
 // A license as a POM declares it: a free name and a URL, which publishers spell in many ways.
 export type PomLicense = { readonly name: string; readonly url: string };
 
+// Each URL matches whole: an optional http or https and www, the host and path, an optional .txt
+// or .html and trailing slash, and nothing else, so that a URL that only contains it, on another
+// host or under another path, is not read as that license.
 const KNOWN: readonly { id: string; name: RegExp; url: RegExp }[] = [
   {
     id: 'Apache-2.0',
     name: /^(the )?apache([ -]software)?([ -]license)?,?([ -]version)?[ -]2(\.0)?$/i,
-    url: /apache\.org\/licenses\/LICENSE-2\.0/i,
+    url: /^(https?:\/\/)?(www\.)?apache\.org\/licenses\/LICENSE-2\.0(\.txt|\.html)?\/?$/i,
   },
-  { id: 'MIT', name: /^(the )?mit( license)?$/i, url: /opensource\.org\/licenses?\/mit/i },
+  {
+    id: 'MIT',
+    name: /^(the )?mit( license)?$/i,
+    url: /^(https?:\/\/)?(www\.)?opensource\.org\/licenses\/MIT(\.txt|\.html)?\/?$/i,
+  },
 ];
 
 // The license a POM entry names, read from its name alone: a URL to a known license text says
@@ -16,7 +23,7 @@ const KNOWN: readonly { id: string; name: RegExp; url: RegExp }[] = [
 function spdxOfLicense(license: PomLicense): string | null {
   const named = KNOWN.find((known) => known.name.test(license.name.trim()));
   if (named === undefined) return null;
-  const linked = KNOWN.find((known) => known.url.test(license.url));
+  const linked = KNOWN.find((known) => known.url.test(license.url.trim()));
   if (linked !== undefined && linked.id !== named.id) return null;
   return named.id;
 }
