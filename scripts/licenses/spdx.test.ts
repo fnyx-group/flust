@@ -16,10 +16,28 @@ describe('the license of a POM', () => {
     expect(spdxOfPom([{ name, url: '' }])).toBe('MIT');
   });
 
-  it('reads the URL when the name is unusual', () => {
+  // A URL to the Apache text does not make Apache-2.0 of a license whose name adds terms to it.
+  it.each([
+    ['Some name', 'https://www.apache.org/licenses/LICENSE-2.0'],
+    ['Apache 2.0 with Commons Clause', 'https://www.apache.org/licenses/LICENSE-2.0'],
+    ['Elastic License 2.0', 'https://www.apache.org/licenses/LICENSE-2.0.txt'],
+  ])('knows nothing of %s, whatever its URL', (name, url) => {
+    expect(spdxOfPom([{ name, url }])).toBeNull();
+  });
+
+  it('knows nothing of a license whose name and URL disagree', () => {
     expect(
-      spdxOfPom([{ name: 'Some name', url: 'https://www.apache.org/licenses/LICENSE-2.0' }]),
-    ).toBe('Apache-2.0');
+      spdxOfPom([{ name: 'MIT', url: 'https://www.apache.org/licenses/LICENSE-2.0' }]),
+    ).toBeNull();
+    expect(
+      spdxOfPom([{ name: 'Apache 2.0', url: 'https://opensource.org/licenses/MIT' }]),
+    ).toBeNull();
+  });
+
+  it('reads a name and a URL that agree', () => {
+    expect(spdxOfPom([{ name: 'MIT License', url: 'https://opensource.org/licenses/MIT' }])).toBe(
+      'MIT',
+    );
   });
 
   it('reads several licenses as a choice', () => {

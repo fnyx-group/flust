@@ -76,7 +76,9 @@ object TestTls {
     store.inputStream().use { load(it, PASSWORD.toCharArray()) }
   }.getCertificateChain("server")
 
-  class Server(store: File) : AutoCloseable {
+  // `answers` false completes the handshake, then reads queries and never answers them, as a
+  // resolver that stopped answering would.
+  class Server(store: File, private val answers: Boolean = true) : AutoCloseable {
     val accepted = AtomicInteger()
     private val socket: SSLServerSocket
     val port: Int
@@ -104,6 +106,7 @@ object TestTls {
         val output = DataOutputStream(it.getOutputStream())
         while (true) {
           val query = ByteArray(input.readUnsignedShort()).also(input::readFully)
+          if (!answers) continue
           val answer = TestData.response(query, listOf(Triple(Dns.TYPE_A, 60L, byteArrayOf(9, 9, 9, 9))))
           output.writeShort(answer.size)
           output.write(answer)

@@ -98,7 +98,7 @@ class FlustFilterModule : Module() {
     // the phases of the last tunnel start in this process, shown in the development build only.
     AsyncFunction("measure") {
       val started = SystemClock.elapsedRealtimeNanos()
-      val bytes = context.assets.open(FilterLists.ASSET).use { it.readBytes() }
+      val bytes = context.assets.open(FilterVpnService.LISTS_ASSET).use { it.readBytes() }
       val lists = Blocklist.read(bytes)
       val loaded = SystemClock.elapsedRealtimeNanos()
       val policy = FilterPolicy(lists, FilterConfig(enabled = true))

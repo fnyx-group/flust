@@ -16,6 +16,17 @@ object Resolvers {
   // IPv4 failure there is immediate.
   val QUAD9 = endpoint("dns.quad9.net", "9.9.9.9", "149.112.112.112", "2620:fe::fe", "2620:fe::9")
 
+  // Cloudflare's malware-blocking resolver comes before DNS4EU: it deletes its logs and the
+  // truncated addresses within 25 hours, where DNS4EU keeps pseudonymous query logs for up to six
+  // months and shares them with its project partners.
+  val CLOUDFLARE = endpoint(
+    "security.cloudflare-dns.com",
+    "1.1.1.2",
+    "1.0.0.2",
+    "2606:4700:4700::1112",
+    "2606:4700:4700::1002",
+  )
+
   // DNS4EU's Protective resolution, which blocks malware like the two others.
   val DNS4EU = endpoint(
     "protective.joindns4.eu",
@@ -25,16 +36,8 @@ object Resolvers {
     "2a13:1001::86:54:11:201",
   )
 
-  val CLOUDFLARE = endpoint(
-    "security.cloudflare-dns.com",
-    "1.1.1.2",
-    "1.0.0.2",
-    "2606:4700:4700::1112",
-    "2606:4700:4700::1002",
-  )
-
-  val CHAIN = listOf(QUAD9, DNS4EU, CLOUDFLARE)
-  val NAMES = listOf("Quad9", "DNS4EU", "Cloudflare")
+  val CHAIN = listOf(QUAD9, CLOUDFLARE, DNS4EU)
+  val NAMES = listOf("Quad9", "Cloudflare", "DNS4EU")
 
   private fun endpoint(host: String, vararg addresses: String) =
     ResolverEndpoint(host, PORT, addresses.map(::literal))

@@ -24,6 +24,7 @@ kotlin {
         "**/DotClient.kt",
         "**/FilterConfig.kt",
         "**/FilterEngine.kt",
+        "**/FilterLists.kt",
         "**/FilterPolicy.kt",
         "**/NetworkChecks.kt",
         "**/PacketHandler.kt",

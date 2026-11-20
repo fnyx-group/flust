@@ -1,19 +1,147 @@
 {
-  "npm:@expo/ui": { "text": "expo.txt" },
-  "npm:@react-native/asset-utils": { "text": "react-native.txt" },
-  "npm:@react-native/js-polyfills": { "text": "react-native.txt" },
-  "npm:@react-native/normalize-colors": { "text": "react-native.txt" },
-  "npm:@react-native/virtualized-lists": { "text": "react-native.txt" },
-  "npm:expo-router": { "text": "expo.txt" },
-  "npm:standard-navigation": { "text": "standard-navigation.txt" },
-  "maven:com.facebook.fresco": { "text": "fresco.txt" },
-  "maven:com.facebook.hermes:hermes-android": { "text": "hermes.txt" },
-  "maven:com.facebook.infer.annotation:infer-annotation": { "text": "infer-annotation.txt" },
-  "maven:com.facebook.react:react-android": { "text": "react-native.txt" },
-  "maven:com.facebook.yoga:proguard-annotations": { "text": "react-native.txt" },
-  "maven:com.parse.bolts:bolts-tasks": { "license": "BSD-3-Clause", "text": "bolts.txt" },
-  "maven:io.github.expo": { "text": "expo.txt" },
-  "maven:io.github.expo.kolibri": { "text": "expo.txt" },
-  "maven:io.github.expo.pika": { "text": "expo.txt" },
-  "maven:org.brotli:dec": { "text": "brotli.txt" }
+  "npm:@expo/ui": {
+    "text": "expo.txt"
+  },
+  "npm:@react-native/asset-utils": {
+    "text": "react-native.txt"
+  },
+  "npm:@react-native/js-polyfills": {
+    "text": "react-native.txt"
+  },
+  "npm:@react-native/normalize-colors": {
+    "text": "react-native.txt"
+  },
+  "npm:@react-native/virtualized-lists": {
+    "text": "react-native.txt"
+  },
+  "npm:expo-router": {
+    "text": "expo.txt"
+  },
+  "npm:standard-navigation": {
+    "text": "standard-navigation.txt"
+  },
+  "maven:com.facebook.fresco:animated-base": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:animated-drawable": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:animated-gif": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:animated-gif-lite": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:drawee": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:fbcore": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:fresco": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:imagepipeline": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:imagepipeline-base": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:imagepipeline-native": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:imagepipeline-okhttp3": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:memory-type-ashmem": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:memory-type-java": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:memory-type-native": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:middleware": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:nativeimagefilters": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:nativeimagetranscoder": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:soloader": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:ui-common": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:ui-core": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:urimod": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:vito-core": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:vito-core-common-impl": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:vito-core-impl": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:vito-core-java-impl": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:vito-drawee-support": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:vito-options": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:vito-provider": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:vito-renderer": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:vito-source": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.fresco:webpsupport": {
+    "text": "fresco.txt"
+  },
+  "maven:com.facebook.hermes:hermes-android": {
+    "text": "hermes.txt"
+  },
+  "maven:com.facebook.infer.annotation:infer-annotation": {
+    "text": "infer-annotation.txt"
+  },
+  "maven:com.facebook.react:react-android": {
+    "text": "react-native.txt"
+  },
+  "maven:com.facebook.yoga:proguard-annotations": {
+    "text": "react-native.txt"
+  },
+  "maven:com.parse.bolts:bolts-tasks": {
+    "license": "BSD-3-Clause",
+    "text": "bolts.txt"
+  },
+  "maven:io.github.expo.kolibri:kolibri-android": {
+    "text": "expo.txt"
+  },
+  "maven:io.github.expo.kolibri:runtime": {
+    "text": "expo.txt"
+  },
+  "maven:io.github.expo.pika:pika-api": {
+    "text": "expo.txt"
+  },
+  "maven:io.github.expo:expo-modules-v2-react": {
+    "text": "expo.txt"
+  },
+  "maven:org.brotli:dec": {
+    "text": "brotli.txt"
+  }
 }

@@ -136,7 +136,7 @@ describe('the filter bridge', () => {
     });
   });
 
-  it.each(['Quad9', 'DNS4EU', 'Cloudflare'])(
+  it.each(['Quad9', 'Cloudflare', 'DNS4EU'])(
     'reads %s as the resolver in use',
     async (resolver) => {
       const bridge = createFilterBridge(

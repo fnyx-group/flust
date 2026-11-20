@@ -10,6 +10,7 @@ The exclusions of `package.json` (`expo.autolinking.android.exclude`) apply to e
 
 - `plugins/with-production-modules.ts`, applied to the production variant only, writes `expoAutolinking.exclude` with these modules into the generated `settings.gradle`, before `expoAutolinking.useExpoModules()`. The Gradle plugin passes them to autolinking, which adds them to the exclusions of `package.json`.
 - The plugin fails the prebuild when `settings.gradle` does not call `useExpoModules()` exactly once, rather than ship the modules without notice.
+- `scripts/check-android-release.sh` fails on a build whose dex holds a class of these modules' Java packages, `expo.modules.devclient`, `devlauncher`, `devmenu`, `manifests`, `jsonutils`, `updatesinterface` and `webview`. `expo-dev-menu-interface` has no Android code.
 - Android only for now. The iPhone build gets the same exclusion with lot 3, when its native project is generated.
 
 ## Consequences

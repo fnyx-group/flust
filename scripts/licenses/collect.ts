@@ -24,7 +24,9 @@ export type AndroidReport = {
 };
 
 // licenses/overrides.json: the license or the text of a dependency that does not ship them in a
-// form the build can read. Keys are `npm:<name>`, `maven:<group>:<name>` or `maven:<group>`.
+// form the build can read. Keys are `npm:<name>` or `maven:<group>:<name>`, one dependency each:
+// a key for a whole Maven group would give its text to any new module of the group, whatever
+// that module's own license.
 export type Overrides = Record<string, { license?: string; text: string }>;
 
 // licenses/native.json: code compiled or copied into the APK without a Gradle module of its
@@ -55,6 +57,11 @@ type Package = { name: string; version: string; license: string; dir: string };
 // ship several, such as the fonts with the OFL apart from the code's license.
 const LICENSE_FILE = /^(licen[cs]e|copying|notice)([._-][a-z0-9]+)?(\.(md|txt|markdown))?$/i;
 
+const OVERRIDE_KEY = /^(npm:[^:]+|maven:[^:]+:[^:]+)$/;
+
+// A module of a package: the folder after the last node_modules of its path.
+const PACKAGE_SOURCE = /^((?:.*\/)?node_modules\/(?:@[^/]+\/)?[^/@][^/]*)\//;
+
 export class Collector {
   readonly problems: string[] = [];
   private readonly usedOverrides = new Set<string>();
@@ -68,6 +75,11 @@ export class Collector {
     this.root = root;
     this.texts = texts;
     this.overrides = overrides;
+    for (const key of Object.keys(overrides)) {
+      if (!OVERRIDE_KEY.test(key)) {
+        this.problems.push(`${key}: an override names one npm package or one Maven module`);
+      }
+    }
     for (const [license, packages] of Object.entries(pnpm)) {
       for (const entry of packages) {
         entry.paths.forEach((dir, index) => {
@@ -79,15 +91,23 @@ export class Collector {
   }
 
   // The packages whose code is in the JavaScript bundle, from its source map. Each module sits
-  // under the last node_modules of its path; the app's own files sit under none.
+  // under the last node_modules of its path; the app's own files sit under none. An entry that is
+  // neither fails the run rather than leave a package out of the notices.
   bundled(sources: readonly string[]): Shipped[] {
     const dirs = new Set<string>();
     for (const source of sources) {
-      const match = /^(.*\/node_modules\/(?:@[^/]+\/)?[^/@][^/]*)\//.exec(source);
-      if (match === null) continue;
-      const relative = match[1] ?? '';
-      const absolute = relative.startsWith(this.root) ? relative : path.join(this.root, relative);
-      dirs.add(fs.realpathSync(absolute));
+      // Metro's virtual modules, such as its polyfills, have no file.
+      if (source.startsWith('\u0000')) continue;
+      const match = PACKAGE_SOURCE.exec(source);
+      if (match === null) {
+        if (!this.ownFile(source)) {
+          this.problems.push(
+            `${source}: in the source map, but neither in a package nor in the app`,
+          );
+        }
+        continue;
+      }
+      dirs.add(fs.realpathSync(this.inRoot(match[1] ?? '')));
     }
     return [...dirs].flatMap((dir) => this.npm(dir, 'bundle'));
   }
@@ -109,15 +129,10 @@ export class Collector {
     return Object.keys(this.overrides).filter((key) => !this.usedOverrides.has(key));
   }
 
-  private override(...keys: string[]) {
-    for (const key of keys) {
-      const found = this.overrides[key];
-      if (found !== undefined) {
-        this.usedOverrides.add(key);
-        return found;
-      }
-    }
-    return undefined;
+  private override(key: string) {
+    const found = this.overrides[key];
+    if (found !== undefined) this.usedOverrides.add(key);
+    return found;
   }
 
   private readText(file: string): string {
@@ -153,7 +168,7 @@ export class Collector {
 
   private maven(module: AndroidReport['maven'][number]): Shipped {
     const key = `maven:${module.group}:${module.name}`;
-    const override = this.override(key, `maven:${module.group}`);
+    const override = this.override(key);
     const license = override?.license ?? spdxOfPom(module.licenses);
     if (license === null) this.problems.push(`${key}: its POM declares no license we can read`);
     const text =
@@ -169,6 +184,19 @@ export class Collector {
       license: license ?? 'UNKNOWN',
       text,
     };
+  }
+
+  // Source map paths are absolute, or relative to the project with or without a leading slash.
+  private inRoot(source: string): string {
+    return source.startsWith(this.root) ? source : path.join(this.root, source);
+  }
+
+  // A file of the app, or a folder of it that a require.context module stands for, such as Expo
+  // Router's `/src/app?ctx=<hash>`.
+  private ownFile(source: string): boolean {
+    if (/(^|\/)node_modules\//.test(source)) return false;
+    const absolute = this.inRoot(source.replace(/\?ctx=[0-9a-f]+$/, ''));
+    return !path.relative(this.root, absolute).startsWith('..') && fs.existsSync(absolute);
   }
 
   // flust's own native modules are not third-party code.

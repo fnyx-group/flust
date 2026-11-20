@@ -37,6 +37,7 @@ class FilterVpnService : VpnService() {
   private val main = Handler(Looper.getMainLooper())
   private val starts = TunnelStarts()
   private val preparation: ExecutorService = Executors.newSingleThreadExecutor { task -> Thread(task, "flust-filter-start") }
+  private val lists = FilterLists { Blocklist.read(assets.open(LISTS_ASSET).use { it.readBytes() }) }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     if (intent?.action == ACTION_STOP) {
@@ -77,7 +78,7 @@ class FilterVpnService : VpnService() {
     preparation.shutdownNow()
     if (tunnel != null) FilterLog.stopped(this, null)
     stopTunnel(null)
-    FilterLists.release()
+    lists.release()
     super.onDestroy()
   }
 
@@ -91,9 +92,9 @@ class FilterVpnService : VpnService() {
     val requested = SystemClock.elapsedRealtimeNanos()
     preparation.execute {
       val step = try {
-        val listsCached = FilterLists.cached
+        val listsCached = lists.cached
         val listsStarted = SystemClock.elapsedRealtimeNanos()
-        val lists = FilterLists.get(this)
+        val read = lists.get()
         val trustStarted = SystemClock.elapsedRealtimeNanos()
         val failure: Throwable? = try {
           SystemTrust.context()
@@ -102,7 +103,7 @@ class FilterVpnService : VpnService() {
           untrusted
         }
         val trusted = SystemClock.elapsedRealtimeNanos()
-        val prepared = Prepared(lists, millis(listsStarted, trustStarted), listsCached, millis(trustStarted, trusted))
+        val prepared = Prepared(read, millis(listsStarted, trustStarted), listsCached, millis(trustStarted, trusted))
         Runnable {
           if (!starts.finish(ticket)) return@Runnable
           if (failure != null) fail(StopReason.FAILED, failure) else startTunnel(config, prepared, requested)
@@ -121,6 +122,7 @@ class FilterVpnService : VpnService() {
     val establishing = SystemClock.elapsedRealtimeNanos()
     var descriptor: ParcelFileDescriptor? = null
     var started: FilterEngine? = null
+    var networks: ConnectivityManager.NetworkCallback? = null
     try {
       generation = (generation + 1) % TunnelRoutes.DNS.size
       val established = builder(TunnelRoutes.DNS[generation]).establish() ?: return fail(StopReason.NO_CONSENT)
@@ -128,7 +130,7 @@ class FilterVpnService : VpnService() {
       val trust = SystemTrust.context()
       val clients = Resolvers.CHAIN.map { endpoint ->
         val transport = ResolverTransport(endpoint, { socket -> protect(socket) }, trust)
-        DotClient({ budget -> if (budget == null) transport.connect() else transport.connect(budget) }, System::currentTimeMillis)
+        DotClient(transport::connect, System::currentTimeMillis, transport::close)
       }
       val chain = ResolverChain(clients, BackgroundThreads(clients.size), System::currentTimeMillis)
       val engine = FilterEngine(prepared.lists, config, chain, chain::stop)
@@ -145,13 +147,15 @@ class FilterVpnService : VpnService() {
         }
       }, "flust-filter")
       val previous = tunnel
-      tunnel = Tunnel(established, engine, reader, config, watchNetworks(chain))
+      networks = watchNetworks(chain)
+      tunnel = Tunnel(established, engine, reader, config, networks)
       FilterStatus.activeResolver = { chain.active()?.let(Resolvers.NAMES::get) }
       reader.start()
       previous?.let(::close)
     } catch (error: Exception) {
       // An established tunnel that no thread reads would swallow every lookup.
       started?.stop()
+      networks?.let(::unwatch)
       try {
         descriptor?.close()
       } catch (ignored: Exception) {
@@ -267,13 +271,16 @@ class FilterVpnService : VpnService() {
       null
     }
 
-  private fun close(old: Tunnel) {
-    old.networks?.let { callback ->
-      try {
-        getSystemService(ConnectivityManager::class.java)?.unregisterNetworkCallback(callback)
-      } catch (unregistered: IllegalArgumentException) {
-      }
+  // A callback already unregistered, by the tunnel's own close, throws.
+  private fun unwatch(callback: ConnectivityManager.NetworkCallback) {
+    try {
+      getSystemService(ConnectivityManager::class.java)?.unregisterNetworkCallback(callback)
+    } catch (unregistered: IllegalArgumentException) {
     }
+  }
+
+  private fun close(old: Tunnel) {
+    old.networks?.let(::unwatch)
     old.engine.stop()
     try {
       old.descriptor.close()
@@ -285,6 +292,7 @@ class FilterVpnService : VpnService() {
   companion object {
     const val ACTION_START = "org.fnyxgroup.flust.filter.START"
     const val ACTION_STOP = "org.fnyxgroup.flust.filter.STOP"
+    const val LISTS_ASSET = "filter-lists.bin"
 
     fun start(context: Context) {
       context.startService(Intent(context, FilterVpnService::class.java).setAction(ACTION_START))

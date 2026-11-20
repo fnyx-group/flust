@@ -38,7 +38,7 @@ DNS has no equivalent of Strict YouTube for X, TikTok, Reddit or Instagram: none
 
 ## In the app
 
-- Settings has a Filter row with its state: on, off or inactive. It opens the filter screen: the state at the top, with the reason and what to do when inactive and the request while it waits, then the two switches, one line on what the filter blocks, one line saying that the names of allowed sites go encrypted to Quad9, or to DNS4EU then Cloudflare when it does not answer, all three blocking malware, a help line for Chrome's secure DNS, and links to the always-on VPN setting and to the licenses of the lists.
+- Settings has a Filter row with its state: on, off or inactive. It opens the filter screen: the state at the top, with the reason and what to do when inactive and the request while it waits, then the two switches, one line on what the filter blocks, one line saying that the names of allowed sites go encrypted to Quad9, or to Cloudflare then DNS4EU when it does not answer, all three blocking malware, a help line for Chrome's secure DNS, and links to the always-on VPN setting and to the licenses of the lists.
 - The onboarding presents the filter in a step of its own before the start point, with the disclosure in full, "Accepter et activer" and "Plus tard" ([0042](../decisions/0042-filter-onboarding-and-disclosure.md)).
 - Turning the filter on from the filter screen shows the same disclosure in a sheet whenever Android's VPN dialog will follow.
 - Home shows an inactive filter with a neutral chip, a shield and "Filtre inactif", in place of the circle name in the header row. It takes no height, so home keeps its fit at 667 points, and it opens the filter screen.
@@ -86,13 +86,19 @@ Android's automatic Private DNS tries DNS over TLS to the VPN's DNS address firs
 
 The filter forwards allowed lookups to a chain of three resolvers, in this order ([0045](../decisions/0045-resolver-chain.md)). All three block known malware domains, which the app states. Family resolvers can be offered later as options.
 
-| Resolver                          | Name                          | Data policy                                                                   |
-| --------------------------------- | ----------------------------- | ----------------------------------------------------------------------------- |
-| Quad9, a nonprofit in Switzerland | `dns.quad9.net`               | Does not log client IP addresses                                              |
-| DNS4EU Protective                 | `protective.joindns4.eu`      | Anonymises queries, does not sell, profile or use them for advertising        |
-| Cloudflare, malware blocking      | `security.cloudflare-dns.com` | Truncates the client's address and deletes it, with its logs, within 25 hours |
+| Resolver                          | Name                          |
+| --------------------------------- | ----------------------------- |
+| Quad9, a nonprofit in Switzerland | `dns.quad9.net`               |
+| Cloudflare, malware blocking      | `security.cloudflare-dns.com` |
+| DNS4EU Protective                 | `protective.joindns4.eu`      |
 
-Quad9 stops answering people located in France on 24 November 2026: their lookups then go to DNS4EU. A resolver fails on a connect timeout, a refused or reset connection, a TLS or certificate failure, or a `REFUSED` answer, never on `SERVFAIL`, `NXDOMAIN` or another answer. The filter probes the chain in the background when the tunnel starts and on each change of network. A resolver that fails a lookup is probed again at once, then after 30 seconds, 2 minutes and 10 minutes, then every hour, and takes its place again as soon as a probe passes. A lookup goes to the first resolver that passed and never waits on one known to fail. Before the first probes finish, the chain is tried in order with a one second connect timeout. When every resolver fails, the lookup gets `SERVFAIL`.
+What each operator publishes about the lookups it receives, read on 2026-11-20:
+
+- Quad9 does not log client IP addresses.
+- Cloudflare, under the 1.1.1.1 policy, which covers its malware-blocking resolver. The client's IP address is not written to disk, except in network packets sampled from at most 0.05% of the traffic, for troubleshooting and attack mitigation, with no stated retention. The resolver logs keep the name, the type, the answer code, the network's AS number and country, and the address truncated to its first three IPv4 bytes or first 48 IPv6 bits, and are deleted within 25 hours, except a sample without addresses used for aggregates. The aggregates, among them the list of every name asked with its count and the time it was first asked in each region, are kept without limit. APNIC can query the anonymised logs, names, types and resolver locations but no client address, for non-profit research.
+- DNS4EU, run by Whalebone in the Czech Republic, under its resolver policy of 2025 and its public page. The client's IP address stays in memory for the time of the query; it is written to disk only during an attack on the resolver, kept up to six months after it, or in a crash dump, kept up to three months. The query logs keep the name, the answer, the time, the network's AS number and a pseudonym of the address, made with a key that changes every day, for up to six months, for threat research; project partners train models on them. Aggregated data and parts of the anonymised logs may go to threat intelligence partners under written agreements, and aggregates are kept without limit. DNS4EU does not sell or pass on IP addresses, does not combine the data with other sources, and says queries are not sold, profiled or used for advertising. It applies court-ordered blocks to all its resolvers.
+
+Quad9 stops serving people located in France on 24 November 2026, and has not said how: their lookups then go to Cloudflare. Cloudflare comes before DNS4EU because it deletes its logs and the truncated addresses within 25 hours, where DNS4EU keeps pseudonymous query logs up to six months and shares them with its project partners. A lookup gets 1 second to connect, 2 seconds for the TLS handshake and 3 seconds for the answer, with every resolver, and moves on to the next resolver when one of them runs out, on any other error, and on a `REFUSED` answer. `SERVFAIL`, `NXDOMAIN` and every other answer go back to the app, but a `SERVFAIL` also has the resolver probed in the background. A probe asks for the root's name servers and passes only when it gets them. The filter probes the chain in the background when the tunnel starts and on each change of network, which makes every resolver not probed yet. A resolver that fails a lookup is probed again at once, then after 30 seconds, 2 minutes and 10 minutes, then every hour, and takes its place again as soon as a probe passes. A lookup goes to the first resolver that passed, then to those not probed yet, and never to one known to fail. When every resolver fails, the lookup gets `SERVFAIL`.
 
 The module reaches each resolver over DNS over TLS, on port 853, by its hard-coded IPv4 and IPv6 addresses. It never looks up their names, which strict mode blocks for every app along with the other DoH and DoT providers, and its sockets leave the tunnel through `protect()`, so the route that sends other apps' traffic to these addresses into the tunnel does not apply to them. TLS still validates each certificate for the resolver's name, against the certificates that ship with Android only: a certificate authority added by the person or a device policy is not trusted. Tests check both that the names are blocked and that the resolvers are reached.
 
@@ -323,10 +329,10 @@ Real phones, with a fixed set of domains. It holds about a hundred common adult 
 3. [Apple forums, web domain limit in Screen Time](https://developer.apple.com/forums/thread/730444)
 4. [Apple forums, Family Controls needs a paid team](https://developer.apple.com/forums/thread/764682)
 5. [Apple forums, Family Controls entitlement for distribution](https://developer.apple.com/forums/thread/829311)
-6. [Quad9, how Quad9 handles your data](https://quad9.net/news/blog/how-quad9-handles-your-data-2025/), [service addresses](https://quad9.net/service/service-addresses-and-features/)
+6. [Quad9, how Quad9 handles your data](https://quad9.net/news/blog/how-quad9-handles-your-data-2025/), [service addresses](https://quad9.net/service/service-addresses-and-features/), [Farewell, France](https://quad9.net/news/blog/au-revoir-france/)
 7. [ShadowWhisperer block lists](https://github.com/ShadowWhisperer/BlockLists)
 8. [aegis block list](https://github.com/0xDarkMatter/aegis-blocklist)
 9. [Chromium, DoH provider list](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/net/dns/public/doh_provider_entry.cc)
 10. [RFC 7858, DNS over TLS](https://www.rfc-editor.org/rfc/rfc7858)
-11. [DNS4EU for the public](https://www.joindns4.eu/for-public)
+11. [DNS4EU for the public](https://www.joindns4.eu/for-public) and [its public resolver policy](https://legal-documents-dns4eu.s3.fr-par.scw.cloud/DNS4EU-Public-DNS-Resolver-policy-2025.pdf)
 12. [Cloudflare, 1.1.1.1 for Families](https://developers.cloudflare.com/1.1.1.1/setup/) and [its resolver's privacy commitments](https://developers.cloudflare.com/1.1.1.1/privacy/public-dns-resolver/)

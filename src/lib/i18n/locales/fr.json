@@ -908,7 +908,7 @@
     "youtubeStrict": "YouTube strict",
     "youtubeStrictHint": "Masque plus de vidéos que le mode restreint de base.",
     "blocks": "Bloque les sites pour adultes, le porno IA et les contournements, et impose SafeSearch sur Google, Bing, DuckDuckGo et YouTube.",
-    "resolvers": "Les noms des sites autorisés partent chiffrés vers Quad9, ou vers DNS4EU puis Cloudflare s'il ne répond pas. Les trois bloquent aussi les logiciels malveillants.",
+    "resolvers": "Les noms des sites autorisés partent chiffrés vers Quad9, ou vers Cloudflare puis DNS4EU s'il ne répond pas. Les trois bloquent aussi les logiciels malveillants.",
     "chrome": "Plus rien ne charge dans Chrome ? Dans ses paramètres, Confidentialité et sécurité, Utiliser le DNS sécurisé, choisis Automatique.",
     "alwaysOn": "VPN permanent",
     "alwaysOnHint": "Active VPN permanent pour flust, le filtre repart alors tout seul.",
@@ -959,7 +959,7 @@
     },
     "disclosure": {
       "title": "Avant d'activer le filtre",
-      "text": "flust utilise le service VPN d'Android pour filtrer les noms des sites que tes apps ouvrent, sur tout le téléphone. Les noms bloqués ne quittent jamais le téléphone. Les noms des sites autorisés partent chiffrés vers Quad9, ou vers DNS4EU puis Cloudflare quand Quad9 ne répond pas. DNS4EU anonymise les requêtes, sans les vendre ni s'en servir pour du profilage ou de la publicité, et Cloudflare efface les adresses IP anonymisées sous 25 heures. Le reste de ton trafic ne passe pas par flust, sauf les connexions directes à des serveurs DNS publics connus, qui sont bloquées.",
+      "text": "flust utilise le service VPN d'Android pour filtrer les noms des sites que tes apps ouvrent, sur tout le téléphone. Les noms bloqués ne quittent jamais le téléphone. Les noms des sites autorisés partent chiffrés vers Quad9, ou vers Cloudflare puis DNS4EU quand Quad9 ne répond pas. Cloudflare efface les adresses IP anonymisées sous 25 heures. DNS4EU peut garder certaines données de requêtes jusqu'à six mois pour la recherche sur les menaces, sans les vendre ni s'en servir pour du profilage ou de la publicité. Le reste de ton trafic ne passe pas par flust, sauf les connexions directes à des serveurs DNS publics connus, qui sont bloquées.",
       "accept": "Accepter et activer",
       "later": "Plus tard"
     },

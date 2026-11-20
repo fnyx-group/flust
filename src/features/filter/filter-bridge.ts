@@ -22,7 +22,7 @@ export type TunnelStartMeasure = {
   totalMillis: number;
 };
 
-const RESOLVERS = ['Quad9', 'DNS4EU', 'Cloudflare'] as const;
+const RESOLVERS = ['Quad9', 'Cloudflare', 'DNS4EU'] as const;
 
 export type Resolver = (typeof RESOLVERS)[number];
 

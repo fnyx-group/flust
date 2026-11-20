@@ -49,12 +49,17 @@ function collector(production: PnpmLicenses, overrides = {}) {
 describe('the bundled packages', () => {
   it('come from the source map, with every license file of the package', () => {
     const dir = install('fonts', '1.0.0', { LICENSE: MIT, LICENSE_FONT: 'SIL OPEN FONT LICENSE' });
-    const found = collector(
+    write('src/app/index.tsx', '');
+    const results = collector(
       pnpm([{ name: 'fonts', version: '1.0.0', dir, license: 'MIT AND OFL-1.1' }]),
-    ).bundled([
+    );
+    const found = results.bundled([
       '/node_modules/.pnpm/fonts@1.0.0/node_modules/fonts/index.js',
       `${root}/node_modules/.pnpm/fonts@1.0.0/node_modules/fonts/lib/a.js`,
+      'node_modules/.pnpm/fonts@1.0.0/node_modules/fonts/lib/b.js',
       '/src/app/index.tsx',
+      'src/app/index.tsx',
+      '/src/app?ctx=f5d9e791d457250edfb6132a1ae4b69b5ae248c5',
       '\u0000polyfill:external-require',
     ]);
 
@@ -66,6 +71,24 @@ describe('the bundled packages', () => {
         license: 'MIT AND OFL-1.1',
         text: `${MIT.trim()}\n\nSIL OPEN FONT LICENSE`,
       },
+    ]);
+    expect(results.problems).toEqual([]);
+  });
+
+  // A package left out of the notices would ship without its license.
+  it.each([
+    ['a path to node_modules with no package', '/node_modules/@scope/'],
+    ['a file outside the project', '/../elsewhere/index.js'],
+    ['a file the project does not have', '/src/missing.ts'],
+    ['a name Metro made up', '[metro-runtime]'],
+    ['a context module of a folder the project does not have', '/src/gone?ctx=f5d9e791'],
+    ['a context module of a package', '/node_modules/lib?ctx=f5d9e791'],
+  ])('report %s', (_, source) => {
+    const results = collector({});
+
+    expect(results.bundled([source])).toEqual([]);
+    expect(results.problems).toEqual([
+      `${source}: in the source map, but neither in a package nor in the app`,
     ]);
   });
 
@@ -130,19 +153,40 @@ describe('the Android build', () => {
     ]);
   });
 
-  it('report a module without a readable license, and take a group override', () => {
-    const results = collector({}, { 'maven:com.example': { license: 'MIT', text: 'a.txt' } });
+  it('report a module without a readable license, and take the override of one module', () => {
+    const results = collector({}, { 'maven:com.example:lib': { license: 'MIT', text: 'a.txt' } });
     const maven = [
       { group: 'com.example', name: 'lib', version: '1', pom: '/c/l.pom', licenses: [] },
-      { group: 'org.other', name: 'lib', version: '1', pom: '/c/o.pom', licenses: [] },
+      { group: 'com.example', name: 'other', version: '1', pom: '/c/e.pom', licenses: [] },
     ];
     const found = results.android(report({ maven }), NO_NATIVE, EMPTY_APK);
 
     expect(found[0]).toMatchObject({ license: 'MIT', text: MIT });
     expect(found[1]).toMatchObject({ license: 'UNKNOWN', text: '' });
     expect(results.problems).toEqual([
-      'maven:org.other:lib: its POM declares no license we can read',
+      'maven:com.example:other: its POM declares no license we can read',
     ]);
+  });
+
+  // A new module of the group would take a text that may not be its own.
+  it('refuse an override for a whole Maven group', () => {
+    const results = collector({}, { 'maven:com.example': { text: 'a.txt' } });
+    const maven = [
+      {
+        group: 'com.example',
+        name: 'lib',
+        version: '1',
+        pom: '/c/l.pom',
+        licenses: [{ name: 'MIT', url: '' }],
+      },
+    ];
+    const found = results.android(report({ maven }), NO_NATIVE, EMPTY_APK);
+
+    expect(found[0]).toMatchObject({ license: 'MIT', text: '' });
+    expect(results.problems).toEqual([
+      'maven:com.example: an override names one npm package or one Maven module',
+    ]);
+    expect(results.unusedOverrides()).toEqual(['maven:com.example']);
   });
 
   it('read library projects and modules published inside a package from that package', () => {

@@ -1,25 +1,30 @@
 package org.fnyxgroup.flust.filter
 
-import android.content.Context
-
-// The compiled lists in the app's assets, read once per process and shared by every tunnel: a
-// Blocklist is read-only, and reading 2.7 MB again at each change of the settings would slow the
-// switch to the new tunnel. Released when the service stops.
-object FilterLists {
-  const val ASSET = "filter-lists.bin"
-
-  @Volatile private var loaded: Blocklist? = null
+// The compiled lists, read once per service and shared by every tunnel it sets up: a Blocklist is
+// read-only, and reading 2.7 MB again at each change of the settings would slow the switch to the
+// new tunnel. Released when the service stops: a start still being prepared then reads the lists
+// for itself without keeping them, so they never outlive the service.
+class FilterLists(private val read: () -> Blocklist) {
+  private var loaded: Blocklist? = null
+  private var released = false
 
   val cached: Boolean
-    get() = loaded != null
+    get() = synchronized(this) { loaded != null }
 
-  fun get(context: Context): Blocklist =
-    loaded ?: synchronized(this) { loaded ?: read(context).also { loaded = it } }
-
-  fun read(context: Context): Blocklist =
-    Blocklist.read(context.assets.open(ASSET).use { it.readBytes() })
+  // Reads outside the lock, so that release() on the main thread never waits for the read.
+  fun get(): Blocklist {
+    synchronized(this) { loaded?.let { return it } }
+    val lists = read()
+    synchronized(this) {
+      if (!released && loaded == null) loaded = lists
+      return loaded ?: lists
+    }
+  }
 
   fun release() {
-    loaded = null
+    synchronized(this) {
+      released = true
+      loaded = null
+    }
   }
 }

@@ -36,11 +36,21 @@ beforeAll(() => {
   execFileSync('zip', ['-q', apk, 'classes.dex', 'AndroidManifest.xml'], { cwd: folder });
 });
 
+// An APK whose dex holds these class names, as a dex holds them: plain text between other bytes.
+function apkWithClasses(name: string, classes: readonly string[]): string {
+  const dir = fs.mkdtempSync(path.join(folder, `${name}-`));
+  fs.writeFileSync(path.join(dir, 'classes.dex'), `dex\u0000${classes.join('\u0000')}\u0000`);
+  fs.writeFileSync(path.join(dir, 'AndroidManifest.xml'), 'manifest');
+  const file = path.join(dir, 'app.apk');
+  execFileSync('zip', ['-q', file, 'classes.dex', 'AndroidManifest.xml'], { cwd: dir });
+  return file;
+}
+
 afterAll(() => {
   fs.rmSync(folder, { recursive: true, force: true });
 });
 
-function check(manifest: string, permissions: readonly string[]) {
+function check(manifest: string, permissions: readonly string[], build = apk) {
   const permissionsFile = path.join(folder, 'permissions.txt');
   fs.writeFileSync(
     permissionsFile,
@@ -48,7 +58,7 @@ function check(manifest: string, permissions: readonly string[]) {
       .map((name) => `uses-permission: name='${name}'`)
       .join('\n'),
   );
-  const result = spawnSync('bash', [script, apk], {
+  const result = spawnSync('bash', [script, build], {
     encoding: 'utf8',
     env: {
       ...process.env,
@@ -90,5 +100,36 @@ describe('the release check, for the content filter', () => {
       "declares VPN services other than the content filter's:\n  com.example.sdk.ProxyService\n  com.example.sdk.TunnelService\n",
     );
     expect(errors).not.toContain(missingPermissions);
+  });
+});
+
+describe('the release check, for the development modules', () => {
+  it.each([
+    'Lexpo/modules/devclient/DevClientPackage;',
+    'Lexpo/modules/devlauncher/DevLauncherController;',
+    'Lexpo/modules/devmenu/DevMenuManager;',
+    'Lexpo/modules/manifests/core/Manifest;',
+    'Lexpo/modules/jsonutils/JSONObjectExtensionsKt;',
+    'Lexpo/modules/updatesinterface/UpdatesInterface;',
+    'Lexpo/modules/webview/DomWebView;',
+  ])('fails on a build that holds %s', (name) => {
+    const build = apkWithClasses('development', ['Lexpo/modules/kotlin/AppContext;', name]);
+    const { status, errors } = check('vpn-filter', filterPermissions, build);
+
+    expect(status).toBe(1);
+    expect(errors).toContain(
+      'contains classes of development modules, which production leaves out:',
+    );
+    expect(errors).toContain(`  class ${name.slice(0, -1)}\n`);
+  });
+
+  it('passes the modules production keeps', () => {
+    const build = apkWithClasses('production', [
+      'Lexpo/modules/kotlin/AppContext;',
+      'Lexpo/modules/devicesettings/Settings;',
+      'Lorg/fnyxgroup/flust/filter/FilterVpnService;',
+    ]);
+
+    expect(check('vpn-filter', filterPermissions, build)).toEqual({ status: 0, errors: '' });
   });
 });

@@ -5,8 +5,9 @@
 # (docs/decisions/0030-production-android-permissions.md), or when a component has an intent filter
 # that opens a URL scheme (docs/decisions/0035-no-url-scheme-in-production.md), or when it declares
 # a VPN service other than the content filter's, or lacks the filter's service or one of the two
-# permissions it needs (docs/decisions/0041-filter-network-permissions.md). Lists the merged
-# permissions.
+# permissions it needs (docs/decisions/0041-filter-network-permissions.md), or when it holds classes
+# of the development modules that production leaves out (docs/decisions/0044-production-modules.md).
+# Lists the merged permissions.
 # An APK is read with aapt2, from $AAPT2, the PATH or $ANDROID_HOME/build-tools. A bundle is read
 # with the bundletool jar at $BUNDLETOOL, run by the Java of $JAVA_HOME or the PATH.
 # Exits with 1 when the build contains something flust must not ship, 2 when it cannot be checked.
@@ -38,6 +39,11 @@ expected_permissions=(
 # permissions it needs and that are there for it alone: INTERNET to reach the resolver,
 # ACCESS_NETWORK_STATE to see strict Private DNS and another VPN.
 filter_service=org.fnyxgroup.flust.filter.FilterVpnService
+
+# The Java packages of the modules that plugins/with-production-modules.ts leaves out of
+# production: the development client, its launcher and menu, the modules only they use, and the
+# DOM components' web view. expo-dev-menu-interface has no Android code.
+development_packages='expo/modules/(devclient|devlauncher|devmenu|manifests|jsonutils|updatesinterface|webview)'
 filter_permissions=(
   android.permission.INTERNET
   android.permission.ACCESS_NETWORK_STATE
@@ -121,11 +127,14 @@ indent() {
 
 # Class names are plain text in dex files. The manifest is binary XML, with UTF-16 or UTF-8
 # strings, or protobuf in a bundle: without the NUL bytes, its names read as text either way.
-classes=$(
+dex_classes() {
   for dex in "${dex_files[@]}"; do unzip -p "$build" "$dex" || exit 2; done |
-    LC_ALL=C matches -a -o -E 'L(com/google/firebase|com/google/android/gms|com/android/installreferrer)/[A-Za-z0-9_/$]*' |
+    LC_ALL=C matches -a -o -E "L($1)/[A-Za-z0-9_/\$]*" |
     sort -u
-) || cannot_check "Cannot read the dex files of $build"
+}
+classes=$(dex_classes 'com/google/firebase|com/google/android/gms|com/android/installreferrer') ||
+  cannot_check "Cannot read the dex files of $build"
+development_classes=$(dex_classes "$development_packages") || cannot_check "Cannot read the dex files of $build"
 entries=$(
   unzip -p "$build" "$manifest" | tr -d '\000' |
     LC_ALL=C matches -a -o -E 'com\.google\.(firebase|android\.gms|android\.c2dm|android\.finsky)[A-Za-z0-9_.]*' |
@@ -208,6 +217,11 @@ if [[ -n $classes || -n $entries ]]; then
   [[ -n $entries ]] && indent '  manifest ' <<<"$entries" >&2
   failed=1
 fi
+if [[ -n $development_classes ]]; then
+  echo "$build contains classes of development modules, which production leaves out:" >&2
+  indent '  class ' <<<"$development_classes" >&2
+  failed=1
+fi
 if [[ ${#blocked_found[@]} -gt 0 ]]; then
   echo "$build requests permissions that production builds must not have:" >&2
   printf '  %s\n' "${blocked_found[@]}" >&2
@@ -240,4 +254,4 @@ if [[ -n $schemes ]]; then
 fi
 [[ $failed -eq 0 ]] || exit 1
 
-echo "$build: no Firebase, Google Play services or Install Referrer code or manifest entries, only expected permissions, no URL scheme, and the content filter's VPN service with its permissions and no other."
+echo "$build: no Firebase, Google Play services or Install Referrer code or manifest entries, no development module, only expected permissions, no URL scheme, and the content filter's VPN service with its permissions and no other."
