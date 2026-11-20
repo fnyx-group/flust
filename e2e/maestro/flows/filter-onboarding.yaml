@@ -16,6 +16,9 @@ appId: org.fnyxgroup.flust
 - tapOn: Continue
 - tapOn: Continue
 - assertVisible: A filter for the whole phone
+# At large font sizes the disclosure starts below the fold.
+- scrollUntilVisible:
+    element: flust uses Android's VPN service.*
 - assertVisible: flust uses Android's VPN service.*
 - assertVisible: Not now
 - tapOn: Accept and turn on
@@ -24,8 +27,9 @@ appId: org.fnyxgroup.flust
       visible: Connection request
     commands:
       - tapOn: OK
-- extendedWaitUntil:
-    visible: The filter is on. You will find it in the settings.
+# The confirmation shows under the disclosure, below the fold at large font sizes.
+- scrollUntilVisible:
+    element: The filter is on. You will find it in the settings.
     timeout: 15000
 - tapOn: Continue
 - assertVisible: Last step

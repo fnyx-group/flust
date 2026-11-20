@@ -63,9 +63,12 @@ class FilterEngine(
     }
   }
 
+  // The service stops a replaced tunnel on the main thread. Closing a TLS connection writes to
+  // the network, which Android refuses there with an unchecked exception: thrown while a new
+  // tunnel is set up, it also took the new one down.
   fun stop() {
     workers.shutdownNow()
-    closeUpstream()
+    Thread(closeUpstream, "flust-filter-close").start()
   }
 
   private fun write(output: OutputStream, packet: ByteArray) {

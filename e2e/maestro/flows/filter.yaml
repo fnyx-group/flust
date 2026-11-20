@@ -10,9 +10,11 @@ appId: org.fnyxgroup.flust
 - assertVisible:
     text: Strict YouTube.*
     enabled: false
+# The screen's title is also "Filter": the switch is the one below the status.
 - tapOn:
     text: Filter
     checked: false
+    below: The filter is off.
 - runFlow: ../common/accept-filter.yaml
 - extendedWaitUntil:
     visible: The filter protects this phone.
@@ -30,7 +32,9 @@ appId: org.fnyxgroup.flust
     checked: true
 - assertNotVisible: Strict YouTube turns off.*
 
-# The links to the system and the licenses.
+# The links to the system and the licenses, below the fold at large font sizes.
+- scrollUntilVisible:
+    element: List licenses
 - tapOn: List licenses
 - assertVisible: Licenses
 - assertVisible: ShadowWhisperer, Unlicense

@@ -6,9 +6,11 @@ appId: org.fnyxgroup.flust
 - runFlow: ../common/onboard.yaml
 - tapOn: Settings
 - tapOn: Filter, Off
+# The screen's title is also "Filter": the switch is the one below the status.
 - tapOn:
     text: Filter
     checked: false
+    below: The filter is off.
 - runFlow: ../common/accept-filter.yaml
 - extendedWaitUntil:
     visible: The filter protects this phone.

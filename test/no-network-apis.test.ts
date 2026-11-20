@@ -285,6 +285,20 @@ describe('the Android filter', () => {
     ]);
   });
 
+  // Logcat ends up in bug reports and is read by any tool with adb access: only FilterLog.kt
+  // writes to it, and only in the development build.
+  it('logs through FilterLog.kt alone', () => {
+    const logging = sourceFiles().filter(
+      (file) =>
+        file.endsWith('.kt') &&
+        !file.includes('/src/test/') &&
+        /\bandroid\.util\.Log\b|\bLog\.(v|d|i|w|e|wtf)\(/.test(
+          withoutComments(fs.readFileSync(path.join(root, file), 'utf8')),
+        ),
+    );
+    expect(logging).toEqual([`${filterSource}FilterLog.kt`]);
+  });
+
   it('is the only native code that may use the network', () => {
     expect(allowedNative('modules/flust-reminders/android/src/main/java/a/A.kt')).toEqual([]);
     expect(allowedNative(`${filterSource}DotClient.kt`)).toEqual([]);

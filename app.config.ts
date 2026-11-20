@@ -73,7 +73,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     screenPrivacy,
   );
   // The Android content filter ships in every variant (docs/decisions/0038-content-filter.md).
-  const withFilter = withAndroidFilter(configured);
+  // Its log of why the tunnel stopped is a development tool.
+  const withFilter = withAndroidFilter(configured, { logs: name === 'development' });
   // The development build keeps flust-dev, which the dev client is opened with.
   return production ? withNoUrlScheme(withFilter) : withFilter;
 };

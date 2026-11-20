@@ -47,17 +47,19 @@ DNS has no equivalent of Strict YouTube for X, TikTok, Reddit or Instagram: none
 
 ### Inactive states
 
-| State                                 | How flust knows                                                                 | What flust says and offers                                                     |
-| ------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Strict Private DNS                    | A network with a Private DNS hostname, read with `ACCESS_NETWORK_STATE`         | Choose Automatic in the network settings, with a button that opens them        |
-| Another VPN                           | The tunnel stopped while another app's VPN network exists                       | Android keeps one VPN at a time. Turn the filter back on, after the disclosure |
-| Consent lost                          | Android's VPN consent no longer holds                                           | Turn the filter back on, after the disclosure                                  |
-| VPN turned off in the system settings | The system revoked the tunnel                                                   | Turn the filter back on, and the always-on VPN link                            |
-| Lists unreadable                      | The compiled lists failed to load                                               | Update flust or reinstall it. No button                                        |
-| Start refused at boot                 | Android refused to start the service after a reboot. Not shown as an error      | The filter resumes when flust opens, and always-on avoids the wait             |
-| Stopped                               | Any other stop, such as an error in the tunnel or the app stopped by the system | Turn the filter back on                                                        |
+| State                                 | How flust knows                                                                 | What flust says and offers                                                                      |
+| ------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Strict Private DNS                    | A network with a Private DNS hostname, read with `ACCESS_NETWORK_STATE`         | Choose Automatic in the network settings, with a button that opens them                         |
+| Another VPN                           | The tunnel stopped while another app's VPN network exists                       | Android keeps one VPN at a time. Turn the filter back on, after the disclosure                  |
+| Consent lost                          | Android's VPN consent no longer holds                                           | Turn the filter back on, after the disclosure                                                   |
+| VPN turned off in the system settings | The system revoked the tunnel. Shown while flust is running                     | Turn the filter back on, and the always-on VPN link. The next launch turns it back on by itself |
+| Lists unreadable                      | The compiled lists failed to load                                               | Update flust or reinstall it. No button                                                         |
+| Start refused at boot                 | Android refused to start the service after a reboot. Not shown as an error      | The filter resumes when flust opens, and always-on avoids the wait                              |
+| Stopped                               | Any other stop, such as an error in the tunnel or the app stopped by the system | Turn the filter back on                                                                         |
 
 flust reads these when a screen comes into focus and when the app returns to the foreground, and every two seconds on the filter screen.
+
+A filter that is on and stopped comes back by itself when flust launches, whatever stopped it, as long as Android's VPN consent holds. That includes a disconnect in Android's VPN settings: turning it off there would otherwise be the easiest way around the 20 minute wait. The state above only shows while flust keeps running after the disconnect.
 
 ### Chrome's secure DNS
 

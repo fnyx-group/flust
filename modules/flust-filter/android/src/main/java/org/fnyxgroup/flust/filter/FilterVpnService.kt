@@ -57,6 +57,7 @@ class FilterVpnService : VpnService() {
   }
 
   override fun onDestroy() {
+    if (tunnel != null) FilterLog.stopped(this, null)
     stopTunnel(null)
     super.onDestroy()
   }
@@ -68,7 +69,7 @@ class FilterVpnService : VpnService() {
     val lists = try {
       Blocklist.read(assets.open(LISTS_ASSET).use { it.readBytes() })
     } catch (unreadable: Exception) {
-      return fail(StopReason.LISTS)
+      return fail(StopReason.LISTS, unreadable)
     }
     var descriptor: ParcelFileDescriptor? = null
     var started: FilterEngine? = null
@@ -102,14 +103,15 @@ class FilterVpnService : VpnService() {
         descriptor?.close()
       } catch (ignored: Exception) {
       }
-      return fail(StopReason.FAILED)
+      return fail(StopReason.FAILED, error)
     }
     FilterStatus.running = true
     FilterStatus.recordStop(this, null)
     return true
   }
 
-  private fun fail(reason: StopReason): Boolean {
+  private fun fail(reason: StopReason, error: Throwable? = null): Boolean {
+    FilterLog.stopped(this, reason, error)
     stopTunnel(null)
     FilterStatus.recordStop(this, reason)
     stopSelf()
@@ -141,7 +143,10 @@ class FilterVpnService : VpnService() {
     tunnel = null
     close(running)
     FilterStatus.running = false
-    if (reason != null) FilterStatus.recordStop(this, reason)
+    if (reason != null) {
+      FilterLog.stopped(this, reason)
+      FilterStatus.recordStop(this, reason)
+    }
   }
 
   private fun close(old: Tunnel) {
