@@ -318,8 +318,8 @@ debuggable=$(identity_value debuggable)
 # "key=value" line each, since an empty value must not shift the other.
 app_version=$(node -e '
   const app = require(process.argv[1]).expo;
-  console.log(`name=${app.version ?? ""}`);
-  console.log(`code=${app.android?.versionCode ?? ""}`);
+  console.log("name=" + (app.version ?? ""));
+  console.log("code=" + (app.android?.versionCode ?? ""));
 ' "$repository/app.json") || cannot_check "Cannot read the version of app.json"
 expected_version_name=$(sed -n 's/^name=//p' <<<"$app_version")
 expected_version_code=$(sed -n 's/^code=//p' <<<"$app_version")

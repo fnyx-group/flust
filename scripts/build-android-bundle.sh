@@ -132,7 +132,7 @@ check_flags=()
 
 version=$(node -e '
   const app = require(process.argv[1]).expo;
-  console.log(`${app.version}-${app.android.versionCode}`);
+  console.log(app.version + "-" + app.android.versionCode);
 ' "$root/app.json")
 signing=debug-signed
 [[ $upload -eq 0 ]] || signing=upload
