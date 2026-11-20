@@ -9,10 +9,10 @@ The checks before each store release, in order. A release that fails one is not 
    - The build contains no Firebase, Google Play services or Install Referrer code, and no manifest entries for them ([0021](../decisions/0021-local-notifications.md)).
    - It requests the expected permissions only, none of those blocked in production ([0030](../decisions/0030-production-android-permissions.md)).
    - It registers no URL scheme, meaning no intent filter with a `VIEW` action and a data scheme ([0035](../decisions/0035-no-url-scheme-in-production.md)).
-   - It is what Google Play accepts: the production package, not debuggable, the target API level Play requires, the version of `app.json`, 64-bit native libraries aligned for 16 KB pages, and the R8 mapping and native symbols in the bundle. It is signed with the upload key ([0046](../decisions/0046-android-bundle-and-upload-key.md)).
+   - It is what Google Play accepts: the production package, not debuggable, the target API level Play requires, the version of `app.json`, the native libraries of the four ABIs, uncompressed and aligned for 16 KB pages in the 64-bit ones, and the R8 mapping and native symbols in the bundle. It is signed with the upload key, whose certificate the check knows by its SHA-256 ([0046](../decisions/0046-android-bundle-and-upload-key.md)).
    - Its universal APK passes the same checks, and the Licenses screen lists what it ships: every dependency has its text and a license allowed by `scripts/licenses/allowed.ts` ([0043](../decisions/0043-third-party-licenses.md)).
 
-   The check lists the permissions the build requests and prints its signer. It exits with 1 and lists what it found when the build has something it must not ship, and with 2 when it cannot read the build. A new permission is either blocked, or added to `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts` and to the script, with a reason.
+   The check lists the permissions the build requests, the 32-bit native libraries not aligned for 16 KB pages, which it does not fail on, and prints the signer. It exits with 1 and lists what it found when the build has something it must not ship, and with 2 when it cannot read the build. A new permission is either blocked, or added to `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts` and to the script, with a reason.
 
 5. Every help number was checked against its official sources within the last 400 days, which the review test enforces. Check them again every year ([0027](../decisions/0027-offline-help-resources.md)).
 6. The Maestro flows pass on the field APK of the release bundle ([Testing](testing.md#end-to-end)), and the [manual checklist](manual-checklist.md) is done for the platforms being released.
@@ -35,16 +35,13 @@ Once, before the first upload:
 
        keytool -list -v -keystore ~/.config/flust/flust-upload.jks -alias flust-upload | grep SHA256:
 
-4. Give the key to Gradle, either for the release session only, which keeps the password out of every file:
+4. Tell the build script where the keystore is, in the shell profile or before each release. It refuses a keystore inside the repository:
 
-       export ORG_GRADLE_PROJECT_flustUploadStoreFile="$HOME/.config/flust/flust-upload.jks"
-       export ORG_GRADLE_PROJECT_flustUploadKeyAlias=flust-upload
-       read -rs ORG_GRADLE_PROJECT_flustUploadStorePassword && export ORG_GRADLE_PROJECT_flustUploadStorePassword
-       export ORG_GRADLE_PROJECT_flustUploadKeyPassword="$ORG_GRADLE_PROJECT_flustUploadStorePassword"
+       export FLUST_UPLOAD_KEYSTORE="$HOME/.config/flust/flust-upload.jks"
 
-   or in `~/.gradle/gradle.properties`, outside the repository and readable by you only (`chmod 600`), with the same four properties: `flustUploadStoreFile`, an absolute path, `flustUploadStorePassword`, `flustUploadKeyAlias` and `flustUploadKeyPassword`. The build fails when only some of them are set.
+   The alias is `flust-upload`, or `$FLUST_UPLOAD_KEY_ALIAS`. The passwords are never written down for the build: `scripts/build-android-bundle.sh --upload` asks for them, and gives them to its one Gradle run through that run's environment, with `--no-daemon`, so that no Gradle process keeps them once the build ends. Never put them in `gradle.properties` or a `flustUpload*` variable: the build signs with the upload key only when the script passes `-PflustRequireUploadKey=true`, and fails then if any of the four `flustUpload*` properties is missing.
 
-In the distrobox, `~` is the container's home folder, the one Gradle reads.
+In the distrobox, `~` is the container's home folder.
 
 ## Android bundle
 
@@ -52,13 +49,19 @@ The bundle comes from the production prebuild and the same release build type as
 
 It needs the [Android build tools](setup.md#android-build-tools), bundletool included.
 
-1. With the upload key set (step 4 above), from a clean working tree on the release commit:
+1. With `FLUST_UPLOAD_KEYSTORE` set (step 4 above), from a clean working tree on the release commit:
 
        scripts/build-android-bundle.sh --upload --field-apk
 
-   It runs the production prebuild, `./gradlew bundleRelease` for every ABI, then `scripts/check-android-release.sh --upload` on the bundle. The check also builds the bundle's universal APK, runs every APK check on it, and checks the Licenses screen against it.
+   It asks for the keystore and key passwords (Enter for the key when it shares the keystore's), then:
+   - refuses a working tree with changes, and any `.env*` file at the root of the repository, which Git ignores and Expo loads into the build: move it out for the release;
+   - runs `pnpm install --frozen-lockfile --offline`, so that `node_modules` is what `pnpm-lock.yaml` says, and refuses a working tree the install changed;
+   - runs the production prebuild, then `./gradlew --no-daemon bundleRelease` for the four ABIs, `armeabi-v7a`, `arm64-v8a`, `x86` and `x86_64`, given on the command line so that a `reactNativeArchitectures` of `~/.gradle/gradle.properties` cannot leave one out;
+   - runs `scripts/check-android-release.sh --upload` on the bundle. The check also builds the bundle's universal APK, runs every APK check on it, and checks the Licenses screen against it.
 
-2. It keeps the build in a new folder of `~/flust-releases`, or of `$FLUST_RELEASE_DIR`, outside the repository, since the next prebuild deletes `android/`. The folder is named after the version, the commit and the time. Keep it for as long as the release can send crash reports:
+   When anything fails, it deletes the upload-signed bundle in `android/` and every `.partial` folder of the release folder, so that the only upload-signed bundle is a complete archive.
+
+2. It keeps the build in a new folder of `~/flust-releases`, or of `$FLUST_RELEASE_DIR`, outside the repository, since the next prebuild deletes `android/`. The folder is named after the version, the commit and the time, and gets that name only once every file is in it. Keep it for as long as the release can send crash reports:
    - `flust-<version>-<versionCode>-upload.aab`, the bundle to upload.
    - `-mapping.txt` and `-native-debug-symbols.zip`, which Play already reads from the bundle. They are kept in case Play asks for them again, and to read a stack trace locally.
    - `-index.android.bundle.map`, the JavaScript source map.
@@ -67,7 +70,7 @@ It needs the [Android build tools](setup.md#android-build-tools), bundletool inc
 
 3. Upload the `.aab` to Google Play Console.
 
-Without `--upload`, the same script builds a bundle signed with the debug key from a working tree with changes, for local checks and field tests. Its files end in `-debug-signed`, the check says it is signed with the debug key, and Google Play refuses it.
+Without `--upload`, the same script builds a bundle signed with the template's debug key, from a working tree with changes too, for local checks and field tests. It neither asks for passwords nor runs the install. Its files end in `-debug-signed`, and the folder name in `-dirty` when the tree had changes. The check fails on any other signer than the debug key, matched by its SHA-256, and Google Play refuses the bundle.
 
 ### Field tests
 
@@ -86,7 +89,7 @@ To check a production build after a dependency change, build a release APK in th
 
        APP_VARIANT=production pnpm expo prebuild --platform android --clean
 
-2. Build the release APK. Gradle downloads its dependencies, and the NDK and CMake versions it needs into the SDK, the first time. Without the upload key, the release build is signed with the debug key: the APK installs on a test device, but is not for the stores.
+2. Build the release APK. Gradle downloads its dependencies, and the NDK and CMake versions it needs into the SDK, the first time. The release build is signed with the template's debug key: the APK installs on a test device, but is not for the stores.
 
        (cd android && ./gradlew assembleRelease)
 

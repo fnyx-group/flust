@@ -65,16 +65,18 @@ Only needed to build Android locally and to run the release check ([Release](rel
 
        "$ANDROID_HOME"/cmdline-tools/latest/bin/sdkmanager --licenses
 
-4. The release check reads a bundle with bundletool, at the version CI pins in `.github/workflows/native.yml`. Download its jar from the [GitHub releases](https://github.com/google/bundletool/releases), check it against the SHA-256 that GitHub shows next to the file on the release page, and export its path:
+4. The release scripts read a bundle with bundletool, the release whose version and SHA-256 are in `scripts/bundletool.sh`, which CI downloads too. From the root of the repository, download its jar and check it against that hash:
 
+       source scripts/bundletool.sh
        mkdir -p ~/tools
-       curl -fL -o ~/tools/bundletool-all-1.18.3.jar https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
-       echo "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29  $HOME/tools/bundletool-all-1.18.3.jar" | sha256sum -c
-       echo 'export BUNDLETOOL="$HOME/tools/bundletool-all-1.18.3.jar"' >> ~/.bashrc
+       jar="$HOME/tools/bundletool-all-$BUNDLETOOL_VERSION.jar"
+       curl -fL -o "$jar" "https://github.com/google/bundletool/releases/download/$BUNDLETOOL_VERSION/bundletool-all-$BUNDLETOOL_VERSION.jar"
+       echo "$BUNDLETOOL_SHA256  $jar" | sha256sum --check --strict
+       echo "export BUNDLETOOL=\"$jar\"" >> ~/.bashrc
 
-   For a newer version, take the SHA-256 from its release page. A mismatch means the file is not the one Google published: delete it.
+   A mismatch means the file is not the one Google published: delete it. `scripts/check-android-release.sh` and `scripts/build-android-bundle.sh` check `$BUNDLETOOL` against the same hash on every run, and stop on another jar. To move to a newer version, change the version and the SHA-256 of `scripts/bundletool.sh` together, the hash taken from the release page, and download it again.
 
-   The check also uses `zipalign` from the newest build-tools of the SDK, and `llvm-readelf` from the newest NDK, which the first Gradle build installs.
+   The check also uses `zipalign` from the newest build-tools of the SDK, which must be 35 or later for its 16 KB check, never one from the `PATH`, and `llvm-readelf` from the newest NDK, which the first Gradle build installs.
 
 ## End-to-end tests
 

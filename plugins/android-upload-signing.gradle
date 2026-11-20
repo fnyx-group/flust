@@ -1,0 +1,28 @@
+// Which key signs the release build, applied to the generated app/build.gradle by
+// plugins/with-android-upload-signing.ts, and run without the Android Gradle plugin by the tests in
+// plugins/jvm-test (docs/decisions/0046-android-bundle-and-upload-key.md).
+//
+// The upload key signs only when flustRequireUploadKey is true, which scripts/build-android-bundle.sh
+// --upload alone passes, with the four properties below in the environment of that run. Every other
+// build is signed with the template's debug key, whatever else is set.
+def uploadKeyProperties = [
+    'flustUploadStoreFile',
+    'flustUploadStorePassword',
+    'flustUploadKeyAlias',
+    'flustUploadKeyPassword',
+]
+
+// Takes a Gradle property lookup, and returns the upload key's properties by name, or null for the
+// debug key.
+ext.flustUploadKeyFrom = { Closure property ->
+    if (!(property('flustRequireUploadKey') ?: 'false').toString().toBoolean()) {
+        return null
+    }
+    def missing = uploadKeyProperties.findAll { !property(it) }
+    if (!missing.isEmpty()) {
+        throw new GradleException(
+            "flustRequireUploadKey is set and the upload key is not: ${missing.join(', ')} missing. " +
+            'Build with scripts/build-android-bundle.sh --upload (docs/development/release.md#android-bundle).')
+    }
+    return uploadKeyProperties.collectEntries { [(it): property(it).toString()] }
+}

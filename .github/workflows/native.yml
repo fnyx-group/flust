@@ -47,7 +47,7 @@ jobs:
             exit 0
           fi
           files=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
-          native=$(grep -E '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.node-version|app\.json|app\.config\.ts|eas\.json|plugins/|modules/|lists/|scripts/lists/|scripts/build-lists\.ts|scripts/check-(android|ios)-release\.sh|scripts/(url-schemes|vpn-services)\.awk|licenses/|scripts/licenses/|scripts/(build|update)-licenses\.(ts|sh)|src/features/settings/third-party-licenses\.json|\.github/workflows/native\.yml)' <<<"$files" || true)
+          native=$(grep -E '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.node-version|app\.json|app\.config\.ts|eas\.json|plugins/|modules/|lists/|scripts/lists/|scripts/build-lists\.ts|scripts/check-(android|ios)-release\.sh|scripts/bundletool\.sh|scripts/(url-schemes|vpn-services)\.awk|licenses/|scripts/licenses/|scripts/(build|update)-licenses\.(ts|sh)|src/features/settings/third-party-licenses\.json|\.github/workflows/native\.yml)' <<<"$files" || true)
           if [[ -n $native ]]; then
             echo "Native paths changed:"
             echo "$native"
@@ -62,7 +62,8 @@ jobs:
     needs: native-paths
     if: needs.native-paths.outputs.changed == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # The four ABIs of the bundle about double the native build of one.
+    timeout-minutes: 75
     permissions:
       contents: read
     env:
@@ -91,21 +92,19 @@ jobs:
 
       - run: pnpm expo prebuild --platform android --clean --no-install
 
-      # The bundle for Google Play comes from the same build type, R8 and JavaScript as the APK. With
-      # no upload key here, both are signed with the debug key. One ABI is enough: the manifest and
-      # the dex files are the same for every ABI, and the native code of the others doubles the
-      # build time. The 16 KB alignment of x86_64 is checked on the local bundle of each release.
+      # The bundle for Google Play comes from the same build type, R8 and JavaScript as the APK.
+      # With no upload key here, both are signed with the template's debug key. Both hold the four
+      # ABIs, as the Play bundle must: the check fails on a bundle without one, and checks the 16 KB
+      # alignment of arm64-v8a and x86_64 alike.
       - name: assembleRelease bundleRelease
         working-directory: android
-        run: ./gradlew assembleRelease bundleRelease -PreactNativeArchitectures=arm64-v8a
+        run: ./gradlew assembleRelease bundleRelease -PreactNativeArchitectures=armeabi-v7a,arm64-v8a,x86,x86_64
 
-      # Dependabot does not update bundletool: change the version and the hash together, the hash
-      # taken from the release page, as for gitleaks in ci.yml.
+      # The version and the hash come from scripts/bundletool.sh, which the release scripts check
+      # the jar against too.
       - name: Install bundletool
-        env:
-          BUNDLETOOL_VERSION: 1.18.3
-          BUNDLETOOL_SHA256: a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29
         run: |
+          source scripts/bundletool.sh
           jar="$RUNNER_TEMP/bundletool-$BUNDLETOOL_VERSION.jar"
           curl -fsSL --retry 3 -o "$jar" \
             "https://github.com/google/bundletool/releases/download/$BUNDLETOOL_VERSION/bundletool-all-$BUNDLETOOL_VERSION.jar"

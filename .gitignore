@@ -58,3 +58,5 @@ modules/*/android/build/
 modules/*/jvm-test/build/
 modules/*/jvm-test/.gradle/
 modules/*/jvm-test/.kotlin/
+plugins/jvm-test/.gradle/
+plugins/jvm-test/build/

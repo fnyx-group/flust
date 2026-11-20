@@ -12,15 +12,18 @@
 # native libraries not aligned for 16 KB pages (docs/decisions/0046-android-bundle-and-upload-key.md).
 # Lists the merged permissions.
 #
-# A bundle is also checked for its 16 KB alignment setting, its R8 mapping and native symbols, and
-# its signer, which is printed. Its universal APK is then built and goes through every APK check,
-# and the notices of the Licenses screen are checked against it. With --upload, a bundle must be
-# signed with the upload key.
+# 32-bit native libraries not aligned for 16 KB pages are listed, without failing.
+#
+# A bundle is also checked for its 16 KB alignment setting, the native libraries of the four ABIs,
+# its R8 mapping and native symbols, and its signer, which is printed: the template's debug key,
+# or with --upload the upload key. Its universal APK is then built and goes through every APK
+# check, and the notices of the Licenses screen are checked against it.
 #
 # An APK is read with aapt2, from $AAPT2, the PATH or $ANDROID_HOME/build-tools, its alignment
-# checked with zipalign, from $ZIPALIGN, the PATH or the build-tools, and its native libraries with
-# llvm-readelf, from $LLVM_READELF or the NDKs of $ANDROID_HOME. A bundle is read with the bundletool
-# jar at $BUNDLETOOL, run by the Java of $JAVA_HOME or the PATH, and its licenses checked by
+# checked with zipalign, from $ZIPALIGN or the newest build-tools of $ANDROID_HOME, 35 or later, and
+# its native libraries with llvm-readelf, from $LLVM_READELF, the PATH or the NDKs of $ANDROID_HOME.
+# A bundle is read with the bundletool jar at $BUNDLETOOL, the release pinned in
+# scripts/bundletool.sh, run by the Java of $JAVA_HOME or the PATH, and its licenses checked by
 # $UPDATE_LICENSES, scripts/update-licenses.sh by default, from the production prebuild in android/.
 # Exits with 1 when the build contains something flust must not ship, 2 when it cannot be checked.
 # Usage: scripts/check-android-release.sh [--upload] <app.apk|app.aab>
@@ -42,6 +45,12 @@ max_version_code=2100000000
 # docs/development/release.md#upload-key describes. Until then, --upload fails on every bundle.
 upload_certificate_sha256=''
 min_upload_key_bits=2048
+# The certificate of android/app/debug.keystore, which the Expo template ships. A bundle checked
+# without --upload must be signed with it, so that a local build signed with anything else stands out.
+debug_certificate_sha256=FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C
+
+# zipalign checks 16 KB alignment with -P 16 from build-tools 35.
+min_build_tools=35
 
 # Must match PRODUCTION_BLOCKED_PERMISSIONS in app.config.ts, which app.config.test.ts checks.
 blocked_permissions=(
@@ -76,8 +85,10 @@ filter_permissions=(
   android.permission.ACCESS_NETWORK_STATE
 )
 
-# What the Android Gradle plugin puts in a bundle for Play: the R8 mapping, and the symbol tables
-# of the native libraries that the release build type asks for.
+# What the Android Gradle plugin puts in a bundle for Play: the native libraries of every ABI that
+# Play delivers to, the R8 mapping, and the symbol tables of the native libraries that the release
+# build type asks for.
+bundle_abis=(armeabi-v7a arm64-v8a x86 x86_64)
 bundle_mapping=BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map
 bundle_symbols=BUNDLE-METADATA/com.android.tools.build.debugsymbols/
 
@@ -128,6 +139,18 @@ find_tool() {
   fi
 }
 
+# The SDK's own zipalign, never one from the PATH, whose version is unknown.
+find_zipalign() {
+  if [[ -n ${ZIPALIGN:-} ]]; then
+    echo "$ZIPALIGN"
+    return
+  fi
+  local candidate version
+  candidate=$(newest_in_sdk 'build-tools/*/zipalign') || return 0
+  version=$(basename "$(dirname "$candidate")")
+  [[ ${version%%.*} =~ ^[0-9]+$ && ${version%%.*} -ge $min_build_tools ]] && echo "$candidate"
+}
+
 find_java() {
   if [[ -n ${JAVA_HOME:-} ]]; then
     echo "$JAVA_HOME/bin/java"
@@ -140,8 +163,9 @@ find_java() {
 if [[ $build == *.apk ]]; then
   aapt2=$(find_tool AAPT2 aapt2 'build-tools/*/aapt2' || true)
   [[ -n $aapt2 && -x $aapt2 ]] || cannot_check "aapt2 not found: set AAPT2, or ANDROID_HOME to the Android SDK."
-  zipalign=$(find_tool ZIPALIGN zipalign 'build-tools/*/zipalign' || true)
-  [[ -n $zipalign && -x $zipalign ]] || cannot_check "zipalign not found: set ZIPALIGN, or ANDROID_HOME to the Android SDK."
+  zipalign=$(find_zipalign || true)
+  [[ -n $zipalign && -x $zipalign ]] ||
+    cannot_check "zipalign of build-tools $min_build_tools or later not found: install them in the SDK of ANDROID_HOME, or set ZIPALIGN."
   readelf=$(find_tool LLVM_READELF llvm-readelf 'ndk/*/toolchains/llvm/prebuilt/*/bin/llvm-readelf' || true)
   [[ -n $readelf && -x $readelf ]] || cannot_check "llvm-readelf not found: set LLVM_READELF, or ANDROID_HOME to an Android SDK with an NDK."
 else
@@ -149,7 +173,10 @@ else
   [[ -n $java && -x $java ]] || cannot_check "java not found: set JAVA_HOME."
   keytool=$(dirname "$java")/keytool
   [[ -x $keytool ]] || cannot_check "keytool not found next to $java."
-  [[ -n ${BUNDLETOOL:-} && -f $BUNDLETOOL ]] || cannot_check "bundletool not found: set BUNDLETOOL to the bundletool jar."
+  # CI runs shellcheck on each script alone, which does not follow it.
+  # shellcheck disable=SC1091
+  source "$script_dir/bundletool.sh"
+  problem=$(bundletool_problem) || cannot_check "$problem"
   update_licenses=${UPDATE_LICENSES:-$script_dir/update-licenses.sh}
   [[ -x $update_licenses ]] || cannot_check "Cannot run $update_licenses"
 fi
@@ -287,16 +314,15 @@ target_sdk=$(identity_value targetSdk)
 debuggable=$(identity_value debuggable)
 [[ -n $package ]] || cannot_check "No package read from $build: check the output of the tool that reads it."
 
-# The version is set by hand in app.json for each release (docs/development/release.md).
+# The version is set by hand in app.json for each release (docs/development/release.md). One
+# "key=value" line each, since an empty value must not shift the other.
 app_version=$(node -e '
   const app = require(process.argv[1]).expo;
-  console.log(app.version ?? "");
-  console.log(app.android?.versionCode ?? "");
+  console.log(`name=${app.version ?? ""}`);
+  console.log(`code=${app.android?.versionCode ?? ""}`);
 ' "$repository/app.json") || cannot_check "Cannot read the version of app.json"
-{
-  read -r expected_version_name
-  read -r expected_version_code
-} <<<"$app_version"
+expected_version_name=$(sed -n 's/^name=//p' <<<"$app_version")
+expected_version_code=$(sed -n 's/^code=//p' <<<"$app_version")
 
 identity_problems=()
 [[ $package == "$production_package" ]] ||
@@ -321,14 +347,15 @@ work=$(mktemp -d "${TMPDIR:-/tmp}/flust-release-check.XXXXXX")
 trap 'rm -rf "$work"' EXIT
 
 # A LOAD segment aligned on less than 16 KB cannot be mapped on a device with 16 KB pages. These
-# devices are 64-bit only, and Google Play checks the 64-bit libraries: the 32-bit ones, built for
-# 4 KB pages like the prebuilt React Native and NDK libraries, are never loaded there. zipalign
-# checks that the uncompressed libraries start on a 16 KB boundary in the APK, which lets the
-# system map them in place.
+# devices are 64-bit only, and Google Play checks the arm64-v8a and x86_64 libraries: the 32-bit
+# ones, built for 4 KB pages like the prebuilt React Native and NDK libraries, are never loaded
+# there, so they are listed without failing. zipalign checks that the uncompressed libraries start
+# on a 16 KB boundary in the APK, which lets the system map them in place.
 unaligned_libraries=()
+unaligned_32bit_libraries=()
 zip_misaligned=''
 if [[ $build == *.apk ]]; then
-  mapfile -t libraries < <(unzip -Z1 "$build" | grep -E '^lib/(arm64-v8a|x86_64)/[^/]+\.so$' || true)
+  mapfile -t libraries < <(unzip -Z1 "$build" | grep -E '^lib/(armeabi-v7a|arm64-v8a|x86|x86_64)/[^/]+\.so$' || true)
   for library in "${libraries[@]}"; do
     unzip -p "$build" "$library" >"$work/library.so" || cannot_check "Cannot read $library in $build"
     alignments=$("$readelf" --program-headers --wide "$work/library.so" | awk '$1 == "LOAD" { print $NF }') ||
@@ -336,45 +363,73 @@ if [[ $build == *.apk ]]; then
     [[ -n $alignments ]] || cannot_check "No LOAD segment read from $library in $build"
     while IFS= read -r alignment; do
       if [[ ! $alignment =~ ^0x[0-9a-fA-F]+$ ]] || ((alignment < 0x4000)); then
-        unaligned_libraries+=("$library (LOAD aligned on $alignment)")
+        case $library in
+          lib/arm64-v8a/* | lib/x86_64/*) unaligned_libraries+=("$library (LOAD aligned on $alignment)") ;;
+          *) unaligned_32bit_libraries+=("$library (LOAD aligned on $alignment)") ;;
+        esac
         break
       fi
     done <<<"$alignments"
   done
   if ! "$zipalign" -c -P 16 4 "$build" >/dev/null 2>&1; then
-    # Run again to name the entries: it exits with 1 again, which is expected here.
+    # Run again to name the entries: it exits with 1 again, which is expected here. A zipalign that
+    # names none failed on something else, such as an option it does not know.
     zip_misaligned=$({ "$zipalign" -c -P 16 -v 4 "$build" 2>&1 || true; } | matches -E 'BAD|FAILED')
-    [[ -n $zip_misaligned ]] || zip_misaligned="zipalign failed on $build without naming an entry"
+    [[ -n $zip_misaligned ]] || cannot_check "$zipalign failed on $build without naming a misaligned entry."
   fi
 fi
+if [[ ${#unaligned_32bit_libraries[@]} -gt 0 ]]; then
+  echo "32-bit native libraries not aligned for 16 KB pages, which devices with 16 KB pages never load (not a failure):"
+  printf '  %s\n' "${unaligned_32bit_libraries[@]}"
+fi
 
-# A bundle declares the alignment the APKs Play generates from it get, its mapping and symbols are
-# what Play uses to read crash reports, and its signer tells an upload build from a local one.
+# A bundle declares the alignment the APKs Play generates from it get, holds the native libraries
+# of each ABI Play delivers to, carries the mapping and symbols Play reads crash reports with, and
+# its signer tells an upload build from a local one.
 bundle_problems=()
 if [[ $build == *.aab ]]; then
   config=$(bundletool dump config --bundle="$build") || cannot_check "Cannot read the configuration of $build"
-  grep -q PAGE_ALIGNMENT_16K <<<"$config" ||
-    bundle_problems+=("its configuration does not align native libraries on 16 KB pages (PAGE_ALIGNMENT_16K)")
-  metadata=$(unzip -Z1 "$build" | matches '^BUNDLE-METADATA/') || cannot_check "Cannot list the files of $build"
-  grep -q -x -F "$bundle_mapping" <<<"$metadata" || bundle_problems+=("it has no R8 mapping ($bundle_mapping)")
-  grep -q -F "$bundle_symbols" <<<"$metadata" || bundle_problems+=("it has no native debug symbols ($bundle_symbols)")
+  # The setting itself, not the name anywhere in the configuration: compressed libraries are
+  # extracted on install and the alignment then does not apply.
+  page_alignment=$(node -e '
+    const libraries = JSON.parse(require("fs").readFileSync(0, "utf8")).optimizations?.uncompressNativeLibraries;
+    console.log(libraries?.enabled === true ? (libraries.alignment ?? "") : "compressed");
+  ' <<<"$config") || cannot_check "Cannot parse the configuration of $build"
+  [[ $page_alignment == PAGE_ALIGNMENT_16K ]] ||
+    bundle_problems+=("its configuration does not store native libraries uncompressed and aligned on 16 KB pages (uncompressNativeLibraries: ${page_alignment:-no alignment}, not PAGE_ALIGNMENT_16K)")
+
+  files=$(unzip -Z1 "$build") || cannot_check "Cannot list the files of $build"
+  for abi in "${bundle_abis[@]}"; do
+    grep -q -E "^base/lib/$abi/[^/]+\.so$" <<<"$files" || bundle_problems+=("it has no native libraries for $abi (base/lib/$abi/)")
+  done
+  grep -q -x -F "$bundle_mapping" <<<"$files" || bundle_problems+=("it has no R8 mapping ($bundle_mapping)")
+  grep -q -F "$bundle_symbols" <<<"$files" || bundle_problems+=("it has no native debug symbols ($bundle_symbols)")
 
   certificate=$("$keytool" -J-Duser.language=en -printcert -jarfile "$build") ||
     cannot_check "Cannot read the signer of $build"
+  signers=$(matches -c '^Signer #' <<<"$certificate")
   signer_sha256=$(sed -nE 's/^[[:space:]]*SHA256: ([0-9A-Fa-f:]+)$/\1/p' <<<"$certificate" | head -n 1)
   signer_owner=$(sed -nE 's/^Owner: (.*)$/\1/p' <<<"$certificate" | head -n 1)
   signer_key_bits=$(sed -nE 's/^Subject Public Key Algorithm: ([0-9]+)-bit RSA key.*$/\1/p' <<<"$certificate" | head -n 1)
+  signed_with_debug_key=0
+  [[ -n $signer_sha256 && $(normalized "$signer_sha256") == $(normalized "$debug_certificate_sha256") ]] &&
+    signed_with_debug_key=1
   if [[ -z $signer_sha256 ]]; then
     bundle_problems+=("it is not signed")
-  elif [[ $signer_owner == *"CN=Android Debug"* ]]; then
-    echo "$build is signed with the debug key ($signer_sha256): for local checks and field tests only, Google Play refuses it."
+  elif [[ $signers -gt 1 ]]; then
+    bundle_problems+=("it has $signers signers, not one")
+  elif [[ $signed_with_debug_key -eq 1 ]]; then
+    echo "$build is signed with the template's debug key ($signer_sha256): for local checks and field tests only, Google Play refuses it."
   else
     echo "$build is signed by $signer_owner ($signer_sha256)."
   fi
-  # The debug key is refused before the fingerprint is compared, so that it is named as such even
-  # while the upload certificate is a placeholder.
-  if [[ $upload -eq 1 && -n $signer_sha256 ]]; then
-    if [[ $signer_owner == *"CN=Android Debug"* ]]; then
+  if [[ -n $signer_sha256 && $signers -le 1 ]]; then
+    if [[ $upload -eq 0 ]]; then
+      [[ $signed_with_debug_key -eq 1 ]] ||
+        bundle_problems+=("it is not signed with the template's debug key ($debug_certificate_sha256) but with $signer_sha256: check an upload build with --upload")
+    # The debug key is refused before the fingerprint is compared, so that it is named as such even
+    # while the upload certificate is a placeholder.
+    elif [[ $signed_with_debug_key -eq 1 ]]; then
       bundle_problems+=("it is signed with the debug key, not the upload key")
     elif [[ -z $upload_certificate_sha256 ]]; then
       bundle_problems+=("the upload certificate is still a placeholder in scripts/check-android-release.sh: set it as docs/development/release.md#upload-key describes")
@@ -493,5 +548,5 @@ fi
 
 echo "$build: no Firebase, Google Play services or Install Referrer code or manifest entries, no development module, only expected permissions, no URL scheme, the content filter's VPN service with its permissions and no other, the production package and the version of app.json, target API level $target_sdk, and 64-bit native libraries aligned for 16 KB pages."
 if [[ $build == *.aab ]]; then
-  echo "$build: its universal APK passes the same checks, the Licenses screen matches it, and it carries its R8 mapping and native symbols."
+  echo "$build: its universal APK passes the same checks, the Licenses screen matches it, and it carries the native libraries of ${bundle_abis[*]}, its R8 mapping and native symbols."
 fi

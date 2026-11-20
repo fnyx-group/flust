@@ -1,8 +1,7 @@
-import {
-  addReleaseSigning,
-  REQUIRE_UPLOAD_KEY_PROPERTY,
-  UPLOAD_KEY_PROPERTIES,
-} from './with-android-upload-signing';
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { addReleaseSigning } from './with-android-upload-signing';
 
 const BUILD_GRADLE = [
   'android {',
@@ -14,6 +13,21 @@ const BUILD_GRADLE = [
   '}',
   '',
 ].join('\n');
+
+const signingScript = fs.readFileSync(
+  path.join(__dirname, 'android-upload-signing.gradle'),
+  'utf8',
+);
+const buildScript = fs.readFileSync(
+  path.join(__dirname, '..', 'scripts', 'build-android-bundle.sh'),
+  'utf8',
+);
+
+// The upload key properties, as the Gradle script lists them.
+function uploadKeyProperties(): string[] {
+  const list = /def uploadKeyProperties = \[([^\]]*)\]/.exec(signingScript)?.[1] ?? '';
+  return [...list.matchAll(/'([A-Za-z]+)'/g)].map((match) => match[1] ?? '');
+}
 
 describe('release signing', () => {
   it('comes after the android block, so that it overrides the debug signing', () => {
@@ -31,14 +45,29 @@ describe('release signing', () => {
     expect(addReleaseSigning(once)).toBe(once);
   });
 
-  it('reads every upload key property from Gradle, not from a file of the repository', () => {
+  it('leaves the choice of key to the Gradle script that plugins/jvm-test runs', () => {
     const gradle = addReleaseSigning(BUILD_GRADLE);
 
-    for (const name of UPLOAD_KEY_PROPERTIES) {
-      expect(gradle).toContain(`findProperty('${name}')`);
+    expect(gradle).toContain(
+      "apply from: new File(rootDir, '../plugins/android-upload-signing.gradle')",
+    );
+    expect(gradle).toContain('def flustUploadKey = flustUploadKeyFrom { findProperty(it) }');
+  });
+
+  it('signs with each property of the upload key', () => {
+    const gradle = addReleaseSigning(BUILD_GRADLE);
+
+    expect(uploadKeyProperties()).toHaveLength(4);
+    for (const name of uploadKeyProperties()) {
+      expect(gradle).toContain(`flustUploadKey.${name}`);
     }
-    expect(gradle).toContain(`findProperty('${REQUIRE_UPLOAD_KEY_PROPERTY}')`);
-    expect(gradle).not.toMatch(/\.properties['"]/);
+  });
+
+  it('gets every property of the upload key from the --upload build, through its environment', () => {
+    for (const name of uploadKeyProperties()) {
+      expect(buildScript).toContain(`ORG_GRADLE_PROJECT_${name}=`);
+    }
+    expect(buildScript).toContain('-PflustRequireUploadKey=true');
   });
 
   it('keeps the symbol tables of the native libraries for Play', () => {
