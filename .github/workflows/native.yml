@@ -47,7 +47,7 @@ jobs:
             exit 0
           fi
           files=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
-          native=$(grep -E '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.node-version|app\.json|app\.config\.ts|eas\.json|plugins/|modules/|lists/|scripts/lists/|scripts/build-lists\.ts|scripts/check-(android|ios)-release\.sh|scripts/(url-schemes|vpn-services)\.awk|\.github/workflows/native\.yml)' <<<"$files" || true)
+          native=$(grep -E '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.node-version|app\.json|app\.config\.ts|eas\.json|plugins/|modules/|lists/|scripts/lists/|scripts/build-lists\.ts|scripts/check-(android|ios)-release\.sh|scripts/(url-schemes|vpn-services)\.awk|licenses/|scripts/licenses/|scripts/(build|update)-licenses\.(ts|sh)|src/features/settings/third-party-licenses\.json|\.github/workflows/native\.yml)' <<<"$files" || true)
           if [[ -n $native ]]; then
             echo "Native paths changed:"
             echo "$native"
@@ -98,6 +98,10 @@ jobs:
         run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
 
       - run: scripts/check-android-release.sh android/app/build/outputs/apk/release/app-release.apk
+
+      # The notices of the Licenses screen must match what this build ships, every dependency
+      # under an allowed license with its text (docs/decisions/0043-third-party-licenses.md).
+      - run: scripts/update-licenses.sh --check
 
   ios-build:
     name: ios-build

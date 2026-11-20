@@ -66,6 +66,9 @@
 - [0040 Filter delay](decisions/0040-filter-delay.md): 20 minutes to weaken the filter, then a confirmation that expires after 10, on the elapsed clock and the boot count.
 - [0041 Network permissions of the filter in production](decisions/0041-filter-network-permissions.md): `INTERNET` and `ACCESS_NETWORK_STATE` for the filter only, a release check that requires the filter.
 - [0042 Filter onboarding step and disclosure](decisions/0042-filter-onboarding-and-disclosure.md): an Android-only step before the start point, Google Play's disclosure before every VPN consent.
+- [0043 Third-party licenses](decisions/0043-third-party-licenses.md): notices generated from what the release build ships, committed, with an allowlist checked in CI.
+- [0044 Development modules out of production](decisions/0044-production-modules.md): the development client and the DOM web view are not linked into production builds.
+- [0045 Resolver chain of the Android filter](decisions/0045-resolver-chain.md): Quad9, then Cloudflare, then DNS4EU over DNS over TLS, probed in the background, never plain DNS.
 
 ## Development
 

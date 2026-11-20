@@ -10,17 +10,19 @@ object TunnelRoutes {
   const val INTERFACE_V4 = "10.111.222.1"
   const val INTERFACE_V6 = "fd66:6c75:7374::1"
 
-  // Two pairs of fake DNS addresses, used in turn each time the tunnel is set up again. Android
-  // empties its DNS cache when a network's DNS servers change, so a stronger setting applies at
-  // once instead of after the cached answers expire. Every address is answered the same way.
+  // Two pairs of fake DNS addresses, used in turn each time the tunnel is set up again. When a
+  // network's DNS servers change, Android tells apps to empty their Java address cache. Its
+  // resolver keeps its own cache: the new tunnel updates the same network, and the resolver empties
+  // a network's cache only when told to or when the network goes away. Every address is answered
+  // the same way.
   val DNS = listOf(
     DnsAddresses("10.111.222.2", "fd66:6c75:7374::2"),
     DnsAddresses("10.111.222.3", "fd66:6c75:7374::3"),
   )
 
   // The addresses of the providers in Chromium's list of DNS over HTTPS providers
-  // (net/dns/public/doh_provider_entry.cc, checked 2026-11-19), Quad9's included: flust's own
-  // sockets to it are protected and leave the tunnel.
+  // (net/dns/public/doh_provider_entry.cc, checked 2026-11-19), which holds the filter's own resolvers
+  // (Resolvers.CHAIN): flust's own sockets to them are protected and leave the tunnel.
   val RESOLVERS = listOf(
     "1.0.0.1", "1.0.0.2", "1.0.0.3", "1.1.1.1", "1.1.1.2", "1.1.1.3",
     "8.8.4.4", "8.8.8.8",

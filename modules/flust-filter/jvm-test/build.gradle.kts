@@ -24,16 +24,18 @@ kotlin {
         "**/DotClient.kt",
         "**/FilterConfig.kt",
         "**/FilterEngine.kt",
+        "**/FilterLists.kt",
         "**/FilterPolicy.kt",
         "**/NetworkChecks.kt",
         "**/PacketHandler.kt",
         "**/Packets.kt",
         "**/QueryProcessor.kt",
-        "**/Quad9.kt",
+        "**/Resolvers.kt",
         "**/ResolverTransport.kt",
         "**/SafeSearch.kt",
         "**/TcpDnsResponder.kt",
         "**/TunnelRoutes.kt",
+        "**/TunnelStarts.kt",
       )
     }
     test {

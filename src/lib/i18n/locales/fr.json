@@ -908,7 +908,7 @@
     "youtubeStrict": "YouTube strict",
     "youtubeStrictHint": "Masque plus de vidéos que le mode restreint de base.",
     "blocks": "Bloque les sites pour adultes, le porno IA et les contournements, et impose SafeSearch sur Google, Bing, DuckDuckGo et YouTube.",
-    "quad9": "Les noms des sites autorisés partent chiffrés vers Quad9, qui bloque aussi les logiciels malveillants.",
+    "resolvers": "Les noms des sites autorisés partent chiffrés vers Quad9, ou vers Cloudflare puis DNS4EU s'il ne répond pas. Les trois bloquent aussi les logiciels malveillants.",
     "chrome": "Plus rien ne charge dans Chrome ? Dans ses paramètres, Confidentialité et sécurité, Utiliser le DNS sécurisé, choisis Automatique.",
     "alwaysOn": "VPN permanent",
     "alwaysOnHint": "Active VPN permanent pour flust, le filtre repart alors tout seul.",
@@ -959,19 +959,29 @@
     },
     "disclosure": {
       "title": "Avant d'activer le filtre",
-      "text": "flust utilise le service VPN d'Android pour filtrer les noms des sites que tes apps ouvrent, sur tout le téléphone. Les noms bloqués ne quittent pas le téléphone. Les noms des sites autorisés partent chiffrés vers Quad9, qui répond à la place de ton opérateur. Le reste de ton trafic ne passe pas par flust, sauf les connexions directes à des serveurs DNS publics connus, qui sont bloquées. flust n'enregistre rien.",
+      "text": "flust utilise le service VPN d'Android pour filtrer les noms des sites que tes apps ouvrent, sur tout le téléphone. Les noms bloqués ne quittent jamais le téléphone. Les noms des sites autorisés partent chiffrés vers Quad9, ou vers Cloudflare puis DNS4EU quand Quad9 ne répond pas. Cloudflare efface les adresses IP anonymisées sous 25 heures. DNS4EU peut garder certaines données de requêtes jusqu'à six mois pour la recherche sur les menaces, sans les vendre ni s'en servir pour du profilage ou de la publicité. Le reste de ton trafic ne passe pas par flust, sauf les connexions directes à des serveurs DNS publics connus, qui sont bloquées.",
       "accept": "Accepter et activer",
       "later": "Plus tard"
     },
     "refused": "Sans ton accord dans Android, le filtre ne peut pas démarrer.",
     "failed": "Le filtre n'a pas pu démarrer. Réessaie.",
     "measure": "Mesurer les listes",
-    "measured": "{{entries}} domaines, {{kilobytes}} Ko, chargés en {{load}} ms, {{decide}} µs par nom."
+    "measured": "{{entries}} domaines, {{kilobytes}} Ko, chargés en {{load}} ms, {{decide}} µs par nom.",
+    "measuredStart": "Le dernier démarrage a pris {{total}} ms en tout, listes {{lists}} ms, certificats {{trust}} ms, tunnel {{establish}} ms.",
+    "measuredStartCached": "Le dernier démarrage a pris {{total}} ms en tout, listes déjà chargées ({{lists}} ms), certificats {{trust}} ms, tunnel {{establish}} ms.",
+    "measuredNoStart": "Le tunnel n'a pas démarré depuis l'ouverture de flust.",
+    "measuredResolver": "Les requêtes partent vers {{name}}.",
+    "measuredNoResolver": "Aucun résolveur en service."
   },
   "licenses": {
     "title": "Licences",
     "back": "Retour",
-    "intro": "Les listes du filtre viennent de ces projets, sous leurs licences.",
-    "source": "{{name}}, {{license}}"
+    "intro": "flust repose sur ces projets, sous leurs licences, des sources des listes du filtre aux bibliothèques de l'app.",
+    "lists": "Listes du filtre",
+    "libraries": "Bibliothèques de l'app",
+    "details": "{{version}}, {{license}}",
+    "showText": "Affiche le texte de la licence.",
+    "hideText": "Masque le texte de la licence.",
+    "rowLabel": "{{name}}, {{details}}"
   }
 }

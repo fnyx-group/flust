@@ -120,7 +120,7 @@ export function FilterScreen() {
         </RowGroup>
         <View style={styles.notes}>
           <Text style={styles.note}>{t('filter.blocks')}</Text>
-          <Text style={styles.note}>{t('filter.quad9')}</Text>
+          <Text style={styles.note}>{t('filter.resolvers')}</Text>
           <Text style={styles.note}>{t('filter.chrome')}</Text>
         </View>
         <RowGroup>

@@ -39,6 +39,8 @@ class FlustFilterModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("FlustFilter")
 
+    // Called on the JavaScript thread, every two seconds while the filter screen is open: the
+    // settings, the stop reason and the availability come from memory.
     Function("getStatus") {
       val config = FilterConfigStore(context).load()
       val running = FilterStatus.running
@@ -92,8 +94,8 @@ class FlustFilterModule : Module() {
       whenRunning(SystemClock.elapsedRealtime() + RESUME_WAIT_MILLIS) { promise.resolve(true) }
     }
 
-    // The size of the compiled lists, the time to load them and the mean time to match a name,
-    // shown in the development build only.
+    // The size of the compiled lists, the time to load them, the mean time to match a name and
+    // the phases of the last tunnel start in this process, shown in the development build only.
     AsyncFunction("measure") {
       val started = SystemClock.elapsedRealtimeNanos()
       val bytes = context.assets.open(FilterVpnService.LISTS_ASSET).use { it.readBytes() }
@@ -109,6 +111,16 @@ class FlustFilterModule : Module() {
         "bytes" to bytes.size,
         "loadMillis" to (loaded - started) / 1_000_000.0,
         "decideMicros" to (matched - matchStarted) / 1_000.0 / MEASURED_NAMES,
+        "resolver" to FilterStatus.activeResolver(),
+        "start" to FilterStatus.lastStart?.let { start ->
+          mapOf(
+            "listsMillis" to start.listsMillis,
+            "listsCached" to start.listsCached,
+            "trustMillis" to start.trustMillis,
+            "establishMillis" to start.establishMillis,
+            "totalMillis" to start.totalMillis,
+          )
+        },
       )
     }
 
@@ -124,7 +136,12 @@ class FlustFilterModule : Module() {
     main.postDelayed({ whenRunning(deadline, done) }, RESUME_POLL_MILLIS)
   }
 
-  private fun available(): Boolean =
+  // The manifest does not change while the app runs.
+  private var declared: Boolean? = null
+
+  private fun available(): Boolean = declared ?: serviceDeclared().also { declared = it }
+
+  private fun serviceDeclared(): Boolean =
     try {
       context.packageManager.getServiceInfo(ComponentName(context, FilterVpnService::class.java), 0)
       true

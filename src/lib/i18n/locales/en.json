@@ -908,7 +908,7 @@
     "youtubeStrict": "Strict YouTube",
     "youtubeStrictHint": "Hides more videos than the basic restricted mode.",
     "blocks": "Blocks adult sites, AI porn and bypasses, and enforces SafeSearch on Google, Bing, DuckDuckGo and YouTube.",
-    "quad9": "The names of allowed sites go encrypted to Quad9, which also blocks malware.",
+    "resolvers": "The names of allowed sites go encrypted to Quad9, or to Cloudflare then DNS4EU when it does not answer. All three also block malware.",
     "chrome": "Nothing loads in Chrome? In its settings, Privacy and security, Use secure DNS, choose Automatic.",
     "alwaysOn": "Always-on VPN",
     "alwaysOnHint": "Turn on Always-on VPN for flust, so the filter restarts by itself.",
@@ -959,19 +959,29 @@
     },
     "disclosure": {
       "title": "Before turning the filter on",
-      "text": "flust uses Android's VPN service to filter the names of the sites your apps open, across the whole phone. Blocked names never leave the phone. The names of allowed sites go encrypted to Quad9, which answers instead of your carrier. The rest of your traffic does not go through flust, except direct connections to known public DNS servers, which are blocked. flust records nothing.",
+      "text": "flust uses Android's VPN service to filter the names of the sites your apps open, across the whole phone. Blocked names never leave the phone. The names of allowed sites go encrypted to Quad9, or to Cloudflare then DNS4EU when Quad9 does not answer. Cloudflare deletes anonymized IP addresses within 25 hours. DNS4EU can keep some query data for up to six months for threat research, without selling it or using it for profiling or advertising. The rest of your traffic does not go through flust, except direct connections to known public DNS servers, which are blocked.",
       "accept": "Accept and turn on",
       "later": "Not now"
     },
     "refused": "Without your consent in Android, the filter cannot start.",
     "failed": "The filter could not start. Try again.",
     "measure": "Measure the lists",
-    "measured": "{{entries}} domains, {{kilobytes}} KB, loaded in {{load}} ms, {{decide}} µs per name."
+    "measured": "{{entries}} domains, {{kilobytes}} KB, loaded in {{load}} ms, {{decide}} µs per name.",
+    "measuredStart": "The last start took {{total}} ms in all, lists {{lists}} ms, certificates {{trust}} ms, tunnel {{establish}} ms.",
+    "measuredStartCached": "The last start took {{total}} ms in all, lists already loaded ({{lists}} ms), certificates {{trust}} ms, tunnel {{establish}} ms.",
+    "measuredNoStart": "The tunnel has not started since flust opened.",
+    "measuredResolver": "Lookups go to {{name}}.",
+    "measuredNoResolver": "No resolver in use."
   },
   "licenses": {
     "title": "Licenses",
     "back": "Back",
-    "intro": "The filter's lists come from these projects, under their licenses.",
-    "source": "{{name}}, {{license}}"
+    "intro": "flust is built on these projects, under their licenses, from the sources of the filter's lists to the libraries of the app.",
+    "lists": "Filter lists",
+    "libraries": "App libraries",
+    "details": "{{version}}, {{license}}",
+    "showText": "Shows the license text.",
+    "hideText": "Hides the license text.",
+    "rowLabel": "{{name}}, {{details}}"
   }
 }

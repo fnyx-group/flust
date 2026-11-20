@@ -1,0 +1,183 @@
+{
+  "components": {
+    "boost": {
+      "name": "Boost",
+      "license": "BSL-1.0",
+      "text": "boost.txt",
+      "version": {
+        "file": "node_modules/react-native/gradle/libs.versions.toml",
+        "pattern": "^boost\\s*=\\s*\"([^\"]+)\""
+      }
+    },
+    "double-conversion": {
+      "name": "double-conversion",
+      "license": "BSD-3-Clause",
+      "text": "double-conversion.txt",
+      "version": {
+        "file": "node_modules/react-native/gradle/libs.versions.toml",
+        "pattern": "^doubleconversion\\s*=\\s*\"([^\"]+)\""
+      }
+    },
+    "fast-float": {
+      "name": "fast_float",
+      "license": "Apache-2.0 OR BSL-1.0 OR MIT",
+      "text": "fast-float.txt",
+      "version": {
+        "file": "node_modules/react-native/gradle/libs.versions.toml",
+        "pattern": "^fastFloat\\s*=\\s*\"([^\"]+)\""
+      }
+    },
+    "fmt": {
+      "name": "{fmt}",
+      "license": "MIT",
+      "text": "fmt.txt",
+      "version": {
+        "file": "node_modules/react-native/gradle/libs.versions.toml",
+        "pattern": "^fmt\\s*=\\s*\"([^\"]+)\""
+      }
+    },
+    "folly": {
+      "name": "Folly",
+      "license": "Apache-2.0",
+      "text": "folly.txt",
+      "version": {
+        "file": "node_modules/react-native/gradle/libs.versions.toml",
+        "pattern": "^folly\\s*=\\s*\"([^\"]+)\""
+      }
+    },
+    "giflib": {
+      "name": "GIFLIB",
+      "license": "MIT",
+      "text": "giflib.txt",
+      "version": { "of": "maven:com.facebook.fresco:animated-gif" }
+    },
+    "glog": {
+      "name": "glog",
+      "license": "BSD-3-Clause",
+      "text": "glog.txt",
+      "version": {
+        "file": "node_modules/react-native/gradle/libs.versions.toml",
+        "pattern": "^glog\\s*=\\s*\"([^\"]+)\""
+      }
+    },
+    "libcxx": {
+      "name": "libc++",
+      "license": "Apache-2.0 WITH LLVM-exception",
+      "text": "libcxx.txt",
+      "version": {
+        "file": "node_modules/react-native/gradle/libs.versions.toml",
+        "pattern": "^ndkVersion\\s*=\\s*\"([^\"]+)\""
+      }
+    },
+    "libjpeg-turbo": {
+      "name": "libjpeg-turbo",
+      "license": "IJG AND BSD-3-Clause AND Zlib",
+      "text": "libjpeg-turbo.txt",
+      "version": { "of": "maven:com.facebook.fresco:nativeimagetranscoder" }
+    },
+    "libwebp": {
+      "name": "libwebp",
+      "license": "BSD-3-Clause",
+      "text": "libwebp.txt",
+      "version": { "of": "maven:com.facebook.fresco:webpsupport" }
+    },
+    "openssl": {
+      "name": "OpenSSL",
+      "license": "Apache-2.0",
+      "text": "Apache-2.0.txt",
+      "version": {
+        "file": "node_modules/expo-sqlite/android/build.gradle",
+        "pattern": "io\\.github\\.ronickg:openssl:([0-9.]+)"
+      }
+    },
+    "public-suffix-list": {
+      "name": "Public Suffix List",
+      "license": "MPL-2.0",
+      "text": "public-suffix-list.txt",
+      "version": { "of": "maven:com.squareup.okhttp3:okhttp" }
+    },
+    "sqlcipher": {
+      "name": "SQLCipher",
+      "license": "BSD-3-Clause",
+      "text": "sqlcipher.txt",
+      "version": {
+        "file": "node_modules/expo-sqlite/vendor/sqlcipher/sqlite3.c",
+        "pattern": "^#define CIPHER_VERSION_NUMBER ([0-9.]+)"
+      }
+    },
+    "sqlite": {
+      "name": "SQLite",
+      "license": "blessing",
+      "text": "sqlite.txt",
+      "version": {
+        "file": "node_modules/expo-sqlite/vendor/sqlcipher/sqlite3.c",
+        "pattern": "^#define SQLITE_VERSION\\s+\"([0-9.]+)\""
+      }
+    },
+    "zstd": {
+      "name": "Zstandard",
+      "license": "BSD-3-Clause OR GPL-2.0-only",
+      "text": "zstd.txt",
+      "version": { "of": "maven:com.squareup.zstd:zstd-kmp-android" }
+    }
+  },
+  "libraries": {
+    "libandroidx.graphics.path.so": ["maven:androidx.graphics:graphics-path"],
+    "libappmodules.so": ["maven:com.facebook.react:react-android", "native:folly", "native:libcxx"],
+    "libc++_shared.so": ["native:libcxx"],
+    "libcrypto.so": ["npm:expo-sqlite", "native:openssl"],
+    "libexpo-modules-core.so": [
+      "npm:expo-modules-core",
+      "native:folly",
+      "native:double-conversion"
+    ],
+    "libexpo-modules-jsi.so": ["npm:expo-modules-core"],
+    "libexpo-modules-v2.so": ["npm:expo-modules-core"],
+    "libexpo-modules-worklets.so": ["npm:expo-modules-core"],
+    "libexpo-sqlite.so": ["npm:expo-sqlite", "native:sqlcipher", "native:sqlite", "native:openssl"],
+    "libfbjni.so": ["maven:com.facebook.fbjni:fbjni"],
+    "libgesturehandler.so": ["npm:react-native-gesture-handler"],
+    "libgifimage.so": ["maven:com.facebook.fresco:animated-gif", "native:giflib"],
+    "libhermestooling.so": ["maven:com.facebook.hermes:hermes-android"],
+    "libhermesvm.so": ["maven:com.facebook.hermes:hermes-android"],
+    "libimagepipeline.so": ["maven:com.facebook.fresco:imagepipeline-native"],
+    "libjsi.so": [
+      "maven:com.facebook.react:react-android",
+      "native:folly",
+      "native:double-conversion",
+      "native:fast-float",
+      "native:glog",
+      "native:fmt",
+      "native:boost"
+    ],
+    "libnative-filters.so": ["maven:com.facebook.fresco:nativeimagefilters"],
+    "libnative-imagetranscoder.so": [
+      "maven:com.facebook.fresco:nativeimagetranscoder",
+      "native:libjpeg-turbo"
+    ],
+    "libreact_codegen_rngesturehandler_codegen.so": ["npm:react-native-gesture-handler"],
+    "libreact_codegen_rnscreens.so": ["npm:react-native-screens"],
+    "libreact_codegen_rnsvg.so": ["npm:react-native-svg"],
+    "libreact_codegen_safeareacontext.so": ["npm:react-native-safe-area-context"],
+    "libreactnative.so": [
+      "maven:com.facebook.react:react-android",
+      "native:folly",
+      "native:double-conversion",
+      "native:fast-float",
+      "native:glog",
+      "native:fmt",
+      "native:boost"
+    ],
+    "libreanimated.so": ["npm:react-native-reanimated"],
+    "librnscreens.so": ["npm:react-native-screens"],
+    "libstatic-webp.so": ["maven:com.facebook.fresco:webpsupport", "native:libwebp"],
+    "libworklets.so": ["npm:react-native-worklets"],
+    "libzstd-kmp.so": ["maven:com.squareup.zstd:zstd-kmp-android", "native:zstd"]
+  },
+  "notices": {
+    "okhttp3/internal/publicsuffix/NOTICE": [
+      "maven:com.squareup.okhttp3:okhttp",
+      "native:public-suffix-list"
+    ]
+  }
+}

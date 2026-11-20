@@ -19,6 +19,7 @@ class DnsRecord(val type: Int, val ttl: Long, val data: ByteArray)
 
 object Dns {
   const val TYPE_A = 1
+  const val TYPE_NS = 2
   const val TYPE_CNAME = 5
   const val TYPE_AAAA = 28
   const val TYPE_OPT = 41
@@ -29,6 +30,7 @@ object Dns {
   const val SERVFAIL = 2
   const val NXDOMAIN = 3
   const val NOTIMP = 4
+  const val REFUSED = 5
 
   const val HEADER_BYTES = 12
   const val MIN_UDP_PAYLOAD = 512
@@ -74,9 +76,12 @@ object Dns {
   }
 
   // The answer to a rewritten name: a CNAME to the target, then the target's records of the type
-  // that was asked, all given to the target. The TTL is the shortest of the target's records.
+  // that was asked, all given to the target. The TTL is the shortest of the target's records, at
+  // most a minute: Android does not always empty its DNS cache when the tunnel changes, and a
+  // stronger setting, such as Strict YouTube, must not wait for the resolver's TTL, which reaches
+  // half an hour for YouTube's restricted names.
   fun rewritten(query: DnsQuery, target: String, records: List<DnsRecord>): ByteArray {
-    val ttl = records.minOfOrNull { it.ttl } ?: CNAME_TTL
+    val ttl = minOf(records.minOfOrNull { it.ttl } ?: REWRITE_MAX_TTL, REWRITE_MAX_TTL)
     val out = ByteArrayOutputStream()
     out.write(header(query.id, query.flags, NOERROR, answers = 1 + records.size))
     out.write(query.bytes, HEADER_BYTES, query.questionEnd - HEADER_BYTES)
@@ -144,7 +149,7 @@ object Dns {
     return truncated
   }
 
-  private const val CNAME_TTL = 300L
+  const val REWRITE_MAX_TTL = 60L
 
   private fun header(
     id: Int,

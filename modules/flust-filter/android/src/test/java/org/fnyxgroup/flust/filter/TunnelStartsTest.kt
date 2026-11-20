@@ -1,0 +1,71 @@
+package org.fnyxgroup.flust.filter
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class TunnelStartsTest {
+  private val moderate = FilterConfig(enabled = true)
+  private val strict = FilterConfig(enabled = true, youtube = YouTubeLevel.STRICT)
+
+  @Test
+  fun letsTheOnlyStartSetUpItsTunnel() {
+    val starts = TunnelStarts()
+    val ticket = starts.begin(moderate)
+
+    assertEquals(moderate, starts.pending)
+    assertTrue(starts.finish(ticket))
+    assertNull(starts.pending)
+  }
+
+  @Test
+  fun dropsAStartStoppedDuringItsPreparation() {
+    val starts = TunnelStarts()
+    val ticket = starts.begin(moderate)
+    starts.cancel()
+
+    assertFalse(starts.finish(ticket))
+    assertNull(starts.pending)
+  }
+
+  @Test
+  fun dropsAStartReplacedByNewerSettings() {
+    val starts = TunnelStarts()
+    val first = starts.begin(moderate)
+    val second = starts.begin(strict)
+
+    assertFalse(starts.finish(first))
+    assertEquals(strict, starts.pending)
+    assertTrue(starts.finish(second))
+  }
+
+  @Test
+  fun neverLetsAStartFinishTwice() {
+    val starts = TunnelStarts()
+    val ticket = starts.begin(moderate)
+
+    assertTrue(starts.finish(ticket))
+    starts.cancel()
+    assertFalse(starts.finish(ticket))
+  }
+
+  @Test
+  fun skipsAStartForTheSettingsBeingPrepared() {
+    val starts = TunnelStarts()
+    starts.begin(strict)
+
+    assertTrue(starts.covers(strict, running = moderate))
+    assertFalse(starts.covers(moderate, running = moderate))
+  }
+
+  @Test
+  fun skipsAStartForTheRunningSettingsWhenNothingIsPrepared() {
+    val starts = TunnelStarts()
+
+    assertTrue(starts.covers(moderate, running = moderate))
+    assertFalse(starts.covers(strict, running = moderate))
+    assertFalse(starts.covers(moderate, running = null))
+  }
+}

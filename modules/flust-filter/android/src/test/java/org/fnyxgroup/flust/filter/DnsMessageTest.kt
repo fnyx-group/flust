@@ -84,6 +84,29 @@ class DnsMessageTest {
     assertArrayEquals(target, cname.data)
   }
 
+  // Android kept a moderate YouTube answer for half an hour after Strict YouTube was turned on,
+  // the resolver's TTL: a rewritten answer must expire within a minute.
+  @Test
+  fun capsTheTtlOfARewrittenAnswerAtAMinute() {
+    val bytes = TestData.query("www.youtube.com")
+    val address = byteArrayOf(216.toByte(), 239.toByte(), 38, 120)
+    val records = listOf(DnsRecord(Dns.TYPE_A, 1917, address), DnsRecord(Dns.TYPE_A, 3600, address))
+    val answer = Dns.rewritten(Dns.parseQuery(bytes)!!, SafeSearch.YOUTUBE_STRICT, records)
+
+    assertEquals(listOf(60L, 60L), Dns.records(answer, bytes, Dns.TYPE_A)!!.map { it.ttl })
+    assertEquals(60L, Dns.records(answer, bytes, Dns.TYPE_CNAME)!!.single().ttl)
+  }
+
+  // A type other than A and AAAA, such as HTTPS, gets the CNAME alone.
+  @Test
+  fun givesARewrittenAnswerWithoutRecordsAMinute() {
+    val https = 65
+    val bytes = TestData.query("www.bing.com", type = https)
+    val answer = Dns.rewritten(Dns.parseQuery(bytes)!!, SafeSearch.BING, emptyList())
+
+    assertEquals(60L, Dns.records(answer, bytes, Dns.TYPE_CNAME)!!.single().ttl)
+  }
+
   @Test
   fun readsTheRecordsOfAResponseOnlyWhenItAnswersTheQuery() {
     val query = TestData.query("forcesafesearch.google.com")

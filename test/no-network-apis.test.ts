@@ -78,7 +78,7 @@ const filterTests = 'modules/flust-filter/android/src/test/';
 const filterAllowances: Record<string, readonly string[]> = {
   'ResolverTransport.kt': ['java.net', 'javax.net', 'Socket', 'InetAddress', 'InetSocketAddress'],
   'SystemTrust.kt': ['javax.net'],
-  'Quad9.kt': ['java.net', 'InetAddress'],
+  'Resolvers.kt': ['java.net', 'InetAddress'],
   'FilterVpnService.kt': ['VpnService'],
   'FilterBootReceiver.kt': ['VpnService'],
   'FlustFilterModule.kt': ['VpnService'],
@@ -265,7 +265,7 @@ describe('the Android filter', () => {
   });
 
   // The filter opens sockets only to the resolver: one file opens them, to an endpoint that only
-  // Quad9.kt builds outside the tests.
+  // Resolvers.kt builds outside the tests.
   it('opens sockets in ResolverTransport.kt alone', () => {
     const opening = sources.filter((file) =>
       /\b(Socket|SSLSocket|SocketFactory|DatagramSocket|SocketChannel)\b/.test(
@@ -275,13 +275,13 @@ describe('the Android filter', () => {
     expect(opening).toEqual([`${filterSource}ResolverTransport.kt`]);
   });
 
-  it('builds the resolver endpoint in Quad9.kt alone', () => {
+  it('builds the resolver endpoints in Resolvers.kt alone', () => {
     const building = sources.filter((file) =>
       /\bResolverEndpoint\(/.test(withoutComments(fs.readFileSync(path.join(root, file), 'utf8'))),
     );
     expect(building.sort()).toEqual([
-      `${filterSource}Quad9.kt`,
       `${filterSource}ResolverTransport.kt`,
+      `${filterSource}Resolvers.kt`,
     ]);
   });
 
