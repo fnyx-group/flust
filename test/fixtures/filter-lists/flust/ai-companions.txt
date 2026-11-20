@@ -1,2 +1,0 @@
-# Companions
-companion.example   # aegis ai-adult, checked 2026-11-19

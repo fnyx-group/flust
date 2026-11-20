@@ -7,7 +7,7 @@ The filter needs large lists of adult domains ([0038](0038-content-filter.md)). 
 ## Decision
 
 - Only sources under MIT, the Unlicense or CC0 are used: ShadowWhisperer, Sinfonietta, 4skinSkywalker and the ai-adult and VPN categories of aegis. Each sits in `lists/sources/<name>/` with its upstream license text and a `PROVENANCE` file: URL, commit, date, license, and the SHA-256 of each file.
-- flust's own lists sit in `lists/flust/`: AI nudify sites, AI companions, encrypted DNS provider names, Google's search domains and exceptions. Every entry names its source and the day it was checked.
+- flust's own lists sit in `lists/flust/`: AI nudify sites, encrypted DNS provider names, Google's search domains and exceptions. The AI companions list of lot 1 is gone ([0038](0038-content-filter.md)), its domains now exceptions. Every entry names its source and the day it was checked.
 - oisd, HaGeZi, Bon-Appetit, StevenBlack and UT1 are never committed, compiled or copied.
 - `scripts/build-lists.ts` checks the layout, the licenses and the checksums, fails on copyleft terms, on any provenance line or comment naming an excluded list and on an exception under a name that stays blocked, then normalizes the domains to lowercase Punycode, removes the exceptions and writes one file: the first 8 bytes of each domain's SHA-256 and a byte of categories, sorted. The domains are not readable in the app.
 - The filter module's Gradle build runs it in the builds that ship the filter, so the compiled file is never committed. `pnpm test` runs the check and builds the committed lists on every pull request.
@@ -19,4 +19,5 @@ The filter needs large lists of adult domains ([0038](0038-content-filter.md)). 
 - About 304,000 domains, 2.7 MB compiled. Two sources do not document where their domains come from; they stay for their coverage and explicit license.
 - Two different domains sharing an 8-byte prefix would mix their categories. The build fails on such a collision.
 - A domain copied by hand from an excluded list without naming it cannot be detected. Review of `lists/` changes covers it.
-- The MIT texts are shown on a Licenses screen in lot 2.
+- The license texts of every source, MIT, Unlicense and CC0, are shown on a Licenses screen in About from lot 2, on the platforms that ship the lists. A copy in `src/features/settings/list-licenses.ts` is tested against each `LICENSE`. Its URLs are text to read, which the source scan of [0030](0030-production-android-permissions.md) allows in that file.
+- Before the store release, the Licenses screen must also cover the JavaScript and native dependencies shipped in the APK (lot 4).

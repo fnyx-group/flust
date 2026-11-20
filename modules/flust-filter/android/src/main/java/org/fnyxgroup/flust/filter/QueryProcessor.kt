@@ -1,7 +1,6 @@
 package org.fnyxgroup.flust.filter
 
 import java.io.IOException
-import java.util.concurrent.atomic.AtomicReference
 import kotlin.random.Random
 
 // Sends a query to the resolver and returns its answer. Blocks the calling thread.
@@ -13,18 +12,14 @@ fun interface Upstream {
 // Answers one query: NXDOMAIN for a blocked name, the restricted version of a search engine, or
 // the resolver's answer. Keeps no reference to the name after its answer: nothing is logged or
 // cached.
-class QueryProcessor(policy: FilterPolicy, private val upstream: Upstream) {
-  private val policy = AtomicReference(policy)
-
-  fun update(policy: FilterPolicy) = this.policy.set(policy)
-
+class QueryProcessor(private val policy: FilterPolicy, private val upstream: Upstream) {
   // Null when the bytes are not even a DNS header: there is no one to answer.
   fun answer(bytes: ByteArray, overUdp: Boolean): ByteArray? {
     val query = Dns.parseQuery(bytes)
     if (query == null) {
       return if (Dns.isQueryHeader(bytes)) Dns.error(bytes, if (opcode(bytes) != 0) Dns.NOTIMP else Dns.FORMERR) else null
     }
-    val answer = when (val decision = policy.get().decide(query.name)) {
+    val answer = when (val decision = policy.decide(query.name)) {
       Decision.Block -> Dns.answer(query, Dns.NXDOMAIN)
       Decision.Forward -> forward(query)
       is Decision.Rewrite -> rewrite(query, decision.target)

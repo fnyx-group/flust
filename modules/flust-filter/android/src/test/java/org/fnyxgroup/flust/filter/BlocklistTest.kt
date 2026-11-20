@@ -10,10 +10,9 @@ class BlocklistTest {
 
   @Test
   fun readsTheEntriesOfTheCompiledFile() {
-    assertEquals(13, lists.size)
+    assertEquals(12, lists.size)
     assertEquals(Categories.ADULT, lists.exact("adult.example"))
     assertEquals(Categories.AI_NUDIFY, lists.exact("nudify.example"))
-    assertEquals(Categories.AI_COMPANIONS, lists.exact("companion.example"))
     assertEquals(Categories.BYPASS, lists.exact("use-application-dns.net"))
     assertEquals(Categories.GOOGLE, lists.exact("google.fr"))
     assertEquals(Categories.ADULT, lists.exact("xn--bcher-kva.example"))
@@ -42,6 +41,7 @@ class BlocklistTest {
   fun leavesOutWhatTheExceptionsRemoved() {
     assertEquals(0, lists.categories("safe.excepted.example"))
     assertEquals(0, lists.categories("antivirus.example"))
+    assertEquals(0, lists.categories("companion.example"))
   }
 
   @Test

@@ -18,8 +18,13 @@ const guards = new Set([
 
 // Pages that flust hands to the browser or the phone app through Linking: that app makes the
 // connection. Any other URL in the app's code could be loaded by flust itself, for example as an
-// image source, a font or a download.
-const linkFiles = new Set(['src/domain/help-resources.ts', 'src/features/settings/labels.ts']);
+// image source, a font or a download. The license texts of the list sources quote their URLs as
+// text to read, shown in a Text and never opened.
+const linkFiles = new Set([
+  'src/domain/help-resources.ts',
+  'src/features/settings/labels.ts',
+  'src/features/settings/list-licenses.ts',
+]);
 
 const scannedFolders = ['src', 'test', 'plugins', 'modules'];
 const ignoredFolders = new Set(['node_modules', 'build', '.gradle', '.kotlin', 'Pods']);
@@ -278,6 +283,20 @@ describe('the Android filter', () => {
       `${filterSource}Quad9.kt`,
       `${filterSource}ResolverTransport.kt`,
     ]);
+  });
+
+  // Logcat ends up in bug reports and is read by any tool with adb access: only FilterLog.kt
+  // writes to it, and only in the development build.
+  it('logs through FilterLog.kt alone', () => {
+    const logging = sourceFiles().filter(
+      (file) =>
+        file.endsWith('.kt') &&
+        !file.includes('/src/test/') &&
+        /\bandroid\.util\.Log\b|\bLog\.(v|d|i|w|e|wtf)\(/.test(
+          withoutComments(fs.readFileSync(path.join(root, file), 'utf8')),
+        ),
+    );
+    expect(logging).toEqual([`${filterSource}FilterLog.kt`]);
   });
 
   it('is the only native code that may use the network', () => {

@@ -25,6 +25,7 @@ kotlin {
         "**/FilterConfig.kt",
         "**/FilterEngine.kt",
         "**/FilterPolicy.kt",
+        "**/NetworkChecks.kt",
         "**/PacketHandler.kt",
         "**/Packets.kt",
         "**/QueryProcessor.kt",

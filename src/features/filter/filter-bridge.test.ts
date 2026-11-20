@@ -1,4 +1,6 @@
-import { createFilterBridge, DEFAULT_FILTER_SETTINGS, type NativeFilter } from './filter-bridge';
+import { createFilterBridge, type NativeFilter } from './filter-bridge';
+
+const SETTINGS = { youtubeStrict: false };
 
 function native(overrides: Partial<NativeFilter> = {}): NativeFilter {
   return {
@@ -8,12 +10,9 @@ function native(overrides: Partial<NativeFilter> = {}): NativeFilter {
       running: true,
       enabled: true,
       stopReason: null,
-      adult: true,
-      aiNudify: false,
-      aiCompanions: true,
-      strict: true,
       youtubeStrict: true,
-      exceptions: ['example.org'],
+      strictPrivateDns: true,
+      otherVpn: false,
     }),
     requestConsent: async () => true,
     start: async () => true,
@@ -30,27 +29,22 @@ describe('the filter bridge', () => {
 
     expect(bridge.status()).toEqual({ available: false });
     await expect(bridge.requestConsent()).resolves.toBe(false);
-    await expect(bridge.start(DEFAULT_FILTER_SETTINGS)).resolves.toBe(false);
+    await expect(bridge.start(SETTINGS)).resolves.toBe(false);
     await expect(bridge.resume()).resolves.toBe(false);
     await expect(bridge.measure()).resolves.toBeNull();
     await expect(bridge.stop()).resolves.toBeUndefined();
   });
 
-  it('reads the status and the settings', () => {
+  it('reads the status, the setting and what it sees of the networks', () => {
     expect(createFilterBridge(native()).status()).toEqual({
       available: true,
       consent: true,
       running: true,
       enabled: true,
+      youtubeStrict: true,
       stopReason: null,
-      settings: {
-        adult: true,
-        aiNudify: false,
-        aiCompanions: true,
-        strict: true,
-        youtubeStrict: true,
-        exceptions: ['example.org'],
-      },
+      strictPrivateDns: true,
+      otherVpn: false,
     });
   });
 
@@ -66,8 +60,8 @@ describe('the filter bridge', () => {
         getStatus: () => ({
           available: true,
           stopReason: 'exploded',
-          adult: 'yes',
-          exceptions: [1, 'a.example'],
+          youtubeStrict: 'yes',
+          otherVpn: 1,
         }),
       }),
     ).status();
@@ -77,12 +71,14 @@ describe('the filter bridge', () => {
       consent: false,
       running: false,
       enabled: false,
+      youtubeStrict: false,
       stopReason: null,
-      settings: { ...DEFAULT_FILTER_SETTINGS, exceptions: ['a.example'] },
+      strictPrivateDns: false,
+      otherVpn: false,
     });
   });
 
-  it.each(['revoked', 'no-consent', 'failed', 'stopped'] as const)(
+  it.each(['revoked', 'no-consent', 'failed', 'stopped', 'lists', 'boot-deferred'] as const)(
     'keeps the stop reason %s',
     (reason) => {
       const status = createFilterBridge(
@@ -107,7 +103,7 @@ describe('the filter bridge', () => {
 
   it('passes the settings to the module when the filter starts', async () => {
     const start = jest.fn(async () => true);
-    const settings = { ...DEFAULT_FILTER_SETTINGS, aiCompanions: true };
+    const settings = { youtubeStrict: true };
 
     await expect(createFilterBridge(native({ start })).start(settings)).resolves.toBe(true);
     expect(start).toHaveBeenCalledWith(settings);
@@ -125,7 +121,7 @@ describe('the filter bridge', () => {
     );
 
     await expect(bridge.requestConsent()).resolves.toBe(false);
-    await expect(bridge.start(DEFAULT_FILTER_SETTINGS)).resolves.toBe(false);
+    await expect(bridge.start(SETTINGS)).resolves.toBe(false);
     await expect(bridge.measure()).resolves.toBeNull();
   });
 

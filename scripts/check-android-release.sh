@@ -4,8 +4,8 @@
 # manifest requests a permission that is blocked in production or not expected
 # (docs/decisions/0030-production-android-permissions.md), or when a component has an intent filter
 # that opens a URL scheme (docs/decisions/0035-no-url-scheme-in-production.md), or when it declares
-# a VPN service other than the content filter's, or the filter's without INTERNET, or INTERNET
-# without the filter's (docs/decisions/0033-android-filter-network-access.md). Lists the merged
+# a VPN service other than the content filter's, or lacks the filter's service or one of the two
+# permissions it needs (docs/decisions/0041-filter-network-permissions.md). Lists the merged
 # permissions.
 # An APK is read with aapt2, from $AAPT2, the PATH or $ANDROID_HOME/build-tools. A bundle is read
 # with the bundletool jar at $BUNDLETOOL, run by the Java of $JAVA_HOME or the PATH.
@@ -17,16 +17,16 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 # Must match PRODUCTION_BLOCKED_PERMISSIONS in app.config.ts, which app.config.test.ts checks.
 blocked_permissions=(
-  android.permission.INTERNET
   android.permission.SYSTEM_ALERT_WINDOW
   android.permission.WRITE_EXTERNAL_STORAGE
-  android.permission.ACCESS_NETWORK_STATE
   android.permission.CHANGE_WIFI_MULTICAST_STATE
   android.permission.ACCESS_LOCAL_NETWORK
 )
 
 # Must match PRODUCTION_ANDROID_PERMISSIONS in app.config.ts, which app.config.test.ts checks.
 expected_permissions=(
+  android.permission.INTERNET
+  android.permission.ACCESS_NETWORK_STATE
   android.permission.POST_NOTIFICATIONS
   android.permission.RECEIVE_BOOT_COMPLETED
   android.permission.USE_BIOMETRIC
@@ -34,10 +34,14 @@ expected_permissions=(
   org.fnyxgroup.flust.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 )
 
-# The content filter's VPN service, declared by plugins/with-android-filter.ts. It needs INTERNET
-# to reach the resolver, and INTERNET is there for it alone.
+# The content filter's VPN service, declared by plugins/with-android-filter.ts, and the two
+# permissions it needs and that are there for it alone: INTERNET to reach the resolver,
+# ACCESS_NETWORK_STATE to see strict Private DNS and another VPN.
 filter_service=org.fnyxgroup.flust.filter.FilterVpnService
-internet=android.permission.INTERNET
+filter_permissions=(
+  android.permission.INTERNET
+  android.permission.ACCESS_NETWORK_STATE
+)
 
 cannot_check() {
   echo "$1" >&2
@@ -172,9 +176,11 @@ vpn_services() {
 services=$(vpn_services | sort -u) || cannot_check "Cannot read the services of $build"
 foreign_services=$(matches -v -x -F "$filter_service" <<<"$services")
 has_filter=0
-has_internet=0
 grep -q -x -F "$filter_service" <<<"$services" && has_filter=1
-grep -q -x -F "$internet" <<<"$permissions" && has_internet=1
+missing_filter_permissions=()
+for permission in "${filter_permissions[@]}"; do
+  grep -q -x -F "$permission" <<<"$permissions" || missing_filter_permissions+=("$permission")
+done
 
 listed() {
   local item=$1 candidate
@@ -217,9 +223,14 @@ if [[ -n $foreign_services ]]; then
   indent '  ' <<<"$foreign_services" >&2
   failed=1
 fi
-if [[ $has_filter -ne $has_internet ]]; then
-  echo "$build must declare the content filter's VPN service and $internet together, or neither:" >&2
-  echo "  $filter_service: $has_filter, $internet: $has_internet (1 present, 0 absent)" >&2
+if [[ $has_filter -eq 0 ]]; then
+  echo "$build does not declare the content filter's VPN service:" >&2
+  echo "  $filter_service" >&2
+  failed=1
+fi
+if [[ ${#missing_filter_permissions[@]} -gt 0 ]]; then
+  echo "$build lacks permissions the content filter needs:" >&2
+  printf '  %s\n' "${missing_filter_permissions[@]}" >&2
   failed=1
 fi
 if [[ -n $schemes ]]; then
@@ -229,4 +240,4 @@ if [[ -n $schemes ]]; then
 fi
 [[ $failed -eq 0 ]] || exit 1
 
-echo "$build: no Firebase, Google Play services or Install Referrer code or manifest entries, only expected permissions, no URL scheme, no VPN service but the filter's, and the filter's service and INTERNET together or neither."
+echo "$build: no Firebase, Google Play services or Install Referrer code or manifest entries, only expected permissions, no URL scheme, and the content filter's VPN service with its permissions and no other."

@@ -1,18 +1,34 @@
 # Names removed from every list, with every name under them, and why.
 4chan.org                                # sinfonietta, 4skinskywalker, general platform whose main purpose is not adult content, checked 2026-11-19
 9gag.com                                 # 4skinskywalker, general platform whose main purpose is not adult content, checked 2026-11-19
+aidungeon.com                            # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
+aisekai.com                              # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
 avast.com                                # aegis vpn, antivirus vendor whose updates and accounts use it, checked 2026-11-19
 avg.com                                  # aegis vpn, antivirus vendor whose updates and accounts use it, checked 2026-11-19
 avira.com                                # aegis vpn, antivirus vendor whose updates and accounts use it, checked 2026-11-19
 bitdefender.com                          # aegis vpn, antivirus vendor whose updates and accounts use it, checked 2026-11-19
+botify.ai                                # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
+c.ai                                     # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
+chai.ml                                  # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
+character.ai                             # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
 deviantart.com                           # sinfonietta, 4skinskywalker, general platform whose main purpose is not adult content, checked 2026-11-19
+dopple.ai                                # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
 f-secure.com                             # aegis vpn, antivirus vendor whose updates and accounts use it, checked 2026-11-19
+joyland.ai                               # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
 kaspersky.com                            # aegis vpn, antivirus vendor whose updates and accounts use it, checked 2026-11-19
+kindroid.ai                              # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
 malwarebytes.com                         # aegis vpn, antivirus vendor whose updates and accounts use it, checked 2026-11-19
 mcafee.com                               # aegis vpn, antivirus vendor whose updates and accounts use it, checked 2026-11-19
+myanima.ai                               # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
+nomi.ai                                  # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
 norton.com                               # aegis vpn, antivirus vendor whose updates and accounts use it, checked 2026-11-19
+novelai.net                              # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
 ok.ru                                    # 4skinskywalker, general platform whose main purpose is not adult content, checked 2026-11-19
 pandasecurity.com                        # aegis vpn, antivirus vendor whose updates and accounts use it, checked 2026-11-19
 proton.me                                # aegis vpn, Proton Mail, Drive and Pass share it, protonvpn.com stays blocked, checked 2026-11-19
+replika.ai                               # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
+replika.com                              # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
+talkie-ai.com                            # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
+tavern.ai                                # aegis ai-adult, general AI chat whose main purpose is not sexual, checked 2026-11-19
 trendmicro.com                           # aegis vpn, antivirus vendor whose updates and accounts use it, checked 2026-11-19
 vk.com                                   # sinfonietta, 4skinskywalker, general platform whose main purpose is not adult content, checked 2026-11-19

@@ -5,14 +5,23 @@ import {
   type ConfigPlugin,
 } from 'expo/config-plugins';
 
-// The Android content filter of modules/flust-filter. Its VPN service and boot receiver are
-// declared here rather than in the module's manifest, so that only the builds that ship the
-// filter carry them, with the compiled lists. scripts/check-android-release.sh fails on a build
-// that has the service without INTERNET, or INTERNET without the service, or any other VPN
-// service. See docs/decisions/0033-android-filter-network-access.md.
+// The Android content filter of modules/flust-filter: its VPN service, its boot receiver, the two
+// permissions it needs and the compiled lists. scripts/check-android-release.sh fails on a build
+// without the service or one of the permissions, or with any other VPN service. See
+// docs/decisions/0033-android-filter-network-access.md and
+// docs/decisions/0041-filter-network-permissions.md.
 export const FILTER_VPN_SERVICE = 'org.fnyxgroup.flust.filter.FilterVpnService';
 export const FILTER_BOOT_RECEIVER = 'org.fnyxgroup.flust.filter.FilterBootReceiver';
 export const FILTER_LISTS_PROPERTY = 'flust.filterLists';
+// Read by FilterLog.kt: true in the development build only, where the filter logs why its tunnel
+// stopped. Missing, it stays off.
+export const FILTER_LOGS_META_DATA = 'org.fnyxgroup.flust.filter.LOGS';
+
+// INTERNET reaches the resolver; ACCESS_NETWORK_STATE reads strict Private DNS and another VPN.
+export const FILTER_PERMISSIONS = [
+  'android.permission.INTERNET',
+  'android.permission.ACCESS_NETWORK_STATE',
+];
 
 type Manifest = AndroidConfig.Manifest.AndroidManifest;
 type Application = AndroidConfig.Manifest.ManifestApplication;
@@ -24,8 +33,14 @@ function withoutComponent<T extends { $: { 'android:name': string } }>(
   return (components ?? []).filter((component) => component.$['android:name'] !== name);
 }
 
-export function addFilterComponents(manifest: Manifest): Manifest {
+export function addFilterComponents(manifest: Manifest, logs: boolean): Manifest {
+  AndroidConfig.Permissions.ensurePermissions(manifest, FILTER_PERMISSIONS);
   const application: Application = AndroidConfig.Manifest.getMainApplicationOrThrow(manifest);
+  AndroidConfig.Manifest.addMetaDataItemToMainApplication(
+    application,
+    FILTER_LOGS_META_DATA,
+    String(logs),
+  );
   application.service = [
     ...withoutComponent(application.service, FILTER_VPN_SERVICE),
     {
@@ -65,10 +80,9 @@ export function setFilterLists(
   ];
 }
 
-export const withAndroidFilter: ConfigPlugin<boolean> = (config, on) => {
-  if (!on) return config;
+export const withAndroidFilter: ConfigPlugin<{ logs: boolean }> = (config, { logs }) => {
   const withComponents = withAndroidManifest(config, (mod) => {
-    mod.modResults = addFilterComponents(mod.modResults);
+    mod.modResults = addFilterComponents(mod.modResults, logs);
     return mod;
   });
   return withGradleProperties(withComponents, (mod) => {

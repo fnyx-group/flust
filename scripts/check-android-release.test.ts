@@ -6,8 +6,11 @@ import path from 'node:path';
 const script = path.join(__dirname, 'check-android-release.sh');
 const xmltree = path.join(__dirname, '..', 'test', 'fixtures', 'xmltree');
 const internet = 'android.permission.INTERNET';
+const networkState = 'android.permission.ACCESS_NETWORK_STATE';
+const filterPermissions = [internet, networkState];
 const filterService = 'org.fnyxgroup.flust.filter.FilterVpnService';
-const pairing = `must declare the content filter's VPN service and ${internet} together`;
+const missingService = "does not declare the content filter's VPN service";
+const missingPermissions = 'lacks permissions the content filter needs';
 
 // aapt2 replaced by a script that prints the permissions and the manifest tree it is given, so
 // that the check runs on a small APK with no Android SDK.
@@ -57,38 +60,35 @@ function check(manifest: string, permissions: readonly string[]) {
   return { status: result.status, errors: result.stderr };
 }
 
-describe('the release check, for the filter VPN service and INTERNET', () => {
-  it('passes a build with neither', () => {
-    expect(check('vpn-none', [])).toEqual({ status: 0, errors: '' });
+describe('the release check, for the content filter', () => {
+  it('passes a build with the filter service and its two permissions', () => {
+    expect(check('vpn-filter', filterPermissions)).toEqual({ status: 0, errors: '' });
   });
 
-  it('fails on the service without INTERNET', () => {
-    const { status, errors } = check('vpn-filter', []);
+  it('fails on a build without the filter service', () => {
+    const { status, errors } = check('vpn-none', filterPermissions);
 
     expect(status).toBe(1);
-    expect(errors).toContain(pairing);
-    expect(errors).toContain(`${filterService}: 1, ${internet}: 0`);
+    expect(errors).toContain(`${missingService}:\n  ${filterService}\n`);
   });
 
-  it('fails on INTERNET without the service', () => {
-    const { status, errors } = check('vpn-none', [internet]);
+  it.each(filterPermissions)('fails on the service without %s', (permission) => {
+    const { status, errors } = check(
+      'vpn-filter',
+      filterPermissions.filter((other) => other !== permission),
+    );
 
     expect(status).toBe(1);
-    expect(errors).toContain(`${filterService}: 0, ${internet}: 1`);
-  });
-
-  // Production still blocks INTERNET until the filter ships: only the pairing is checked here.
-  it('accepts the service and INTERNET together', () => {
-    expect(check('vpn-filter', [internet]).errors).not.toContain(pairing);
+    expect(errors).toContain(`${missingPermissions}:\n  ${permission}\n`);
   });
 
   it('fails on any other VPN service', () => {
-    const { status, errors } = check('vpn-foreign', [internet]);
+    const { status, errors } = check('vpn-foreign', filterPermissions);
 
     expect(status).toBe(1);
     expect(errors).toContain(
       "declares VPN services other than the content filter's:\n  com.example.sdk.ProxyService\n  com.example.sdk.TunnelService\n",
     );
-    expect(errors).not.toContain(pairing);
+    expect(errors).not.toContain(missingPermissions);
   });
 });

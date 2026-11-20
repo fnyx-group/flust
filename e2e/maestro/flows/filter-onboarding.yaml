@@ -1,0 +1,41 @@
+# The onboarding presents the filter with its disclosure in full before Android's VPN dialog, and
+# turns it on from there.
+appId: org.fnyxgroup.flust
+---
+- launchApp:
+    clearState: true
+    permissions:
+      notifications: unset
+- extendedWaitUntil:
+    visible: Start
+    timeout: 30000
+- tapOn: '(Language|Langue).*'
+- tapOn: English
+- tapOn: Start
+- tapOn: Continue
+- tapOn: Continue
+- tapOn: Continue
+- assertVisible: A filter for the whole phone
+# At large font sizes the disclosure starts below the fold.
+- scrollUntilVisible:
+    element: flust uses Android's VPN service.*
+- assertVisible: flust uses Android's VPN service.*
+- assertVisible: Not now
+- tapOn: Accept and turn on
+- runFlow:
+    when:
+      visible: Connection request
+    commands:
+      - tapOn: OK
+# The confirmation shows under the disclosure, below the fold at large font sizes.
+- scrollUntilVisible:
+    element: The filter is on. You will find it in the settings.
+    timeout: 15000
+- tapOn: Continue
+- assertVisible: Last step
+- tapOn: Let's go
+- extendedWaitUntil:
+    visible: Current streak.*
+    timeout: 10000
+- tapOn: Settings
+- assertVisible: Filter, On

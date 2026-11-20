@@ -19,7 +19,7 @@ class FilterConfigTest {
     val config = FilterConfig(
       enabled = true,
       adult = false,
-      aiCompanions = true,
+      aiNudify = false,
       strict = false,
       youtube = YouTubeLevel.STRICT,
       exceptions = setOf("example.org", "cdn.example.net"),

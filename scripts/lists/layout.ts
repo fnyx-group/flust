@@ -5,7 +5,6 @@
 export const Category = {
   adult: 1,
   aiNudify: 2,
-  aiCompanions: 4,
   bypass: 8,
   google: 16,
 } as const;
@@ -32,7 +31,6 @@ export const SOURCES: readonly Source[] = [
 // flust's own lists. Every entry carries its source and the day it was checked.
 export const OWN_LISTS = {
   aiNudify: 'ai-nudify.txt',
-  aiCompanions: 'ai-companions.txt',
   bypass: 'bypass.txt',
   google: 'google-domains.txt',
   exceptions: 'exceptions.txt',

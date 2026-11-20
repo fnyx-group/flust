@@ -5,7 +5,7 @@ import { checkLists } from './check.ts';
 import { normalizeDomain, ownLine, sourceLineName, withParents } from './domains.ts';
 import { Category, OWN_LISTS, SOURCES, type CategoryName } from './layout.ts';
 
-const BLOCKING = Category.adult | Category.aiNudify | Category.aiCompanions | Category.bypass;
+const BLOCKING = Category.adult | Category.aiNudify | Category.bypass;
 
 export type SourceStats = {
   file: string;
@@ -62,9 +62,8 @@ function countOnlyIn(adultSources: Map<string, Set<string>>): Record<string, num
   );
 }
 
-// Reads, normalizes and merges every list, after checking the layout and the licenses. AI
-// companions leave the AI nudify category, and an exception removes a domain and every name under
-// it from the blocking categories. Fails on an exception that a blocked parent would cancel.
+// Reads, normalizes and merges every list, after checking the layout and the licenses. An exception
+// removes a domain and every name under it from the blocking categories. Fails on an exception that a blocked parent would cancel.
 export function buildLists(root: string): BuiltLists {
   const problems = checkLists(root);
   if (problems.length > 0) throw new Error(`The lists cannot be built:\n${problems.join('\n')}`);
@@ -89,13 +88,7 @@ export function buildLists(root: string): BuiltLists {
     }
   }
 
-  const nudify = ownNames(root, OWN_LISTS.aiNudify);
-  const companions = ownNames(root, OWN_LISTS.aiCompanions);
-  const both = [...companions].filter((name) => nudify.has(name));
-  if (both.length > 0) throw new Error(`Both AI nudify and AI companions: ${both.join(', ')}`);
-  add(entries, nudify, Category.aiNudify);
-  for (const name of companions) entries.set(name, (entries.get(name) ?? 0) & ~Category.aiNudify);
-  add(entries, companions, Category.aiCompanions);
+  add(entries, ownNames(root, OWN_LISTS.aiNudify), Category.aiNudify);
   add(entries, ownNames(root, OWN_LISTS.bypass), Category.bypass);
   add(entries, ownNames(root, OWN_LISTS.google), Category.google);
 

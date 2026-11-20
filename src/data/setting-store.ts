@@ -22,4 +22,5 @@ export const SETTING_KEYS = {
   reminders: 'reminders',
   lock: 'lock',
   lockAttempts: 'lock-attempts',
+  filterRequest: 'filter-request',
 } as const;

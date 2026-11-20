@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.InputStream
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
@@ -40,12 +41,12 @@ class FilterEngineTest {
   fun answersQueriesFromTheTunnelUntilItCloses() {
     val tunnel = Tunnel()
     val output = Output()
-    var upstreamClosed = false
+    val upstreamClosed = CountDownLatch(1)
     val engine = FilterEngine(
       TestData.lists,
       FilterConfig(enabled = true),
       Upstream { query -> TestData.response(query, emptyList()) },
-      closeUpstream = { upstreamClosed = true },
+      closeUpstream = { upstreamClosed.countDown() },
     )
     val thread = Thread { engine.run(tunnel, output) }.apply { start() }
 
@@ -62,7 +63,25 @@ class FilterEngineTest {
     tunnel.incoming.put(ByteArray(0))
     thread.join(5_000)
     assertTrue(!thread.isAlive)
-    assertTrue(upstreamClosed)
+    assertTrue(upstreamClosed.await(5, TimeUnit.SECONDS))
+  }
+
+  // Reproduces the filter stopping when Strict YouTube replaced its tunnel: the old engine was
+  // stopped on the main thread, where closing its resolver connections throws.
+  @Test
+  fun closesTheUpstreamAwayFromTheThreadThatStopsIt() {
+    val closedOn = LinkedBlockingQueue<Thread>()
+    val engine = FilterEngine(
+      TestData.lists,
+      FilterConfig(enabled = true),
+      Upstream { ByteArray(0) },
+      closeUpstream = { closedOn.put(Thread.currentThread()) },
+    )
+
+    engine.stop()
+
+    val thread = closedOn.poll(5, TimeUnit.SECONDS)
+    assertTrue(thread != null && thread !== Thread.currentThread())
   }
 
   @Test

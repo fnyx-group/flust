@@ -131,7 +131,7 @@ Full screens shown over the others (emergency, note, lapse, rank unlocked) slide
 
 From top to bottom, with the screen padding of 20:
 
-1. A header row placed like the screen titles of the other tabs, at the same top padding and 44 points tall: the brand lockup on the left (line height 40, so the letters are not cut on Android), the name of the current circle on the right, such as "Cercle de l'Ombre" (row style, in the circle's text color), or "Premier jour" in secondary text before day one.
+1. A header row placed like the screen titles of the other tabs, at the same top padding and 44 points tall: the brand lockup on the left (line height 40, so the letters are not cut on Android), the name of the current circle on the right, such as "Cercle de l'Ombre" (row style, in the circle's text color), or "Premier jour" in secondary text before day one. While the content filter is inactive, a chip takes the circle name's place: a 36 point pill on the surface color with an 18 point shield and "Filtre inactif" (row style), both in the text color, neutral since teal is the color of the first circle and red is for destructive actions. It opens the filter screen and reads as a button. Taking the circle name's place keeps the header at 44 points, so home keeps its fit.
 2. One block, without a card, centered vertically in the free space between the header and the check-in line, with at least 8 points above and below it and 24 between its parts: the streak ring, the rank line, then the daily quote. The free space goes above and below the block, never between its parts.
 3. Pinned at the bottom, above the tab bar and outside the scrolling content: the check-in line, the "J'ai une envie" button, then the discreet "J'ai eu un écart" text button. The urge button is the most important action, so it is always on screen without scrolling, whatever the text size.
 
@@ -279,12 +279,22 @@ A note that cannot be opened shows the close button and a calm centered message 
 A tab screen, scrolling, with 16 points between blocks: the "Réglages" screen title, then three cards (surface color, radius 22) of rows separated by lines. Each row holds an icon tile, its label (row style), its value in secondary body text on the right when it has one, and a chevron:
 
 1. "Raisons et plans" (violet sparkle), with the number of plans ("2 plans"); "Rappels" (gold bell), with the check-in time ("21 h"), else the thought time, else nothing when another reminder is on, else "Désactivés", reading as off while notifications are not allowed; "Verrouillage" (teal lock), with the method ("Face ID", "Empreinte", "Code"), "Désactivé", or "En pause" when the phone has no screen lock; "Langue" (violet globe), with "Langue de l'appareil", "Français" or "English", which opens the language sheet, the choice applying at once, each language named in itself.
+   On Android, "Filtre" (violet shield) follows, with "Activé", "Désactivé" or "Inactif", which opens the filter screen.
 2. "Besoin d'aide" (teal heart), which opens the help screen, and "À propos" (grey info).
 3. "Tout effacer", in red with a red trash tile, which opens the erase screen.
 
 At the end, a teal lock and a line in body text and secondary color: "flust 0.1.0, open source et chiffré sur ton téléphone", with the version from the app config.
 
-The filter row of the mockup comes with its feature.
+## Filter
+
+A screen pushed over the tabs, on Android only until the iPhone filter. The filter takes the violet accent wherever it shows, in Settings, on this screen and in the onboarding, never teal, which is the color of the first circle. The back button and "Filtre" title, then, scrolling, with 24 points between blocks:
+
+1. A card on the surface color: a shield tile, violet when the filter protects and muted otherwise, with the state in row style: "Le filtre protège ce téléphone.", "Le filtre est désactivé." or "Le filtre ne protège pas en ce moment.". When inactive, the reason and what to do (16/400, line height 24, secondary text), then a secondary button, such as "Réactiver le filtre" or "Ouvrir les réglages", except for lists that cannot be read. While a request waits, "Le filtre se désactive dans 18 min." (row style), the reason for the wait, and "Annuler la demande" (text button). After the wait, "Les 20 minutes sont passées. Confirme dans les 9 min qui viennent, sinon la demande expire.", "Confirmer" (secondary) and "Annuler la demande".
+2. A card of two switch rows: "Filtre" (violet shield tile) and "YouTube strict", with "Masque plus de vidéos que le mode restreint de base." under it. Strict YouTube is disabled while the filter is off or a request waits, and the filter switch while a request to turn it off waits.
+3. Three lines (16/400, line height 24, secondary text): what the filter blocks, that the names of allowed sites go encrypted to Quad9, which also blocks malware, and the help line for Chrome's secure DNS.
+4. A card with "VPN permanent" (grey settings), which opens Android's VPN settings, and "Licences des listes" (grey document), then a line on what always-on does.
+
+Turning the filter on opens a sheet first when Android's consent is missing: "Avant d'activer le filtre", the disclosure, then "Plus tard" (primary) and "Accepter et activer" (text button). Confirming a request opens a sheet, "Désactiver le filtre ?" or "Désactiver YouTube strict ?", "Tu peux le réactiver à tout moment, c'est immédiat.", with "Ne rien changer" (primary) and "Désactiver" (text button). Nothing on the screen is red: none of it destroys anything.
 
 ## Reasons and plans
 
@@ -307,7 +317,9 @@ A screen pushed over the tabs: the back button and "À propos" title, then, scro
 
 1. A card on the accent surface: the 64 point app icon, then "flust" (36/800), "Version 0.1.0" (row style, accent text) and "Par fnyx-group" (body, secondary text).
 2. Two lines, each with an icon tile: a teal lock with "Sans compte, sans pub, sans pistage.", and a gold code tile with the license (16/400, line height 24).
-3. A card with "Site web" (violet globe) and "Code source" (violet code), each with an external link icon instead of a chevron, then "Rapport d'erreurs" (grey document), which opens the error report.
+3. A card with "Site web" (violet globe) and "Code source" (violet code), each with an external link icon instead of a chevron, then, on Android, "Licences" (grey document), which opens the licenses of the filter's lists, and "Rapport d'erreurs" (grey document), which opens the error report.
+
+The Licenses screen shows the back button and "Licences" title, a line saying where the lists come from, then for each source a section label with its name and license, such as "ShadowWhisperer, Unlicense" (accent text), over a card (surface color, radius 22, padding 20) holding the license text (12/400, secondary text), selectable.
 
 The links open outside flust, in the browser or the app that handles the address, and screen readers announce them as links, with the address in their hint.
 
@@ -409,6 +421,8 @@ The boards are drawn at 390 points wide.
 ![Onboarding, start](screens/onboarding-5.png)
 
 The welcome screen shows the brand lockup and the language pill at the top, then the first emblem of each circle in its color, the title, the promise and a gold clock beside "Deux minutes pour poser tes bases.". Reasons are chosen as violet chips and risk moments as gold ones. The plan step uses the plan editor. The start step shows "Point de départ" (section label, accent text) over its segmented control, and "Protection" (section label, teal) over a switch row for the lock (teal lock tile) and one for the evening check-in reminder (gold bell tile, "Un rappel discret à 21 h"), both off. Its subtitle reads "Protège ton espace et choisis ton point de départ.", and its footer "Tu pourras tout changer dans les réglages."
+
+On Android, a filter step comes before the start, with the progress out of five: "Un filtre pour tout le téléphone", a subtitle, "Ce que fait le filtre" (section label, violet) over a card holding what it blocks and the disclosure in full (16/400, text color), and a line under it saying it can wait. At the bottom, "Accepter et activer" (primary), which opens Android's VPN dialog, and "Plus tard" (text button). Once on, the line reads "Le filtre est activé. Tu le retrouves dans les réglages." and the primary button becomes "Continuer".
 
 ### Home, first day
 

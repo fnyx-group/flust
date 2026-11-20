@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { NO_ATTEMPTS, recordFailure, type Attempts } from '@/domain/lock';
+import { useCountdown } from '@/features/clock/use-countdown';
 import { countsAsAttempt } from '@/features/lock/auth-outcome';
 import { waitLabel } from '@/features/lock/labels';
 import { authenticate, type DeviceSecurity } from '@/features/lock/local-auth';
 import { useLock } from '@/features/lock/lock-context';
-import { useWaitCountdown } from '@/features/lock/wait-countdown';
 import { useStorage } from '@/features/storage/storage-context';
 import { BrandLockup } from '@/ui/brand/brand-lockup';
 import { LockIcon } from '@/ui/icons/lock-icon';
@@ -36,8 +36,9 @@ export function LockScreen({ security, attempts, onAttempts, onUnlock }: LockScr
     void storage.lock.saveAttempts(next, Date.now());
   }
 
-  const remaining = useWaitCountdown(attempts, {
-    save: store,
+  const wait = useMemo(() => ({ ms: attempts.waitMs }), [attempts.waitMs]);
+  const remaining = useCountdown(wait, {
+    save: (waitMs) => store({ ...attempts, waitMs }),
     onEnd: () => {
       const next = { ...attempts, waitMs: 0 };
       onAttempts(next);

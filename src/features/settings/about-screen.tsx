@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { filterOffered } from '@/features/filter/filter-native';
 import { appVersion } from '@/features/settings/app-version';
 import { SOURCE_URL, WEBSITE_URL } from '@/features/settings/labels';
 import { displayUrl } from '@/features/shared/display-url';
@@ -67,6 +68,13 @@ export function AboutScreen() {
             accessibilityHint={t('about.linkHint', { address: displayUrl(SOURCE_URL) })}
             onPress={() => open(SOURCE_URL)}
           />
+          {filterOffered() && (
+            <NavRow
+              label={t('about.licenses')}
+              icon={{ icon: DocumentIcon, color: colors.textSecondary }}
+              onPress={() => router.push('/licenses')}
+            />
+          )}
           <NavRow
             label={t('about.errorReport')}
             icon={{ icon: DocumentIcon, color: colors.textSecondary }}

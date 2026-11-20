@@ -9,7 +9,11 @@ import createConfig, {
   PRODUCTION_BLOCKED_PERMISSIONS,
 } from './app.config';
 import appJson from './app.json';
-import { FILTER_VPN_SERVICE } from './plugins/with-android-filter';
+import {
+  FILTER_LOGS_META_DATA,
+  FILTER_PERMISSIONS,
+  FILTER_VPN_SERVICE,
+} from './plugins/with-android-filter';
 
 const staticConfig = appJson.expo as ExpoConfig;
 const blockedInEveryVariant = staticConfig.android?.blockedPermissions ?? [];
@@ -31,6 +35,37 @@ function configFor(variant: string | undefined) {
   }
 }
 
+// Runs the Android manifest changes of every plugin on a bare manifest, as a prebuild would.
+async function manifestFor(variant: string | undefined) {
+  const config = configFor(variant);
+  const manifestMod = modsOf(config)?.android?.manifest;
+  if (manifestMod === undefined) throw new Error('No manifest change');
+  const result = await manifestMod({
+    ...config,
+    modRawConfig: config,
+    modResults: {
+      manifest: {
+        $: { 'xmlns:android': 'http://schemas.android.com/apk/res/android' },
+        queries: [],
+        application: [
+          {
+            $: { 'android:name': '.MainApplication' },
+            activity: [{ $: { 'android:name': '.MainActivity' } }],
+          },
+        ],
+      },
+    },
+    modRequest: {
+      platform: 'android',
+      modName: 'manifest',
+      projectRoot: __dirname,
+      platformProjectRoot: path.join(__dirname, 'android'),
+      introspect: true,
+    },
+  });
+  return result.modResults;
+}
+
 function scriptList(name: string): string[] {
   const script = fs.readFileSync(path.join(__dirname, 'scripts/check-android-release.sh'), 'utf8');
   const list = new RegExp(`^${name}=\\(\\n([\\s\\S]*?)\\n\\)$`, 'm').exec(script)?.[1] ?? '';
@@ -39,18 +74,21 @@ function scriptList(name: string): string[] {
 
 describe('app config', () => {
   it.each([['production'], [undefined]])(
-    'blocks INTERNET and the other unused permissions in the %s variant',
+    'blocks the unused permissions in the %s variant, not those of the filter',
     (variant) => {
       const blocked = configFor(variant).android?.blockedPermissions;
-      expect(blocked).toContain('android.permission.INTERNET');
       expect(blocked).toEqual([...blockedInEveryVariant, ...PRODUCTION_BLOCKED_PERMISSIONS]);
+      expect(blocked?.filter((p) => FILTER_PERMISSIONS.includes(p))).toEqual([]);
     },
   );
 
   it('keeps them in the development variant, which reaches Metro over the network', () => {
     const blocked = configFor('development').android?.blockedPermissions;
-    expect(blocked).not.toContain('android.permission.INTERNET');
     expect(blocked).toEqual(blockedInEveryVariant);
+  });
+
+  it('expects the permissions of the filter in production', () => {
+    expect(PRODUCTION_ANDROID_PERMISSIONS).toEqual(expect.arrayContaining(FILTER_PERMISSIONS));
   });
 
   it('rejects an unknown variant', () => {
@@ -87,16 +125,30 @@ describe('URL schemes', () => {
 });
 
 describe('the Android filter', () => {
-  it.each([['production'], [undefined]])('is left out of the %s variant', (variant) => {
-    const config = configFor(variant);
-    expect(config.extra?.filterDevSetting).toBe(false);
-    expect(modsOf(config)?.android?.gradleProperties).toBeUndefined();
+  it.each([['production'], [undefined], ['development']])(
+    'ships with its lists in the %s variant',
+    (variant) => {
+      const mods = modsOf(configFor(variant))?.android;
+      expect(mods?.manifest).toBeDefined();
+      expect(mods?.gradleProperties).toBeDefined();
+    },
+  );
+
+  it.each([
+    ['production', 'false'],
+    [undefined, 'false'],
+    ['development', 'true'],
+  ])('logs why the tunnel stopped in the %s variant: %s', async (variant, logs) => {
+    const application = (await manifestFor(variant)).manifest.application?.[0];
+    const item = application?.['meta-data']?.find(
+      (entry) => entry.$['android:name'] === FILTER_LOGS_META_DATA,
+    );
+    expect(item?.$['android:value']).toBe(logs);
   });
 
-  it('runs behind a setting of the development variant, which declares its service', () => {
-    const config = configFor('development');
-    expect(config.extra?.filterDevSetting).toBe(true);
-    expect(modsOf(config)?.android?.gradleProperties).toBeDefined();
+  it('measures its lists in the development variant only', () => {
+    expect(configFor('development').extra?.filterMeasure).toBe(true);
+    expect(configFor('production').extra?.filterMeasure).toBe(false);
   });
 });
 

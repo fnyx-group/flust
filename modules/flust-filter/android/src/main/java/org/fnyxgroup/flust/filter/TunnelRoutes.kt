@@ -8,9 +8,15 @@ object TunnelRoutes {
   const val MTU = 1500
 
   const val INTERFACE_V4 = "10.111.222.1"
-  const val DNS_V4 = "10.111.222.2"
   const val INTERFACE_V6 = "fd66:6c75:7374::1"
-  const val DNS_V6 = "fd66:6c75:7374::2"
+
+  // Two pairs of fake DNS addresses, used in turn each time the tunnel is set up again. Android
+  // empties its DNS cache when a network's DNS servers change, so a stronger setting applies at
+  // once instead of after the cached answers expire. Every address is answered the same way.
+  val DNS = listOf(
+    DnsAddresses("10.111.222.2", "fd66:6c75:7374::2"),
+    DnsAddresses("10.111.222.3", "fd66:6c75:7374::3"),
+  )
 
   // The addresses of the providers in Chromium's list of DNS over HTTPS providers
   // (net/dns/public/doh_provider_entry.cc, checked 2026-11-19), Quad9's included: flust's own
@@ -47,3 +53,5 @@ object TunnelRoutes {
 
   fun prefixLength(address: String) = if (':' in address) 128 else 32
 }
+
+data class DnsAddresses(val v4: String, val v6: String)

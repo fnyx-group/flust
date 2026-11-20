@@ -1,5 +1,6 @@
 import { createCheckInRepository, type CheckInRepository } from '@/data/check-in-repository';
 import { createDatabase, type Database } from '@/data/database';
+import { createFilterRepository, type FilterRepository } from '@/data/filter-repository';
 import { createJournalRepository, type JournalRepository } from '@/data/journal-repository';
 import { createJourneyRepository, type JourneyRepository } from '@/data/journey-repository';
 import { createLapseRepository, type LapseRepository } from '@/data/lapse-repository';
@@ -38,6 +39,7 @@ export type Storage = {
   readonly settings: SettingsRepository;
   readonly reminders: ReminderRepository;
   readonly lock: LockRepository;
+  readonly filter: FilterRepository;
   close(): Promise<void>;
 };
 
@@ -259,6 +261,7 @@ function toStorage(db: Database): Storage {
     settings: createSettingsRepository(db),
     reminders: createReminderRepository(db),
     lock: createLockRepository(db),
+    filter: createFilterRepository(db),
     close: () => db.close(),
   };
 }

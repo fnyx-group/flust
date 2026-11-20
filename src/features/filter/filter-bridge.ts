@@ -2,37 +2,15 @@
 // checked before use: a module that is missing, as on iOS and the web, or that answers something
 // unexpected, reads as an unavailable filter rather than a crash.
 
-export type FilterSettings = {
-  adult: boolean;
-  aiNudify: boolean;
-  aiCompanions: boolean;
-  strict: boolean;
-  youtubeStrict: boolean;
-  exceptions: string[];
-};
+import {
+  FILTER_STOP_REASONS,
+  type FilterStatus,
+  type FilterStopReason,
+} from '@/domain/filter-state';
 
-export const DEFAULT_FILTER_SETTINGS: FilterSettings = {
-  adult: true,
-  aiNudify: true,
-  aiCompanions: false,
-  strict: true,
-  youtubeStrict: false,
-  exceptions: [],
-};
-
-const STOP_REASONS = ['stopped', 'revoked', 'no-consent', 'failed'] as const;
-export type FilterStopReason = (typeof STOP_REASONS)[number];
-
-export type FilterStatus =
-  | { available: false }
-  | {
-      available: true;
-      consent: boolean;
-      running: boolean;
-      enabled: boolean;
-      stopReason: FilterStopReason | null;
-      settings: FilterSettings;
-    };
+// The one setting the app passes: everything else is fixed while the filter runs
+// (docs/decisions/0038-content-filter.md).
+export type FilterSettings = { youtubeStrict: boolean };
 
 export type FilterMeasure = {
   entries: number;
@@ -70,22 +48,8 @@ function flag(fields: Fields, key: string, fallback: boolean): boolean {
   return typeof value === 'boolean' ? value : fallback;
 }
 
-function readSettings(fields: Fields): FilterSettings {
-  const exceptions = fields.exceptions;
-  return {
-    adult: flag(fields, 'adult', DEFAULT_FILTER_SETTINGS.adult),
-    aiNudify: flag(fields, 'aiNudify', DEFAULT_FILTER_SETTINGS.aiNudify),
-    aiCompanions: flag(fields, 'aiCompanions', DEFAULT_FILTER_SETTINGS.aiCompanions),
-    strict: flag(fields, 'strict', DEFAULT_FILTER_SETTINGS.strict),
-    youtubeStrict: flag(fields, 'youtubeStrict', DEFAULT_FILTER_SETTINGS.youtubeStrict),
-    exceptions: Array.isArray(exceptions)
-      ? exceptions.filter((item): item is string => typeof item === 'string')
-      : [],
-  };
-}
-
 function readStopReason(value: unknown): FilterStopReason | null {
-  return STOP_REASONS.find((reason) => reason === value) ?? null;
+  return FILTER_STOP_REASONS.find((reason) => reason === value) ?? null;
 }
 
 function isNumber(value: unknown): value is number {
@@ -125,8 +89,10 @@ export function createFilterBridge(native: NativeFilter | null): FilterBridge {
         consent: flag(fields, 'consent', false),
         running: flag(fields, 'running', false),
         enabled: flag(fields, 'enabled', false),
+        youtubeStrict: flag(fields, 'youtubeStrict', false),
         stopReason: readStopReason(fields.stopReason),
-        settings: readSettings(fields),
+        strictPrivateDns: flag(fields, 'strictPrivateDns', false),
+        otherVpn: flag(fields, 'otherVpn', false),
       };
     },
     requestConsent: () =>

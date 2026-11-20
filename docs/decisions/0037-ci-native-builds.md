@@ -6,7 +6,7 @@ CI checked the JavaScript and the Kotlin JVM tests only. The production APK was 
 
 ## Decision
 
-- `.github/workflows/native.yml` builds both apps from the `production` variant on every push to `main`, once a week, and on pull requests that change a native path: the package manifests and lockfile, `app.json`, `app.config.ts`, `eas.json`, `plugins/`, `modules/`, the release checks and the workflow itself.
+- `.github/workflows/native.yml` builds both apps from the `production` variant on every push to `main`, once a week, and on pull requests that change a native path: the package manifests and lockfile, `app.json`, `app.config.ts`, `eas.json`, `plugins/`, `modules/`, the filter lists and their build step (`lists/`, `scripts/lists/`, `scripts/build-lists.ts`, since V0.2 lot 2), the release checks and the workflow itself.
   - `android-release` runs `assembleRelease` for one ABI, `arm64-v8a`, and `scripts/check-android-release.sh` on the APK. The check reads the manifest and the dex files, which do not depend on the ABI.
   - `ios-build` runs `xcodebuild` for the simulator in Release, without signing, and `scripts/check-ios-release.sh`, which fails on a `CFBundleURLTypes` in the built `Info.plist` ([0035](0035-no-url-scheme-in-production.md)).
   - The builds are skipped by a job condition fed by `native-paths`, not by a path filter on the workflow: a skipped job counts as passed for a required check, while a filtered workflow leaves it pending. `native-paths` is required as well, since the builds are skipped when it fails.

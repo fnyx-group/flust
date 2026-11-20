@@ -13,7 +13,6 @@ class FilterPolicyTest {
     assertEquals(Decision.Block, decide("Video.Adult.Example."))
     assertEquals(Decision.Block, decide("deepfake.example"))
     assertEquals(Decision.Forward, decide("companion.example"))
-    assertEquals(Decision.Block, decide("companion.example", FilterConfig(aiCompanions = true)))
     assertEquals(Decision.Forward, decide("adult.example", FilterConfig(adult = false)))
   }
 

@@ -6,7 +6,7 @@ flust is a mobile app for iOS and Android that helps people quit pornography, in
 
 Everything flust records stays on the phone. The data lives in a database encrypted with SQLCipher, whose key is held by the Keychain on iOS and the Android Keystore on Android. There is no account, no ads, no analytics and no tracking, and nothing you record is ever sent anywhere. See the [threat model](docs/security/threat-model.md).
 
-Version 0.1 makes no network call at all, and its Android release builds do not request the `INTERNET` permission, which [`scripts/check-android-release.sh`](scripts/check-android-release.sh) checks on an APK or a bundle. This describes the current version, not a permanent promise: the content filter planned for version 0.2 forwards DNS lookups on Android and will need that permission, under the rules of [0033](docs/decisions/0033-android-filter-network-access.md).
+flust makes no network call of its own. From version 0.2, its content filter on Android forwards the DNS lookups it allows, encrypted, to the Quad9 resolver, and nothing else: no query is logged, and blocked lookups never leave the phone. The Android build requests `INTERNET` for the filter only, under the rules of [0033](docs/decisions/0033-android-filter-network-access.md) and [0041](docs/decisions/0041-filter-network-permissions.md), which [`scripts/check-android-release.sh`](scripts/check-android-release.sh) checks on an APK or a bundle. Version 0.1 made no network call at all and did not request that permission.
 
 ## Status
 

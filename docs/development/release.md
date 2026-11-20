@@ -26,7 +26,7 @@ To check a production build before EAS, or after a dependency change, build a re
 
        (cd android && ./gradlew assembleRelease)
 
-3. Run the check on it. It prints every permission the build requests, then fails on Firebase or Google Play services code, a blocked permission, an unexpected one or a URL scheme:
+3. Run the check on it. It prints every permission the build requests, then fails on Firebase or Google Play services code, a blocked permission, an unexpected one, a URL scheme, or a build without the content filter's VPN service and its two permissions:
 
        scripts/check-android-release.sh android/app/build/outputs/apk/release/app-release.apk
 
@@ -34,7 +34,7 @@ To check a production build before EAS, or after a dependency change, build a re
 
        "$ANDROID_HOME"/build-tools/<version>/aapt2 dump permissions android/app/build/outputs/apk/release/app-release.apk
 
-4. Optionally install it with `adb install -r`, next to the development build, which has its own identifier. Without `INTERNET`, it runs from its bundled JavaScript only.
+4. Optionally install it with `adb install -r`, next to the development build, which has its own identifier. It runs from its bundled JavaScript only: its `INTERNET` permission serves the content filter, and nothing loads JavaScript from Metro in a release build.
 
 5. Go back to the development variant before working with Metro again:
 

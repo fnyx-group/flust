@@ -1,0 +1,64 @@
+# Turning the filter or Strict YouTube off waits 20 minutes, survives a restart of the app and can
+# be cancelled. The confirmation after the wait and the expiry are covered by unit tests and the
+# manual checklist: a flow cannot wait 20 minutes.
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- tapOn: Settings
+- tapOn: Filter, Off
+# The screen's title is also "Filter": the switch is the one below the status.
+- tapOn:
+    text: Filter
+    checked: false
+    below: The filter is off.
+- runFlow: ../common/accept-filter.yaml
+- extendedWaitUntil:
+    visible: The filter protects this phone.
+    timeout: 15000
+- tapOn:
+    text: Strict YouTube.*
+    checked: false
+
+# Strict YouTube first: its request waits, and the switch stays on meanwhile.
+- tapOn:
+    text: Strict YouTube.*
+    checked: true
+- assertVisible: Strict YouTube turns off in 20 min.
+- assertVisible:
+    text: Strict YouTube.*
+    checked: true
+- tapOn: Cancel the request
+- assertNotVisible: Strict YouTube turns off.*
+
+# The filter: the request waits, and the filter keeps protecting.
+- tapOn:
+    text: Filter
+    checked: true
+- assertVisible: The filter turns off in (20|19) min.
+- assertVisible: The filter protects this phone.
+- assertVisible:
+    text: Filter
+    checked: true
+    enabled: false
+
+# A new process: the request is read back from storage and still counts down. The filter is
+# brought back by flust as it opens.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: Current streak.*
+    timeout: 30000
+- tapOn: Settings
+- tapOn: Filter, On
+- assertVisible: The filter turns off in (20|19) min.
+- extendedWaitUntil:
+    visible: The filter protects this phone.
+    timeout: 15000
+
+# Cancelling is immediate.
+- tapOn: Cancel the request
+- assertNotVisible: The filter turns off.*
+- assertVisible:
+    text: Filter
+    checked: true
+    enabled: true

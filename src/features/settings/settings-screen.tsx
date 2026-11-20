@@ -3,8 +3,10 @@ import { useCallback, useRef, useState } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { filterView } from '@/domain/filter-state';
 import { DEFAULT_REMINDER_SETTINGS, type ReminderSettings } from '@/domain/reminders';
-import { filterDevSettingOn } from '@/features/filter/filter-native';
+import { filterValue } from '@/features/filter/labels';
+import { useFilterStatus } from '@/features/filter/use-filter-status';
 import { lockValue } from '@/features/lock/labels';
 import { useLock } from '@/features/lock/lock-context';
 import { remindersValue } from '@/features/reminders/labels';
@@ -27,20 +29,20 @@ import { BellIcon } from '@/ui/icons/bell-icon';
 import { HeartIcon } from '@/ui/icons/heart-icon';
 import { InfoIcon } from '@/ui/icons/info-icon';
 import { LockIcon } from '@/ui/icons/lock-icon';
-import { CodeIcon } from '@/ui/icons/code-icon';
 import { SparkleIcon } from '@/ui/icons/sparkle-icon';
 import { TrashIcon } from '@/ui/icons/trash-icon';
 import { NavRow } from '@/ui/nav-row';
 import { PrivateLine } from '@/ui/private-line';
+import { ShieldIcon } from '@/ui/icons/shield-icon';
 import { RowGroup } from '@/ui/row-group';
 import { Screen } from '@/ui/screen';
 import { ScreenTitle } from '@/ui/screen-title';
 import { ScrollView } from '@/ui/scroll-view';
 import { colors, spacing, typography } from '@/ui/theme';
 
-// Only what works in this version: the filter shows only in the development build until its
-// release. The values are read again each time the tab comes into focus, since the screens behind
-// the rows change them.
+// Only what works in this version: the filter shows only where it exists, on Android until the
+// iPhone filter of lot 3. The values are read again each time the tab comes into focus, since the
+// screens behind the rows change them.
 export function SettingsScreen() {
   const { t, i18n: translation } = useTranslation();
   const storage = useStorage();
@@ -53,6 +55,8 @@ export function SettingsScreen() {
   // Bumped on each choice, so a read or a save started before a newer choice never lands.
   const choice = useRef(0);
   const version = appVersion();
+  const { status: filterStatus } = useFilterStatus();
+  const filter = filterView(filterStatus);
 
   useFocusEffect(
     useCallback(() => {
@@ -132,11 +136,12 @@ export function SettingsScreen() {
             onPress={() => router.push('/lock-settings')}
           />
           <LanguageRow preference={preference} onChoose={(next) => void choose(next)} />
-          {filterDevSettingOn() && (
+          {filter.state !== 'unavailable' && (
             <NavRow
-              label={t('settings.filterDev')}
-              icon={{ icon: CodeIcon, color: colors.textSecondary }}
-              onPress={() => router.push('/filter-dev')}
+              label={t('settings.filter')}
+              icon={{ icon: ShieldIcon, color: colors.accent }}
+              value={filterValue(t, filter)}
+              onPress={() => router.push('/filter')}
             />
           )}
         </RowGroup>

@@ -53,7 +53,9 @@
       "dismiss": "Masquer ce message pour aujourd'hui",
       "help": "Voir les numéros d'aide"
     },
-    "firstDay": "Premier jour"
+    "firstDay": "Premier jour",
+    "filterInactive": "Filtre inactif",
+    "filterInactiveHint": "Ouvre le filtre"
   },
   "emergency": {
     "close": "Fermer",
@@ -219,7 +221,7 @@
     "reminders": "Rappels",
     "lock": "Verrouillage",
     "help": "Besoin d'aide",
-    "filterDev": "Filtre (développement)"
+    "filter": "Filtre"
   },
   "about": {
     "title": "À propos",
@@ -231,7 +233,8 @@
     "source": "Code source",
     "errorReport": "Rapport d'erreurs",
     "linkHint": "Ouvre en dehors de flust, {{address}}",
-    "byline": "Par fnyx-group"
+    "byline": "Par fnyx-group",
+    "licenses": "Licences"
   },
   "erase": {
     "back": "Retour",
@@ -429,6 +432,13 @@
         "lockUnavailable": "Ajoute un code de verrouillage à ton téléphone pour activer cette protection.",
         "lockNotConfirmed": "Le déverrouillage n'a pas été confirmé. Le verrouillage reste désactivé."
       }
+    },
+    "filter": {
+      "title": "Un filtre pour tout le téléphone",
+      "subtitle": "flust peut bloquer les sites pour adultes et le porno IA dans toutes tes apps, sans compte et sans serveur.",
+      "label": "Ce que fait le filtre",
+      "on": "Le filtre est activé. Tu le retrouves dans les réglages.",
+      "later": "Tu pourras l'activer plus tard dans les réglages."
     }
   },
   "presets": {
@@ -881,28 +891,87 @@
       "home": "Retour à l'accueil"
     }
   },
-  "filterDev": {
+  "filter": {
     "back": "Retour",
     "title": "Filtre",
-    "filter": "Filtre",
-    "categories": {
-      "adult": "Sites pour adultes",
-      "aiNudify": "Sites IA de déshabillage et de deepfake",
-      "aiCompanions": "Compagnons IA",
-      "strict": "Mode strict",
-      "youtubeStrict": "YouTube strict"
-    },
     "status": {
-      "unavailable": "Indisponible dans cette version.",
-      "running": "Activé. Les recherches passent par le filtre.",
-      "off": "Désactivé.",
-      "stopped": "Désactivé dans flust.",
-      "revoked": "Désactivé. Un autre VPN a pris la place, ou le VPN a été coupé dans les réglages.",
-      "no-consent": "Désactivé. Android n'autorise plus le VPN. Réactive le filtre.",
-      "failed": "Désactivé. Le filtre s'est arrêté après une erreur. Active-le pour le relancer."
+      "on": "Le filtre protège ce téléphone.",
+      "off": "Le filtre est désactivé.",
+      "inactive": "Le filtre ne protège pas en ce moment."
     },
+    "value": {
+      "on": "Activé",
+      "off": "Désactivé",
+      "inactive": "Inactif"
+    },
+    "filter": "Filtre",
+    "youtubeStrict": "YouTube strict",
+    "youtubeStrictHint": "Masque plus de vidéos que le mode restreint de base.",
+    "blocks": "Bloque les sites pour adultes, le porno IA et les contournements, et impose SafeSearch sur Google, Bing, DuckDuckGo et YouTube.",
+    "quad9": "Les noms des sites autorisés partent chiffrés vers Quad9, qui bloque aussi les logiciels malveillants.",
+    "chrome": "Plus rien ne charge dans Chrome ? Dans ses paramètres, Confidentialité et sécurité, Utiliser le DNS sécurisé, choisis Automatique.",
+    "alwaysOn": "VPN permanent",
+    "alwaysOnHint": "Active VPN permanent pour flust, le filtre repart alors tout seul.",
+    "licenses": "Licences des listes",
+    "inactive": {
+      "private-dns": {
+        "text": "Le DNS privé d'Android contourne le filtre. Dans les réglages, Réseau et Internet, DNS privé, choisis Automatique.",
+        "action": "Ouvrir les réglages"
+      },
+      "other-vpn": {
+        "text": "Une autre app VPN a pris la place. Android n'en garde qu'un à la fois.",
+        "action": "Réactiver le filtre"
+      },
+      "consent": {
+        "text": "Android ne permet plus à flust de filtrer. Il faut redonner ton accord.",
+        "action": "Réactiver le filtre"
+      },
+      "vpn-off": {
+        "text": "Le filtre a été coupé dans les réglages d'Android.",
+        "action": "Réactiver le filtre"
+      },
+      "lists": {
+        "text": "Les listes du filtre n'ont pas pu être lues. Mets flust à jour, ou réinstalle-le."
+      },
+      "boot-deferred": {
+        "text": "Android n'a pas relancé le filtre au démarrage. Il reprend à l'ouverture de flust, et le VPN permanent évite cette attente.",
+        "action": "Relancer le filtre"
+      },
+      "stopped": {
+        "text": "Le filtre s'est arrêté.",
+        "action": "Réactiver le filtre"
+      }
+    },
+    "request": {
+      "filter": "Le filtre se désactive dans {{time}}.",
+      "youtube": "YouTube strict se désactive dans {{time}}.",
+      "why": "Ce délai t'aide à laisser passer le moment. Tu peux annuler à tout moment.",
+      "cancel": "Annuler la demande",
+      "ready": "Les 20 minutes sont passées. Confirme dans les {{time}} qui viennent, sinon la demande expire.",
+      "confirmOpen": "Confirmer",
+      "confirmFilterTitle": "Désactiver le filtre ?",
+      "confirmYoutubeTitle": "Désactiver YouTube strict ?",
+      "confirmMessage": "Tu peux le réactiver à tout moment, c'est immédiat.",
+      "confirm": "Désactiver",
+      "keep": "Ne rien changer",
+      "minutes": "{{count}} min",
+      "seconds": "{{count}} s"
+    },
+    "disclosure": {
+      "title": "Avant d'activer le filtre",
+      "text": "flust utilise le service VPN d'Android pour filtrer les noms des sites que tes apps ouvrent, sur tout le téléphone. Les noms bloqués ne quittent pas le téléphone. Les noms des sites autorisés partent chiffrés vers Quad9, qui répond à la place de ton opérateur. Le reste de ton trafic ne passe pas par flust, sauf les connexions directes à des serveurs DNS publics connus, qui sont bloquées. flust n'enregistre rien.",
+      "accept": "Accepter et activer",
+      "later": "Plus tard"
+    },
+    "refused": "Sans ton accord dans Android, le filtre ne peut pas démarrer.",
+    "failed": "Le filtre n'a pas pu démarrer. Réessaie.",
     "measure": "Mesurer les listes",
-    "measured": "{{entries}} domaines, {{kilobytes}} Ko, chargés en {{load}} ms, {{decide}} µs par nom.",
-    "note": "Réglage de développement. Le filtre ne transporte que le DNS, bloque sur l'appareil et envoie les recherches autorisées à Quad9, chiffrées. Rien n'est enregistré."
+    "measured": "{{entries}} domaines, {{kilobytes}} Ko, chargés en {{load}} ms, {{decide}} µs par nom."
+  },
+  "licenses": {
+    "title": "Licences",
+    "back": "Retour",
+    "intro": "Les listes du filtre viennent de ces projets, sous leurs licences.",
+    "source": "{{name}}, {{license}}"
   }
 }

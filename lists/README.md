@@ -13,7 +13,6 @@ The domain lists of the Android content filter, compiled into the app at build. 
 | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | `sources/shadowwhisperer/list`, `sources/sinfonietta/list`, `sources/4skinskywalker/list` | Adult                                                            |
 | `sources/aegis/ai-adult`, `flust/ai-nudify.txt`                                           | AI nudify                                                        |
-| `flust/ai-companions.txt`                                                                 | AI companions, which also leave the AI nudify category           |
 | `sources/aegis/vpn`, `flust/bypass.txt`                                                   | Bypass, blocked in strict mode                                   |
 | `flust/google-domains.txt`                                                                | Google's search domains, for SafeSearch                          |
 | `flust/exceptions.txt`                                                                    | Removed from every blocking category, with every name under them |
@@ -22,7 +21,7 @@ Nothing else may sit in this folder: the check fails on any other file.
 
 ## What is blocked
 
-Sites whose main purpose is adult content are blocked, not general platforms that hold some, as with Reddit and X. A general platform that a source lists goes into `flust/exceptions.txt` with that reason. AI companions built for sexual chat stay under AI nudify; only general companion apps go under AI companions.
+Sites whose main purpose is adult content are blocked, not general platforms that hold some, as with Reddit and X. A general platform that a source lists goes into `flust/exceptions.txt` with that reason. The same goes for general AI chat and companion apps, such as `character.ai`; AI chat built for sex stays under AI nudify.
 
 ## Never
 
@@ -44,4 +43,4 @@ oisd, HaGeZi, Bon-Appetit, StevenBlack and UT1 are never committed, compiled or 
 
     node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-lists.ts --out /tmp/filter-lists.bin
 
-The filter module's Gradle build runs the same script in the development build, so the compiled file is never committed.
+The filter module's Gradle build runs the same script in every Android build, so the compiled file is never committed.

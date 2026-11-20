@@ -1,0 +1,46 @@
+# The filter screen: turning on asks for the disclosure, then Android's consent, and applies at
+# once; Strict YouTube turns on at once too. The system VPN dialog is Android's own, tapped here
+# on the emulator only.
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml
+- tapOn: Settings
+- tapOn: Filter, Off
+- assertVisible: The filter is off.
+- assertVisible:
+    text: Strict YouTube.*
+    enabled: false
+# The screen's title is also "Filter": the switch is the one below the status.
+- tapOn:
+    text: Filter
+    checked: false
+    below: The filter is off.
+- runFlow: ../common/accept-filter.yaml
+- extendedWaitUntil:
+    visible: The filter protects this phone.
+    timeout: 15000
+- assertVisible:
+    text: Filter
+    checked: true
+
+# Strengthening is immediate.
+- tapOn:
+    text: Strict YouTube.*
+    checked: false
+- assertVisible:
+    text: Strict YouTube.*
+    checked: true
+- assertNotVisible: Strict YouTube turns off.*
+
+# The links to the system and the licenses, below the fold at large font sizes.
+- scrollUntilVisible:
+    element: List licenses
+- tapOn: List licenses
+- assertVisible: Licenses
+- assertVisible: ShadowWhisperer, Unlicense
+- tapOn: Back
+- assertVisible: Always-on VPN
+
+# Back in the settings, the row says it is on.
+- tapOn: Back
+- assertVisible: Filter, On

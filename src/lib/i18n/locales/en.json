@@ -53,7 +53,9 @@
       "dismiss": "Hide this message for today",
       "help": "See help numbers"
     },
-    "firstDay": "First day"
+    "firstDay": "First day",
+    "filterInactive": "Filter inactive",
+    "filterInactiveHint": "Opens the filter"
   },
   "emergency": {
     "close": "Close",
@@ -219,7 +221,7 @@
     "reminders": "Reminders",
     "lock": "App lock",
     "help": "Need help",
-    "filterDev": "Content filter (development)"
+    "filter": "Filter"
   },
   "about": {
     "title": "About",
@@ -231,7 +233,8 @@
     "source": "Source code",
     "errorReport": "Error report",
     "linkHint": "Opens outside flust, {{address}}",
-    "byline": "By fnyx-group"
+    "byline": "By fnyx-group",
+    "licenses": "Licenses"
   },
   "erase": {
     "back": "Back",
@@ -429,6 +432,13 @@
         "lockUnavailable": "Set a screen lock on your phone to turn this on.",
         "lockNotConfirmed": "Unlocking was not confirmed. The lock stays off."
       }
+    },
+    "filter": {
+      "title": "A filter for the whole phone",
+      "subtitle": "flust can block adult sites and AI porn in all your apps, with no account and no server.",
+      "label": "What the filter does",
+      "on": "The filter is on. You will find it in the settings.",
+      "later": "You can turn it on later in the settings."
     }
   },
   "presets": {
@@ -881,28 +891,87 @@
       "home": "Back to home"
     }
   },
-  "filterDev": {
+  "filter": {
     "back": "Back",
-    "title": "Content filter",
-    "filter": "Filter",
-    "categories": {
-      "adult": "Adult sites",
-      "aiNudify": "AI nudify and deepfake sites",
-      "aiCompanions": "AI companions",
-      "strict": "Strict mode",
-      "youtubeStrict": "Strict YouTube"
-    },
+    "title": "Filter",
     "status": {
-      "unavailable": "Not available in this build.",
-      "running": "On. Lookups go through the filter.",
-      "off": "Off.",
-      "stopped": "Off, turned off in flust.",
-      "revoked": "Off. Another VPN took over, or the VPN was turned off in the settings.",
-      "no-consent": "Off. Android no longer allows the VPN. Turn the filter on again.",
-      "failed": "Off. The filter stopped after an error. Turn it on to start it again."
+      "on": "The filter protects this phone.",
+      "off": "The filter is off.",
+      "inactive": "The filter is not protecting right now."
     },
+    "value": {
+      "on": "On",
+      "off": "Off",
+      "inactive": "Inactive"
+    },
+    "filter": "Filter",
+    "youtubeStrict": "Strict YouTube",
+    "youtubeStrictHint": "Hides more videos than the basic restricted mode.",
+    "blocks": "Blocks adult sites, AI porn and bypasses, and enforces SafeSearch on Google, Bing, DuckDuckGo and YouTube.",
+    "quad9": "The names of allowed sites go encrypted to Quad9, which also blocks malware.",
+    "chrome": "Nothing loads in Chrome? In its settings, Privacy and security, Use secure DNS, choose Automatic.",
+    "alwaysOn": "Always-on VPN",
+    "alwaysOnHint": "Turn on Always-on VPN for flust, so the filter restarts by itself.",
+    "licenses": "List licenses",
+    "inactive": {
+      "private-dns": {
+        "text": "Android's Private DNS goes around the filter. In the settings, Network and internet, Private DNS, choose Automatic.",
+        "action": "Open the settings"
+      },
+      "other-vpn": {
+        "text": "Another VPN app took over. Android keeps only one at a time.",
+        "action": "Turn the filter back on"
+      },
+      "consent": {
+        "text": "Android no longer lets flust filter. Give your consent again.",
+        "action": "Turn the filter back on"
+      },
+      "vpn-off": {
+        "text": "The filter was turned off in Android's settings.",
+        "action": "Turn the filter back on"
+      },
+      "lists": {
+        "text": "The filter's lists could not be read. Update flust, or reinstall it."
+      },
+      "boot-deferred": {
+        "text": "Android did not restart the filter at boot. It resumes when flust opens, and Always-on VPN avoids the wait.",
+        "action": "Restart the filter"
+      },
+      "stopped": {
+        "text": "The filter stopped.",
+        "action": "Turn the filter back on"
+      }
+    },
+    "request": {
+      "filter": "The filter turns off in {{time}}.",
+      "youtube": "Strict YouTube turns off in {{time}}.",
+      "why": "This wait helps you let the moment pass. You can cancel at any time.",
+      "cancel": "Cancel the request",
+      "ready": "The 20 minutes are over. Confirm within {{time}}, or the request expires.",
+      "confirmOpen": "Confirm",
+      "confirmFilterTitle": "Turn the filter off?",
+      "confirmYoutubeTitle": "Turn Strict YouTube off?",
+      "confirmMessage": "You can turn it back on at any time, at once.",
+      "confirm": "Turn off",
+      "keep": "Keep it as it is",
+      "minutes": "{{count}} min",
+      "seconds": "{{count}} s"
+    },
+    "disclosure": {
+      "title": "Before turning the filter on",
+      "text": "flust uses Android's VPN service to filter the names of the sites your apps open, across the whole phone. Blocked names never leave the phone. The names of allowed sites go encrypted to Quad9, which answers instead of your carrier. The rest of your traffic does not go through flust, except direct connections to known public DNS servers, which are blocked. flust records nothing.",
+      "accept": "Accept and turn on",
+      "later": "Not now"
+    },
+    "refused": "Without your consent in Android, the filter cannot start.",
+    "failed": "The filter could not start. Try again.",
     "measure": "Measure the lists",
-    "measured": "{{entries}} domains, {{kilobytes}} KB, loaded in {{load}} ms, {{decide}} µs per name.",
-    "note": "Development setting. The filter carries DNS only, blocks on the device and sends allowed lookups to Quad9, encrypted. Nothing is logged."
+    "measured": "{{entries}} domains, {{kilobytes}} KB, loaded in {{load}} ms, {{decide}} µs per name."
+  },
+  "licenses": {
+    "title": "Licenses",
+    "back": "Back",
+    "intro": "The filter's lists come from these projects, under their licenses.",
+    "source": "{{name}}, {{license}}"
   }
 }

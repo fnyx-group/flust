@@ -1,2 +1,3 @@
 excepted.example    # fixture, checked 2026-11-19
 antivirus.example   # fixture, checked 2026-11-19
+companion.example   # aegis ai-adult, fixture, checked 2026-11-19

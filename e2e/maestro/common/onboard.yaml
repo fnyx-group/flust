@@ -1,4 +1,5 @@
-# Starts from a fresh install and finishes the onboarding in English, with the protection off.
+# Starts from a fresh install and finishes the onboarding in English, with the filter and the
+# protection off.
 # Notifications are left unset, so a flow that needs them meets the system dialog.
 appId: org.fnyxgroup.flust
 ---
@@ -21,6 +22,8 @@ appId: org.fnyxgroup.flust
 - tapOn: Continue
 - assertVisible: Your first plan
 - tapOn: Continue
+- assertVisible: A filter for the whole phone
+- tapOn: Not now
 - assertVisible: Last step
 - tapOn: Let's go
 - extendedWaitUntil:
