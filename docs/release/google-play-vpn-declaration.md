@@ -8,7 +8,7 @@ Device security, for a filter that blocks content on the device. Reasons:
 
 1. The VPN filters DNS on the phone and blocks harmful domains, as a firewall or DNS filter does, and Quad9 also blocks malware domains.
 2. People set the filter on themselves, on their own phone. Parental control describes a parent and a child, which flust is not.
-3. No traffic other than DNS enters the tunnel, and nothing reaches a server of ours.
+3. Only DNS is handled in the tunnel. The tunnel also takes the traffic to the addresses of known public DNS servers, so that apps cannot reach them directly: anything there other than DNS on port 53 is dropped or reset, never forwarded. All other traffic stays outside flust, and nothing reaches a server of ours.
 
 The alternative is parental control and content filtering. The choice waits for a look at what comparable self-blocking apps declare.
 
@@ -16,19 +16,20 @@ The alternative is parental control and content filtering. The choice waits for 
 
 Shown in the app before Android's VPN dialog: in the onboarding step, and in a sheet on the filter screen whenever consent is missing ([0042](../decisions/0042-filter-onboarding-and-disclosure.md)). The person accepts with "Accepter et activer" or declines with "Plus tard".
 
-French: « flust utilise le service VPN d'Android pour filtrer les recherches DNS de tout le téléphone, c'est-à-dire les noms des sites que tes apps ouvrent. Les sites bloqués sont arrêtés sur le téléphone. Les recherches autorisées partent chiffrées vers Quad9, qui répond à la place de ton opérateur. Rien d'autre ne passe par flust, aucune recherche n'est enregistrée et rien n'est partagé. »
+French: « flust utilise le service VPN d'Android pour filtrer les noms des sites que tes apps ouvrent, sur tout le téléphone. Les noms bloqués ne quittent pas le téléphone. Les noms des sites autorisés partent chiffrés vers Quad9, qui répond à la place de ton opérateur. Le reste de ton trafic ne passe pas par flust, sauf les connexions directes à des serveurs DNS publics connus, qui sont bloquées. flust n'enregistre rien. »
 
-English: "flust uses Android's VPN service to filter the DNS lookups of the whole phone, which are the names of the sites your apps open. Blocked sites are stopped on the phone. Allowed lookups go encrypted to Quad9, which answers them instead of your carrier. Nothing else goes through flust, no lookup is recorded and nothing is shared."
+English: "flust uses Android's VPN service to filter the names of the sites your apps open, across the whole phone. Blocked names never leave the phone. The names of allowed sites go encrypted to Quad9, which answers instead of your carrier. The rest of your traffic does not go through flust, except direct connections to known public DNS servers, which are blocked. flust records nothing."
 
 ## Data safety
 
-Answered honestly about allowed lookups:
+Play counts as collected any data the app sends off the device, including to a service provider, and as shared only data passed to a third party other than a service provider acting on the app's behalf. The filter sends the names of the allowed sites to Quad9, which resolves them for the person and nothing else, so:
 
-- Data shared: yes. The names of the sites the phone looks up and allows, which are web browsing data, go to Quad9 with the phone's IP address, encrypted in transit over DNS over TLS. Quad9 is a service provider that resolves them on the person's behalf. Its policy is not to log client IP addresses; flust cannot verify it ([threat model](../security/threat-model.md)).
-- Data collected by flust: none. Blocked lookups never leave the phone, no lookup is logged or kept, and flust has no server.
-- Processed ephemerally: yes, each lookup only while it is answered.
-- Required: only when the person turns the filter on. Without the filter, nothing is sent.
-- Deletion: nothing to delete on our side.
+- Data collected: yes, web browsing (the names of the allowed sites the phone looks up), only when the filter is on. They go to Quad9 with the phone's IP address. Blocked names never leave the phone.
+- Data shared: no. Quad9 is a service provider that answers the lookups on the person's behalf. Its policy is not to log client IP addresses, which flust cannot verify ([threat model](../security/threat-model.md)).
+- Processed ephemerally: yes. flust keeps no name after its answer and has no server. Quad9 uses each name only to answer it.
+- Encrypted in transit: yes, DNS over TLS.
+- Optional: the person chooses to turn the filter on. Without it, nothing is sent.
+- Deletion: nothing is kept, so there is nothing to delete.
 
 The final form wording is checked against the Play Console's current definitions before submission.
 

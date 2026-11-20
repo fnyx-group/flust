@@ -3,6 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/ui/button';
 import { useOverlaysHidden } from '@/ui/overlays';
+import { ScrollView } from '@/ui/scroll-view';
 import { backdropOpacity, colors, radii, spacing, typography } from '@/ui/theme';
 
 type ConfirmSheetProps = {
@@ -20,7 +21,8 @@ type ConfirmSheetProps = {
 // Built like OptionSheet: a fade, a backdrop that cancels, and the escape gesture. Cancelling is
 // the safe choice, so it is the primary button and comes first; confirming is a plain button.
 // Screen readers skip the backdrop: the cancel button and the escape gesture already cancel, and
-// a second "Cancel" would read as another choice.
+// a second "Cancel" would read as another choice. A long text, such as Google Play's disclosure at
+// a large font size, scrolls between the title and the buttons, which always stay on screen.
 export function ConfirmSheet({
   visible,
   title,
@@ -35,7 +37,7 @@ export function ConfirmSheet({
   const hidden = useOverlaysHidden();
   return (
     <Modal visible={visible && !hidden} transparent animationType="fade" onRequestClose={onCancel}>
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top + spacing.screen }]}>
         <Pressable
           accessible={false}
           importantForAccessibility="no"
@@ -48,10 +50,12 @@ export function ConfirmSheet({
           onAccessibilityEscape={onCancel}
           style={[styles.sheet, { paddingBottom: insets.bottom + spacing.screen }]}
         >
-          <Text accessibilityRole="header" style={styles.title}>
-            {title}
-          </Text>
-          <Text style={styles.message}>{message}</Text>
+          <ScrollView style={styles.text} contentContainerStyle={styles.textContent}>
+            <Text accessibilityRole="header" style={styles.title}>
+              {title}
+            </Text>
+            <Text style={styles.message}>{message}</Text>
+          </ScrollView>
           <View style={styles.actions}>
             <Button label={cancelLabel} onPress={onCancel} />
             <Button
@@ -77,6 +81,7 @@ const styles = StyleSheet.create({
     opacity: backdropOpacity,
   },
   sheet: {
+    flexShrink: 1,
     gap: spacing.l,
     paddingTop: spacing.xl,
     paddingHorizontal: spacing.screen,
@@ -85,6 +90,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderTopWidth: 1,
     borderColor: colors.separator,
+  },
+  text: {
+    flexGrow: 0,
+    flexShrink: 1,
+  },
+  textContent: {
+    gap: spacing.l,
   },
   title: {
     ...typography.rankName,

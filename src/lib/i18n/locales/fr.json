@@ -908,7 +908,7 @@
     "youtubeStrict": "YouTube strict",
     "youtubeStrictHint": "Masque plus de vidéos que le mode restreint de base.",
     "blocks": "Bloque les sites pour adultes, le porno IA et les contournements, et impose SafeSearch sur Google, Bing, DuckDuckGo et YouTube.",
-    "quad9": "Les recherches autorisées partent chiffrées vers Quad9, qui bloque aussi les logiciels malveillants.",
+    "quad9": "Les noms des sites autorisés partent chiffrés vers Quad9, qui bloque aussi les logiciels malveillants.",
     "chrome": "Plus rien ne charge dans Chrome ? Dans ses paramètres, Confidentialité et sécurité, Utiliser le DNS sécurisé, choisis Automatique.",
     "alwaysOn": "VPN permanent",
     "alwaysOnHint": "Active VPN permanent pour flust, le filtre repart alors tout seul.",
@@ -959,7 +959,7 @@
     },
     "disclosure": {
       "title": "Avant d'activer le filtre",
-      "text": "flust utilise le service VPN d'Android pour filtrer les recherches DNS de tout le téléphone, c'est-à-dire les noms des sites que tes apps ouvrent. Les sites bloqués sont arrêtés sur le téléphone. Les recherches autorisées partent chiffrées vers Quad9, qui répond à la place de ton opérateur. Rien d'autre ne passe par flust, aucune recherche n'est enregistrée et rien n'est partagé.",
+      "text": "flust utilise le service VPN d'Android pour filtrer les noms des sites que tes apps ouvrent, sur tout le téléphone. Les noms bloqués ne quittent pas le téléphone. Les noms des sites autorisés partent chiffrés vers Quad9, qui répond à la place de ton opérateur. Le reste de ton trafic ne passe pas par flust, sauf les connexions directes à des serveurs DNS publics connus, qui sont bloquées. flust n'enregistre rien.",
       "accept": "Accepter et activer",
       "later": "Plus tard"
     },

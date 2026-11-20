@@ -26,7 +26,8 @@ type FilterStatusBlockProps = {
 };
 
 // The top of the filter screen: whether it protects, why not and what to do, and the request to
-// weaken it while it waits. Nothing here is red: none of it destroys anything.
+// weaken it while it waits. Nothing here is red: none of it destroys anything. The filter takes
+// the app's violet accent wherever it shows, not teal, the color of the first circle.
 export function FilterStatusBlock({
   view,
   pending,
@@ -42,7 +43,7 @@ export function FilterStatusBlock({
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <IconTile icon={ShieldIcon} color={view.state === 'on' ? colors.teal : colors.muted} />
+        <IconTile icon={ShieldIcon} color={view.state === 'on' ? colors.accent : colors.muted} />
         <Text accessibilityLiveRegion="polite" style={styles.status}>
           {filterStatusLine(t, view)}
         </Text>

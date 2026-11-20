@@ -35,9 +35,9 @@ const NETWORK_SETTINGS = 'android.settings.WIRELESS_SETTINGS';
 export function FilterScreen() {
   const { t } = useTranslation();
   const { status, refresh } = useFilterStatus({ poll: true });
-  const { pending, ask, cancel, confirm } = useFilterRequest(refresh);
+  const request = useFilterRequest(refresh);
+  const { pending, ask, cancel } = request;
   const enabling = useEnableFilter(refresh);
-  const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const enabled = status.available && status.enabled;
   const youtubeStrict = status.available && status.youtubeStrict;
@@ -71,8 +71,8 @@ export function FilterScreen() {
   }
 
   async function confirmRequest() {
-    setConfirming(false);
-    await confirm();
+    request.closeConfirm();
+    await request.confirm();
   }
 
   function open(action: string) {
@@ -95,7 +95,7 @@ export function FilterScreen() {
           onEnable={() => void enabling.enable(youtubeStrict)}
           onNetworkSettings={() => open(NETWORK_SETTINGS)}
           onCancelRequest={cancel}
-          onConfirmRequest={() => setConfirming(true)}
+          onConfirmRequest={request.openConfirm}
         />
         {enabling.notice !== null && (
           <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>
@@ -107,7 +107,7 @@ export function FilterScreen() {
             title={t('filter.filter')}
             value={enabled}
             disabled={working || pending?.kind === 'filter'}
-            icon={{ icon: ShieldIcon, color: colors.teal }}
+            icon={{ icon: ShieldIcon, color: colors.accent }}
             onChange={changeFilter}
           />
           <SwitchRow
@@ -145,13 +145,13 @@ export function FilterScreen() {
       />
       {pending !== null && (
         <ConfirmSheet
-          visible={confirming && pending.phase === 'confirm'}
+          visible={request.confirming}
           title={confirmTitle(t, pending)}
           message={t('filter.request.confirmMessage')}
           confirmLabel={t('filter.request.confirm')}
           cancelLabel={t('filter.request.keep')}
           onConfirm={() => void confirmRequest()}
-          onCancel={() => setConfirming(false)}
+          onCancel={request.closeConfirm}
         />
       )}
     </Screen>

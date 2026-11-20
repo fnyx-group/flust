@@ -50,14 +50,17 @@ export type SavedFilterRequest = {
 };
 
 // The time that passed since the request was saved. Within the same boot, the elapsed clock alone
-// counts, so changing the date or restarting the app changes nothing. After a reboot, only the
-// time since boot counts: the time the phone was off is never credited. Without a boot count, the
-// wall clock counts, and a clock set back gives nothing (docs/decisions/0024-lock-wait.md).
+// counts, so changing the date or restarting the app changes nothing. After a reboot, the time
+// since boot counts, never more than the wall clock moved: the time the phone was off is never
+// credited, and a userspace reboot, which counts a boot but keeps the elapsed clock running, does
+// not credit the whole uptime. Without a boot count, the wall clock counts, and a clock set back
+// gives nothing (docs/decisions/0024-lock-wait.md).
 export function timeSinceSaved(saved: ClockReading, now: ClockReading): number {
+  const wallGap = Math.max(0, now.wall - saved.wall);
   if (saved.boot !== null && now.boot !== null) {
-    return saved.boot === now.boot ? now.elapsed - saved.elapsed : now.elapsed;
+    return saved.boot === now.boot ? now.elapsed - saved.elapsed : Math.min(now.elapsed, wallGap);
   }
-  return now.wall - saved.wall;
+  return wallGap;
 }
 
 export function resumeRequest(saved: SavedFilterRequest, now: ClockReading): FilterRequest {

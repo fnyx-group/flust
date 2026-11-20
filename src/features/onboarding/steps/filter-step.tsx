@@ -56,7 +56,7 @@ export function FilterStep({ progress, onBack, onContinue }: FilterStepProps) {
       }
     >
       <View style={styles.section}>
-        <SectionLabel color={colors.teal}>{t('onboarding.filter.label')}</SectionLabel>
+        <SectionLabel color={colors.accentText}>{t('onboarding.filter.label')}</SectionLabel>
         <View style={styles.card}>
           <Text style={styles.text}>{t('filter.blocks')}</Text>
           <Text style={styles.text}>{t('filter.disclosure.text')}</Text>

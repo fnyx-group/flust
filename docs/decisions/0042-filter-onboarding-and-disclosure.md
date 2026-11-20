@@ -10,7 +10,7 @@ Most people will only turn the filter on if the app presents it ([0038](0038-con
 - The step shows what the filter blocks and the disclosure in full, then "Accepter et activer" and "Plus tard". Accepting opens Android's VPN dialog and starts the filter. "Plus tard" moves on with the filter off, and the filter stays in the settings.
 - The filter's state lives in the filter module, apart from the onboarding answers: the step is not part of the draft or of the transaction that finishes the onboarding. A filter turned on and then left by going back stays on.
 - The filter screen shows the same disclosure in a sheet before Android's dialog whenever consent is missing, including after another VPN took it. Declining is the first button, as in every sheet.
-- The disclosure says that flust uses Android's VPN service to filter the DNS lookups of the whole phone, which are the names of the sites apps open, that blocked sites are stopped on the phone, that allowed lookups go encrypted to Quad9, and that nothing else goes through flust, no lookup is recorded and nothing is shared.
+- The disclosure says that flust uses Android's VPN service to filter the names of the sites apps open, across the whole phone, that blocked names never leave the phone, that the names of allowed sites go encrypted to Quad9, that the rest of the traffic does not go through flust except direct connections to known public DNS servers, which are blocked, and that flust records nothing. It speaks of site names rather than lookups or searches, which read as web searches, and it does not say that nothing is shared: the names of allowed sites go to Quad9.
 
 ## Consequences
 

@@ -60,10 +60,30 @@ describe('the time since a request was saved', () => {
     );
   });
 
-  it('counts only the time since boot after a reboot', () => {
+  it('counts only the time since boot after a reboot, even with the clock moved forward', () => {
     const now = { wall: SAVED.wall + 600 * MS_PER_MINUTE, elapsed: 2 * MS_PER_MINUTE, boot: 8 };
 
     expect(timeSinceSaved(SAVED, now)).toBe(2 * MS_PER_MINUTE);
+  });
+
+  // A userspace reboot restarts Android and counts a new boot, but the kernel keeps its clock.
+  it('counts only the wall time after a reboot that kept the elapsed clock running', () => {
+    const now = {
+      wall: SAVED.wall + 3 * MS_PER_MINUTE,
+      elapsed: SAVED.elapsed + 3 * MS_PER_MINUTE,
+      boot: 8,
+    };
+
+    expect(timeSinceSaved(SAVED, now)).toBe(3 * MS_PER_MINUTE);
+    expect(timeSinceSaved(SAVED, { ...now, elapsed: 3 * 24 * 60 * MS_PER_MINUTE })).toBe(
+      3 * MS_PER_MINUTE,
+    );
+  });
+
+  it('credits nothing after a reboot with the clock set back', () => {
+    const now = { wall: SAVED.wall - 60 * MS_PER_MINUTE, elapsed: 2 * MS_PER_MINUTE, boot: 8 };
+
+    expect(timeSinceSaved(SAVED, now)).toBe(0);
   });
 
   it('falls back to the wall clock without a boot count', () => {

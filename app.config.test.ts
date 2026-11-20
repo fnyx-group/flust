@@ -9,7 +9,11 @@ import createConfig, {
   PRODUCTION_BLOCKED_PERMISSIONS,
 } from './app.config';
 import appJson from './app.json';
-import { FILTER_PERMISSIONS, FILTER_VPN_SERVICE } from './plugins/with-android-filter';
+import {
+  FILTER_LOGS_META_DATA,
+  FILTER_PERMISSIONS,
+  FILTER_VPN_SERVICE,
+} from './plugins/with-android-filter';
 
 const staticConfig = appJson.expo as ExpoConfig;
 const blockedInEveryVariant = staticConfig.android?.blockedPermissions ?? [];
@@ -29,6 +33,37 @@ function configFor(variant: string | undefined) {
     if (previous === undefined) delete process.env.APP_VARIANT;
     else process.env.APP_VARIANT = previous;
   }
+}
+
+// Runs the Android manifest changes of every plugin on a bare manifest, as a prebuild would.
+async function manifestFor(variant: string | undefined) {
+  const config = configFor(variant);
+  const manifestMod = modsOf(config)?.android?.manifest;
+  if (manifestMod === undefined) throw new Error('No manifest change');
+  const result = await manifestMod({
+    ...config,
+    modRawConfig: config,
+    modResults: {
+      manifest: {
+        $: { 'xmlns:android': 'http://schemas.android.com/apk/res/android' },
+        queries: [],
+        application: [
+          {
+            $: { 'android:name': '.MainApplication' },
+            activity: [{ $: { 'android:name': '.MainActivity' } }],
+          },
+        ],
+      },
+    },
+    modRequest: {
+      platform: 'android',
+      modName: 'manifest',
+      projectRoot: __dirname,
+      platformProjectRoot: path.join(__dirname, 'android'),
+      introspect: true,
+    },
+  });
+  return result.modResults;
 }
 
 function scriptList(name: string): string[] {
@@ -98,6 +133,18 @@ describe('the Android filter', () => {
       expect(mods?.gradleProperties).toBeDefined();
     },
   );
+
+  it.each([
+    ['production', 'false'],
+    [undefined, 'false'],
+    ['development', 'true'],
+  ])('logs why the tunnel stopped in the %s variant: %s', async (variant, logs) => {
+    const application = (await manifestFor(variant)).manifest.application?.[0];
+    const item = application?.['meta-data']?.find(
+      (entry) => entry.$['android:name'] === FILTER_LOGS_META_DATA,
+    );
+    expect(item?.$['android:value']).toBe(logs);
+  });
 
   it('measures its lists in the development variant only', () => {
     expect(configFor('development').extra?.filterMeasure).toBe(true);

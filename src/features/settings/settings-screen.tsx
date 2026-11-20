@@ -139,7 +139,7 @@ export function SettingsScreen() {
           {filter.state !== 'unavailable' && (
             <NavRow
               label={t('settings.filter')}
-              icon={{ icon: ShieldIcon, color: colors.teal }}
+              icon={{ icon: ShieldIcon, color: colors.accent }}
               value={filterValue(t, filter)}
               onPress={() => router.push('/filter')}
             />

@@ -5,6 +5,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.VpnService
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.exception.Exceptions
@@ -32,6 +34,7 @@ class FlustFilterModule : Module() {
     get() = appContext.reactContext ?: throw Exceptions.AppContextLost()
 
   private var consent: Promise? = null
+  private val main = Handler(Looper.getMainLooper())
 
   override fun definition() = ModuleDefinition {
     Name("FlustFilter")
@@ -78,14 +81,15 @@ class FlustFilterModule : Module() {
     }
 
     // Brings the tunnel back when flust opens, after Android refused to start it at boot or
-    // stopped the app.
-    AsyncFunction("resume") {
-      if (!available() || FilterStatus.running) return@AsyncFunction false
+    // stopped the app. Resolves once the tunnel runs, or after a short wait, so the status the app
+    // reads next is not the one from before the start.
+    AsyncFunction("resume") { promise: Promise ->
+      if (!available() || FilterStatus.running) return@AsyncFunction promise.resolve(false)
       if (!FilterConfigStore(context).load().enabled || VpnService.prepare(context) != null) {
-        return@AsyncFunction false
+        return@AsyncFunction promise.resolve(false)
       }
       FilterVpnService.start(context)
-      true
+      whenRunning(SystemClock.elapsedRealtime() + RESUME_WAIT_MILLIS) { promise.resolve(true) }
     }
 
     // The size of the compiled lists, the time to load them and the mean time to match a name,
@@ -115,6 +119,11 @@ class FlustFilterModule : Module() {
     }
   }
 
+  private fun whenRunning(deadline: Long, done: () -> Unit) {
+    if (FilterStatus.running || SystemClock.elapsedRealtime() >= deadline) return done()
+    main.postDelayed({ whenRunning(deadline, done) }, RESUME_POLL_MILLIS)
+  }
+
   private fun available(): Boolean =
     try {
       context.packageManager.getServiceInfo(ComponentName(context, FilterVpnService::class.java), 0)
@@ -126,5 +135,7 @@ class FlustFilterModule : Module() {
   private companion object {
     const val CONSENT_REQUEST = 0x464c
     const val MEASURED_NAMES = 20_000
+    const val RESUME_WAIT_MILLIS = 3_000L
+    const val RESUME_POLL_MILLIS = 100L
   }
 }

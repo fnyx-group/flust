@@ -17,15 +17,19 @@ export type PendingRequest = { readonly kind: FilterRequestKind } & FilterReques
 
 // The request to weaken the filter, stored so it survives a restart, counted on the continuous
 // clock, cleared when it is cancelled, applied or expired (docs/decisions/0040-filter-delay.md).
+// Clearing it also closes its confirmation sheet, so a sheet left open never comes back by itself
+// with the next request.
 export function useFilterRequest(onApplied: () => void) {
   const storage = useStorage();
   const [request, setRequest] = useState<FilterRequest | null>(null);
+  const [confirming, setConfirming] = useState(false);
   // Bumped on each change, so a load started before it never lands.
   const change = useRef(0);
 
   const clear = useCallback(() => {
     change.current += 1;
     setRequest(null);
+    setConfirming(false);
     void storage.filter.clearRequest();
   }, [storage]);
 
@@ -68,5 +72,13 @@ export function useFilterRequest(onApplied: () => void) {
     onApplied();
   }
 
-  return { pending, ask, cancel: clear, confirm };
+  return {
+    pending,
+    ask,
+    cancel: clear,
+    confirm,
+    confirming: confirming && pending?.phase === 'confirm',
+    openConfirm: () => setConfirming(true),
+    closeConfirm: () => setConfirming(false),
+  };
 }
