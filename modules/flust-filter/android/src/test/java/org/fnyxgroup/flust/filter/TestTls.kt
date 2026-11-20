@@ -68,7 +68,7 @@ object TestTls {
   }
 
   val selfSigned: File by lazy {
-    keyPair("self.p12", "server", Quad9.HOST, "-ext", "san=dns:${Quad9.HOST}")
+    keyPair("self.p12", "server", Resolvers.QUAD9.host, "-ext", "san=dns:${Resolvers.QUAD9.host}")
     File(directory, "self.p12")
   }
 

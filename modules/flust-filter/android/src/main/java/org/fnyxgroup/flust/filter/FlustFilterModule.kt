@@ -111,6 +111,7 @@ class FlustFilterModule : Module() {
         "bytes" to bytes.size,
         "loadMillis" to (loaded - started) / 1_000_000.0,
         "decideMicros" to (matched - matchStarted) / 1_000.0 / MEASURED_NAMES,
+        "resolver" to FilterStatus.activeResolver(),
         "start" to FilterStatus.lastStart?.let { start ->
           mapOf(
             "listsMillis" to start.listsMillis,

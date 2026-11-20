@@ -29,7 +29,7 @@ kotlin {
         "**/PacketHandler.kt",
         "**/Packets.kt",
         "**/QueryProcessor.kt",
-        "**/Quad9.kt",
+        "**/Resolvers.kt",
         "**/ResolverTransport.kt",
         "**/SafeSearch.kt",
         "**/TcpDnsResponder.kt",

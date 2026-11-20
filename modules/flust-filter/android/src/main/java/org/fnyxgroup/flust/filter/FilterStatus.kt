@@ -36,6 +36,9 @@ object FilterStatus {
 
   @Volatile var lastStart: TunnelStartTiming? = null
 
+  // The name of the resolver queries go to, for the measure of the development build.
+  @Volatile var activeResolver: () -> String? = { null }
+
   @Volatile private var reason: String? = null
   @Volatile private var reasonLoaded = false
 

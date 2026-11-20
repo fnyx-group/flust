@@ -12,10 +12,10 @@ V0.1 makes no network calls and blocks `INTERNET` in production Android builds (
 
 - The filter lives inside flust. From V0.2, the production Android build requests `INTERNET`, for the filter only.
 - Network code lives only in the filter's Kotlin module, `modules/flust-filter`. The lint rules and the source scan of [0030](0030-production-android-permissions.md) stay in force everywhere else. The scan allows network APIs in that module alone, each file only for its part, and its tests.
-- The filter opens sockets only to the DNS resolver, from one file, `ResolverTransport.kt`, to an endpoint built only in `Quad9.kt`. The source scan checks both.
-- The resolver is Quad9, reached over DNS over TLS (RFC 7858) on port 853, at its hard-coded IPv4 and IPv6 addresses. The module never looks up its name. Its sockets are marked with `protect()`, so they leave the tunnel even though the tunnel routes Quad9's addresses for every other app.
-- TLS validates the certificate for `dns.quad9.net`, against the certificates that ship with Android only. A certificate authority added by the person or a device policy is not trusted. The TLS code is part of the audit scope.
-- Strict mode blocks `dns.quad9.net` with the other DoH and DoT provider names, for every app. flust's own lookups are not affected, since they go by address.
+- The filter opens sockets only to the DNS resolver, from one file, `ResolverTransport.kt`, to endpoints built only in `Resolvers.kt` (`Quad9.kt` until the resolver chain of [0045](0045-resolver-chain.md)). The source scan checks both.
+- The resolver is Quad9, reached over DNS over TLS (RFC 7858) on port 853, at its hard-coded IPv4 and IPv6 addresses. Since 2026-11-20, DNS4EU and Cloudflare follow it in a chain, reached the same way, for when it does not answer ([0045](0045-resolver-chain.md)). The module never looks up their names. Its sockets are marked with `protect()`, so they leave the tunnel even though the tunnel routes the resolvers' addresses for every other app.
+- TLS validates the certificate for the resolver's name, such as `dns.quad9.net`, against the certificates that ship with Android only. A certificate authority added by the person or a device policy is not trusted. The TLS code is part of the audit scope.
+- Strict mode blocks `dns.quad9.net` and the names of the other resolvers of the chain with the other DoH and DoT provider names, for every app. flust's own lookups are not affected, since they go by address.
 - There is no fallback to plain DNS. Some networks block port 853, and lookups fail there. A DNS over HTTPS fallback can be added later if the tests on real networks show it is needed.
 - The VPN service never touches the database or its key. Its settings are encrypted under a key of their own.
 - No DNS query is logged, and no reference to a queried name is kept after its answer: the filter keeps no cache.
@@ -36,6 +36,6 @@ V0.1 makes no network calls and blocks `INTERNET` in production Android builds (
 ## Consequences
 
 - From V0.2, the Android build can open sockets, and the guarantee of V0.1 that the app cannot reach the network on Android no longer holds. The containment rests on the module boundary, the source scan, the release check, the tests and the audit instead.
-- Quad9 sees the allowed lookups, as a resolver would without flust, and not the blocked ones. It also blocks known malware domains, which the app states.
+- The resolver that answers sees the allowed lookups, as a resolver would without flust, and not the blocked ones. Each resolver of the chain also blocks known malware domains, which the app states ([0045](0045-resolver-chain.md)).
 - Where port 853 is blocked, the filter stops resolving and flust says so, rather than sending lookups in clear.
 - iOS is not affected: the Screen Time APIs filter without flust forwarding anything.

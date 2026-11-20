@@ -68,6 +68,7 @@
 - [0042 Filter onboarding step and disclosure](decisions/0042-filter-onboarding-and-disclosure.md): an Android-only step before the start point, Google Play's disclosure before every VPN consent.
 - [0043 Third-party licenses](decisions/0043-third-party-licenses.md): notices generated from what the release build ships, committed, with an allowlist checked in CI.
 - [0044 Development modules out of production](decisions/0044-production-modules.md): the development client and the DOM web view are not linked into production builds.
+- [0045 Resolver chain of the Android filter](decisions/0045-resolver-chain.md): Quad9, then DNS4EU, then Cloudflare over DNS over TLS, probed in the background, never plain DNS.
 
 ## Development
 

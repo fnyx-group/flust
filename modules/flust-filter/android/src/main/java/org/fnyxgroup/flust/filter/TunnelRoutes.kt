@@ -21,8 +21,8 @@ object TunnelRoutes {
   )
 
   // The addresses of the providers in Chromium's list of DNS over HTTPS providers
-  // (net/dns/public/doh_provider_entry.cc, checked 2026-11-19), Quad9's included: flust's own
-  // sockets to it are protected and leave the tunnel.
+  // (net/dns/public/doh_provider_entry.cc, checked 2026-11-19), which holds the filter's own resolvers
+  // (Resolvers.CHAIN): flust's own sockets to them are protected and leave the tunnel.
   val RESOLVERS = listOf(
     "1.0.0.1", "1.0.0.2", "1.0.0.3", "1.1.1.1", "1.1.1.2", "1.1.1.3",
     "8.8.4.4", "8.8.8.8",

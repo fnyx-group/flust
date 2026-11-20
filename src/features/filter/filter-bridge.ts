@@ -22,12 +22,18 @@ export type TunnelStartMeasure = {
   totalMillis: number;
 };
 
+const RESOLVERS = ['Quad9', 'DNS4EU', 'Cloudflare'] as const;
+
+export type Resolver = (typeof RESOLVERS)[number];
+
 export type FilterMeasure = {
   entries: number;
   bytes: number;
   loadMillis: number;
   decideMicros: number;
   start: TunnelStartMeasure | null;
+  // The resolver queries go to, or null when none answers or the tunnel is down.
+  resolver: Resolver | null;
 };
 
 export type NativeFilter = {
@@ -88,7 +94,18 @@ function readMeasure(value: unknown): FilterMeasure | null {
   if (!isNumber(entries) || !isNumber(bytes) || !isNumber(loadMillis) || !isNumber(decideMicros)) {
     return null;
   }
-  return { entries, bytes, loadMillis, decideMicros, start: readStart(value.start) };
+  return {
+    entries,
+    bytes,
+    loadMillis,
+    decideMicros,
+    start: readStart(value.start),
+    resolver: readResolver(value.resolver),
+  };
+}
+
+function readResolver(value: unknown): Resolver | null {
+  return RESOLVERS.find((resolver) => resolver === value) ?? null;
 }
 
 async function settle<T>(call: () => Promise<unknown>, read: (value: unknown) => T, failed: T) {

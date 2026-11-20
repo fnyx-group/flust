@@ -7,8 +7,8 @@ import { filterBridge } from '@/features/filter/filter-native';
 import { Button } from '@/ui/button';
 import { colors, spacing, typography } from '@/ui/theme';
 
-// The size of the lists, the cost of a lookup and the phases of the last tunnel start, for the
-// development build (docs/development/manual-checklist.md).
+// The size of the lists, the cost of a lookup, the phases of the last tunnel start and the resolver
+// in use, for the development build (docs/development/manual-checklist.md).
 export function FilterMeasure() {
   const { t } = useTranslation();
   const [measure, setMeasure] = useState<Measure | null>(null);
@@ -48,6 +48,13 @@ export function FilterMeasure() {
                 establish: measure.start.establishMillis.toFixed(1),
                 total: measure.start.totalMillis.toFixed(1),
               })}
+        </Text>
+      )}
+      {measure !== null && (
+        <Text style={styles.note}>
+          {measure.resolver === null
+            ? t('filter.measuredNoResolver')
+            : t('filter.measuredResolver', { name: measure.resolver })}
         </Text>
       )}
     </View>

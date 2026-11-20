@@ -3,6 +3,10 @@ package org.fnyxgroup.flust.filter
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.net.VpnService
 import android.os.Build
 import android.os.Handler
@@ -22,6 +26,7 @@ class FilterVpnService : VpnService() {
     val engine: FilterEngine,
     val thread: Thread,
     val config: FilterConfig,
+    val networks: ConnectivityManager.NetworkCallback?,
   )
 
   // What a start reads off the main thread, before any tunnel exists.
@@ -120,9 +125,13 @@ class FilterVpnService : VpnService() {
       generation = (generation + 1) % TunnelRoutes.DNS.size
       val established = builder(TunnelRoutes.DNS[generation]).establish() ?: return fail(StopReason.NO_CONSENT)
       descriptor = established
-      val transport = ResolverTransport(Quad9.ENDPOINT, { socket -> protect(socket) }, SystemTrust.context())
-      val upstream = DotClient(transport::connect, System::currentTimeMillis)
-      val engine = FilterEngine(prepared.lists, config, upstream, upstream::close)
+      val trust = SystemTrust.context()
+      val clients = Resolvers.CHAIN.map { endpoint ->
+        val transport = ResolverTransport(endpoint, { socket -> protect(socket) }, trust)
+        DotClient({ budget -> if (budget == null) transport.connect() else transport.connect(budget) }, System::currentTimeMillis)
+      }
+      val chain = ResolverChain(clients, BackgroundThreads(clients.size), System::currentTimeMillis)
+      val engine = FilterEngine(prepared.lists, config, chain, chain::stop)
       started = engine
       val reader = Thread({
         engine.run(FileInputStream(established.fileDescriptor), FileOutputStream(established.fileDescriptor))
@@ -136,7 +145,8 @@ class FilterVpnService : VpnService() {
         }
       }, "flust-filter")
       val previous = tunnel
-      tunnel = Tunnel(established, engine, reader, config)
+      tunnel = Tunnel(established, engine, reader, config, watchNetworks(chain))
+      FilterStatus.activeResolver = { chain.active()?.let(Resolvers.NAMES::get) }
       reader.start()
       previous?.let(::close)
     } catch (error: Exception) {
@@ -194,6 +204,7 @@ class FilterVpnService : VpnService() {
   private fun stopTunnel(reason: StopReason?) {
     val running = tunnel ?: return
     tunnel = null
+    FilterStatus.activeResolver = { null }
     close(running)
     FilterStatus.running = false
     if (reason != null) {
@@ -202,7 +213,67 @@ class FilterVpnService : VpnService() {
     }
   }
 
+  // A resolver that fails on one network may answer on the next, and the other way round. The
+  // chain is probed once at the start: the callback first reports the networks already there.
+  private fun watchNetworks(chain: ResolverChain): ConnectivityManager.NetworkCallback? {
+    val connectivity = getSystemService(ConnectivityManager::class.java)
+    if (connectivity == null) {
+      chain.start()
+      return null
+    }
+    val request = NetworkRequest.Builder()
+      .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+      .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+      .build()
+    val initial = currentNetworks(connectivity)
+    val present = initial.orEmpty().toMutableSet()
+    val callback = object : ConnectivityManager.NetworkCallback() {
+      override fun onAvailable(network: Network) = changed { present += network.networkHandle }
+
+      override fun onLost(network: Network) = changed { present -= network.networkHandle }
+
+      private fun changed(update: () -> Unit) {
+        val networks = synchronized(present) {
+          update()
+          present.toSet()
+        }
+        chain.networksChanged(networks)
+      }
+    }
+    chain.start(initial)
+    // Without ACCESS_NETWORK_STATE the chain is probed at the start and after failures only.
+    return try {
+      connectivity.registerNetworkCallback(request, callback)
+      callback
+    } catch (refused: SecurityException) {
+      null
+    }
+  }
+
+  // The networks the request above matches, read synchronously as in NetworkState.
+  private fun currentNetworks(connectivity: ConnectivityManager): Set<Long>? =
+    try {
+      @Suppress("DEPRECATION")
+      connectivity.allNetworks
+        .filter { network ->
+          val capabilities = connectivity.getNetworkCapabilities(network)
+          capabilities != null &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+        }
+        .map { it.networkHandle }
+        .toSet()
+    } catch (refused: SecurityException) {
+      null
+    }
+
   private fun close(old: Tunnel) {
+    old.networks?.let { callback ->
+      try {
+        getSystemService(ConnectivityManager::class.java)?.unregisterNetworkCallback(callback)
+      } catch (unregistered: IllegalArgumentException) {
+      }
+    }
     old.engine.stop()
     try {
       old.descriptor.close()

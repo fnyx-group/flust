@@ -9,7 +9,7 @@ V0.2 adds a filter that blocks pornography and AI-generated pornography across t
 - Android: a local `VpnService` that carries DNS only, in the Kotlin module `modules/flust-filter`.
   - The tunnel routes a fake DNS address and the addresses of the major public resolvers, in IPv4 and IPv6. Other traffic never enters it.
   - DNS on port 53, over UDP and TCP, is answered. Other TCP to a routed address is reset at once, other UDP is dropped, so encrypted DNS to a known resolver fails fast and browsers fall back to the system resolver.
-  - Each name and its parents are looked up in compiled lists ([0039](0039-filter-lists-and-licenses.md)). A blocked name gets NXDOMAIN. An allowed name goes to Quad9 over DNS over TLS ([0033](0033-android-filter-network-access.md)).
+  - Each name and its parents are looked up in compiled lists ([0039](0039-filter-lists-and-licenses.md)). A blocked name gets NXDOMAIN. An allowed name goes over DNS over TLS to Quad9, or to DNS4EU then Cloudflare when Quad9 does not answer ([0033](0033-android-filter-network-access.md), [0045](0045-resolver-chain.md)).
   - The decision follows a fixed order: the strict mode guard, SafeSearch, the user's exceptions, the blocked categories, then the resolver. The strict guard comes first so a user exception cannot reopen a bypass.
   - SafeSearch rewrites Google, Bing, DuckDuckGo and YouTube to their restricted names with a CNAME, resolved by the filter.
   - The settings live in their own file in `noBackupFilesDir`, encrypted with AES-GCM under their own Android Keystore key, so the service can start at boot without the database.

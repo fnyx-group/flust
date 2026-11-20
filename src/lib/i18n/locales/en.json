@@ -908,7 +908,7 @@
     "youtubeStrict": "Strict YouTube",
     "youtubeStrictHint": "Hides more videos than the basic restricted mode.",
     "blocks": "Blocks adult sites, AI porn and bypasses, and enforces SafeSearch on Google, Bing, DuckDuckGo and YouTube.",
-    "quad9": "The names of allowed sites go encrypted to Quad9, which also blocks malware.",
+    "resolvers": "The names of allowed sites go encrypted to Quad9, or to DNS4EU then Cloudflare when it does not answer. All three also block malware.",
     "chrome": "Nothing loads in Chrome? In its settings, Privacy and security, Use secure DNS, choose Automatic.",
     "alwaysOn": "Always-on VPN",
     "alwaysOnHint": "Turn on Always-on VPN for flust, so the filter restarts by itself.",
@@ -959,7 +959,7 @@
     },
     "disclosure": {
       "title": "Before turning the filter on",
-      "text": "flust uses Android's VPN service to filter the names of the sites your apps open, across the whole phone. Blocked names never leave the phone. The names of allowed sites go encrypted to Quad9, which answers instead of your carrier. The rest of your traffic does not go through flust, except direct connections to known public DNS servers, which are blocked. flust records nothing.",
+      "text": "flust uses Android's VPN service to filter the names of the sites your apps open, across the whole phone. Blocked names never leave the phone. The names of allowed sites go encrypted to Quad9, or to DNS4EU then Cloudflare when Quad9 does not answer. DNS4EU anonymizes queries and does not sell, profile or use them for advertising, and Cloudflare deletes anonymized IP addresses within 25 hours. The rest of your traffic does not go through flust, except direct connections to known public DNS servers, which are blocked.",
       "accept": "Accept and turn on",
       "later": "Not now"
     },
@@ -969,7 +969,9 @@
     "measured": "{{entries}} domains, {{kilobytes}} KB, loaded in {{load}} ms, {{decide}} µs per name.",
     "measuredStart": "The last start took {{total}} ms in all, lists {{lists}} ms, certificates {{trust}} ms, tunnel {{establish}} ms.",
     "measuredStartCached": "The last start took {{total}} ms in all, lists already loaded ({{lists}} ms), certificates {{trust}} ms, tunnel {{establish}} ms.",
-    "measuredNoStart": "The tunnel has not started since flust opened."
+    "measuredNoStart": "The tunnel has not started since flust opened.",
+    "measuredResolver": "Lookups go to {{name}}.",
+    "measuredNoResolver": "No resolver in use."
   },
   "licenses": {
     "title": "Licenses",

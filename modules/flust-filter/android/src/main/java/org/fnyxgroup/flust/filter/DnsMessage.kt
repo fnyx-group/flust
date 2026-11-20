@@ -19,6 +19,7 @@ class DnsRecord(val type: Int, val ttl: Long, val data: ByteArray)
 
 object Dns {
   const val TYPE_A = 1
+  const val TYPE_NS = 2
   const val TYPE_CNAME = 5
   const val TYPE_AAAA = 28
   const val TYPE_OPT = 41
@@ -29,6 +30,7 @@ object Dns {
   const val SERVFAIL = 2
   const val NXDOMAIN = 3
   const val NOTIMP = 4
+  const val REFUSED = 5
 
   const val HEADER_BYTES = 12
   const val MIN_UDP_PAYLOAD = 512
