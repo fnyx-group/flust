@@ -91,17 +91,33 @@ jobs:
 
       - run: pnpm expo prebuild --platform android --clean --no-install
 
-      # One ABI is enough: the check reads the manifest and the dex files, the same for every ABI,
-      # and the native code of the others doubles the build time.
-      - name: assembleRelease
+      # The bundle for Google Play comes from the same build type, R8 and JavaScript as the APK. With
+      # no upload key here, both are signed with the debug key. One ABI is enough: the manifest and
+      # the dex files are the same for every ABI, and the native code of the others doubles the
+      # build time. The 16 KB alignment of x86_64 is checked on the local bundle of each release.
+      - name: assembleRelease bundleRelease
         working-directory: android
-        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+        run: ./gradlew assembleRelease bundleRelease -PreactNativeArchitectures=arm64-v8a
+
+      # Dependabot does not update bundletool: change the version and the hash together, the hash
+      # taken from the release page, as for gitleaks in ci.yml.
+      - name: Install bundletool
+        env:
+          BUNDLETOOL_VERSION: 1.18.3
+          BUNDLETOOL_SHA256: a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29
+        run: |
+          jar="$RUNNER_TEMP/bundletool-$BUNDLETOOL_VERSION.jar"
+          curl -fsSL --retry 3 -o "$jar" \
+            "https://github.com/google/bundletool/releases/download/$BUNDLETOOL_VERSION/bundletool-all-$BUNDLETOOL_VERSION.jar"
+          echo "$BUNDLETOOL_SHA256  $jar" | sha256sum --check --strict
+          echo "BUNDLETOOL=$jar" >> "$GITHUB_ENV"
 
       - run: scripts/check-android-release.sh android/app/build/outputs/apk/release/app-release.apk
 
-      # The notices of the Licenses screen must match what this build ships, every dependency
-      # under an allowed license with its text (docs/decisions/0043-third-party-licenses.md).
-      - run: scripts/update-licenses.sh --check
+      # The bundle, then its universal APK, through the same checks. The notices of the Licenses
+      # screen must match that APK, every dependency under an allowed license with its text
+      # (docs/decisions/0043-third-party-licenses.md, 0046-android-bundle-and-upload-key.md).
+      - run: scripts/check-android-release.sh android/app/build/outputs/bundle/release/app-release.aab
 
   ios-build:
     name: ios-build

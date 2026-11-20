@@ -124,6 +124,16 @@ describe('URL schemes', () => {
   });
 });
 
+describe('release signing', () => {
+  it.each([['production'], [undefined]])('is set up in the %s variant', (variant) => {
+    expect(modsOf(configFor(variant))?.android?.appBuildGradle).toBeDefined();
+  });
+
+  it('is left out of the development variant', () => {
+    expect(modsOf(configFor('development'))?.android?.appBuildGradle).toBeUndefined();
+  });
+});
+
 describe('the Android filter', () => {
   it.each([['production'], [undefined], ['development']])(
     'ships with its lists in the %s variant',

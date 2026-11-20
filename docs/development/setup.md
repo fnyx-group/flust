@@ -65,7 +65,7 @@ Only needed to build Android locally and to run the release check ([Release](rel
 
        "$ANDROID_HOME"/cmdline-tools/latest/bin/sdkmanager --licenses
 
-4. The release check reads a bundle with bundletool. Download its jar from the [GitHub releases](https://github.com/google/bundletool/releases), check it against the SHA-256 that GitHub shows next to the file on the release page, and export its path:
+4. The release check reads a bundle with bundletool, at the version CI pins in `.github/workflows/native.yml`. Download its jar from the [GitHub releases](https://github.com/google/bundletool/releases), check it against the SHA-256 that GitHub shows next to the file on the release page, and export its path:
 
        mkdir -p ~/tools
        curl -fL -o ~/tools/bundletool-all-1.18.3.jar https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
@@ -73,6 +73,8 @@ Only needed to build Android locally and to run the release check ([Release](rel
        echo 'export BUNDLETOOL="$HOME/tools/bundletool-all-1.18.3.jar"' >> ~/.bashrc
 
    For a newer version, take the SHA-256 from its release page. A mismatch means the file is not the one Google published: delete it.
+
+   The check also uses `zipalign` from the newest build-tools of the SDK, and `llvm-readelf` from the newest NDK, which the first Gradle build installs.
 
 ## End-to-end tests
 

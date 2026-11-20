@@ -2,32 +2,95 @@
 
 The checks before each store release, in order. A release that fails one is not submitted.
 
-1. `main` is green in CI, every job of the three workflows ([Testing](testing.md#ci)), the native builds included: the Android check and the iOS URL type check have passed on a production build of the release commit.
-2. The builds come from the `production` profile on EAS (see [Setup](setup.md#development-build)).
-3. The Android build contains no Firebase, Google Play services or Install Referrer code, and no manifest entries for them ([0021](../decisions/0021-local-notifications.md)). It requests the expected permissions only, none of those blocked in production ([0030](../decisions/0030-production-android-permissions.md)). It registers no URL scheme: no intent filter with a `VIEW` action and a data scheme ([0035](../decisions/0035-no-url-scheme-in-production.md)). Run the check on the bundle EAS produced, with `BUNDLETOOL` set (see [Setup](setup.md#android-build-tools)):
+1. `main` is green in CI, every job of the three workflows ([Testing](testing.md#ci)), the native builds included: the Android check, on the release APK and on the bundle, and the iOS URL type check have passed on a production build of the release commit.
+2. The version is raised in `app.json`: `expo.version` for the user, and for Android `expo.android.versionCode`, a whole number greater than the one of the last upload to Google Play, at most 2,100,000,000. The release check fails on a build whose version differs from `app.json`.
+3. The Android bundle for Google Play is built and checked locally from the release commit, signed with the upload key: see [Android bundle](#android-bundle). The iPhone build comes from the `production` profile on EAS (see [Setup](setup.md#development-build)).
+4. The Android bundle passes the release check, which `scripts/build-android-bundle.sh` runs:
+   - The build contains no Firebase, Google Play services or Install Referrer code, and no manifest entries for them ([0021](../decisions/0021-local-notifications.md)).
+   - It requests the expected permissions only, none of those blocked in production ([0030](../decisions/0030-production-android-permissions.md)).
+   - It registers no URL scheme, meaning no intent filter with a `VIEW` action and a data scheme ([0035](../decisions/0035-no-url-scheme-in-production.md)).
+   - It is what Google Play accepts: the production package, not debuggable, the target API level Play requires, the version of `app.json`, 64-bit native libraries aligned for 16 KB pages, and the R8 mapping and native symbols in the bundle. It is signed with the upload key ([0046](../decisions/0046-android-bundle-and-upload-key.md)).
+   - Its universal APK passes the same checks, and the Licenses screen lists what it ships: every dependency has its text and a license allowed by `scripts/licenses/allowed.ts` ([0043](../decisions/0043-third-party-licenses.md)).
 
-       scripts/check-android-release.sh path/to/flust.aab
+   The check lists the permissions the build requests and prints its signer. It exits with 1 and lists what it found when the build has something it must not ship, and with 2 when it cannot read the build. A new permission is either blocked, or added to `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts` and to the script, with a reason.
 
-   CI already runs it on a release APK built from each change to a native path; this run is on what EAS built. It lists the permissions the build requests. It exits with 1 and lists what it found when the build has something it must not ship, including a permission outside the expected list or a URL scheme, and with 2 when it cannot read the build. A new permission is either blocked, or added to `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts` and to the script, with a reason.
-
-4. The Licenses screen lists what the build ships: `scripts/update-licenses.sh --check` passes on the production release APK of the release commit, which CI already runs. Every dependency has its text and a license allowed by `scripts/licenses/allowed.ts` ([0043](../decisions/0043-third-party-licenses.md)).
 5. Every help number was checked against its official sources within the last 400 days, which the review test enforces. Check them again every year ([0027](../decisions/0027-offline-help-resources.md)).
-6. The Maestro flows pass on a local production release APK built from the release commit ([Testing](testing.md#end-to-end)), and the [manual checklist](manual-checklist.md) is done for the platforms being released.
+6. The Maestro flows pass on the field APK of the release bundle ([Testing](testing.md#end-to-end)), and the [manual checklist](manual-checklist.md) is done for the platforms being released.
 7. The release goes out as a phased rollout on both stores ([Scenarios](../product/scenarios.md#production-incidents)).
+
+## Upload key
+
+Google Play signs the APKs it delivers with an app signing key that Google generates and holds (Play App Signing). Each bundle sent to Play is signed with the upload key, which only the maintainer has. Neither key, nor its passwords, ever goes into the repository: `.gitignore` covers `*.jks`, `*.keystore` and `keystore.properties`, but the keystore belongs outside the repository anyway.
+
+Once, before the first upload:
+
+1. Create the keystore outside the repository, with an RSA key of 4,096 bits valid for about 27 years. `keytool` asks for a password and the certificate's name fields. A PKCS12 keystore uses its store password for the key too:
+
+       mkdir -p ~/.config/flust && chmod 700 ~/.config/flust
+       keytool -genkeypair -v -storetype PKCS12 -keystore ~/.config/flust/flust-upload.jks \
+         -alias flust-upload -keyalg RSA -keysize 4096 -validity 10000
+
+2. Keep the password in a password manager. Back up the keystore to an encrypted medium kept offline, apart from the computer. If the key is lost or leaked, Google Play can register a new upload key on request. Apps already installed are not affected, since the app signing key does not change.
+3. Write the certificate's SHA-256 into `upload_certificate_sha256` of `scripts/check-android-release.sh`, in place of the placeholder, and commit it. A certificate fingerprint is public. Until then, `--upload` fails on every bundle:
+
+       keytool -list -v -keystore ~/.config/flust/flust-upload.jks -alias flust-upload | grep SHA256:
+
+4. Give the key to Gradle, either for the release session only, which keeps the password out of every file:
+
+       export ORG_GRADLE_PROJECT_flustUploadStoreFile="$HOME/.config/flust/flust-upload.jks"
+       export ORG_GRADLE_PROJECT_flustUploadKeyAlias=flust-upload
+       read -rs ORG_GRADLE_PROJECT_flustUploadStorePassword && export ORG_GRADLE_PROJECT_flustUploadStorePassword
+       export ORG_GRADLE_PROJECT_flustUploadKeyPassword="$ORG_GRADLE_PROJECT_flustUploadStorePassword"
+
+   or in `~/.gradle/gradle.properties`, outside the repository and readable by you only (`chmod 600`), with the same four properties: `flustUploadStoreFile`, an absolute path, `flustUploadStorePassword`, `flustUploadKeyAlias` and `flustUploadKeyPassword`. The build fails when only some of them are set.
+
+In the distrobox, `~` is the container's home folder, the one Gradle reads.
+
+## Android bundle
+
+The bundle comes from the production prebuild and the same release build type as the release APK: the same R8 settings, resources, JavaScript bundle and filter lists. It differs in how it is packaged, not in what it holds. Google Play splits it into APKs by ABI, screen density and language, signs them with the app signing key, and keeps the R8 mapping and native symbols that the bundle carries in `BUNDLE-METADATA/`.
+
+It needs the [Android build tools](setup.md#android-build-tools), bundletool included.
+
+1. With the upload key set (step 4 above), from a clean working tree on the release commit:
+
+       scripts/build-android-bundle.sh --upload --field-apk
+
+   It runs the production prebuild, `./gradlew bundleRelease` for every ABI, then `scripts/check-android-release.sh --upload` on the bundle. The check also builds the bundle's universal APK, runs every APK check on it, and checks the Licenses screen against it.
+
+2. It keeps the build in a new folder of `~/flust-releases`, or of `$FLUST_RELEASE_DIR`, outside the repository, since the next prebuild deletes `android/`. The folder is named after the version, the commit and the time. Keep it for as long as the release can send crash reports:
+   - `flust-<version>-<versionCode>-upload.aab`, the bundle to upload.
+   - `-mapping.txt` and `-native-debug-symbols.zip`, which Play already reads from the bundle. They are kept in case Play asks for them again, and to read a stack trace locally.
+   - `-index.android.bundle.map`, the JavaScript source map.
+   - `-field.apk`, with `--field-apk`.
+   - `SHA256SUMS`, the hashes of all of them.
+
+3. Upload the `.aab` to Google Play Console.
+
+Without `--upload`, the same script builds a bundle signed with the debug key from a working tree with changes, for local checks and field tests. Its files end in `-debug-signed`, the check says it is signed with the debug key, and Google Play refuses it.
+
+### Field tests
+
+`--field-apk` turns the checked bundle into its universal APK, which holds every ABI, density and language, signed with the debug key of the generated project, the same as the local release APK. Install it on a phone or the emulator, and run the Maestro flows on it:
+
+    adb install -r ~/flust-releases/<folder>/flust-<version>-<versionCode>-field.apk
+    scripts/e2e-android.sh --apk ~/flust-releases/<folder>/flust-<version>-<versionCode>-field.apk
+
+The field APK and the Google Play build have different signers: Android refuses to install one over the other. Moving a phone from one to the other needs an uninstall, which deletes all of flust's local data, with no way to recover it. Tell field testers before they install it, and use test data only.
 
 ## Local production build
 
-To check a production build before EAS, or after a dependency change, build a release APK in the distrobox. It needs the Android SDK and the JDK set up as described in [Setup](setup.md#android-build-tools).
+To check a production build after a dependency change, build a release APK in the distrobox. It needs the Android SDK and the JDK set up as described in [Setup](setup.md#android-build-tools).
 
 1. Generate the native project for the production variant. `--clean` deletes `android/` first, so local changes there are lost, which is expected since it is generated:
 
        APP_VARIANT=production pnpm expo prebuild --platform android --clean
 
-2. Build the release APK. Gradle downloads its dependencies, and the NDK and CMake versions it needs into the SDK, the first time. The template signs the release build with the debug key: the APK installs on a test device, but is not for the stores.
+2. Build the release APK. Gradle downloads its dependencies, and the NDK and CMake versions it needs into the SDK, the first time. Without the upload key, the release build is signed with the debug key: the APK installs on a test device, but is not for the stores.
 
        (cd android && ./gradlew assembleRelease)
 
-3. Run the check on it. It prints every permission the build requests, then fails on Firebase or Google Play services code, a blocked permission, an unexpected one, a URL scheme, or a build without the content filter's VPN service and its two permissions:
+3. Run the check on it. It prints every permission the build requests, then fails on Firebase or Google Play services code, a blocked permission, an unexpected one, a URL scheme, a build without the content filter's VPN service and its two permissions, or a build Google Play refuses:
 
        scripts/check-android-release.sh android/app/build/outputs/apk/release/app-release.apk
 
@@ -44,6 +107,8 @@ To check a production build before EAS, or after a dependency change, build a re
 6. Go back to the development variant before working with Metro again:
 
        APP_VARIANT=development pnpm expo prebuild --platform android --clean
+
+The prebuild rewrites the `android` and `ios` scripts of `package.json`. `scripts/build-android-bundle.sh` puts the file back. After a prebuild by hand, restore it with `git checkout package.json`.
 
 ## Local iOS build
 
