@@ -966,12 +966,20 @@
     "refused": "Sans ton accord dans Android, le filtre ne peut pas démarrer.",
     "failed": "Le filtre n'a pas pu démarrer. Réessaie.",
     "measure": "Mesurer les listes",
-    "measured": "{{entries}} domaines, {{kilobytes}} Ko, chargés en {{load}} ms, {{decide}} µs par nom."
+    "measured": "{{entries}} domaines, {{kilobytes}} Ko, chargés en {{load}} ms, {{decide}} µs par nom.",
+    "measuredStart": "Le dernier démarrage a pris {{total}} ms en tout, listes {{lists}} ms, certificats {{trust}} ms, tunnel {{establish}} ms.",
+    "measuredStartCached": "Le dernier démarrage a pris {{total}} ms en tout, listes déjà chargées ({{lists}} ms), certificats {{trust}} ms, tunnel {{establish}} ms.",
+    "measuredNoStart": "Le tunnel n'a pas démarré depuis l'ouverture de flust."
   },
   "licenses": {
     "title": "Licences",
     "back": "Retour",
-    "intro": "Les listes du filtre viennent de ces projets, sous leurs licences.",
-    "source": "{{name}}, {{license}}"
+    "intro": "flust repose sur ces projets, sous leurs licences, des sources des listes du filtre aux bibliothèques de l'app.",
+    "lists": "Listes du filtre",
+    "libraries": "Bibliothèques de l'app",
+    "details": "{{version}}, {{license}}",
+    "showText": "Affiche le texte de la licence.",
+    "hideText": "Masque le texte de la licence.",
+    "rowLabel": "{{name}}, {{details}}"
   }
 }

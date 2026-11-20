@@ -15,22 +15,30 @@ import javax.crypto.spec.GCMParameterSpec
 // a key of their own in the Android Keystore, never the database's: the VPN service runs without
 // the app and must not touch the database or its key (docs/decisions/0033). Kept in the no-backup
 // directory. A file that cannot be read gives the defaults, with the filter off.
+//
+// The settings are decrypted once per process and kept in memory: the app reads them with the
+// status every two seconds, on the JavaScript thread. Every writer runs in this process, so the
+// copy cannot fall behind the file. A failed read is not kept, so a passing Keystore error does
+// not turn the filter off for the life of the process.
 class FilterConfigStore(context: Context) {
   private val file = File(context.noBackupFilesDir, FILE_NAME)
 
   fun load(): FilterConfig = synchronized(LOCK) {
-    if (!file.exists()) return FilterConfig()
+    cached?.let { return it }
+    if (!file.exists()) return FilterConfig().also { cached = it }
     try {
       val stored = file.readBytes()
       val cipher = Cipher.getInstance(TRANSFORMATION)
       cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(TAG_BITS, stored, 0, IV_BYTES))
       FilterConfig.decode(String(cipher.doFinal(stored, IV_BYTES, stored.size - IV_BYTES), Charsets.UTF_8))
+        .also { cached = it }
     } catch (error: Exception) {
       FilterConfig()
     }
   }
 
   fun save(config: FilterConfig) = synchronized(LOCK) {
+    cached = null
     val cipher = Cipher.getInstance(TRANSFORMATION)
     cipher.init(Cipher.ENCRYPT_MODE, key())
     val sealed = cipher.iv + cipher.doFinal(config.encode().toByteArray(Charsets.UTF_8))
@@ -41,6 +49,7 @@ class FilterConfigStore(context: Context) {
         stream.fd.sync()
       }
       if (!temporary.renameTo(file)) throw IllegalStateException("Cannot save the filter settings")
+      cached = config
     } finally {
       temporary.delete()
     }
@@ -68,5 +77,6 @@ class FilterConfigStore(context: Context) {
     const val IV_BYTES = 12
     const val TAG_BITS = 128
     val LOCK = Any()
+    var cached: FilterConfig? = null
   }
 }

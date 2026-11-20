@@ -142,7 +142,7 @@ TalkBack is in Settings, Accessibility, TalkBack. The font scale can be set with
 These run on the production APK of [Release](release.md#local-production-build), installed with `adb install -r android/app/build/outputs/apk/release/app-release.apk`. The `adb` commands use `org.fnyxgroup.flust`. Steps 2 and 3 need the development build, which has the measure of the lists and the filter's log. The measurements on a real phone, a network that blocks port 853 and an app that queries a resolver directly belong to the field tests of lot 4.
 
 1. A fresh install: the onboarding shows "Un filtre pour tout le téléphone" after the plan, with the disclosure in full. "Plus tard" goes on to the start, and Settings, Filtre reads Désactivé.
-2. Development build: Filtre, Mesurer les listes: 304,083 domains, 2,673 KB. Write down the load time and the cost per name.
+2. Development build: Filtre, Mesurer les listes: 304,083 domains, 2,673 KB. Write down the load time and the cost per name. Before the filter starts, the second line says the tunnel has not started. Turn the filter on and measure again: the second line gives the last start's total, then its lists, certificates and tunnel. Turn Strict YouTube on and measure: the lists read as already loaded, and the start is shorter.
 3. Development build: the Filtre row and screen work as in production, with the measure at the bottom. Turn the filter on, then off: `adb logcat -d -s FlustFilter` shows `Tunnel stopped: stopped`, and nothing else from the filter. On the production APK, the same command shows nothing.
 4. Turn the filter on from its screen: the disclosure sheet shows first, then Android's VPN dialog. After OK, the state reads that the filter protects, and the key icon shows in the status bar.
 5. Blocking: `adb shell ping -c 1 pornhub.com` and `www.pornhub.com` answer `unknown host`, and Chrome shows `ERR_NAME_NOT_RESOLVED`. `cloth-off.io` and `janitorai.com` too. `adb shell ping -c 1 wikipedia.org` and `character.ai` resolve, and Wikipedia loads in Chrome.
@@ -163,7 +163,7 @@ These run on the production APK of [Release](release.md#local-production-build),
 20. Reboot: `adb reboot`, then, without opening flust, `adb shell ping -c 1 pornhub.com` answers `unknown host` once the phone is up. If Android refused the start, flust reads that the filter resumes when it opens, not an error, and opening it brings the filter back.
 21. Turned off in the system: disconnect the VPN in Settings, Network, VPN. The filter screen reads that it was turned off in Android's settings, with "Réactiver le filtre", which brings it back without a dialog.
 22. Another VPN: install a second VPN app and connect it. The filter screen reads that another VPN took over; "Réactiver le filtre" shows the disclosure, then Android's dialog, and the other VPN disconnects.
-23. Licenses: About, Licences shows ShadowWhisperer (Unlicense), Sinfonietta and 4skinSkywalker (MIT) and aegis (CC0-1.0) with their full texts.
+23. Licenses: About, Licences shows two groups. Listes du filtre: ShadowWhisperer (Unlicense), Sinfonietta and 4skinSkywalker (MIT) and aegis (CC0-1.0). Bibliothèques de l'app: the libraries with their version and license, from `@expo-google-fonts/barlow-condensed` to `Zstandard`. A tap on a row shows its text, another hides it, and TalkBack reads whether it is expanded.
 24. The release check passes on the production APK: `scripts/check-android-release.sh android/app/build/outputs/apk/release/app-release.apk` lists `INTERNET` and `ACCESS_NETWORK_STATE`, and the filter's VPN service.
 
 ## iOS

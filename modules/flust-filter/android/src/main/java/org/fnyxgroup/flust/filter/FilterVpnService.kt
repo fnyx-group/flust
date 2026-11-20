@@ -8,8 +8,11 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 // A local VPN that carries DNS only (docs/product/content-filter.md). It reads its settings from
 // FilterConfigStore and the compiled lists from the app's assets, never from the database.
@@ -21,12 +24,18 @@ class FilterVpnService : VpnService() {
     val config: FilterConfig,
   )
 
+  // What a start reads off the main thread, before any tunnel exists.
+  private class Prepared(val lists: Blocklist, val listsMillis: Double, val listsCached: Boolean, val trustMillis: Double)
+
   private var tunnel: Tunnel? = null
   private var generation = 0
   private val main = Handler(Looper.getMainLooper())
+  private val starts = TunnelStarts()
+  private val preparation: ExecutorService = Executors.newSingleThreadExecutor { task -> Thread(task, "flust-filter-start") }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     if (intent?.action == ACTION_STOP) {
+      starts.cancel()
       stopTunnel(StopReason.STOPPED)
       stopSelf()
       return START_NOT_STICKY
@@ -43,34 +52,68 @@ class FilterVpnService : VpnService() {
       }
     }
     if (!config.enabled) {
+      starts.cancel()
       stopTunnel(StopReason.STOPPED)
       stopSelf()
       return START_NOT_STICKY
     }
-    if (tunnel?.config == config) return START_STICKY
-    return if (startTunnel(config)) START_STICKY else START_NOT_STICKY
+    if (!starts.covers(config, tunnel?.config)) prepare(config)
+    return START_STICKY
   }
 
   override fun onRevoke() {
+    starts.cancel()
     stopTunnel(StopReason.REVOKED)
     super.onRevoke()
   }
 
   override fun onDestroy() {
+    starts.cancel()
+    preparation.shutdownNow()
     if (tunnel != null) FilterLog.stopped(this, null)
     stopTunnel(null)
+    FilterLists.release()
     super.onDestroy()
   }
 
-  // Sets up a new tunnel, then closes the one it replaces, so lookups never leave the filter in
-  // between. A new tunnel also empties Android's DNS cache (TunnelRoutes.DNS): a name cached
-  // before a stronger setting would otherwise still resolve until its answer expires.
-  private fun startTunnel(config: FilterConfig): Boolean {
-    val lists = try {
-      Blocklist.read(assets.open(LISTS_ASSET).use { it.readBytes() })
-    } catch (unreadable: Exception) {
-      return fail(StopReason.LISTS, unreadable)
+  // Reads the lists and the system certificates off the main thread, where they took long enough
+  // on slow phones to freeze flust. A running tunnel keeps filtering with its settings meanwhile,
+  // and the new one is set up only once its lists are in memory, so a tunnel is never up without
+  // them. A start that a stop, a revoked consent or newer settings made stale
+  // is dropped (TunnelStarts).
+  private fun prepare(config: FilterConfig) {
+    val ticket = starts.begin(config)
+    val requested = SystemClock.elapsedRealtimeNanos()
+    preparation.execute {
+      val step = try {
+        val listsCached = FilterLists.cached
+        val listsStarted = SystemClock.elapsedRealtimeNanos()
+        val lists = FilterLists.get(this)
+        val trustStarted = SystemClock.elapsedRealtimeNanos()
+        val failure: Throwable? = try {
+          SystemTrust.context()
+          null
+        } catch (untrusted: Exception) {
+          untrusted
+        }
+        val trusted = SystemClock.elapsedRealtimeNanos()
+        val prepared = Prepared(lists, millis(listsStarted, trustStarted), listsCached, millis(trustStarted, trusted))
+        Runnable {
+          if (!starts.finish(ticket)) return@Runnable
+          if (failure != null) fail(StopReason.FAILED, failure) else startTunnel(config, prepared, requested)
+        }
+      } catch (unreadable: Exception) {
+        Runnable { if (starts.finish(ticket)) fail(StopReason.LISTS, unreadable) }
+      }
+      main.post(step)
     }
+  }
+
+  // Sets up a new tunnel, then closes the one it replaces, so lookups never leave the filter in
+  // between. Android's resolver keeps the answers it cached before (TunnelRoutes.DNS), so SafeSearch
+  // answers last a minute at most (Dns.rewritten).
+  private fun startTunnel(config: FilterConfig, prepared: Prepared, requested: Long): Boolean {
+    val establishing = SystemClock.elapsedRealtimeNanos()
     var descriptor: ParcelFileDescriptor? = null
     var started: FilterEngine? = null
     try {
@@ -79,7 +122,7 @@ class FilterVpnService : VpnService() {
       descriptor = established
       val transport = ResolverTransport(Quad9.ENDPOINT, { socket -> protect(socket) }, SystemTrust.context())
       val upstream = DotClient(transport::connect, System::currentTimeMillis)
-      val engine = FilterEngine(lists, config, upstream, upstream::close)
+      val engine = FilterEngine(prepared.lists, config, upstream, upstream::close)
       started = engine
       val reader = Thread({
         engine.run(FileInputStream(established.fileDescriptor), FileOutputStream(established.fileDescriptor))
@@ -107,8 +150,18 @@ class FilterVpnService : VpnService() {
     }
     FilterStatus.running = true
     FilterStatus.recordStop(this, null)
+    val running = SystemClock.elapsedRealtimeNanos()
+    FilterStatus.lastStart = TunnelStartTiming(
+      listsMillis = prepared.listsMillis,
+      listsCached = prepared.listsCached,
+      trustMillis = prepared.trustMillis,
+      establishMillis = millis(establishing, running),
+      totalMillis = millis(requested, running),
+    )
     return true
   }
+
+  private fun millis(from: Long, to: Long): Double = (to - from) / 1_000_000.0
 
   private fun fail(reason: StopReason, error: Throwable? = null): Boolean {
     FilterLog.stopped(this, reason, error)
@@ -161,7 +214,6 @@ class FilterVpnService : VpnService() {
   companion object {
     const val ACTION_START = "org.fnyxgroup.flust.filter.START"
     const val ACTION_STOP = "org.fnyxgroup.flust.filter.STOP"
-    const val LISTS_ASSET = "filter-lists.bin"
 
     fun start(context: Context) {
       context.startService(Intent(context, FilterVpnService::class.java).setAction(ACTION_START))

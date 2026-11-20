@@ -125,12 +125,52 @@ describe('the filter bridge', () => {
     await expect(bridge.measure()).resolves.toBeNull();
   });
 
-  it('reads the measurements', async () => {
+  it('reads the measurements, without a start when the tunnel has not started yet', async () => {
     await expect(createFilterBridge(native()).measure()).resolves.toEqual({
       entries: 304114,
       bytes: 2737038,
       loadMillis: 41.5,
       decideMicros: 6.2,
+      start: null,
     });
+  });
+
+  it('reads the phases of the last tunnel start', async () => {
+    const start = {
+      listsMillis: 38.2,
+      listsCached: false,
+      trustMillis: 120.4,
+      establishMillis: 9.1,
+      totalMillis: 171.3,
+    };
+    const bridge = createFilterBridge(
+      native({
+        measure: async () => ({
+          entries: 304114,
+          bytes: 2737038,
+          loadMillis: 41.5,
+          decideMicros: 6.2,
+          start,
+        }),
+      }),
+    );
+
+    await expect(bridge.measure()).resolves.toMatchObject({ start });
+  });
+
+  it('ignores a start it cannot read, and keeps the measure of the lists', async () => {
+    const bridge = createFilterBridge(
+      native({
+        measure: async () => ({
+          entries: 304114,
+          bytes: 2737038,
+          loadMillis: 41.5,
+          decideMicros: 6.2,
+          start: { listsMillis: 'slow', listsCached: true },
+        }),
+      }),
+    );
+
+    await expect(bridge.measure()).resolves.toMatchObject({ entries: 304114, start: null });
   });
 });

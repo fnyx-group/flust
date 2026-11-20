@@ -1,0 +1,19 @@
+{
+  "npm:@expo/ui": { "text": "expo.txt" },
+  "npm:@react-native/asset-utils": { "text": "react-native.txt" },
+  "npm:@react-native/js-polyfills": { "text": "react-native.txt" },
+  "npm:@react-native/normalize-colors": { "text": "react-native.txt" },
+  "npm:@react-native/virtualized-lists": { "text": "react-native.txt" },
+  "npm:expo-router": { "text": "expo.txt" },
+  "npm:standard-navigation": { "text": "standard-navigation.txt" },
+  "maven:com.facebook.fresco": { "text": "fresco.txt" },
+  "maven:com.facebook.hermes:hermes-android": { "text": "hermes.txt" },
+  "maven:com.facebook.infer.annotation:infer-annotation": { "text": "infer-annotation.txt" },
+  "maven:com.facebook.react:react-android": { "text": "react-native.txt" },
+  "maven:com.facebook.yoga:proguard-annotations": { "text": "react-native.txt" },
+  "maven:com.parse.bolts:bolts-tasks": { "license": "BSD-3-Clause", "text": "bolts.txt" },
+  "maven:io.github.expo": { "text": "expo.txt" },
+  "maven:io.github.expo.kolibri": { "text": "expo.txt" },
+  "maven:io.github.expo.pika": { "text": "expo.txt" },
+  "maven:org.brotli:dec": { "text": "brotli.txt" }
+}

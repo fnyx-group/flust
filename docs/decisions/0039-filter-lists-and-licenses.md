@@ -20,4 +20,4 @@ The filter needs large lists of adult domains ([0038](0038-content-filter.md)). 
 - Two different domains sharing an 8-byte prefix would mix their categories. The build fails on such a collision.
 - A domain copied by hand from an excluded list without naming it cannot be detected. Review of `lists/` changes covers it.
 - The license texts of every source, MIT, Unlicense and CC0, are shown on a Licenses screen in About from lot 2, on the platforms that ship the lists. A copy in `src/features/settings/list-licenses.ts` is tested against each `LICENSE`. Its URLs are text to read, which the source scan of [0030](0030-production-android-permissions.md) allows in that file.
-- Before the store release, the Licenses screen must also cover the JavaScript and native dependencies shipped in the APK (lot 4).
+- Before the store release, the Licenses screen also covers the JavaScript and native dependencies shipped in the APK ([0043](0043-third-party-licenses.md)).

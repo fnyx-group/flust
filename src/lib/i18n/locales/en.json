@@ -966,12 +966,20 @@
     "refused": "Without your consent in Android, the filter cannot start.",
     "failed": "The filter could not start. Try again.",
     "measure": "Measure the lists",
-    "measured": "{{entries}} domains, {{kilobytes}} KB, loaded in {{load}} ms, {{decide}} µs per name."
+    "measured": "{{entries}} domains, {{kilobytes}} KB, loaded in {{load}} ms, {{decide}} µs per name.",
+    "measuredStart": "The last start took {{total}} ms in all, lists {{lists}} ms, certificates {{trust}} ms, tunnel {{establish}} ms.",
+    "measuredStartCached": "The last start took {{total}} ms in all, lists already loaded ({{lists}} ms), certificates {{trust}} ms, tunnel {{establish}} ms.",
+    "measuredNoStart": "The tunnel has not started since flust opened."
   },
   "licenses": {
     "title": "Licenses",
     "back": "Back",
-    "intro": "The filter's lists come from these projects, under their licenses.",
-    "source": "{{name}}, {{license}}"
+    "intro": "flust is built on these projects, under their licenses, from the sources of the filter's lists to the libraries of the app.",
+    "lists": "Filter lists",
+    "libraries": "App libraries",
+    "details": "{{version}}, {{license}}",
+    "showText": "Shows the license text.",
+    "hideText": "Hides the license text.",
+    "rowLabel": "{{name}}, {{details}}"
   }
 }

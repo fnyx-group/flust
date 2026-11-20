@@ -1,9 +1,8 @@
 import { router } from 'expo-router';
 import type { ComponentType } from 'react';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import { Linking, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { filterOffered } from '@/features/filter/filter-native';
 import { appVersion } from '@/features/settings/app-version';
 import { SOURCE_URL, WEBSITE_URL } from '@/features/settings/labels';
 import { displayUrl } from '@/features/shared/display-url';
@@ -68,7 +67,8 @@ export function AboutScreen() {
             accessibilityHint={t('about.linkHint', { address: displayUrl(SOURCE_URL) })}
             onPress={() => open(SOURCE_URL)}
           />
-          {filterOffered() && (
+          {/* The notices list what the Android build ships; the iPhone's come with lot 3. */}
+          {Platform.OS === 'android' && (
             <NavRow
               label={t('about.licenses')}
               icon={{ icon: DocumentIcon, color: colors.textSecondary }}

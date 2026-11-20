@@ -152,7 +152,7 @@ The filter has two controls only, Filter and Strict YouTube. While it is on, it 
 - a strict mode that blocks the usual bypasses on Android,
 - enforced SafeSearch on Google, Bing, DuckDuckGo and YouTube through DNS, on Android only, with YouTube moderate, or strict with the switch.
 
-Turning the filter or Strict YouTube on is immediate. Turning either off waits 20 minutes, then asks once more, and the request expires after 10 minutes without an answer ([0040](../decisions/0040-filter-delay.md)). flust says when the filter is inactive and why, on the filter screen and with a chip on home. A Licenses screen in About shows the license texts of the lists.
+Turning the filter or Strict YouTube on is immediate. Turning either off waits 20 minutes, then asks once more, and the request expires after 10 minutes without an answer ([0040](../decisions/0040-filter-delay.md)). flust says when the filter is inactive and why, on the filter screen and with a chip on home. A Licenses screen in About shows the license texts of the lists and of the app's libraries ([0043](../decisions/0043-third-party-licenses.md)).
 
 The onboarding gets a filter step on Android, with Google Play's disclosure before the VPN consent and a "Plus tard" choice ([0042](../decisions/0042-filter-onboarding-and-disclosure.md)).
 

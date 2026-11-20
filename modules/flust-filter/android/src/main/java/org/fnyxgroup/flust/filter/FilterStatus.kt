@@ -15,18 +15,43 @@ enum class StopReason(val code: String) {
   BOOT_DEFERRED("boot-deferred"),
 }
 
+// How long the last start of the tunnel took, for the measure of the development build. Lists and
+// trust run off the main thread, establish on it; total counts from the request to the running
+// tunnel.
+data class TunnelStartTiming(
+  val listsMillis: Double,
+  val listsCached: Boolean,
+  val trustMillis: Double,
+  val establishMillis: Double,
+  val totalMillis: Double,
+)
+
+// The status the app reads every two seconds while the filter screen is open. Kept in memory, so
+// a read touches no storage: the service, the boot receiver and the module share one process.
 object FilterStatus {
   private const val PREFERENCES = "flust-filter-status"
   private const val STOP_REASON = "stop-reason"
 
   @Volatile var running = false
 
+  @Volatile var lastStart: TunnelStartTiming? = null
+
+  @Volatile private var reason: String? = null
+  @Volatile private var reasonLoaded = false
+
   fun recordStop(context: Context, reason: StopReason?) {
+    this.reason = reason?.code
+    reasonLoaded = true
     context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit()
       .putString(STOP_REASON, reason?.code)
       .apply()
   }
 
-  fun stopReason(context: Context): String? =
-    context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getString(STOP_REASON, null)
+  fun stopReason(context: Context): String? {
+    if (!reasonLoaded) {
+      reason = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getString(STOP_REASON, null)
+      reasonLoaded = true
+    }
+    return reason
+  }
 }

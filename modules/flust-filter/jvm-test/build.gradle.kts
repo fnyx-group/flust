@@ -34,6 +34,7 @@ kotlin {
         "**/SafeSearch.kt",
         "**/TcpDnsResponder.kt",
         "**/TunnelRoutes.kt",
+        "**/TunnelStarts.kt",
       )
     }
     test {

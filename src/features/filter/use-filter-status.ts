@@ -17,7 +17,8 @@ export function filterStatusChanged() {
 
 // The filter's status, read again when the screen comes into focus, when flust comes back to the
 // foreground, since it changes from the system settings, and on filterStatusChanged. `poll` also
-// reads it every two seconds, for the screen that shows it in full.
+// reads it every two seconds, for the screen that shows it in full: the native side answers from
+// memory, without decrypting the settings (modules/flust-filter, FilterConfigStore).
 export function useFilterStatus({ poll = false }: { poll?: boolean } = {}) {
   const [status, setStatus] = useState<FilterStatus>(() => filterBridge.status());
   const refresh = useCallback(() => setStatus(filterBridge.status()), []);

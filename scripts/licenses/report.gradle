@@ -1,0 +1,87 @@
+// Lists what the release build of the app ships from Gradle, for scripts/build-licenses.ts: the
+// Maven modules of the release runtime classpath with the licenses their POMs declare, following
+// parent POMs, and the path of their POM, and the library projects with the folder they come from. An init script, so the
+// build itself is unchanged and no plugin is needed:
+//
+//   ./gradlew --init-script ../scripts/licenses/report.gradle --no-configuration-cache \
+//     :app:flustLicenseReport -PflustLicenseReport=<file>
+import groovy.json.JsonOutput
+import javax.xml.parsers.DocumentBuilderFactory
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
+import org.gradle.api.artifacts.result.ResolvedArtifactResult
+import org.gradle.maven.MavenModule
+import org.gradle.maven.MavenPomArtifact
+
+gradle.beforeProject { project ->
+  if (project.path != ':app') return
+  project.afterEvaluate {
+    project.tasks.register('flustLicenseReport') {
+      doLast {
+        def output = project.findProperty('flustLicenseReport')
+        if (output == null) throw new GradleException('Pass -PflustLicenseReport=<file>')
+        def classpath = project.configurations.getByName('releaseRuntimeClasspath')
+        def components = classpath.incoming.resolutionResult.allComponents
+        def poms = [:]
+
+        // The POM of a module, resolved on its own: the classpath holds the artifacts only.
+        def pomOf = { String group, String name, String version ->
+          def key = "$group:$name:$version"
+          if (!poms.containsKey(key)) {
+            def result = project.dependencies.createArtifactResolutionQuery()
+              .forModule(group, name, version)
+              .withArtifacts(MavenModule, MavenPomArtifact)
+              .execute()
+            def pom = result.resolvedComponents
+              .collectMany { it.getArtifacts(MavenPomArtifact) }
+              .find { it instanceof ResolvedArtifactResult }
+            if (pom == null) throw new GradleException("No POM for $key")
+            poms[key] = [file: pom.file, root: DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(pom.file).documentElement]
+          }
+          poms[key]
+        }
+
+        // The direct children of an element with this name.
+        def children = { element, String tag ->
+          (0..<element.childNodes.length).collect { element.childNodes.item(it) }
+            .findAll { it.nodeType == org.w3c.dom.Node.ELEMENT_NODE && it.nodeName == tag }
+        }
+        def text = { element, String tag ->
+          def found = children(element, tag)
+          found.isEmpty() ? '' : found[0].textContent.trim()
+        }
+
+        // The licenses of a POM, or of the closest parent that declares some.
+        def licensesOf
+        licensesOf = { String group, String name, String version, int depth ->
+          def pom = pomOf(group, name, version).root
+          def declared = children(pom, 'licenses').collectMany { children(it, 'license') }
+            .collect { [name: text(it, 'name'), url: text(it, 'url')] }
+          def parents = children(pom, 'parent')
+          if (!declared.isEmpty() || depth >= 5 || parents.isEmpty()) return declared
+          def parent = parents[0]
+          licensesOf(text(parent, 'groupId'), text(parent, 'artifactId'), text(parent, 'version'), depth + 1)
+        }
+
+        def maven = []
+        def projects = []
+        components.each { component ->
+          def id = component.id
+          if (id instanceof ModuleComponentIdentifier) {
+            // The POM's path tells a module published from an npm package, as Expo's are.
+            def pom = pomOf(id.group, id.module, id.version).file.canonicalPath
+            maven << [group: id.group, name: id.module, version: id.version, pom: pom, licenses: licensesOf(id.group, id.module, id.version, 0)]
+          } else if (id instanceof ProjectComponentIdentifier && id.projectPath != ':app') {
+            def dir = project.rootProject.project(id.projectPath).projectDir
+            projects << [path: id.projectPath, dir: dir.canonicalPath]
+          }
+        }
+        maven.sort { a, b -> "${a.group}:${a.name}" <=> "${b.group}:${b.name}" }
+        projects.sort { it.path }
+        def file = project.file(output)
+        file.parentFile.mkdirs()
+        file.text = JsonOutput.prettyPrint(JsonOutput.toJson([maven: maven, projects: projects])) + '\n'
+      }
+    }
+  }
+}

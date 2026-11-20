@@ -10,9 +10,10 @@ The checks before each store release, in order. A release that fails one is not 
 
    CI already runs it on a release APK built from each change to a native path; this run is on what EAS built. It lists the permissions the build requests. It exits with 1 and lists what it found when the build has something it must not ship, including a permission outside the expected list or a URL scheme, and with 2 when it cannot read the build. A new permission is either blocked, or added to `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts` and to the script, with a reason.
 
-4. Every help number was checked against its official sources within the last 400 days, which the review test enforces. Check them again every year ([0027](../decisions/0027-offline-help-resources.md)).
-5. The Maestro flows pass on a local production release APK built from the release commit ([Testing](testing.md#end-to-end)), and the [manual checklist](manual-checklist.md) is done for the platforms being released.
-6. The release goes out as a phased rollout on both stores ([Scenarios](../product/scenarios.md#production-incidents)).
+4. The Licenses screen lists what the build ships: `scripts/update-licenses.sh --check` passes on the production release APK of the release commit, which CI already runs. Every dependency has its text and a license allowed by `scripts/licenses/allowed.ts` ([0043](../decisions/0043-third-party-licenses.md)).
+5. Every help number was checked against its official sources within the last 400 days, which the review test enforces. Check them again every year ([0027](../decisions/0027-offline-help-resources.md)).
+6. The Maestro flows pass on a local production release APK built from the release commit ([Testing](testing.md#end-to-end)), and the [manual checklist](manual-checklist.md) is done for the platforms being released.
+7. The release goes out as a phased rollout on both stores ([Scenarios](../product/scenarios.md#production-incidents)).
 
 ## Local production build
 
@@ -34,9 +35,13 @@ To check a production build before EAS, or after a dependency change, build a re
 
        "$ANDROID_HOME"/build-tools/<version>/aapt2 dump permissions android/app/build/outputs/apk/release/app-release.apk
 
-4. Optionally install it with `adb install -r`, next to the development build, which has its own identifier. It runs from its bundled JavaScript only: its `INTERNET` permission serves the content filter, and nothing loads JavaScript from Metro in a release build.
+4. After a dependency change, regenerate the notices of the Licenses screen from this APK and commit `src/features/settings/third-party-licenses.json`. The script fails and says why when a dependency has no license text or a license not allowed, when a native library of the APK is not in `licenses/native.json`, or when an override is no longer used. `--check` compares instead of writing:
 
-5. Go back to the development variant before working with Metro again:
+       scripts/update-licenses.sh
+
+5. Optionally install it with `adb install -r`, next to the development build, which has its own identifier. It runs from its bundled JavaScript only: its `INTERNET` permission serves the content filter, and nothing loads JavaScript from Metro in a release build.
+
+6. Go back to the development variant before working with Metro again:
 
        APP_VARIANT=development pnpm expo prebuild --platform android --clean
 

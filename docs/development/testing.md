@@ -22,7 +22,7 @@ Three workflows run on pull requests and on `main`. Each job has a timeout and o
   - `dependency-review`: the dependencies a pull request adds, failing on a moderate or worse advisory.
 - `codeql.yml`: `codeql (javascript-typescript)` and `codeql (actions)`, also weekly.
 - `native.yml`, also weekly, and on pull requests only when a native path changes (`native-paths` decides; see [0037](../decisions/0037-ci-native-builds.md)):
-  - `android-release`: a production release APK, checked with `scripts/check-android-release.sh`.
+  - `android-release`: a production release APK, checked with `scripts/check-android-release.sh`, and its third-party notices with `scripts/update-licenses.sh --check` ([0043](../decisions/0043-third-party-licenses.md)).
   - `ios-build`: a production Release build for the simulator, without signing, checked with `scripts/check-ios-release.sh`. It is the only place the Swift code of `modules/` compiles before an EAS build.
 
 ## Network

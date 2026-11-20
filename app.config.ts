@@ -3,6 +3,7 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
 import { withAndroidFilter } from './plugins/with-android-filter.ts';
 import { withAndroidNoBackup } from './plugins/with-android-no-backup.ts';
 import { withNoUrlScheme } from './plugins/with-no-url-scheme.ts';
+import { withProductionModules } from './plugins/with-production-modules.ts';
 import { withScreenPrivacy } from './plugins/with-screen-privacy.ts';
 
 const production = { name: 'flust', identifier: 'org.fnyxgroup.flust', scheme: 'flust' };
@@ -75,6 +76,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   // The Android content filter ships in every variant (docs/decisions/0038-content-filter.md).
   // Its log of why the tunnel stopped is a development tool.
   const withFilter = withAndroidFilter(configured, { logs: name === 'development' });
-  // The development build keeps flust-dev, which the dev client is opened with.
-  return production ? withNoUrlScheme(withFilter) : withFilter;
+  // The development build keeps flust-dev, which the dev client is opened with, and the dev client.
+  return production ? withProductionModules(withNoUrlScheme(withFilter)) : withFilter;
 };

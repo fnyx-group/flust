@@ -12,11 +12,22 @@ import {
 // (docs/decisions/0038-content-filter.md).
 export type FilterSettings = { youtubeStrict: boolean };
 
+// The phases of the last tunnel start in this process: the lists and the certificates off the
+// main thread, then establishing the tunnel on it.
+export type TunnelStartMeasure = {
+  listsMillis: number;
+  listsCached: boolean;
+  trustMillis: number;
+  establishMillis: number;
+  totalMillis: number;
+};
+
 export type FilterMeasure = {
   entries: number;
   bytes: number;
   loadMillis: number;
   decideMicros: number;
+  start: TunnelStartMeasure | null;
 };
 
 export type NativeFilter = {
@@ -56,13 +67,28 @@ function isNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
+function readStart(value: unknown): TunnelStartMeasure | null {
+  if (!isFields(value)) return null;
+  const { listsMillis, listsCached, trustMillis, establishMillis, totalMillis } = value;
+  if (
+    !isNumber(listsMillis) ||
+    !isNumber(trustMillis) ||
+    !isNumber(establishMillis) ||
+    !isNumber(totalMillis) ||
+    typeof listsCached !== 'boolean'
+  ) {
+    return null;
+  }
+  return { listsMillis, listsCached, trustMillis, establishMillis, totalMillis };
+}
+
 function readMeasure(value: unknown): FilterMeasure | null {
   if (!isFields(value)) return null;
   const { entries, bytes, loadMillis, decideMicros } = value;
   if (!isNumber(entries) || !isNumber(bytes) || !isNumber(loadMillis) || !isNumber(decideMicros)) {
     return null;
   }
-  return { entries, bytes, loadMillis, decideMicros };
+  return { entries, bytes, loadMillis, decideMicros, start: readStart(value.start) };
 }
 
 async function settle<T>(call: () => Promise<unknown>, read: (value: unknown) => T, failed: T) {
