@@ -13,8 +13,9 @@ class FilterBootReceiver : BroadcastReceiver() {
     if (intent.action !in RESTART_ACTIONS) return
     if (!FilterConfigStore(context).load().enabled || VpnService.prepare(context) != null) return
     try {
-      FilterVpnService.start(context)
+      FilterVpnService.start(context, "boot")
     } catch (refused: IllegalStateException) {
+      FilterTestLog.event("boot start refused ${refused.javaClass.name}")
       FilterLog.stopped(context, StopReason.BOOT_DEFERRED, refused)
       FilterStatus.recordStop(context, StopReason.BOOT_DEFERRED)
     }

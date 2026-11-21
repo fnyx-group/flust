@@ -14,8 +14,9 @@ object FilterLog {
   @Volatile private var enabled: Boolean? = null
 
   fun stopped(context: Context, reason: StopReason?, error: Throwable? = null) {
-    if (!enabled(context)) return
     val cause = error?.let { ", ${it.javaClass.name}" } ?: ""
+    FilterTestLog.event("tunnel stopped, ${reason?.code ?: "destroyed"}$cause")
+    if (!enabled(context)) return
     Log.w(TAG, "Tunnel stopped: ${reason?.code ?: "destroyed"}$cause")
   }
 

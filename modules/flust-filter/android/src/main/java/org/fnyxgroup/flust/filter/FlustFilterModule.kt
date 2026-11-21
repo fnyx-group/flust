@@ -70,7 +70,7 @@ class FlustFilterModule : Module() {
     AsyncFunction("start") { settings: FilterSettingsRecord ->
       if (!available() || VpnService.prepare(context) != null) return@AsyncFunction false
       FilterConfigStore(context).save(settings.toConfig(enabled = true))
-      FilterVpnService.start(context)
+      FilterVpnService.start(context, "app-start")
       true
     }
 
@@ -90,7 +90,7 @@ class FlustFilterModule : Module() {
       if (!FilterConfigStore(context).load().enabled || VpnService.prepare(context) != null) {
         return@AsyncFunction promise.resolve(false)
       }
-      FilterVpnService.start(context)
+      FilterVpnService.start(context, "app-resume")
       whenRunning(SystemClock.elapsedRealtime() + RESUME_WAIT_MILLIS) { promise.resolve(true) }
     }
 
@@ -122,6 +122,15 @@ class FlustFilterModule : Module() {
           )
         },
       )
+    }
+
+    // The activity's end is often the last call before a manufacturer kills flust from recents.
+    OnActivityDestroys {
+      val context = appContext.reactContext ?: return@OnActivityDestroys
+      FilterTestLog.event("activity destroyed")
+      if (available() && FilterConfigStore(context).load().enabled) {
+        FilterRestartJob.scheduleSoon(context, "activity-destroyed")
+      }
     }
 
     OnActivityResult { _: Activity, payload ->

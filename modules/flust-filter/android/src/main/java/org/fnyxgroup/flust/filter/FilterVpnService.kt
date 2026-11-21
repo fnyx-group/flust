@@ -3,6 +3,7 @@ package org.fnyxgroup.flust.filter
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -13,6 +14,8 @@ import android.os.Handler
 import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
+import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.concurrent.ExecutorService
@@ -34,6 +37,7 @@ class FilterVpnService : VpnService() {
 
   private var tunnel: Tunnel? = null
   private var generation = 0
+  private var trigger = TRIGGER_STICKY
   private val main = Handler(Looper.getMainLooper())
   private val starts = TunnelStarts()
   private val preparation: ExecutorService = Executors.newSingleThreadExecutor { task -> Thread(task, "flust-filter-start") }
@@ -41,11 +45,21 @@ class FilterVpnService : VpnService() {
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     if (intent?.action == ACTION_STOP) {
+      FilterTestLog.event("service stop requested")
+      FilterRestartJob.cancel(this)
       starts.cancel()
       stopTunnel(StopReason.STOPPED)
       stopSelf()
       return START_NOT_STICKY
     }
+    trigger = when {
+      intent == null -> TRIGGER_STICKY
+      intent.action == SERVICE_INTERFACE -> TRIGGER_ALWAYS_ON
+      else -> intent.getStringExtra(EXTRA_TRIGGER) ?: TRIGGER_UNKNOWN
+    }
+    FilterTestLog.event("service started, trigger=$trigger")
+    // Every start but a stop may come from startForegroundService, which must be answered.
+    promote()
     val store = FilterConfigStore(this)
     var config = store.load()
     // The always-on setting starts the service itself: the person chose the filter there.
@@ -58,6 +72,7 @@ class FilterVpnService : VpnService() {
       }
     }
     if (!config.enabled) {
+      FilterRestartJob.cancel(this)
       starts.cancel()
       stopTunnel(StopReason.STOPPED)
       stopSelf()
@@ -67,13 +82,22 @@ class FilterVpnService : VpnService() {
     return START_STICKY
   }
 
+  // Called when flust is swiped away from recents, on the builds that call it before they kill.
+  override fun onTaskRemoved(rootIntent: Intent?) {
+    FilterTestLog.event("onTaskRemoved, running=${FilterStatus.running}")
+    if (FilterConfigStore(this).load().enabled) FilterRestartJob.scheduleSoon(this, "task-removed")
+    super.onTaskRemoved(rootIntent)
+  }
+
   override fun onRevoke() {
+    FilterTestLog.event("consent revoked")
     starts.cancel()
     stopTunnel(StopReason.REVOKED)
     super.onRevoke()
   }
 
   override fun onDestroy() {
+    FilterTestLog.event("service destroyed")
     starts.cancel()
     preparation.shutdownNow()
     if (tunnel != null) FilterLog.stopped(this, null)
@@ -164,6 +188,8 @@ class FilterVpnService : VpnService() {
     }
     FilterStatus.running = true
     FilterStatus.recordStop(this, null)
+    FilterTestLog.event("tunnel running, trigger=$trigger")
+    FilterRestartJob.schedulePeriodic(this)
     val running = SystemClock.elapsedRealtimeNanos()
     FilterStatus.lastStart = TunnelStartTiming(
       listsMillis = prepared.listsMillis,
@@ -174,6 +200,19 @@ class FilterVpnService : VpnService() {
     )
     return true
   }
+
+  private fun promote() {
+    try {
+      ServiceCompat.startForeground(this, FilterNotification.ID, FilterNotification.build(this), foregroundType())
+      FilterTestLog.event("foreground ok")
+    } catch (refused: Exception) {
+      FilterTestLog.event("foreground refused ${refused.javaClass.name}")
+    }
+  }
+
+  // A VPN app with the user's consent may use the system-exempted type from Android 14.
+  private fun foregroundType(): Int =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED else 0
 
   private fun millis(from: Long, to: Long): Double = (to - from) / 1_000_000.0
 
@@ -293,9 +332,16 @@ class FilterVpnService : VpnService() {
     const val ACTION_START = "org.fnyxgroup.flust.filter.START"
     const val ACTION_STOP = "org.fnyxgroup.flust.filter.STOP"
     const val LISTS_ASSET = "filter-lists.bin"
+    private const val EXTRA_TRIGGER = "org.fnyxgroup.flust.filter.TRIGGER"
+    private const val TRIGGER_STICKY = "sticky-restart"
+    private const val TRIGGER_ALWAYS_ON = "always-on"
+    private const val TRIGGER_UNKNOWN = "unknown"
 
-    fun start(context: Context) {
-      context.startService(Intent(context, FilterVpnService::class.java).setAction(ACTION_START))
+    // A foreground start, so that Android 8 and later accept it from the background: the
+    // consent to the VPN exempts it from the background start limits of Android 12 and later.
+    fun start(context: Context, trigger: String) {
+      val intent = Intent(context, FilterVpnService::class.java).setAction(ACTION_START).putExtra(EXTRA_TRIGGER, trigger)
+      ContextCompat.startForegroundService(context, intent)
     }
 
     fun stop(context: Context) {

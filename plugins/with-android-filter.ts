@@ -12,15 +12,21 @@ import {
 // docs/decisions/0041-filter-network-permissions.md.
 export const FILTER_VPN_SERVICE = 'org.fnyxgroup.flust.filter.FilterVpnService';
 export const FILTER_BOOT_RECEIVER = 'org.fnyxgroup.flust.filter.FilterBootReceiver';
+// Restarts the filter after flust was killed, run by JobScheduler.
+export const FILTER_RESTART_JOB = 'org.fnyxgroup.flust.filter.FilterRestartJob';
 export const FILTER_LISTS_PROPERTY = 'flust.filterLists';
 // Read by FilterLog.kt: true in the development build only, where the filter logs why its tunnel
 // stopped. Missing, it stays off.
 export const FILTER_LOGS_META_DATA = 'org.fnyxgroup.flust.filter.LOGS';
 
 // INTERNET reaches the resolver; ACCESS_NETWORK_STATE reads strict Private DNS and another VPN.
+// The two foreground service permissions keep the VPN service in the foreground, with the type
+// Android 14 reserves for VPN apps among others.
 export const FILTER_PERMISSIONS = [
   'android.permission.INTERNET',
   'android.permission.ACCESS_NETWORK_STATE',
+  'android.permission.FOREGROUND_SERVICE',
+  'android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED',
 ];
 
 type Manifest = AndroidConfig.Manifest.AndroidManifest;
@@ -48,8 +54,19 @@ export function addFilterComponents(manifest: Manifest, logs: boolean): Manifest
         'android:name': FILTER_VPN_SERVICE,
         'android:permission': 'android.permission.BIND_VPN_SERVICE',
         'android:exported': 'false',
+        'android:foregroundServiceType': 'systemExempted',
       },
       'intent-filter': [{ action: [{ $: { 'android:name': 'android.net.VpnService' } }] }],
+    },
+  ];
+  application.service = [
+    ...withoutComponent(application.service, FILTER_RESTART_JOB),
+    {
+      $: {
+        'android:name': FILTER_RESTART_JOB,
+        'android:permission': 'android.permission.BIND_JOB_SERVICE',
+        'android:exported': 'false',
+      },
     },
   ];
   application.receiver = [

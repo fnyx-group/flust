@@ -64,6 +64,8 @@ blocked_permissions=(
 expected_permissions=(
   android.permission.INTERNET
   android.permission.ACCESS_NETWORK_STATE
+  android.permission.FOREGROUND_SERVICE
+  android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED
   android.permission.POST_NOTIFICATIONS
   android.permission.RECEIVE_BOOT_COMPLETED
   android.permission.USE_BIOMETRIC
@@ -71,9 +73,10 @@ expected_permissions=(
   org.fnyxgroup.flust.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 )
 
-# The content filter's VPN service, declared by plugins/with-android-filter.ts, and the two
+# The content filter's VPN service, declared by plugins/with-android-filter.ts, and the
 # permissions it needs and that are there for it alone: INTERNET to reach the resolver,
-# ACCESS_NETWORK_STATE to see strict Private DNS and another VPN.
+# ACCESS_NETWORK_STATE to see strict Private DNS and another VPN, and the two foreground service
+# permissions that keep the VPN service in the foreground.
 filter_service=org.fnyxgroup.flust.filter.FilterVpnService
 
 # The Java packages of the modules that plugins/with-production-modules.ts leaves out of
@@ -83,6 +86,8 @@ development_packages='expo/modules/(devclient|devlauncher|devmenu|manifests|json
 filter_permissions=(
   android.permission.INTERNET
   android.permission.ACCESS_NETWORK_STATE
+  android.permission.FOREGROUND_SERVICE
+  android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED
 )
 
 # What the Android Gradle plugin puts in a bundle for Play: the native libraries of every ABI that

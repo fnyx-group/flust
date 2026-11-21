@@ -33,6 +33,8 @@ export const PRODUCTION_BLOCKED_PERMISSIONS = [
 export const PRODUCTION_ANDROID_PERMISSIONS = [
   'android.permission.INTERNET',
   'android.permission.ACCESS_NETWORK_STATE',
+  'android.permission.FOREGROUND_SERVICE',
+  'android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED',
   'android.permission.POST_NOTIFICATIONS',
   'android.permission.RECEIVE_BOOT_COMPLETED',
   'android.permission.USE_BIOMETRIC',

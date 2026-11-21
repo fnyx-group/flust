@@ -13,7 +13,12 @@ const placeholder = "upload_certificate_sha256=''";
 const xmltree = path.join(__dirname, '..', 'test', 'fixtures', 'xmltree');
 const internet = 'android.permission.INTERNET';
 const networkState = 'android.permission.ACCESS_NETWORK_STATE';
-const filterPermissions = [internet, networkState];
+const filterPermissions = [
+  internet,
+  networkState,
+  'android.permission.FOREGROUND_SERVICE',
+  'android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED',
+];
 const filterService = 'org.fnyxgroup.flust.filter.FilterVpnService';
 const missingService = "does not declare the content filter's VPN service";
 const missingPermissions = 'lacks permissions the content filter needs';
@@ -314,7 +319,7 @@ function failure(options: Check = {}) {
 }
 
 describe('the release check, for the content filter', () => {
-  it('passes a build with the filter service and its two permissions', () => {
+  it('passes a build with the filter service and its permissions', () => {
     expect(failure()).toEqual({ status: 0, errors: '' });
   });
 

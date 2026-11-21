@@ -4,6 +4,7 @@ import {
   FILTER_LISTS_PROPERTY,
   FILTER_LOGS_META_DATA,
   FILTER_PERMISSIONS,
+  FILTER_RESTART_JOB,
   FILTER_VPN_SERVICE,
   setFilterLists,
 } from './with-android-filter';
@@ -19,7 +20,7 @@ function manifest() {
 }
 
 describe('the Android filter plugin', () => {
-  it('declares the VPN service, which only the system may bind', () => {
+  it('declares the foreground VPN service and the restart job, which only the system may bind', () => {
     const application = addFilterComponents(manifest(), false).manifest.application?.[0];
 
     expect(application?.service).toEqual([
@@ -28,8 +29,16 @@ describe('the Android filter plugin', () => {
           'android:name': FILTER_VPN_SERVICE,
           'android:permission': 'android.permission.BIND_VPN_SERVICE',
           'android:exported': 'false',
+          'android:foregroundServiceType': 'systemExempted',
         },
         'intent-filter': [{ action: [{ $: { 'android:name': 'android.net.VpnService' } }] }],
+      },
+      {
+        $: {
+          'android:name': FILTER_RESTART_JOB,
+          'android:permission': 'android.permission.BIND_JOB_SERVICE',
+          'android:exported': 'false',
+        },
       },
     ]);
   });
@@ -50,7 +59,7 @@ describe('the Android filter plugin', () => {
     ]);
   });
 
-  it('requests INTERNET and ACCESS_NETWORK_STATE', () => {
+  it('requests the network and foreground service permissions', () => {
     const permissions = addFilterComponents(manifest(), false).manifest['uses-permission'];
 
     expect(permissions?.map((permission) => permission.$['android:name'])).toEqual(
@@ -62,7 +71,7 @@ describe('the Android filter plugin', () => {
     const twice = addFilterComponents(addFilterComponents(manifest(), false), false).manifest;
     const application = twice.application?.[0];
 
-    expect(application?.service).toHaveLength(1);
+    expect(application?.service).toHaveLength(2);
     expect(application?.receiver).toHaveLength(1);
     expect(application?.['meta-data']).toHaveLength(1);
     expect(twice['uses-permission']).toHaveLength(FILTER_PERMISSIONS.length);
