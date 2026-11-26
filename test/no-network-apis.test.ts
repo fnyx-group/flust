@@ -81,6 +81,7 @@ const filterAllowances: Record<string, readonly string[]> = {
   'Resolvers.kt': ['java.net', 'InetAddress'],
   'FilterVpnService.kt': ['VpnService'],
   'FilterBootReceiver.kt': ['VpnService'],
+  'FilterRestartJob.kt': ['VpnService'],
   'FlustFilterModule.kt': ['VpnService'],
 };
 

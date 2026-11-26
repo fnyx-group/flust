@@ -8,15 +8,30 @@ import appJson from '../app.json';
 
 const script = path.join(__dirname, 'check-android-release.sh');
 // The files the check reads next to itself, copied with it into a repository of each test.
-const scriptFiles = ['url-schemes.awk', 'vpn-services.awk', 'bundletool.sh'];
+const scriptFiles = [
+  'url-schemes.awk',
+  'vpn-services.awk',
+  'service-attribute.awk',
+  'bundletool.sh',
+];
 const placeholder = "upload_certificate_sha256=''";
 const xmltree = path.join(__dirname, '..', 'test', 'fixtures', 'xmltree');
 const internet = 'android.permission.INTERNET';
 const networkState = 'android.permission.ACCESS_NETWORK_STATE';
-const filterPermissions = [internet, networkState];
+const filterPermissions = [
+  internet,
+  networkState,
+  'android.permission.FOREGROUND_SERVICE',
+  'android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED',
+];
 const filterService = 'org.fnyxgroup.flust.filter.FilterVpnService';
 const missingService = "does not declare the content filter's VPN service";
 const missingPermissions = 'lacks permissions the content filter needs';
+const restartJob = 'org.fnyxgroup.flust.filter.FilterRestartJob';
+const wrongType =
+  "does not run the content filter's VPN service in the foreground with the systemExempted type";
+const missingJob =
+  "does not declare the content filter's restart job, bound with android.permission.BIND_JOB_SERVICE";
 const notForPlay = 'is not a production build Google Play accepts:';
 const versionName = appJson.expo.version;
 const versionCode = String(appJson.expo.android.versionCode);
@@ -66,6 +81,8 @@ case "$1 \${2:-}" in
     case $xpath in
       *uses-permission*) cat "$FAKE_PERMISSION_NAMES" ;;
       *intent-filter*VIEW*) ;;
+      *FilterVpnService*foregroundServiceType) echo "$FAKE_FILTER_TYPE" ;;
+      *FilterRestartJob*permission) echo "$FAKE_JOB_PERMISSION" ;;
       //service*) echo ${filterService} ;;
       /manifest/@package) echo "$FAKE_PACKAGE" ;;
       /manifest/@android:versionCode) echo "$FAKE_VERSION_CODE" ;;
@@ -302,6 +319,8 @@ function check({
       FAKE_UNIVERSAL: apk,
       FAKE_CERTIFICATE: debugCertificate,
       FAKE_LICENSES_STATUS: '0',
+      FAKE_FILTER_TYPE: '0x00000400',
+      FAKE_JOB_PERMISSION: 'android.permission.BIND_JOB_SERVICE',
       ...env,
     },
   });
@@ -314,7 +333,7 @@ function failure(options: Check = {}) {
 }
 
 describe('the release check, for the content filter', () => {
-  it('passes a build with the filter service and its two permissions', () => {
+  it('passes a build with the filter service and its permissions', () => {
     expect(failure()).toEqual({ status: 0, errors: '' });
   });
 
@@ -332,6 +351,27 @@ describe('the release check, for the content filter', () => {
 
     expect(status).toBe(1);
     expect(errors).toContain(`${missingPermissions}:\n  ${permission}\n`);
+  });
+
+  it.each([
+    ['filter-no-type', '(missing)'],
+    ['filter-other-type', '0x00000001'],
+  ])('fails on the service in %s, without the systemExempted type', (manifest, found) => {
+    const { status, errors } = failure({ manifest });
+
+    expect(status).toBe(1);
+    expect(errors).toContain(`${wrongType}:\n  ${filterService} foregroundServiceType=${found}\n`);
+  });
+
+  it.each([
+    ['filter-no-job', '(missing)'],
+    ['filter-job-unprotected', '(missing)'],
+    ['filter-job-other-permission', 'android.permission.BIND_VPN_SERVICE'],
+  ])('fails on the restart job in %s', (manifest, found) => {
+    const { status, errors } = failure({ manifest });
+
+    expect(status).toBe(1);
+    expect(errors).toContain(`${missingJob}:\n  ${restartJob} permission=${found}\n`);
   });
 
   it('fails on any other VPN service', () => {
@@ -524,6 +564,29 @@ describe('the release check, for a bundle', () => {
 
     expect(status).toBe(1);
     expect(errors).toContain(problem);
+  });
+
+  it.each([
+    ['', '(missing)'],
+    ['0x00000001', '0x00000001'],
+  ])('fails on a bundle whose filter service has the type "%s"', (type, found) => {
+    const { status, errors } = failure({ build: bundle(), env: { FAKE_FILTER_TYPE: type } });
+
+    expect(status).toBe(1);
+    expect(errors).toContain(`${wrongType}:\n  ${filterService} foregroundServiceType=${found}\n`);
+  });
+
+  it.each([
+    ['', '(missing)'],
+    ['android.permission.BIND_VPN_SERVICE', 'android.permission.BIND_VPN_SERVICE'],
+  ])('fails on a bundle whose restart job has the permission "%s"', (permission, found) => {
+    const { status, errors } = failure({
+      build: bundle(),
+      env: { FAKE_JOB_PERMISSION: permission },
+    });
+
+    expect(status).toBe(1);
+    expect(errors).toContain(`${missingJob}:\n  ${restartJob} permission=${found}\n`);
   });
 
   it('fails on an unsigned bundle', () => {

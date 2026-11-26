@@ -12,6 +12,10 @@ import {
 // (docs/decisions/0038-content-filter.md).
 export type FilterSettings = { youtubeStrict: boolean };
 
+// The words of the notification Android shows while the filter runs, in the app's language. The
+// module keeps them for the starts without the app, at boot or after a kill.
+export type FilterNotificationWords = { channelName: string; text: string };
+
 // The phases of the last tunnel start in this process: the lists and the certificates off the
 // main thread, then establishing the tunnel on it.
 export type TunnelStartMeasure = {
@@ -39,9 +43,10 @@ export type FilterMeasure = {
 export type NativeFilter = {
   getStatus(): unknown;
   requestConsent(): Promise<unknown>;
-  start(settings: FilterSettings): Promise<unknown>;
+  start(settings: FilterSettings & { notification?: FilterNotificationWords }): Promise<unknown>;
   stop(): Promise<unknown>;
   resume(): Promise<unknown>;
+  describe(words: FilterNotificationWords): Promise<unknown>;
   measure(): Promise<unknown>;
 };
 
@@ -51,6 +56,7 @@ export type FilterBridge = {
   start(settings: FilterSettings): Promise<boolean>;
   stop(): Promise<void>;
   resume(): Promise<boolean>;
+  describe(): Promise<void>;
   measure(): Promise<FilterMeasure | null>;
 };
 
@@ -116,7 +122,11 @@ async function settle<T>(call: () => Promise<unknown>, read: (value: unknown) =>
   }
 }
 
-export function createFilterBridge(native: NativeFilter | null): FilterBridge {
+// `words` is read at each call, so that a change of language reaches the next start.
+export function createFilterBridge(
+  native: NativeFilter | null,
+  words: () => FilterNotificationWords | null = () => null,
+): FilterBridge {
   return {
     status() {
       if (native === null) return { available: false };
@@ -150,7 +160,10 @@ export function createFilterBridge(native: NativeFilter | null): FilterBridge {
       native === null
         ? Promise.resolve(false)
         : settle(
-            () => native.start(settings),
+            () => {
+              const notification = words();
+              return native.start(notification === null ? settings : { ...settings, notification });
+            },
             (value) => value === true,
             false,
           ),
@@ -170,6 +183,15 @@ export function createFilterBridge(native: NativeFilter | null): FilterBridge {
             (value) => value === true,
             false,
           ),
+    describe: () => {
+      const notification = words();
+      if (native === null || notification === null) return Promise.resolve();
+      return settle(
+        () => native.describe(notification),
+        () => undefined,
+        undefined,
+      );
+    },
     measure: () =>
       native === null ? Promise.resolve(null) : settle(() => native.measure(), readMeasure, null),
   };

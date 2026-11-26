@@ -1,6 +1,7 @@
 import { createFilterBridge, type NativeFilter } from './filter-bridge';
 
 const SETTINGS = { youtubeStrict: false };
+const WORDS = { channelName: 'Background service', text: 'Running in the background' };
 
 function native(overrides: Partial<NativeFilter> = {}): NativeFilter {
   return {
@@ -18,6 +19,7 @@ function native(overrides: Partial<NativeFilter> = {}): NativeFilter {
     start: async () => true,
     stop: async () => undefined,
     resume: async () => true,
+    describe: async () => undefined,
     measure: async () => ({ entries: 304114, bytes: 2737038, loadMillis: 41.5, decideMicros: 6.2 }),
     ...overrides,
   };
@@ -107,6 +109,42 @@ describe('the filter bridge', () => {
 
     await expect(createFilterBridge(native({ start })).start(settings)).resolves.toBe(true);
     expect(start).toHaveBeenCalledWith(settings);
+  });
+
+  it('passes the notification words of the current language with each start', async () => {
+    const start = jest.fn(async () => true);
+    let words = WORDS;
+    const bridge = createFilterBridge(native({ start }), () => words);
+
+    await bridge.start(SETTINGS);
+    words = { channelName: 'Service en arrière-plan', text: 'Actif en arrière-plan' };
+    await bridge.start(SETTINGS);
+
+    expect(start).toHaveBeenNthCalledWith(1, { ...SETTINGS, notification: WORDS });
+    expect(start).toHaveBeenNthCalledWith(2, { ...SETTINGS, notification: words });
+  });
+
+  it('gives the module the notification words, and nothing without them', async () => {
+    const describe = jest.fn(async () => undefined);
+
+    await createFilterBridge(native({ describe }), () => WORDS).describe();
+    await createFilterBridge(native({ describe })).describe();
+
+    expect(describe).toHaveBeenCalledTimes(1);
+    expect(describe).toHaveBeenCalledWith(WORDS);
+  });
+
+  it('ignores a module that cannot take the notification words', async () => {
+    const bridge = createFilterBridge(
+      native({
+        describe: async () => {
+          throw new Error('Keystore unavailable');
+        },
+      }),
+      () => WORDS,
+    );
+
+    await expect(bridge.describe()).resolves.toBeUndefined();
   });
 
   it('turns a rejected call into a failed result', async () => {

@@ -24,6 +24,7 @@ function bridge(status: FilterStatus, overrides: Partial<FilterBridge> = {}) {
     start: jest.fn(async () => true),
     stop: jest.fn(async () => undefined),
     resume: jest.fn(async () => true),
+    describe: jest.fn(async () => undefined),
     measure: jest.fn(async () => null),
     ...overrides,
   };

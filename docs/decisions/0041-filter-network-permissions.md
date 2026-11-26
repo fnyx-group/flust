@@ -6,10 +6,10 @@ From V0.2, lot 2, the production Android build ships the content filter ([0038](
 
 ## Decision
 
-- `INTERNET` and `ACCESS_NETWORK_STATE` leave `PRODUCTION_BLOCKED_PERMISSIONS` for `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts`, and the same lists in `scripts/check-android-release.sh`, which a test compares.
+- `INTERNET` and `ACCESS_NETWORK_STATE` leave `PRODUCTION_BLOCKED_PERMISSIONS` for `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts`, and the same lists in `scripts/check-android-release.sh`, which a test compares. `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_SYSTEM_EXEMPTED` joined them later, for the VPN service in the foreground ([0047](0047-filter-foreground-service.md)): normal permissions, granted at install without a prompt.
 - `plugins/with-android-filter.ts` declares both, with the VPN service and the boot receiver, in every variant. Neither depends on a library's manifest.
 - `ACCESS_NETWORK_STATE` is read in `NetworkState.kt` of the filter module only, which turns the networks into two answers: strict Private DNS, and another VPN while flust's tunnel is down. Nothing about the networks is stored or leaves the app. Without the permission, or on a failure, it reports no network rather than a wrong reason.
-- The release check fails on a build without the filter's VPN service, without one of the two permissions, or with any other VPN service. A production build without the filter is no longer a valid release.
+- The release check fails on a build without the filter's VPN service, without one of the two permissions, or with any other VPN service. From [0047](0047-filter-foreground-service.md), it also fails without the two foreground service permissions, the `systemExempted` type on the service, or the restart job bound with `BIND_JOB_SERVICE`. A production build without the filter is no longer a valid release.
 - Every other permission blocked by [0030](0030-production-android-permissions.md) stays blocked.
 
 ## Consequences

@@ -2,6 +2,29 @@ package org.fnyxgroup.flust.filter
 
 enum class YouTubeLevel { MODERATE, STRICT }
 
+// The words of the foreground service's notification, in the language chosen in the app, which
+// passes them. Kept with the settings so that a start without the app, at boot or by a job, uses
+// them too. One line each, of bounded length, since the settings file has one value per line:
+// every instance goes through `of`, which cleans them.
+@ConsistentCopyVisibility
+data class NotificationText private constructor(val channelName: String, val text: String) {
+  companion object {
+    private const val MAX_LENGTH = 120
+    private val CONTROL = Regex("\\p{Cntrl}+")
+
+    val DEFAULT = NotificationText(channelName = "Background service", text = "Running in the background")
+
+    // Null when either is blank once cleaned.
+    fun of(channelName: String, text: String): NotificationText? {
+      val name = clean(channelName)
+      val body = clean(text)
+      return if (name.isEmpty() || body.isEmpty()) null else NotificationText(name, body)
+    }
+
+    private fun clean(raw: String): String = raw.replace(CONTROL, " ").trim().take(MAX_LENGTH).trim()
+  }
+}
+
 // What the person chose. Kept by FilterConfigStore, encrypted, apart from the database and its key.
 data class FilterConfig(
   val enabled: Boolean = false,
@@ -10,7 +33,12 @@ data class FilterConfig(
   val strict: Boolean = true,
   val youtube: YouTubeLevel = YouTubeLevel.MODERATE,
   val exceptions: Set<String> = emptySet(),
+  val notification: NotificationText? = null,
 ) {
+  // What the tunnel depends on: new notification words alone never set up a new tunnel.
+  val filtering: FilterConfig
+    get() = copy(notification = null)
+
   val blockedCategories: Int
     get() =
       (if (adult) Categories.ADULT else 0) or (if (aiNudify) Categories.AI_NUDIFY else 0)
@@ -22,6 +50,10 @@ data class FilterConfig(
     appendLine("strict=$strict")
     appendLine("youtube=${youtube.name}")
     exceptions.sorted().forEach { appendLine("exception=$it") }
+    notification?.let {
+      appendLine("notificationChannel=${it.channelName}")
+      appendLine("notificationText=${it.text}")
+    }
   }
 
   companion object {
@@ -50,6 +82,7 @@ data class FilterConfig(
         strict = flag("strict", defaults.strict),
         youtube = YouTubeLevel.entries.firstOrNull { it.name == values["youtube"] } ?: defaults.youtube,
         exceptions = exceptions,
+        notification = NotificationText.of(values["notificationChannel"].orEmpty(), values["notificationText"].orEmpty()),
       )
     }
   }

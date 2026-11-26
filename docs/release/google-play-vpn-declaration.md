@@ -20,6 +20,18 @@ French: « flust utilise le service VPN d'Android pour filtrer les noms des site
 
 English: "flust uses Android's VPN service to filter the names of the sites your apps open, across the whole phone. Blocked names never leave the phone. The names of allowed sites go encrypted to Quad9, or to Cloudflare then DNS4EU when Quad9 does not answer. Cloudflare deletes anonymized IP addresses within 25 hours. DNS4EU can keep some query data for up to six months for threat research, without selling it or using it for profiling or advertising. The rest of your traffic does not go through flust, except direct connections to known public DNS servers, which are blocked."
 
+## Foreground service declaration
+
+The VPN service runs in the foreground with the `systemExempted` type ([0047](../decisions/0047-filter-foreground-service.md)). Every app that targets Android 14 or later declares its foreground service types in the Play Console, on the App content page, besides this VpnService declaration ([Understanding foreground service and full-screen intent requirements](https://support.google.com/googleplay/android-developer/answer/13392821)). For each type, the form asks for a description of the feature, the impact on the person if Android defers or interrupts the task, a link to a video showing how the person starts the feature, and a use case from a preset list.
+
+Play's foreground service policy exempts `systemExempted` from its criteria, that the task is started by the person, can be stopped by them, cannot be deferred and lasts only as long as needed ([Permissions for Foreground Services](https://support.google.com/googleplay/android-developer/answer/13315670)). It does not exempt the type from the declaration, and Play's table of types and use cases does not list it, so the use case is chosen in the Console at submission, from what it offers for this type.
+
+Description: "flust's content filter is a local VPN that filters DNS lookups on the device, which the person turns on and off in the app. Its VpnService runs as a foreground service of the systemExempted type, which Android allows for VPN apps, so that the filter keeps running when the app is closed or swiped away from recents. Its notification is silent and hidden on the lock screen."
+
+Impact if deferred or interrupted: "While the service is deferred or stopped, the filter does not run: sites the person chose to block load again on every app of the phone, without them knowing, until the filter starts again. Some manufacturers kill apps swiped away from recents, and without the foreground service the filter stopped there."
+
+Video: the video of the VPN in use below, which shows the person turning the filter on, Android's VPN dialog, the filter blocking and the VPN in Android's settings. It is filmed with the notification permission granted before filming, since flust never asks for it, so that the silent notification shows once the filter is on.
+
 ## Data safety
 
 Play counts as collected any data the app sends off the device, including to a service provider, and as shared only data passed to a third party other than a service provider acting on the app's behalf. The filter sends the names of the allowed sites to Quad9, or to Cloudflare then DNS4EU when Quad9 does not answer, which resolve them for the person and nothing else ([0045](../decisions/0045-resolver-chain.md)), so:
@@ -39,8 +51,10 @@ Two videos of 90 seconds or less, on a clean emulator in French.
 
 ### The VPN in use
 
+Before filming, grant flust the notification permission, which it never asks for the filter, so that the silent notification shows: `adb shell pm grant org.fnyxgroup.flust android.permission.POST_NOTIFICATIONS`. Without it, the service still runs in the foreground, but nothing shows in the shade.
+
 1. 0 to 10 s: open flust, Réglages, Filtre, state "Le filtre est désactivé.".
-2. 10 to 30 s: turn Filtre on, the disclosure sheet, "Accepter et activer", Android's VPN dialog, OK, the key icon in the status bar.
+2. 10 to 30 s: turn Filtre on, the disclosure sheet, "Accepter et activer", Android's VPN dialog, OK, the key icon in the status bar, and the silent notification "Actif en arrière-plan" in the shade.
 3. 30 to 55 s: Chrome opens an adult site: blocked. A Google search shows SafeSearch locked on. Wikipedia loads.
 4. 55 to 75 s: turn Filtre off: the 20-minute countdown, then "Annuler la demande".
 5. 75 to 90 s: Android's VPN settings show flust as the VPN.

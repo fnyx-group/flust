@@ -4,8 +4,10 @@
 # manifest requests a permission that is blocked in production or not expected
 # (docs/decisions/0030-production-android-permissions.md), or when a component has an intent filter
 # that opens a URL scheme (docs/decisions/0035-no-url-scheme-in-production.md), or when it declares
-# a VPN service other than the content filter's, or lacks the filter's service or one of the two
-# permissions it needs (docs/decisions/0041-filter-network-permissions.md), or when it holds classes
+# a VPN service other than the content filter's, or lacks the filter's service or one of the
+# permissions it needs (docs/decisions/0041-filter-network-permissions.md), or runs that service
+# without the systemExempted foreground type or lacks its restart job bound with BIND_JOB_SERVICE
+# (docs/decisions/0047-filter-foreground-service.md), or when it holds classes
 # of the development modules that production leaves out (docs/decisions/0044-production-modules.md).
 # It also fails on what Google Play refuses: another package than the production one, a debuggable
 # build, a target API level below Play's, a version that is not the one of app.json, and 64-bit
@@ -64,6 +66,8 @@ blocked_permissions=(
 expected_permissions=(
   android.permission.INTERNET
   android.permission.ACCESS_NETWORK_STATE
+  android.permission.FOREGROUND_SERVICE
+  android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED
   android.permission.POST_NOTIFICATIONS
   android.permission.RECEIVE_BOOT_COMPLETED
   android.permission.USE_BIOMETRIC
@@ -71,10 +75,19 @@ expected_permissions=(
   org.fnyxgroup.flust.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 )
 
-# The content filter's VPN service, declared by plugins/with-android-filter.ts, and the two
+# The content filter's VPN service, declared by plugins/with-android-filter.ts, and the
 # permissions it needs and that are there for it alone: INTERNET to reach the resolver,
-# ACCESS_NETWORK_STATE to see strict Private DNS and another VPN.
+# ACCESS_NETWORK_STATE to see strict Private DNS and another VPN, and the two foreground service
+# permissions that keep the VPN service in the foreground.
 filter_service=org.fnyxgroup.flust.filter.FilterVpnService
+# The service runs in the foreground with the systemExempted type, the one the Play Console
+# declaration names, and its restart job can only be bound by the system's JobScheduler
+# (docs/decisions/0047-filter-foreground-service.md). aapt2 and bundletool print the type as a flag
+# value; the name is accepted too.
+filter_service_type=systemExempted
+filter_service_type_flag=0x00000400
+filter_restart_job=org.fnyxgroup.flust.filter.FilterRestartJob
+filter_restart_job_permission=android.permission.BIND_JOB_SERVICE
 
 # The Java packages of the modules that plugins/with-production-modules.ts leaves out of
 # production: the development client, its launcher and menu, the modules only they use, and the
@@ -83,6 +96,8 @@ development_packages='expo/modules/(devclient|devlauncher|devmenu|manifests|json
 filter_permissions=(
   android.permission.INTERNET
   android.permission.ACCESS_NETWORK_STATE
+  android.permission.FOREGROUND_SERVICE
+  android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED
 )
 
 # What the Android Gradle plugin puts in a bundle for Play: the native libraries of every ABI that
@@ -280,6 +295,22 @@ missing_filter_permissions=()
 for permission in "${filter_permissions[@]}"; do
   grep -q -x -F "$permission" <<<"$permissions" || missing_filter_permissions+=("$permission")
 done
+
+# The value of an attribute of a service, parsed by service-attribute.awk for an APK. Empty when
+# the service or the attribute is missing.
+service_attribute() {
+  if [[ $build == *.apk ]]; then
+    "$aapt2" dump xmltree --file AndroidManifest.xml "$build" |
+      awk -v service="$1" -v attribute="$2" -f "$script_dir/service-attribute.awk"
+  else
+    manifest_xpath "//service[@android:name='$1']/@android:$2"
+  fi
+}
+
+filter_type=$(service_attribute "$filter_service" foregroundServiceType) ||
+  cannot_check "Cannot read the services of $build"
+job_permission=$(service_attribute "$filter_restart_job" permission) ||
+  cannot_check "Cannot read the services of $build"
 
 # One "key=value" line each for the package, the version, the target API level and whether the
 # build is debuggable, read from the manifest.
@@ -492,6 +523,16 @@ if [[ $has_filter -eq 0 ]]; then
   echo "  $filter_service" >&2
   failed=1
 fi
+if [[ $has_filter -eq 1 && $filter_type != "$filter_service_type" && $filter_type != "$filter_service_type_flag" ]]; then
+  echo "$build does not run the content filter's VPN service in the foreground with the $filter_service_type type:" >&2
+  echo "  $filter_service foregroundServiceType=${filter_type:-(missing)}" >&2
+  failed=1
+fi
+if [[ $job_permission != "$filter_restart_job_permission" ]]; then
+  echo "$build does not declare the content filter's restart job, bound with $filter_restart_job_permission:" >&2
+  echo "  $filter_restart_job permission=${job_permission:-(missing)}" >&2
+  failed=1
+fi
 if [[ ${#missing_filter_permissions[@]} -gt 0 ]]; then
   echo "$build lacks permissions the content filter needs:" >&2
   printf '  %s\n' "${missing_filter_permissions[@]}" >&2
@@ -546,7 +587,7 @@ if [[ $build == *.aab ]]; then
 fi
 [[ $failed -eq 0 ]] || exit 1
 
-echo "$build: no Firebase, Google Play services or Install Referrer code or manifest entries, no development module, only expected permissions, no URL scheme, the content filter's VPN service with its permissions and no other, the production package and the version of app.json, target API level $target_sdk, and 64-bit native libraries aligned for 16 KB pages."
+echo "$build: no Firebase, Google Play services or Install Referrer code or manifest entries, no development module, only expected permissions, no URL scheme, the content filter's VPN service with its permissions, its foreground type and its restart job, and no other VPN service, the production package and the version of app.json, target API level $target_sdk, and 64-bit native libraries aligned for 16 KB pages."
 if [[ $build == *.aab ]]; then
   echo "$build: its universal APK passes the same checks, the Licenses screen matches it, and it carries the native libraries of ${bundle_abis[*]}, its R8 mapping and native symbols."
 fi

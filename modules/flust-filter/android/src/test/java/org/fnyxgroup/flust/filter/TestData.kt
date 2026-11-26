@@ -89,3 +89,6 @@ object TestData {
   val CLIENT_V6 = ByteArray(16).also { it[0] = 0xfd.toByte(); it[15] = 1 }
   val DNS_V6 = ByteArray(16).also { it[0] = 0xfd.toByte(); it[15] = 2 }
 }
+
+// Notification words that `NotificationText.of` accepts as they are.
+fun words(channelName: String, text: String): NotificationText = checkNotNull(NotificationText.of(channelName, text))

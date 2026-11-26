@@ -32,5 +32,5 @@ class TunnelStarts {
   // A start for these settings would change nothing: they are being prepared, or they already run
   // and nothing else is being prepared.
   fun covers(config: FilterConfig, running: FilterConfig?): Boolean =
-    pending == config || (pending == null && running == config)
+    pending?.filtering == config.filtering || (pending == null && running?.filtering == config.filtering)
 }

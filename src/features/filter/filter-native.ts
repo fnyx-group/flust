@@ -3,11 +3,14 @@ import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
 import { createFilterBridge, type NativeFilter } from '@/features/filter/filter-bridge';
+import { filterNotificationWords } from '@/features/filter/labels';
+import { i18n } from '@/lib/i18n';
 
 // modules/flust-filter, on Android only. Null elsewhere, which the bridge reads as unavailable:
 // the iPhone filter comes with lot 3 (docs/product/content-filter.md, Delivery).
 export const filterBridge = createFilterBridge(
   Platform.OS === 'android' ? requireOptionalNativeModule<NativeFilter>('FlustFilter') : null,
+  () => filterNotificationWords(i18n.t),
 );
 
 // The filter is offered where its VPN service is declared.

@@ -27,6 +27,11 @@ N: android=http://schemas.android.com/apk/res/android (line=1)
             A: http://schemas.android.com/apk/res/android:name(0x01010003)="org.fnyxgroup.flust.filter.FilterVpnService" (Raw: "org.fnyxgroup.flust.filter.FilterVpnService")
             A: http://schemas.android.com/apk/res/android:permission(0x01010006)="android.permission.BIND_VPN_SERVICE" (Raw: "android.permission.BIND_VPN_SERVICE")
             A: http://schemas.android.com/apk/res/android:exported(0x01010010)=false
+            A: http://schemas.android.com/apk/res/android:foregroundServiceType(0x01010599)=0x00000400
               E: intent-filter (line=14)
                   E: action (line=15)
                     A: http://schemas.android.com/apk/res/android:name(0x01010003)="android.net.VpnService" (Raw: "android.net.VpnService")
+          E: service (line=18)
+            A: http://schemas.android.com/apk/res/android:name(0x01010003)="org.fnyxgroup.flust.filter.FilterRestartJob" (Raw: "org.fnyxgroup.flust.filter.FilterRestartJob")
+            A: http://schemas.android.com/apk/res/android:permission(0x01010006)="android.permission.BIND_JOB_SERVICE" (Raw: "android.permission.BIND_JOB_SERVICE")
+            A: http://schemas.android.com/apk/res/android:exported(0x01010010)=false
