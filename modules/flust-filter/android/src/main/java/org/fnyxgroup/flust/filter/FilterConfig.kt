@@ -4,8 +4,10 @@ enum class YouTubeLevel { MODERATE, STRICT }
 
 // The words of the foreground service's notification, in the language chosen in the app, which
 // passes them. Kept with the settings so that a start without the app, at boot or by a job, uses
-// them too. One line each, of bounded length, since the settings file has one value per line.
-data class NotificationText(val channelName: String, val text: String) {
+// them too. One line each, of bounded length, since the settings file has one value per line:
+// every instance goes through `of`, which cleans them.
+@ConsistentCopyVisibility
+data class NotificationText private constructor(val channelName: String, val text: String) {
   companion object {
     private const val MAX_LENGTH = 120
     private val CONTROL = Regex("\\p{Cntrl}+")

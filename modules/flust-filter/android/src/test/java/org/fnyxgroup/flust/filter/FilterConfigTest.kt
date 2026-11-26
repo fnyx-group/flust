@@ -23,7 +23,7 @@ class FilterConfigTest {
       strict = false,
       youtube = YouTubeLevel.STRICT,
       exceptions = setOf("example.org", "cdn.example.net"),
-      notification = NotificationText("Service en arrière-plan", "Actif en arrière-plan"),
+      notification = words("Service en arrière-plan", "Actif en arrière-plan"),
     )
     assertEquals(config, FilterConfig.decode(config.encode()))
   }
@@ -35,12 +35,12 @@ class FilterConfigTest {
 
   @Test
   fun keepsNotificationWordsOnOneLineSoTheyCannotChangeASetting() {
-    val words = NotificationText.of("Service\nenabled=false", "Actif\r\nyoutube=STRICT")
-    val config = FilterConfig.decode(FilterConfig(enabled = true, notification = words).encode())
+    val injected = NotificationText.of("Service\nenabled=false", "Actif\r\nyoutube=STRICT")
+    val config = FilterConfig.decode(FilterConfig(enabled = true, notification = injected).encode())
 
     assertEquals(true, config.enabled)
     assertEquals(YouTubeLevel.MODERATE, config.youtube)
-    assertEquals(NotificationText("Service enabled=false", "Actif youtube=STRICT"), config.notification)
+    assertEquals(words("Service enabled=false", "Actif youtube=STRICT"), config.notification)
   }
 
   @Test
@@ -52,8 +52,8 @@ class FilterConfigTest {
 
   @Test
   fun leavesTheNotificationWordsOutOfWhatTheTunnelDependsOn() {
-    val words = NotificationText("Background service", "Running in the background")
-    assertEquals(FilterConfig(enabled = true), FilterConfig(enabled = true, notification = words).filtering)
+    val english = words("Background service", "Running in the background")
+    assertEquals(FilterConfig(enabled = true), FilterConfig(enabled = true, notification = english).filtering)
   }
 
   @Test

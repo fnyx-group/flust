@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import expo.modules.kotlin.Promise
+import expo.modules.kotlin.exception.CodedException
 import expo.modules.kotlin.exception.Exceptions
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -22,12 +23,8 @@ class FilterSettingsRecord : Record {
   @Field val youtubeStrict: Boolean = false
   @Field val notification: FilterNotificationRecord = FilterNotificationRecord()
 
-  // Words that cannot be used keep the ones stored before.
-  fun toConfig(enabled: Boolean, stored: NotificationText?) = FilterConfig(
-    enabled = enabled,
-    youtube = if (youtubeStrict) YouTubeLevel.STRICT else YouTubeLevel.MODERATE,
-    notification = notification.toText() ?: stored,
-  )
+  val youtube: YouTubeLevel
+    get() = if (youtubeStrict) YouTubeLevel.STRICT else YouTubeLevel.MODERATE
 }
 
 // The words of the foreground service's notification, in the language chosen in the app.
@@ -53,7 +50,7 @@ class FlustFilterModule : Module() {
     // Called on the JavaScript thread, every two seconds while the filter screen is open: the
     // settings, the stop reason and the availability come from memory.
     Function("getStatus") {
-      val config = FilterConfigStore(context).load()
+      val config = FilterConfigStore.of(context).load()
       val running = FilterStatus.running
       val networks = NetworkState.networks(context)
       mapOf(
@@ -80,8 +77,8 @@ class FlustFilterModule : Module() {
 
     AsyncFunction("start") { settings: FilterSettingsRecord ->
       if (!available() || VpnService.prepare(context) != null) return@AsyncFunction false
-      val store = FilterConfigStore(context)
-      store.save(settings.toConfig(enabled = true, stored = store.load().notification))
+      // Settings that cannot be read are not overwritten: the app reports a failed start.
+      FilterConfigStore.of(context).turnOn(settings.youtube, settings.notification.toText()) ?: return@AsyncFunction false
       FilterVpnService.start(context, "app-start")
       true
     }
@@ -90,16 +87,14 @@ class FlustFilterModule : Module() {
     AsyncFunction("describe") { words: FilterNotificationRecord ->
       if (!available()) return@AsyncFunction
       val text = words.toText() ?: return@AsyncFunction
-      val store = FilterConfigStore(context)
-      val config = store.load()
-      if (config.notification != text) store.save(config.copy(notification = text))
+      FilterConfigStore.of(context).describe(text) ?: return@AsyncFunction
       FilterNotification.update(context, text, FilterStatus.running)
     }
 
     AsyncFunction("stop") {
       if (available()) {
-        val store = FilterConfigStore(context)
-        store.save(store.load().copy(enabled = false))
+        // Settings that cannot be read are not overwritten, and the filter stays on.
+        FilterConfigStore.of(context).turnOff() ?: throw UnreadableSettingsException()
         FilterVpnService.stop(context)
       }
     }
@@ -109,7 +104,7 @@ class FlustFilterModule : Module() {
     // reads next is not the one from before the start.
     AsyncFunction("resume") { promise: Promise ->
       if (!available() || FilterStatus.running) return@AsyncFunction promise.resolve(false)
-      if (!FilterConfigStore(context).load().enabled || VpnService.prepare(context) != null) {
+      if (!FilterConfigStore.of(context).load().enabled || VpnService.prepare(context) != null) {
         return@AsyncFunction promise.resolve(false)
       }
       FilterVpnService.start(context, "app-resume")
@@ -149,7 +144,7 @@ class FlustFilterModule : Module() {
     // The activity's end is often the last call before a manufacturer kills flust from recents.
     OnActivityDestroys {
       val context = appContext.reactContext ?: return@OnActivityDestroys
-      if (available() && FilterConfigStore(context).load().enabled) {
+      if (available() && FilterConfigStore.of(context).load().enabled) {
         FilterRestartJob.scheduleSoon(context, "activity-destroyed")
       }
     }
@@ -186,3 +181,5 @@ class FlustFilterModule : Module() {
     const val RESUME_POLL_MILLIS = 100L
   }
 }
+
+private class UnreadableSettingsException : CodedException("The filter settings cannot be read")

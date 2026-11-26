@@ -56,33 +56,57 @@ class FilterVpnService : VpnService() {
       intent.action == SERVICE_INTERFACE -> TRIGGER_ALWAYS_ON
       else -> intent.getStringExtra(EXTRA_TRIGGER) ?: TRIGGER_UNKNOWN
     }
-    val store = FilterConfigStore(this)
-    var config = store.load()
+    val store = FilterConfigStore.of(this)
+    val read = store.read()
+    val alwaysOn = intent?.action == SERVICE_INTERFACE
     // Every start but a stop may come from startForegroundService, which must be answered.
-    promote(config.notification)
-    // The always-on setting starts the service itself: the person chose the filter there.
-    if (intent?.action == SERVICE_INTERFACE && !config.enabled) {
-      config = config.copy(enabled = true)
-      // The filter still starts if the choice cannot be saved: always-on asked for it.
-      try {
-        store.save(config)
-      } catch (unsaved: Exception) {
+    val promoted = promote(read.config.notification)
+    val decision = StartDecision.of(
+      promoted,
+      foregroundRequired = intent?.action == ACTION_START,
+      read = read,
+      alwaysOn = alwaysOn,
+      running = tunnel != null,
+    )
+    when (decision) {
+      StartDecision.START -> {
+        val config = if (alwaysOn) enabledByAlwaysOn(store, read) else read.config
+        if (!starts.covers(config, tunnel?.config)) prepare(config)
+        return START_STICKY
+      }
+      StartDecision.KEEP -> return START_STICKY
+      else -> {
+        if (decision.cancelJobs) FilterRestartJob.cancel(this)
+        starts.cancel()
+        // A filter turned off records why only when a tunnel was running; a failure always does.
+        when (val reason = decision.stopReason) {
+          StopReason.STOPPED, null -> {
+            stopTunnel(StopReason.STOPPED)
+            stopSelf()
+          }
+          else -> fail(reason)
+        }
+        return START_NOT_STICKY
       }
     }
-    if (!config.enabled) {
-      FilterRestartJob.cancel(this)
-      starts.cancel()
-      stopTunnel(StopReason.STOPPED)
-      stopSelf()
-      return START_NOT_STICKY
+  }
+
+  // The always-on setting starts the service itself: the person chose the filter there. The filter
+  // still starts if the choice cannot be saved, or the settings cannot be read: always-on asked
+  // for it.
+  private fun enabledByAlwaysOn(store: FilterSettingsFile, read: ConfigRead): FilterConfig {
+    if (read.config.enabled) return read.config
+    val saved = try {
+      store.turnOnFromAlwaysOn()
+    } catch (unsaved: Exception) {
+      null
     }
-    if (!starts.covers(config, tunnel?.config)) prepare(config)
-    return START_STICKY
+    return saved ?: read.config.copy(enabled = true)
   }
 
   // Called when flust is swiped away from recents, which some manufacturers follow with a kill.
   override fun onTaskRemoved(rootIntent: Intent?) {
-    if (FilterConfigStore(this).load().enabled) FilterRestartJob.scheduleSoon(this, "task-removed")
+    if (FilterConfigStore.of(this).load().enabled) FilterRestartJob.scheduleSoon(this, "task-removed")
     super.onTaskRemoved(rootIntent)
   }
 
@@ -196,13 +220,14 @@ class FilterVpnService : VpnService() {
     return true
   }
 
-  private fun promote(text: NotificationText?) {
+  private fun promote(text: NotificationText?): Boolean =
     try {
       ServiceCompat.startForeground(this, FilterNotification.ID, FilterNotification.build(this, text), foregroundType())
+      true
     } catch (refused: Exception) {
       FilterLog.restart(this, "foreground refused after $trigger", refused)
+      false
     }
-  }
 
   // A VPN app with the user's consent may use the system-exempted type from Android 14.
   private fun foregroundType(): Int =

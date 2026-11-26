@@ -73,7 +73,7 @@ class TunnelStartsTest {
   @Test
   fun skipsAStartThatOnlyChangesTheNotificationWords() {
     val starts = TunnelStarts()
-    val renamed = moderate.copy(notification = NotificationText("Service en arrière-plan", "Actif en arrière-plan"))
+    val renamed = moderate.copy(notification = words("Service en arrière-plan", "Actif en arrière-plan"))
 
     assertTrue(starts.covers(renamed, running = moderate))
     starts.begin(moderate)

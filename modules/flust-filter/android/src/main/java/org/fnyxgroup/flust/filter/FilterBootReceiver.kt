@@ -11,7 +11,7 @@ import android.net.VpnService
 class FilterBootReceiver : BroadcastReceiver() {
   override fun onReceive(context: Context, intent: Intent) {
     if (intent.action !in RESTART_ACTIONS) return
-    if (!FilterConfigStore(context).load().enabled || VpnService.prepare(context) != null) return
+    if (!FilterConfigStore.of(context).load().enabled || VpnService.prepare(context) != null) return
     try {
       FilterVpnService.start(context, "boot")
     } catch (refused: IllegalStateException) {

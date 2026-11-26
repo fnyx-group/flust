@@ -2,19 +2,6 @@ package org.fnyxgroup.flust.filter
 
 import android.content.Context
 
-// Why the tunnel last stopped, for the app to show. No browsing data: one word.
-enum class StopReason(val code: String) {
-  STOPPED("stopped"),
-  REVOKED("revoked"),
-  NO_CONSENT("no-consent"),
-  FAILED("failed"),
-  // The compiled lists could not be read: only a new install brings them back.
-  LISTS("lists"),
-  // Android refused to start the service after a reboot. Not a failure: flust resumes the filter
-  // when it is opened, and the always-on setting avoids it.
-  BOOT_DEFERRED("boot-deferred"),
-}
-
 // How long the last start of the tunnel took, for the measure of the development build. Lists and
 // trust run off the main thread, establish on it; total counts from the request to the running
 // tunnel.

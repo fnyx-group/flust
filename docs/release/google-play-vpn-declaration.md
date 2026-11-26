@@ -30,7 +30,7 @@ Description: "flust's content filter is a local VPN that filters DNS lookups on 
 
 Impact if deferred or interrupted: "While the service is deferred or stopped, the filter does not run: sites the person chose to block load again on every app of the phone, without them knowing, until the filter starts again. Some manufacturers kill apps swiped away from recents, and without the foreground service the filter stopped there."
 
-Video: the video of the VPN in use below, which shows the person turning the filter on, Android's VPN dialog, the filter blocking and the VPN in Android's settings. It is filmed with notifications allowed, so that the silent notification shows once the filter is on.
+Video: the video of the VPN in use below, which shows the person turning the filter on, Android's VPN dialog, the filter blocking and the VPN in Android's settings. It is filmed with the notification permission granted before filming, since flust never asks for it, so that the silent notification shows once the filter is on.
 
 ## Data safety
 
@@ -50,6 +50,8 @@ The final form wording is checked against the Play Console's current definitions
 Two videos of 90 seconds or less, on a clean emulator in French.
 
 ### The VPN in use
+
+Before filming, grant flust the notification permission, which it never asks for the filter, so that the silent notification shows: `adb shell pm grant org.fnyxgroup.flust android.permission.POST_NOTIFICATIONS`. Without it, the service still runs in the foreground, but nothing shows in the shade.
 
 1. 0 to 10 s: open flust, Réglages, Filtre, state "Le filtre est désactivé.".
 2. 10 to 30 s: turn Filtre on, the disclosure sheet, "Accepter et activer", Android's VPN dialog, OK, the key icon in the status bar, and the silent notification "Actif en arrière-plan" in the shade.

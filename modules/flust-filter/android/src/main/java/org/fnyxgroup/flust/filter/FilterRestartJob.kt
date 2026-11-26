@@ -59,7 +59,7 @@ class FilterRestartJob : JobService() {
 
     private fun restartIfNeeded(context: Context, trigger: String) {
       val decision = RestartDecision.of(
-        enabled = FilterConfigStore(context).load().enabled,
+        enabled = FilterConfigStore.of(context).load().enabled,
         consent = VpnService.prepare(context) == null,
         running = FilterStatus.running,
       )

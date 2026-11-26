@@ -62,9 +62,12 @@ describe('the Android filter plugin', () => {
   it('requests the network and foreground service permissions', () => {
     const permissions = addFilterComponents(manifest(), false).manifest['uses-permission'];
 
-    expect(permissions?.map((permission) => permission.$['android:name'])).toEqual(
-      FILTER_PERMISSIONS,
-    );
+    expect(permissions?.map((permission) => permission.$['android:name'])).toEqual([
+      'android.permission.INTERNET',
+      'android.permission.ACCESS_NETWORK_STATE',
+      'android.permission.FOREGROUND_SERVICE',
+      'android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED',
+    ]);
   });
 
   it('declares each component and permission once when it runs again', () => {
