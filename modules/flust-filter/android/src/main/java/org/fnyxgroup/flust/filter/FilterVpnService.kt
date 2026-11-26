@@ -45,7 +45,6 @@ class FilterVpnService : VpnService() {
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     if (intent?.action == ACTION_STOP) {
-      FilterTestLog.event("service stop requested")
       FilterRestartJob.cancel(this)
       starts.cancel()
       stopTunnel(StopReason.STOPPED)
@@ -57,11 +56,10 @@ class FilterVpnService : VpnService() {
       intent.action == SERVICE_INTERFACE -> TRIGGER_ALWAYS_ON
       else -> intent.getStringExtra(EXTRA_TRIGGER) ?: TRIGGER_UNKNOWN
     }
-    FilterTestLog.event("service started, trigger=$trigger")
-    // Every start but a stop may come from startForegroundService, which must be answered.
-    promote()
     val store = FilterConfigStore(this)
     var config = store.load()
+    // Every start but a stop may come from startForegroundService, which must be answered.
+    promote(config.notification)
     // The always-on setting starts the service itself: the person chose the filter there.
     if (intent?.action == SERVICE_INTERFACE && !config.enabled) {
       config = config.copy(enabled = true)
@@ -82,22 +80,19 @@ class FilterVpnService : VpnService() {
     return START_STICKY
   }
 
-  // Called when flust is swiped away from recents, on the builds that call it before they kill.
+  // Called when flust is swiped away from recents, which some manufacturers follow with a kill.
   override fun onTaskRemoved(rootIntent: Intent?) {
-    FilterTestLog.event("onTaskRemoved, running=${FilterStatus.running}")
     if (FilterConfigStore(this).load().enabled) FilterRestartJob.scheduleSoon(this, "task-removed")
     super.onTaskRemoved(rootIntent)
   }
 
   override fun onRevoke() {
-    FilterTestLog.event("consent revoked")
     starts.cancel()
     stopTunnel(StopReason.REVOKED)
     super.onRevoke()
   }
 
   override fun onDestroy() {
-    FilterTestLog.event("service destroyed")
     starts.cancel()
     preparation.shutdownNow()
     if (tunnel != null) FilterLog.stopped(this, null)
@@ -188,7 +183,7 @@ class FilterVpnService : VpnService() {
     }
     FilterStatus.running = true
     FilterStatus.recordStop(this, null)
-    FilterTestLog.event("tunnel running, trigger=$trigger")
+    FilterLog.restart(this, "tunnel running after $trigger")
     FilterRestartJob.schedulePeriodic(this)
     val running = SystemClock.elapsedRealtimeNanos()
     FilterStatus.lastStart = TunnelStartTiming(
@@ -201,12 +196,11 @@ class FilterVpnService : VpnService() {
     return true
   }
 
-  private fun promote() {
+  private fun promote(text: NotificationText?) {
     try {
-      ServiceCompat.startForeground(this, FilterNotification.ID, FilterNotification.build(this), foregroundType())
-      FilterTestLog.event("foreground ok")
+      ServiceCompat.startForeground(this, FilterNotification.ID, FilterNotification.build(this, text), foregroundType())
     } catch (refused: Exception) {
-      FilterTestLog.event("foreground refused ${refused.javaClass.name}")
+      FilterLog.restart(this, "foreground refused after $trigger", refused)
     }
   }
 

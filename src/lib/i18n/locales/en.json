@@ -893,6 +893,10 @@
   },
   "filter": {
     "back": "Back",
+    "notification": {
+      "channelName": "Background service",
+      "text": "Running in the background"
+    },
     "title": "Filter",
     "status": {
       "on": "The filter protects this phone.",

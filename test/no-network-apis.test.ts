@@ -287,9 +287,8 @@ describe('the Android filter', () => {
   });
 
   // Logcat ends up in bug reports and is read by any tool with adb access: only FilterLog.kt
-  // writes to it, and only in the development build. FilterTestLog.kt is the restart field test's,
-  // in every build while the test lasts, and holds no name or address.
-  it('logs through FilterLog.kt and the field test log alone', () => {
+  // writes to it, and only in the development build.
+  it('logs through FilterLog.kt alone', () => {
     const logging = sourceFiles().filter(
       (file) =>
         file.endsWith('.kt') &&
@@ -298,7 +297,7 @@ describe('the Android filter', () => {
           withoutComments(fs.readFileSync(path.join(root, file), 'utf8')),
         ),
     );
-    expect(logging).toEqual([`${filterSource}FilterLog.kt`, `${filterSource}FilterTestLog.kt`]);
+    expect(logging).toEqual([`${filterSource}FilterLog.kt`]);
   });
 
   it('is the only native code that may use the network', () => {

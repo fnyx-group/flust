@@ -1,4 +1,0 @@
-<resources>
-  <string name="flust_filter_channel_name">Background service</string>
-  <string name="flust_filter_notification_text">Running in the background</string>
-</resources>

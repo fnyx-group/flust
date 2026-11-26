@@ -2,9 +2,18 @@ import type { TFunction } from 'i18next';
 
 import type { FilterInactiveReason, FilterView } from '@/domain/filter-state';
 import { MS_PER_MINUTE, MS_PER_SECOND } from '@/domain/time';
+import type { FilterNotificationWords } from '@/features/filter/filter-bridge';
 import type { PendingRequest } from '@/features/filter/use-filter-request';
 
 type ShownView = Exclude<FilterView, { state: 'unavailable' }>;
+
+// Neutral on purpose, like the reminders: nothing in the notification says what flust is for.
+export function filterNotificationWords(t: TFunction): FilterNotificationWords {
+  return {
+    channelName: t('filter.notification.channelName'),
+    text: t('filter.notification.text'),
+  };
+}
 
 export function filterValue(t: TFunction, view: ShownView): string {
   return t(`filter.value.${view.state}`);

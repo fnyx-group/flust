@@ -80,6 +80,8 @@ A local VpnService that carries DNS only. It is the only way to apply our own li
 7. Each change of the settings from the app sets up a new tunnel, then closes the one it replaces, so lookups never leave the filter in between. The two tunnels use different fake DNS addresses, so Android empties the Java address caches of apps. Its resolver keeps its cache, so every answer flust rewrites for SafeSearch carries a TTL of a minute at most, and a stronger SafeSearch setting applies within a minute.
 8. DNS on port 53 to a fake address or to a routed resolver address is answered by flust. Other TCP connections to these addresses are reset at once and other UDP is dropped, so encrypted DNS to a known resolver fails fast and apps fall back to the system resolver. This does not depend on strict mode. A resolver missing from the list stays reachable.
 
+The VPN service runs in the foreground, so that manufacturers that kill apps swiped away from recents leave it running. While notifications are allowed, Android shows a silent notification for it, hidden on the lock screen, whose words do not say what flust is for. flust never asks for the notification permission for it, and turning its channel off keeps the protection. After a kill, a job restarts the filter a few seconds after flust leaves recents, and another checks every 15 minutes ([0047](../decisions/0047-filter-foreground-service.md)).
+
 Android's automatic Private DNS tries DNS over TLS to the VPN's DNS address first. The tunnel resets that connection at once, so Android falls back to plain DNS through the filter without waiting.
 
 ### Resolver
@@ -133,7 +135,7 @@ flust detects and shows these, with the reason and what to do.
 
 1. Private DNS in strict mode sends lookups around the VPN. flust detects it and explains how to switch to Automatic. Refusing port 853 would break all resolution instead of filtering. Detecting it needs `ACCESS_NETWORK_STATE`, which the production build requests from lot 2 ([0041](../decisions/0041-filter-network-permissions.md)).
 2. Another VPN app takes over, since Android runs one VPN at a time.
-3. The VPN is turned off in the settings, or the app is force stopped. flust restarts the tunnel and guides people to the always-on VPN setting, which only they can enable.
+3. The VPN is turned off in the settings, or the app is force stopped. flust restarts the tunnel and guides people to the always-on VPN setting, which only they can enable. A force stop also cancels the restart jobs, so the filter comes back when flust opens, or at once with always-on.
 4. Clear data in the Android settings resets the lock and the delay.
 5. flust can be uninstalled. Nothing prevents it without Device Owner.
 
@@ -294,7 +296,7 @@ Every build compiles the lists from lot 2, so `lists/`, `scripts/lists/` and `sc
 
 ## Store requirements
 
-Every app that uses VpnService fills a declaration in the Play Console, with an in-app disclosure shown before consent and two videos of 90 seconds or less, one of the VPN in use and one of the disclosure. [Google Play VpnService declaration](../release/google-play-vpn-declaration.md) holds the proposed category, the disclosure, the Data safety answers and the video scripts. The category stays open until comparable apps are compared.
+Every app that uses VpnService fills a declaration in the Play Console, with an in-app disclosure shown before consent and two videos of 90 seconds or less, one of the VPN in use and one of the disclosure. The foreground service type of the VPN service is declared there too. [Google Play VpnService declaration](../release/google-play-vpn-declaration.md) holds the proposed category, the disclosure, the foreground service declaration, the Data safety answers and the video scripts. The category stays open until comparable apps are compared.
 
 On Apple's side, the association enrolls in the Apple Developer Program and asks for the fee waiver, then requests the Family Controls (Distribution) entitlement. Both take weeks and start as soon as the association is registered.
 
@@ -309,11 +311,12 @@ Real phones, with a fixed set of domains. It holds about a hundred common adult 
 3. An app that queries 8.8.8.8 directly.
 4. Another VPN app installed and turned on.
 5. Reboot, force stop, Clear data, clock changed during the delay, reboot during the delay.
-6. Wi-Fi, mobile data, an IPv6-only network, and a network that blocks port 853.
-7. SafeSearch shows its restricted mode on Google, Bing, YouTube and DuckDuckGo.
-8. The module opens sockets only to the resolver.
-9. A day of normal use with no lost connection and no unusual battery drain.
-10. The cost of loading the lists and of a lookup on a low-end phone.
+6. Swipe flust from recents and close all recents: the filter keeps blocking. A full day with the screen off: the filter still blocks, on Xiaomi and on every other brand at hand ([0047](../decisions/0047-filter-foreground-service.md)).
+7. Wi-Fi, mobile data, an IPv6-only network, and a network that blocks port 853.
+8. SafeSearch shows its restricted mode on Google, Bing, YouTube and DuckDuckGo.
+9. The module opens sockets only to the resolver.
+10. A day of normal use with no lost connection and no unusual battery drain.
+11. The cost of loading the lists and of a lookup on a low-end phone.
 
 ### iPhone
 

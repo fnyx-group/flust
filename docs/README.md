@@ -70,6 +70,7 @@
 - [0044 Development modules out of production](decisions/0044-production-modules.md): the development client and the DOM web view are not linked into production builds.
 - [0045 Resolver chain of the Android filter](decisions/0045-resolver-chain.md): Quad9, then Cloudflare, then DNS4EU over DNS over TLS, probed in the background, never plain DNS.
 - [0046 Android App Bundle and upload key](decisions/0046-android-bundle-and-upload-key.md): the Play bundle built and signed locally with an upload key kept outside the repository, and checked for what Google Play refuses.
+- [0047 Foreground service and restart jobs of the Android filter](decisions/0047-filter-foreground-service.md): the VPN service in the foreground with a silent notification that flust never asks permission for, and restart jobs after a kill.
 
 ## Development
 

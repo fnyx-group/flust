@@ -893,6 +893,10 @@
   },
   "filter": {
     "back": "Retour",
+    "notification": {
+      "channelName": "Service en arrière-plan",
+      "text": "Actif en arrière-plan"
+    },
     "title": "Filtre",
     "status": {
       "on": "Le filtre protège ce téléphone.",

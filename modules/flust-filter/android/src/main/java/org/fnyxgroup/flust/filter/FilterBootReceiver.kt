@@ -15,7 +15,6 @@ class FilterBootReceiver : BroadcastReceiver() {
     try {
       FilterVpnService.start(context, "boot")
     } catch (refused: IllegalStateException) {
-      FilterTestLog.event("boot start refused ${refused.javaClass.name}")
       FilterLog.stopped(context, StopReason.BOOT_DEFERRED, refused)
       FilterStatus.recordStop(context, StopReason.BOOT_DEFERRED)
     }

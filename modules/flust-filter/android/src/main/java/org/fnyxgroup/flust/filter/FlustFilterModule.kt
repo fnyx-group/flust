@@ -20,11 +20,22 @@ import expo.modules.kotlin.records.Record
 // to weaken the filter in a weak moment.
 class FilterSettingsRecord : Record {
   @Field val youtubeStrict: Boolean = false
+  @Field val notification: FilterNotificationRecord = FilterNotificationRecord()
 
-  fun toConfig(enabled: Boolean) = FilterConfig(
+  // Words that cannot be used keep the ones stored before.
+  fun toConfig(enabled: Boolean, stored: NotificationText?) = FilterConfig(
     enabled = enabled,
     youtube = if (youtubeStrict) YouTubeLevel.STRICT else YouTubeLevel.MODERATE,
+    notification = notification.toText() ?: stored,
   )
+}
+
+// The words of the foreground service's notification, in the language chosen in the app.
+class FilterNotificationRecord : Record {
+  @Field val channelName: String = ""
+  @Field val text: String = ""
+
+  fun toText(): NotificationText? = NotificationText.of(channelName, text)
 }
 
 // The bridge to the filter. In the builds where the VPN service is not declared, every call
@@ -69,9 +80,20 @@ class FlustFilterModule : Module() {
 
     AsyncFunction("start") { settings: FilterSettingsRecord ->
       if (!available() || VpnService.prepare(context) != null) return@AsyncFunction false
-      FilterConfigStore(context).save(settings.toConfig(enabled = true))
+      val store = FilterConfigStore(context)
+      store.save(settings.toConfig(enabled = true, stored = store.load().notification))
       FilterVpnService.start(context, "app-start")
       true
+    }
+
+    // Keeps the notification's words in the language of the app, for the starts without it too.
+    AsyncFunction("describe") { words: FilterNotificationRecord ->
+      if (!available()) return@AsyncFunction
+      val text = words.toText() ?: return@AsyncFunction
+      val store = FilterConfigStore(context)
+      val config = store.load()
+      if (config.notification != text) store.save(config.copy(notification = text))
+      FilterNotification.update(context, text, FilterStatus.running)
     }
 
     AsyncFunction("stop") {
@@ -127,7 +149,6 @@ class FlustFilterModule : Module() {
     // The activity's end is often the last call before a manufacturer kills flust from recents.
     OnActivityDestroys {
       val context = appContext.reactContext ?: return@OnActivityDestroys
-      FilterTestLog.event("activity destroyed")
       if (available() && FilterConfigStore(context).load().enabled) {
         FilterRestartJob.scheduleSoon(context, "activity-destroyed")
       }

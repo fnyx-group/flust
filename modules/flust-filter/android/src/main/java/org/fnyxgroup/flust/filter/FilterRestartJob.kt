@@ -9,13 +9,13 @@ import android.content.Context
 import android.net.VpnService
 import android.os.PersistableBundle
 
-// Brings the filter back after Android or the manufacturer killed flust. Jobs survive a kill,
-// not a force stop. A one-off job runs a few seconds after the task is removed, and a periodic one
-// is the safety net for kills nothing announces.
+// Brings the filter back after Android or the manufacturer killed flust, as a safety net behind
+// the foreground service (docs/decisions/0047-filter-foreground-service.md). Jobs survive a kill,
+// not a force stop. A one-off job runs a few seconds after flust leaves recents, and a periodic
+// one covers kills that nothing announces.
 class FilterRestartJob : JobService() {
   override fun onStartJob(params: JobParameters): Boolean {
     val trigger = params.extras.getString(EXTRA_TRIGGER) ?: TRIGGER_PERIODIC
-    FilterTestLog.event("job ran, trigger=$trigger")
     restartIfNeeded(this, "job-$trigger")
     return false
   }
@@ -37,7 +37,7 @@ class FilterRestartJob : JobService() {
         .setOverrideDeadline(SOON_DEADLINE_MILLIS)
         .setExtras(PersistableBundle().apply { putString(EXTRA_TRIGGER, trigger) })
         .build()
-      schedule(context, job, "soon, trigger=$trigger")
+      schedule(context, job, "soon after $trigger")
     }
 
     // Kept when already pending, so that each start of the tunnel does not push the next run back.
@@ -55,33 +55,31 @@ class FilterRestartJob : JobService() {
       val scheduler = context.getSystemService(JobScheduler::class.java) ?: return
       scheduler.cancel(SOON_JOB)
       scheduler.cancel(PERIODIC_JOB)
-      FilterTestLog.event("jobs cancelled")
     }
 
-    fun restartIfNeeded(context: Context, trigger: String) {
-      val skipped = when {
-        !FilterConfigStore(context).load().enabled -> "filter off"
-        VpnService.prepare(context) != null -> "no consent"
-        FilterStatus.running -> "already running"
-        else -> null
-      }
-      if (skipped != null) return FilterTestLog.event("restart skipped, $skipped, trigger=$trigger")
+    private fun restartIfNeeded(context: Context, trigger: String) {
+      val decision = RestartDecision.of(
+        enabled = FilterConfigStore(context).load().enabled,
+        consent = VpnService.prepare(context) == null,
+        running = FilterStatus.running,
+      )
+      if (decision != RestartDecision.START) return FilterLog.restart(context, "$trigger ${decision.event}")
       try {
         FilterVpnService.start(context, trigger)
-        FilterTestLog.event("restart attempted, accepted, trigger=$trigger")
+        FilterLog.restart(context, "$trigger start accepted")
       } catch (refused: Exception) {
-        FilterTestLog.event("restart attempted, refused ${refused.javaClass.name}, trigger=$trigger")
+        FilterLog.restart(context, "$trigger start refused", refused)
       }
     }
 
     private fun schedule(context: Context, job: JobInfo, label: String) {
       val scheduler = context.getSystemService(JobScheduler::class.java) ?: return
-      val result = try {
-        if (scheduler.schedule(job) == JobScheduler.RESULT_SUCCESS) "ok" else "failed"
+      try {
+        val scheduled = scheduler.schedule(job) == JobScheduler.RESULT_SUCCESS
+        FilterLog.restart(context, "job $label ${if (scheduled) "scheduled" else "not scheduled"}")
       } catch (refused: Exception) {
-        "refused ${refused.javaClass.name}"
+        FilterLog.restart(context, "job $label not scheduled", refused)
       }
-      FilterTestLog.event("job scheduled, $label, $result")
     }
   }
 }
