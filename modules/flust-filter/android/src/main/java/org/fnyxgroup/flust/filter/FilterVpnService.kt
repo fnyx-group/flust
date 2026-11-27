@@ -39,7 +39,7 @@ class FilterVpnService : VpnService() {
   private var generation = 0
   private var trigger = TRIGGER_STICKY
   private val main = Handler(Looper.getMainLooper())
-  private val starts = TunnelStarts()
+  private val starts = TunnelStarts { underWay -> FilterStatus.starting = underWay }
   private val preparation: ExecutorService = Executors.newSingleThreadExecutor { task -> Thread(task, "flust-filter-start") }
   private val lists = FilterLists { Blocklist.read(assets.open(LISTS_ASSET).use { it.readBytes() }) }
 
@@ -156,9 +156,14 @@ class FilterVpnService : VpnService() {
         Runnable {
           if (!starts.finish(ticket)) return@Runnable
           if (failure != null) fail(StopReason.FAILED, failure) else startTunnel(config, prepared, requested)
+          starts.done()
         }
       } catch (unreadable: Exception) {
-        Runnable { if (starts.finish(ticket)) fail(StopReason.LISTS, unreadable) }
+        Runnable {
+          if (!starts.finish(ticket)) return@Runnable
+          fail(StopReason.LISTS, unreadable)
+          starts.done()
+        }
       }
       main.post(step)
     }

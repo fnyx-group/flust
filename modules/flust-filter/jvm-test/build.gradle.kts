@@ -20,6 +20,7 @@ kotlin {
       kotlin.include(
         "**/Blocklist.kt",
         "**/CertificateCheck.kt",
+        "**/CrashHandler.kt",
         "**/CrashRestartDecision.kt",
         "**/DnsMessage.kt",
         "**/DotClient.kt",

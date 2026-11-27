@@ -3,7 +3,12 @@ import { useEffect, useState } from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { filterView } from '@/domain/filter-state';
+import {
+  alwaysOnValue,
+  filterView,
+  showsAlwaysOnGear,
+  showsUnusedAppsRow,
+} from '@/domain/filter-state';
 import { turnYoutubeStrictOn } from '@/features/filter/filter-actions';
 import { FilterDisclosureSheet } from '@/features/filter/filter-disclosure-sheet';
 import { FilterMeasure } from '@/features/filter/filter-measure';
@@ -84,12 +89,8 @@ export function FilterScreen() {
     Linking.sendIntent(action).catch(() => undefined);
   }
 
-  const working = busy || enabling.busy;
-  // Android tells only a running filter whether always-on names it.
-  const alwaysOnValue =
-    status.alwaysOn === null
-      ? undefined
-      : t(status.alwaysOn ? 'filter.value.on' : 'filter.value.off');
+  const working = busy || enabling.busy || request.busy;
+  const alwaysOn = alwaysOnValue(status);
   return (
     <Screen bottomInset>
       <BackHeader backLabel={t('filter.back')} title={t('filter.title')} onBack={goBack} />
@@ -137,7 +138,7 @@ export function FilterScreen() {
         <RowGroup>
           <NavRow
             label={t('filter.alwaysOn')}
-            value={alwaysOnValue}
+            value={alwaysOn === null ? undefined : t(`filter.value.${alwaysOn}`)}
             icon={{ icon: SettingsIcon, color: colors.textSecondary }}
             onPress={() => open(VPN_SETTINGS)}
           />
@@ -147,8 +148,8 @@ export function FilterScreen() {
             onPress={() => router.push('/licenses')}
           />
         </RowGroup>
-        {status.alwaysOn !== true && <Text style={styles.note}>{t('filter.alwaysOnGear')}</Text>}
-        {enabled && status.pausedIfUnused === true && (
+        {showsAlwaysOnGear(status) && <Text style={styles.note}>{t('filter.alwaysOnGear')}</Text>}
+        {showsUnusedAppsRow(status) && (
           <>
             <RowGroup>
               <NavRow

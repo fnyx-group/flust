@@ -1,4 +1,11 @@
-import { filterView, isFilterInactive, type FilterStatus } from '@/domain/filter-state';
+import {
+  alwaysOnValue,
+  filterView,
+  isFilterInactive,
+  showsAlwaysOnGear,
+  showsUnusedAppsRow,
+  type FilterStatus,
+} from '@/domain/filter-state';
 
 const RUNNING: FilterStatus = {
   available: true,
@@ -57,5 +64,38 @@ describe('the filter state', () => {
   it('counts only an inactive filter as inactive', () => {
     expect(isFilterInactive(filterView(RUNNING))).toBe(false);
     expect(isFilterInactive(filterView({ available: false }))).toBe(false);
+  });
+});
+
+describe('the always-on row', () => {
+  it('shows whether always-on names flust while the filter runs', () => {
+    expect(alwaysOnValue({ ...RUNNING, alwaysOn: true })).toBe('on');
+    expect(alwaysOnValue({ ...RUNNING, alwaysOn: false })).toBe('off');
+  });
+
+  it('shows no value when Android cannot tell, or without a filter', () => {
+    expect(alwaysOnValue({ ...STOPPED, alwaysOn: null })).toBeNull();
+    expect(alwaysOnValue({ available: false })).toBeNull();
+  });
+
+  it('points to the gear until always-on is known to name flust', () => {
+    expect(showsAlwaysOnGear({ ...RUNNING, alwaysOn: false })).toBe(true);
+    expect(showsAlwaysOnGear({ ...STOPPED, alwaysOn: null })).toBe(true);
+    expect(showsAlwaysOnGear({ ...RUNNING, alwaysOn: true })).toBe(false);
+    expect(showsAlwaysOnGear({ available: false })).toBe(false);
+  });
+});
+
+describe('the unused apps row', () => {
+  it('shows while the filter is wanted and Android would pause flust', () => {
+    expect(showsUnusedAppsRow({ ...RUNNING, pausedIfUnused: true })).toBe(true);
+    expect(showsUnusedAppsRow({ ...STOPPED, pausedIfUnused: true })).toBe(true);
+  });
+
+  it('goes away once the pause is off, where Android has none, or with the filter off', () => {
+    expect(showsUnusedAppsRow({ ...RUNNING, pausedIfUnused: false })).toBe(false);
+    expect(showsUnusedAppsRow({ ...RUNNING, pausedIfUnused: null })).toBe(false);
+    expect(showsUnusedAppsRow({ ...STOPPED, enabled: false, pausedIfUnused: true })).toBe(false);
+    expect(showsUnusedAppsRow({ available: false })).toBe(false);
   });
 });

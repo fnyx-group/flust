@@ -73,6 +73,7 @@ export function FilterStatusBlock({
             <Button
               label={t('filter.request.confirmOpen')}
               variant="secondary"
+              disabled={busy}
               onPress={onConfirmRequest}
             />
           )}

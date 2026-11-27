@@ -12,8 +12,9 @@ expo-router exports a global `router`. Each navigation container binds it to its
 
 - flust navigates only with `useRouter()`. Code outside a component receives the router from the component that calls it.
 - Back buttons go through `useGoBack(fallback)`, which reads `useCanGoBack()`. The navigation reference behind `router.canGoBack()` is shared by every root, and the old root sets it to null as it unmounts, so after a recreation it would always answer that there is nothing to go back to.
-- ESLint refuses `import { router } from 'expo-router'` in every layer.
-- `src/features/home/streak-counter.test.tsx` mounts two roots, unmounts the first and taps the counter in the second, which threw with the global router.
+- ESLint refuses `import { router } from 'expo-router'` and a namespace import of expo-router in every layer, and `canGoBack`, `canDismiss` and `setParams` on the router, which read the shared navigation reference.
+- `src/features/home/streak-counter.test.tsx` mounts two roots, unmounts the first and taps the counter in the second, which threw with the global router. `src/features/navigation/recreation.test.tsx` does the same for a notification tap, the navigation held during the lock and a rank unlock.
+- Only the root mounted last takes a notification tap or the navigation held during the lock (`useCurrentRoot`). The tap listeners and the held route are module state shared by both roots, and a route taken by the root that is unmounting would be lost with it.
 - The activity keeps being recreated on a font or display size change, as Android does by default: handling those changes in place would leave React Native's text and layout sizes to update by themselves, which it does not promise.
 
 ## Consequences

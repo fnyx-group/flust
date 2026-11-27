@@ -115,8 +115,8 @@ class FlustFilterModule : Module() {
     AsyncFunction("stop") {
       if (available()) {
         // Settings that cannot be read are not overwritten, and the filter stays on.
-        FilterConfigStore.of(context).turnOff() ?: throw UnreadableSettingsException()
-        FilterVpnService.stop(context)
+        FilterConfigStore.of(context).turnOffAndStop { FilterVpnService.stop(context) }
+          ?: throw UnreadableSettingsException()
       }
     }
 
@@ -177,10 +177,11 @@ class FlustFilterModule : Module() {
     }
   }
 
-  // Android 11 and later pause an app that is not opened for months, unless the person turned it
-  // off for that app. Null where Android has no such pause.
+  // Android 12 and later pause an app that is not opened for months, which stops it like a force
+  // stop, unless the person turned it off for that app. The same switch on Android 11 only resets
+  // runtime permissions, which the filter does not use. Null where Android has no such pause.
   private fun pausedIfUnused(): Boolean? =
-    if (available() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    if (available() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
       !context.packageManager.isAutoRevokeWhitelisted
     } else {
       null

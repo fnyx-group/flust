@@ -21,6 +21,9 @@ object FilterStatus {
 
   @Volatile var running = false
 
+  // Whether a start of the tunnel is under way (TunnelStarts), read by CrashRestart.
+  @Volatile var starting = false
+
   @Volatile var lastStart: TunnelStartTiming? = null
 
   // The name of the resolver queries go to, for the measure of the development build.

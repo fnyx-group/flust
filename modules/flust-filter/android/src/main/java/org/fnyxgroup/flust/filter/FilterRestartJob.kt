@@ -29,7 +29,6 @@ class FilterRestartJob : JobService() {
     private const val TRIGGER_PERIODIC = "periodic"
     private const val SOON_DELAY_MILLIS = 3_000L
     private const val SOON_DEADLINE_MILLIS = 15_000L
-    const val CRASH_DELAY_MILLIS = 1_000L
     private const val PERIOD_MILLIS = 15 * 60 * 1_000L
 
     fun scheduleSoon(context: Context, trigger: String, delayMillis: Long = SOON_DELAY_MILLIS) {
