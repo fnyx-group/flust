@@ -8,3 +8,8 @@ auditConfig:
     # is not in the app bundle, and its globs come from Expo, not from users. Reviewed at each Expo
     # update; remove once Expo depends on minimatch 11.0.1 or later.
     - GHSA-g3hv-75wg-m249
+overrides:
+  # Jest coverage pulls test-exclude 6 and 7 with glob 7 and 10 (SNYK-JS-GLOB-22112102). Remove once
+  # jest-expo and Jest ship test-exclude with glob 13.0.7 or later.
+  test-exclude: ^7.0.2
+  test-exclude>glob: ^13.0.7
