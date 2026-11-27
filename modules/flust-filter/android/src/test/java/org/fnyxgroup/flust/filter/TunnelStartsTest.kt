@@ -79,4 +79,40 @@ class TunnelStartsTest {
     starts.begin(moderate)
     assertTrue(starts.covers(renamed, running = null))
   }
+
+  // A crash while the tunnel is set up must still find the start under way (CrashRestart).
+  @Test
+  fun keepsAFinishedStartUnderWayUntilItsTunnelIsSetUp() {
+    val reported = mutableListOf<Boolean>()
+    val starts = TunnelStarts { reported += it }
+    val ticket = starts.begin(moderate)
+
+    assertTrue(starts.finish(ticket))
+    assertTrue(starts.underWay)
+    starts.done()
+
+    assertFalse(starts.underWay)
+    assertEquals(listOf(true, false), reported)
+  }
+
+  @Test
+  fun endsAStartThatWasCancelled() {
+    val starts = TunnelStarts()
+    starts.begin(moderate)
+    starts.cancel()
+
+    assertFalse(starts.underWay)
+  }
+
+  @Test
+  fun keepsANewerStartUnderWayWhenAnOlderOneIsDropped() {
+    val starts = TunnelStarts()
+    val first = starts.begin(moderate)
+    starts.begin(strict)
+
+    assertFalse(starts.finish(first))
+    starts.done()
+
+    assertTrue(starts.underWay)
+  }
 }

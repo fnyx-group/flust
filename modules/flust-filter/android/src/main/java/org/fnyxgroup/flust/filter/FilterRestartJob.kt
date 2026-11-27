@@ -11,8 +11,8 @@ import android.os.PersistableBundle
 
 // Brings the filter back after Android or the manufacturer killed flust, as a safety net behind
 // the foreground service (docs/decisions/0047-filter-foreground-service.md). Jobs survive a kill,
-// not a force stop. A one-off job runs a few seconds after flust leaves recents, and a periodic
-// one covers kills that nothing announces.
+// not a force stop. A one-off job runs a few seconds after flust leaves recents, a second after
+// a crash, and a periodic one covers kills that nothing announces.
 class FilterRestartJob : JobService() {
   override fun onStartJob(params: JobParameters): Boolean {
     val trigger = params.extras.getString(EXTRA_TRIGGER) ?: TRIGGER_PERIODIC
@@ -31,10 +31,10 @@ class FilterRestartJob : JobService() {
     private const val SOON_DEADLINE_MILLIS = 15_000L
     private const val PERIOD_MILLIS = 15 * 60 * 1_000L
 
-    fun scheduleSoon(context: Context, trigger: String) {
+    fun scheduleSoon(context: Context, trigger: String, delayMillis: Long = SOON_DELAY_MILLIS) {
       val job = JobInfo.Builder(SOON_JOB, ComponentName(context, FilterRestartJob::class.java))
-        .setMinimumLatency(SOON_DELAY_MILLIS)
-        .setOverrideDeadline(SOON_DEADLINE_MILLIS)
+        .setMinimumLatency(delayMillis)
+        .setOverrideDeadline(delayMillis + SOON_DEADLINE_MILLIS - SOON_DELAY_MILLIS)
         .setExtras(PersistableBundle().apply { putString(EXTRA_TRIGGER, trigger) })
         .build()
       schedule(context, job, "soon after $trigger")

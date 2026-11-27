@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -20,6 +20,7 @@ type RankLineProps = {
 // With a rank, the standing only changes once a day, so ticks in between do not re-render.
 // The parts wrap under each other, still centered, when large text makes the line too long.
 export function RankLine({ journey, unlockedRanks }: RankLineProps) {
+  const router = useRouter();
   const { t } = useTranslation();
   const standing = useClock((now) => rankStanding(journey, unlockedRanks, now), sameFields);
   const text = rankLineText(t, standing);

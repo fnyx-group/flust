@@ -27,9 +27,9 @@ import { dateOfDay, localDayNumber, utcToLocal } from '@/domain/local-time';
 import { ClockContext, useClock } from '@/features/clock/clock-context';
 import { createMinuteClock } from '@/features/clock/minute-clock';
 import { nativeClockDeps } from '@/features/clock/native-clock';
-import { closeNote } from '@/features/journal/close-note';
 import { noteDateTime } from '@/features/journal/labels';
 import { NotePrompts } from '@/features/journal/note-prompts';
+import { useGoBack } from '@/features/navigation/use-go-back';
 import {
   saveNote,
   SAVE_NOTE_ERROR_MESSAGES,
@@ -64,6 +64,8 @@ type Sheet = { kind: 'leave'; leave: () => void } | { kind: 'delete' } | null;
 // note that is still empty leaves without asking and is never saved. Only the prompts stay above
 // the keyboard; the rest scrolls with the text.
 export function NoteEditor({ note }: { note: Note | null }) {
+  // The note can open alone, from a link at launch: closing it then shows the journal.
+  const closeNote = useGoBack('/journal');
   const { t } = useTranslation();
   const storage = useStorage();
   const [clock] = useState(() => createMinuteClock(CLOCK_ANCHOR, nativeClockDeps));

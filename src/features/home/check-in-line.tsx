@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -14,6 +14,7 @@ import { colors, pressedOpacity, sizes, spacing, typography } from '@/ui/theme';
 // day, so it waits again after midnight. Plain secondary text: a missed check-in is never shown
 // as a failure.
 export function CheckInLine() {
+  const router = useRouter();
   const { t } = useTranslation();
   const { checkIns } = useSession();
   const today = useClock((now) => localDayNumber(now, deviceOffsetAt));

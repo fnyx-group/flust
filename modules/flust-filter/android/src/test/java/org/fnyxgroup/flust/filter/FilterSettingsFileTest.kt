@@ -13,6 +13,8 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -76,7 +78,9 @@ class FilterSettingsFileTest {
 
     assertEquals(ConfigRead(FilterConfig(), failed = true), settings.read())
     assertNull(settings.update { it.copy(enabled = false) })
-    assertNull(settings.turnOff())
+    var stopped = false
+    assertNull(settings.turnOffAndStop { stopped = true })
+    assertFalse(stopped)
     assertNull(settings.turnOn(YouTubeLevel.MODERATE, null))
     assertNull(settings.turnOnFromAlwaysOn())
     assertArrayEquals(before, file.readBytes())
@@ -136,6 +140,53 @@ class FilterSettingsFileTest {
     val expected = listOf("a", "b").flatMap { writer -> List(writes) { "$writer$it.example.org" } }.toSet()
     assertEquals(expected, settings.load().exceptions)
     assertEquals(expected, FilterSettingsFile(file, seal).load().exceptions)
+  }
+
+  @Test
+  fun turnsTheFilterOffBeforeTheStop() {
+    val settings = stored(strict)
+    var enabledAtStop: Boolean? = null
+
+    assertEquals(strict.copy(enabled = false), settings.turnOffAndStop { enabledAtStop = settings.load().enabled })
+    assertEquals(false, enabledAtStop)
+    assertFalse(FilterSettingsFile(file, seal).load().enabled)
+  }
+
+  // The stop request could not be sent: the tunnel runs on, so the setting must say on.
+  @Test
+  fun turnsTheFilterBackOnWhenTheStopThrows() {
+    val settings = stored(strict)
+    val refused = IllegalStateException("Not allowed to start service")
+
+    val thrown = assertThrows(IllegalStateException::class.java) { settings.turnOffAndStop { throw refused } }
+
+    assertSame(refused, thrown)
+    assertEquals(strict, settings.load())
+    assertEquals(strict, FilterSettingsFile(file, seal).load())
+  }
+
+  @Test
+  fun leavesAFilterThatWasOffOffWhenTheStopThrows() {
+    val settings = stored(strict.copy(enabled = false))
+
+    assertThrows(IllegalStateException::class.java) { settings.turnOffAndStop { throw IllegalStateException() } }
+
+    assertFalse(settings.load().enabled)
+  }
+
+  @Test
+  fun keepsTheStopErrorWhenTheFilterCannotBeTurnedBackOn() {
+    val settings = stored(strict)
+
+    val thrown = assertThrows(IllegalStateException::class.java) {
+      settings.turnOffAndStop {
+        seal.broken = true
+        throw IllegalStateException("Not allowed to start service")
+      }
+    }
+
+    assertEquals("Not allowed to start service", thrown.message)
+    assertEquals(1, thrown.suppressed.size)
   }
 
   @Test

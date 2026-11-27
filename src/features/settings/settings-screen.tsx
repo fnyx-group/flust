@@ -1,4 +1,4 @@
-import { router, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -44,6 +44,7 @@ import { colors, spacing, typography } from '@/ui/theme';
 // iPhone filter of lot 3. The values are read again each time the tab comes into focus, since the
 // screens behind the rows change them.
 export function SettingsScreen() {
+  const router = useRouter();
   const { t, i18n: translation } = useTranslation();
   const storage = useStorage();
   const lock = useLock();

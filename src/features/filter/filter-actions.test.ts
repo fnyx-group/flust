@@ -15,6 +15,8 @@ const ON: FilterStatus = {
   stopReason: null,
   strictPrivateDns: false,
   otherVpn: false,
+  alwaysOn: null,
+  pausedIfUnused: null,
 };
 
 function bridge(status: FilterStatus, overrides: Partial<FilterBridge> = {}) {
@@ -22,10 +24,11 @@ function bridge(status: FilterStatus, overrides: Partial<FilterBridge> = {}) {
     status: () => status,
     requestConsent: jest.fn(async () => true),
     start: jest.fn(async () => true),
-    stop: jest.fn(async () => undefined),
+    stop: jest.fn(async () => true),
     resume: jest.fn(async () => true),
     describe: jest.fn(async () => undefined),
     measure: jest.fn(async () => null),
+    openUnusedAppSettings: jest.fn(async () => true),
     ...overrides,
   };
 }
@@ -98,6 +101,20 @@ describe('applyWeakening', () => {
 
     await expect(applyWeakening(fake, 'youtube')).resolves.toBe(true);
     expect(fake.start).toHaveBeenCalledWith({ youtubeStrict: false });
+  });
+
+  // The stop failed when the filter's settings could not be read, and the screen still showed it
+  // as turned off.
+  it('reports a stop that failed, the filter still on', async () => {
+    const fake = bridge(ON, { stop: jest.fn(async () => false) });
+
+    await expect(applyWeakening(fake, 'filter')).resolves.toBe(false);
+  });
+
+  it('reports YouTube strict that could not be turned off', async () => {
+    const fake = bridge({ ...ON, youtubeStrict: true }, { start: jest.fn(async () => false) });
+
+    await expect(applyWeakening(fake, 'youtube')).resolves.toBe(false);
   });
 
   it('leaves a filter that was turned off meanwhile alone', async () => {

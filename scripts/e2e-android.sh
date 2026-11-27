@@ -6,6 +6,8 @@
 # screen lock PIN for the lock flow, removed again at the end, along with any font scale change.
 # The app's log is recorded during the run, and its path printed when a flow fails or the run is
 # interrupted.
+# A full run ends with the recreation check of e2e/maestro/recreate: a font size change while the
+# app is open, which makes Android recreate the activity (docs/decisions/0048-router-per-root.md).
 # Usage: scripts/e2e-android.sh [--apk <app-release.apk>] [--font-scale <scale>] [flow.yaml ...]
 set -euo pipefail
 
@@ -47,7 +49,11 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
-[[ ${#flows[@]} -gt 0 ]] || flows=("$root/e2e/maestro")
+recreate=false
+if [[ ${#flows[@]} -eq 0 ]]; then
+  flows=("$root/e2e/maestro")
+  recreate=true
+fi
 # The PIN reaches the device shell through adb, so only digits are accepted.
 [[ $pin =~ ^[0-9]{4,16}$ ]] || fail "E2E_PIN must be 4 to 16 digits."
 
@@ -90,7 +96,7 @@ restore() {
   if $pin_set; then
     "$adb" shell locksettings clear --old "$pin" >/dev/null || echo "Could not remove the emulator PIN $pin." >&2
   fi
-  if [[ -n $font_scale ]]; then
+  if [[ -n $font_scale ]] || $recreate; then
     if [[ $previous_scale == null ]]; then
       "$adb" shell settings delete system font_scale >/dev/null ||
         echo "Could not reset the emulator font scale." >&2
@@ -140,7 +146,22 @@ logcat_pid=$!
 
 # Maestro does not read ANDROID_SERIAL. status stays 1 until Maestro returns, so an interrupted
 # run keeps its log.
-if maestro --device "$ANDROID_SERIAL" test --env "PIN=$pin" "${flows[@]}"; then
+run_maestro() {
+  maestro --device "$ANDROID_SERIAL" test --env "PIN=$pin" "$@"
+}
+
+# Any other font size recreates the activity, while the app shows Home.
+recreate_check() {
+  local scale=${font_scale:-$previous_scale}
+  local other=1.3
+  [[ $scale != "$other" ]] || other=1.0
+  run_maestro "$root/e2e/maestro/recreate/before.yaml" &&
+    "$adb" shell settings put system font_scale "$other" &&
+    sleep 3 &&
+    run_maestro "$root/e2e/maestro/recreate/after.yaml"
+}
+
+if run_maestro "${flows[@]}" && { ! $recreate || recreate_check; }; then
   status=0
 else
   status=$?

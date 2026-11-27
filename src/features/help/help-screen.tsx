@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { AccessibilityInfo, Linking, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +17,7 @@ import { deviceRegion } from '@/features/help/device-region';
 import { HelpRows } from '@/features/help/help-row';
 import { checkedMonth, openFailedMessage, regionLabel } from '@/features/help/labels';
 import { openHelp } from '@/features/help/open-help';
+import { useGoBack } from '@/features/navigation/use-go-back';
 import { displayUrl } from '@/features/shared/display-url';
 import { BackHeader } from '@/ui/back-header';
 import { Button } from '@/ui/button';
@@ -38,6 +38,7 @@ const DIRECTORY = 'directory';
 // itself sends nothing. The chosen country is not stored, and nothing records that this screen
 // was opened.
 export function HelpScreen() {
+  const goBack = useGoBack('/settings');
   const { t, i18n } = useTranslation();
   const [region] = useState(deviceRegion);
   const [chosen, setChosen] = useState<HelpRegion>(() => helpRegionFor(region));
@@ -81,11 +82,7 @@ export function HelpScreen() {
 
   return (
     <Screen bottomInset>
-      <BackHeader
-        backLabel={t('help.back')}
-        title={t('help.title')}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
-      />
+      <BackHeader backLabel={t('help.back')} title={t('help.title')} onBack={goBack} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.paragraph}>{t('help.intro')}</Text>
         <RowGroup>

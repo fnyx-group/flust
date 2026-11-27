@@ -48,16 +48,20 @@ export type NativeFilter = {
   resume(): Promise<unknown>;
   describe(words: FilterNotificationWords): Promise<unknown>;
   measure(): Promise<unknown>;
+  openUnusedAppSettings(): Promise<unknown>;
 };
 
 export type FilterBridge = {
   status(): FilterStatus;
   requestConsent(): Promise<boolean>;
   start(settings: FilterSettings): Promise<boolean>;
-  stop(): Promise<void>;
+  // False when the filter could not be turned off, for example when its settings cannot be read:
+  // it then stays on.
+  stop(): Promise<boolean>;
   resume(): Promise<boolean>;
   describe(): Promise<void>;
   measure(): Promise<FilterMeasure | null>;
+  openUnusedAppSettings(): Promise<boolean>;
 };
 
 type Fields = Record<string, unknown>;
@@ -69,6 +73,11 @@ function isFields(value: unknown): value is Fields {
 function flag(fields: Fields, key: string, fallback: boolean): boolean {
   const value = fields[key];
   return typeof value === 'boolean' ? value : fallback;
+}
+
+function optionalFlag(fields: Fields, key: string): boolean | null {
+  const value = fields[key];
+  return typeof value === 'boolean' ? value : null;
 }
 
 function readStopReason(value: unknown): FilterStopReason | null {
@@ -146,6 +155,8 @@ export function createFilterBridge(
         stopReason: readStopReason(fields.stopReason),
         strictPrivateDns: flag(fields, 'strictPrivateDns', false),
         otherVpn: flag(fields, 'otherVpn', false),
+        alwaysOn: optionalFlag(fields, 'alwaysOn'),
+        pausedIfUnused: optionalFlag(fields, 'pausedIfUnused'),
       };
     },
     requestConsent: () =>
@@ -169,11 +180,11 @@ export function createFilterBridge(
           ),
     stop: () =>
       native === null
-        ? Promise.resolve()
+        ? Promise.resolve(false)
         : settle(
             () => native.stop(),
-            () => undefined,
-            undefined,
+            () => true,
+            false,
           ),
     resume: () =>
       native === null
@@ -194,5 +205,13 @@ export function createFilterBridge(
     },
     measure: () =>
       native === null ? Promise.resolve(null) : settle(() => native.measure(), readMeasure, null),
+    openUnusedAppSettings: () =>
+      native === null
+        ? Promise.resolve(false)
+        : settle(
+            () => native.openUnusedAppSettings(),
+            (value) => value === true,
+            false,
+          ),
   };
 }

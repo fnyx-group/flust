@@ -21,10 +21,17 @@ object FilterStatus {
 
   @Volatile var running = false
 
+  // Whether a start of the tunnel is under way (TunnelStarts), read by CrashRestart.
+  @Volatile var starting = false
+
   @Volatile var lastStart: TunnelStartTiming? = null
 
   // The name of the resolver queries go to, for the measure of the development build.
   @Volatile var activeResolver: () -> String? = { null }
+
+  // Whether the always-on VPN setting names flust. Only the running service can tell, from
+  // Android 10: null otherwise.
+  @Volatile var alwaysOn: () -> Boolean? = { null }
 
   @Volatile private var reason: String? = null
   @Volatile private var reasonLoaded = false

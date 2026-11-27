@@ -16,6 +16,7 @@ import { installErrorHandlers } from '@/features/errors/report-error';
 import { useFilterResume } from '@/features/filter/use-filter-resume';
 import { LockGate } from '@/features/lock/lock-gate';
 import { useHeldNavigation } from '@/features/lock/use-held-navigation';
+import { useCurrentRoot } from '@/features/navigation/current-root';
 import { useNotificationTaps } from '@/features/reminders/use-notification-taps';
 import { useReminderSync } from '@/features/reminders/use-reminder-sync';
 import { SessionGate } from '@/features/session/session-gate';
@@ -90,9 +91,10 @@ function RootStack() {
   const started = journey !== null;
   const reduceMotion = useReduceMotion() !== false;
   const covering = reduceMotion ? COVERING_STILL : COVERING;
+  const isCurrentRoot = useCurrentRoot();
   useReminderSync();
-  useNotificationTaps();
-  useHeldNavigation();
+  useNotificationTaps(isCurrentRoot);
+  useHeldNavigation(isCurrentRoot);
   useFilterResume();
   return (
     <Stack screenOptions={{ headerShown: false, ...(reduceMotion && { animation: 'fade' }) }}>

@@ -30,14 +30,12 @@ export async function turnYoutubeStrictOn(bridge: FilterBridge): Promise<boolean
 }
 
 // Applies a request once it is confirmed, after its wait (docs/decisions/0040-filter-delay.md).
+// False when nothing changed, so the screen never shows a weakening that did not happen.
 export async function applyWeakening(
   bridge: FilterBridge,
   kind: FilterRequestKind,
 ): Promise<boolean> {
-  if (kind === 'filter') {
-    await bridge.stop();
-    return true;
-  }
+  if (kind === 'filter') return bridge.stop();
   const status = bridge.status();
   if (!status.available || !status.enabled) return false;
   return bridge.start({ youtubeStrict: false });

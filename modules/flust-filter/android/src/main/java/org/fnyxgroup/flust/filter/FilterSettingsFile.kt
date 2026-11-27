@@ -78,8 +78,29 @@ fun FilterSettingsFile.turnOn(youtube: YouTubeLevel, notification: NotificationT
     FilterConfig(enabled = true, youtube = youtube, notification = notification ?: current.notification)
   }
 
-// After the delay, from the app.
-fun FilterSettingsFile.turnOff(): FilterConfig? = update { it.copy(enabled = false) }
+// After the delay, from the app: turns the filter off, then asks the tunnel to stop. When that
+// request throws, the filter is turned back on before the error goes up, so the setting never
+// says off while the tunnel runs, and the app reports a stop that failed.
+fun FilterSettingsFile.turnOffAndStop(stop: () -> Unit): FilterConfig? {
+  var wasEnabled = false
+  val off = update { current ->
+    wasEnabled = current.enabled
+    current.copy(enabled = false)
+  } ?: return null
+  try {
+    stop()
+  } catch (refused: Exception) {
+    if (wasEnabled) {
+      try {
+        update { it.copy(enabled = true) }
+      } catch (unsaved: Exception) {
+        refused.addSuppressed(unsaved)
+      }
+    }
+    throw refused
+  }
+  return off
+}
 
 // The always-on setting started the service: the person chose the filter there.
 fun FilterSettingsFile.turnOnFromAlwaysOn(): FilterConfig? = update { it.copy(enabled = true) }

@@ -21,7 +21,7 @@ const coverageThreshold = Object.fromEntries(
 module.exports = {
   preset: 'jest-expo',
   transformIgnorePatterns: [
-    'node_modules/(?!(.pnpm|(jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*))',
+    'node_modules/(?!(.pnpm|(jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*|standard-navigation))',
   ],
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
   // The native adapters only forward to Expo modules, which cannot run outside a device.

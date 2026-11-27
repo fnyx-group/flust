@@ -5,9 +5,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.VpnService
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import androidx.core.content.IntentCompat
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.exception.CodedException
 import expo.modules.kotlin.exception.Exceptions
@@ -47,6 +49,10 @@ class FlustFilterModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("FlustFilter")
 
+    OnCreate {
+      appContext.reactContext?.let { if (available()) CrashRestart.install(it) }
+    }
+
     // Called on the JavaScript thread, every two seconds while the filter screen is open: the
     // settings, the stop reason and the availability come from memory.
     Function("getStatus") {
@@ -62,7 +68,22 @@ class FlustFilterModule : Module() {
         "youtubeStrict" to (config.youtube == YouTubeLevel.STRICT),
         "strictPrivateDns" to NetworkChecks.strictPrivateDns(networks),
         "otherVpn" to NetworkChecks.otherVpn(networks, running),
+        "alwaysOn" to FilterStatus.alwaysOn(),
+        "pausedIfUnused" to pausedIfUnused(),
       )
+    }
+
+    // Opens Android's setting that pauses flust when it is not opened for months, which stops the
+    // filter and cancels its restart jobs (docs/decisions/0049-filter-restart-after-crash.md).
+    AsyncFunction("openUnusedAppSettings") {
+      val activity = appContext.currentActivity ?: return@AsyncFunction false
+      try {
+        val intent = IntentCompat.createManageUnusedAppRestrictionsIntent(activity, activity.packageName)
+        activity.startActivityForResult(intent, UNUSED_APP_REQUEST)
+        true
+      } catch (unavailable: Exception) {
+        false
+      }
     }
 
     // Shows Android's VPN consent dialog when it is needed. Resolves with whether consent holds.
@@ -94,8 +115,8 @@ class FlustFilterModule : Module() {
     AsyncFunction("stop") {
       if (available()) {
         // Settings that cannot be read are not overwritten, and the filter stays on.
-        FilterConfigStore.of(context).turnOff() ?: throw UnreadableSettingsException()
-        FilterVpnService.stop(context)
+        FilterConfigStore.of(context).turnOffAndStop { FilterVpnService.stop(context) }
+          ?: throw UnreadableSettingsException()
       }
     }
 
@@ -156,6 +177,16 @@ class FlustFilterModule : Module() {
     }
   }
 
+  // Android 12 and later pause an app that is not opened for months, which stops it like a force
+  // stop, unless the person turned it off for that app. The same switch on Android 11 only resets
+  // runtime permissions, which the filter does not use. Null where Android has no such pause.
+  private fun pausedIfUnused(): Boolean? =
+    if (available() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      !context.packageManager.isAutoRevokeWhitelisted
+    } else {
+      null
+    }
+
   private fun whenRunning(deadline: Long, done: () -> Unit) {
     if (FilterStatus.running || SystemClock.elapsedRealtime() >= deadline) return done()
     main.postDelayed({ whenRunning(deadline, done) }, RESUME_POLL_MILLIS)
@@ -176,6 +207,7 @@ class FlustFilterModule : Module() {
 
   private companion object {
     const val CONSENT_REQUEST = 0x464c
+    const val UNUSED_APP_REQUEST = 0x464d
     const val MEASURED_NAMES = 20_000
     const val RESUME_WAIT_MILLIS = 3_000L
     const val RESUME_POLL_MILLIS = 100L
