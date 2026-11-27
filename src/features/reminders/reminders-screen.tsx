@@ -166,7 +166,6 @@ export function RemindersScreen() {
         <RowGroup>
           <SwitchRow
             title={t('reminders.checkIn.title')}
-            subtitle={t('reminders.checkIn.subtitle')}
             icon={{ icon: PencilIcon, color: colors.gold }}
             accessory={settings.checkIn.on && timeChip('checkIn')}
             value={settings.checkIn.on}
@@ -229,10 +228,7 @@ export function RemindersScreen() {
           <SectionLabel>{t('reminders.preview')}</SectionLabel>
           <NotificationPreview text={t('reminders.notifications.check-in')} />
         </View>
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>{t('reminders.footer')}</Text>
-          <Text style={styles.footerText}>{t('reminders.lockScreenPreviews')}</Text>
-        </View>
+        <Text style={styles.footer}>{t('reminders.footer')}</Text>
       </ScrollView>
       {editing !== null && (
         <TimeWheelSheet
@@ -305,9 +301,6 @@ const styles = StyleSheet.create({
     gap: spacing.m,
   },
   footer: {
-    gap: spacing.l,
-  },
-  footerText: {
     ...typography.paragraphSmall,
     color: colors.textSecondary,
   },

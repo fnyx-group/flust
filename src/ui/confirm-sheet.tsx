@@ -9,7 +9,7 @@ import { backdropOpacity, colors, radii, spacing, typography } from '@/ui/theme'
 type ConfirmSheetProps = {
   visible: boolean;
   title: string;
-  message: string;
+  message?: string;
   confirmLabel: string;
   cancelLabel: string;
   onConfirm: () => void;
@@ -54,7 +54,7 @@ export function ConfirmSheet({
             <Text accessibilityRole="header" style={styles.title}>
               {title}
             </Text>
-            <Text style={styles.message}>{message}</Text>
+            {message !== undefined && <Text style={styles.message}>{message}</Text>}
           </ScrollView>
           <View style={styles.actions}>
             <Button label={cancelLabel} onPress={onCancel} />

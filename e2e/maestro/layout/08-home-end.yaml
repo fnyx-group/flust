@@ -1,0 +1,6 @@
+appId: org.fnyxgroup.flust
+---
+- scrollUntilVisible:
+    element: J'ai eu un écart
+    direction: DOWN
+- assertVisible: J'ai une envie

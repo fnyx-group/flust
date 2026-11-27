@@ -20,7 +20,7 @@ Every step can be skipped. "Save and start again" and "Skip" both log the lapse;
 
 ## The following hours
 
-- For six hours after the lapse is logged, one short supportive line shows above the emergency button: "The next few hours matter. You've already done the hardest part by noting it."
+- For six hours after the lapse is logged, one short supportive line shows above the emergency button: "You did the hardest part by noting it."
 - No rank unlock screen appears during those hours. A rank reached meanwhile shows on the badge at once and is announced when they end.
 - If reminders are on, the app sends at most one gentle reminder. Its text is neutral, like every notification.
 

@@ -218,10 +218,7 @@ function Lapse({ journey: initialJourney }: { journey: Journey }) {
           />
         }
       >
-        <View style={styles.intro}>
-          <ScreenTitle>{t('lapse.title')}</ScreenTitle>
-          <Text style={styles.subtitle}>{t('lapse.subtitle')}</Text>
-        </View>
+        <ScreenTitle>{t('lapse.title')}</ScreenTitle>
         <LapseSummaryCards journey={journey} at={earlier} unlockedRanks={unlockedRanks} />
         <View style={styles.section}>
           <SectionLabel color={colors.accentText}>{t('lapse.whatHappened')}</SectionLabel>
@@ -278,13 +275,6 @@ const styles = StyleSheet.create({
   content: {
     gap: spacing.xxl,
     paddingBottom: spacing.xl,
-  },
-  intro: {
-    gap: spacing.s,
-  },
-  subtitle: {
-    ...typography.paragraph,
-    color: colors.textSecondary,
   },
   section: {
     gap: spacing.l,

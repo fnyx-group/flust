@@ -16,7 +16,7 @@ import { CheckInLine } from '@/features/home/check-in-line';
 import { CircleName } from '@/features/home/circle-name';
 import { FilterChip } from '@/features/home/filter-chip';
 import { DailyQuote } from '@/features/home/daily-quote';
-import { fitHome, homeSpacing, type HomeFit } from '@/features/home/home-fit';
+import { fitHome, homeSpacing, pinsAllActions, type HomeFit } from '@/features/home/home-fit';
 import { SupportLine, UndoLine } from '@/features/home/lapse-lines';
 import { LowMoodCard } from '@/features/home/low-mood-card';
 import { RankLine } from '@/features/home/rank-line';
@@ -51,7 +51,7 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
   const { t } = useTranslation();
   const anchor = streakStart(journey);
   const clock = useMemo(() => createMinuteClock(anchor, nativeClockDeps), [anchor]);
-  const { width, fontScale } = useWindowDimensions();
+  const { width, height: windowHeight, fontScale } = useWindowDimensions();
   const ringMax = streakRingSize(width);
   const [measured, setMeasured] = useState<Measured>({});
   const measure = (part: MeasuredPart) => (event: LayoutChangeEvent) => {
@@ -62,6 +62,24 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
   };
   const filterInactive = isFilterInactive(filterView(useFilterStatus().status));
   const fit = fitOf(measured, fontScale, ringMax);
+  const pinsAll = pinsAllOf(measured, windowHeight);
+  const checkIn = (
+    <View onLayout={measure('checkIn')}>
+      <CheckInLine />
+    </View>
+  );
+  const lapse = (
+    <>
+      <View onLayout={measure('lapse')}>
+        <Button
+          variant="plain"
+          label={t('home.lapse.link')}
+          onPress={() => router.push('/lapse')}
+        />
+      </View>
+      <UndoLine journey={journey} latestLapse={latestLapse} />
+    </>
+  );
   return (
     <Screen>
       <ClockContext value={clock}>
@@ -100,24 +118,27 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
           <View style={styles.notices} onLayout={measure('notices')}>
             <LowMoodCard />
             <SupportLine latestLapse={latestLapse} />
+            {pinsAll === false && (
+              <View style={styles.scrolledActions}>
+                {checkIn}
+                {lapse}
+              </View>
+            )}
           </View>
         </ScrollView>
-        <View style={styles.actions}>
-          <CheckInLine />
-          <Button label={t('home.urgeButton')} onPress={() => router.push('/emergency')} />
-          <Button
-            variant="plain"
-            label={t('home.lapse.link')}
-            onPress={() => router.push('/lapse')}
-          />
-          <UndoLine journey={journey} latestLapse={latestLapse} />
+        <View style={[styles.actions, pinsAll === null && styles.measuring]}>
+          {pinsAll !== false && checkIn}
+          <View onLayout={measure('urge')}>
+            <Button label={t('home.urgeButton')} onPress={() => router.push('/emergency')} />
+          </View>
+          {pinsAll !== false && lapse}
         </View>
       </ClockContext>
     </Screen>
   );
 }
 
-type MeasuredPart = 'available' | 'rankLine' | 'quote' | 'notices';
+type MeasuredPart = 'available' | 'rankLine' | 'quote' | 'notices' | 'checkIn' | 'urge' | 'lapse';
 
 type Measured = Partial<Record<MeasuredPart, number>>;
 
@@ -138,6 +159,14 @@ function fitOf(measured: Measured, fontScale: number, ringMax: number): HomeFit 
     ringMax,
     heights: { rankLine, quote, notices },
   });
+}
+
+// null until the pinned block has been measured once. Its parts keep their height wherever they
+// are laid out, so moving them never changes the result.
+function pinsAllOf(measured: Measured, windowHeight: number): boolean | null {
+  const { checkIn, urge, lapse } = measured;
+  if (checkIn === undefined || urge === undefined || lapse === undefined) return null;
+  return pinsAllActions({ checkIn, urge, lapse }, windowHeight);
 }
 
 const styles = StyleSheet.create({
@@ -182,11 +211,16 @@ const styles = StyleSheet.create({
     opacity: 0,
     pointerEvents: 'none',
   },
-  // Outside the scroll view, so the check-in line and the urge button are always on screen,
-  // whatever the text size.
+  // Outside the scroll view, so the urge button is always on screen, whatever the text and
+  // display size. The check-in line and the lapse link stay with it while the block takes at most
+  // PINNED_MAX_SHARE of the window.
   actions: {
-    gap: spacing.s,
-    paddingTop: spacing.m,
+    gap: homeSpacing.actionsGap,
+    paddingTop: homeSpacing.actionsPadding,
+  },
+  scrolledActions: {
+    gap: homeSpacing.actionsGap,
+    paddingTop: homeSpacing.actionsPadding,
   },
 });
 

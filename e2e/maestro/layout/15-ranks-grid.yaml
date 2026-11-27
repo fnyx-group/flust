@@ -1,0 +1,5 @@
+appId: org.fnyxgroup.flust
+---
+- scrollUntilVisible:
+    element: Un écart ne te fait jamais redescendre.
+    direction: DOWN

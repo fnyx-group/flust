@@ -102,6 +102,9 @@ Maestro flows in `e2e/maestro/` run the main journeys on the production release 
     scripts/e2e-android.sh                       # every flow
     scripts/e2e-android.sh e2e/maestro/flows/journal.yaml
     scripts/e2e-android.sh --font-scale 2.0      # every flow with the largest text
+    scripts/e2e-android.sh --layout --font-scale 1.5 --density 460   # the layout check at one size
+    scripts/e2e-android.sh --matrix              # the layout check at the corner sizes
+    scripts/e2e-android.sh --full-matrix         # the layout check at every size, before a release
 
 Each flow starts with the app's data cleared and goes through the onboarding in English (`common/onboard.yaml`), then checks one journey: the home screen, the emergency screen, a lapse and its undo, a check-in, a journal note written, edited and deleted, a reminder turned on and off, the app lock, the help numbers, erasing everything, and the content filter: its onboarding step, its screen, and the delay to turn it off, cancelled and read back after a restart. The filter flows tap Android's VPN dialog on the emulator; Android keeps that consent across a clear of the app's data, so the flows accept the disclosure and the dialog only when they show. Selectors are the English texts and screen reader labels, and the emulator's system language must be English. The onboarding and erase flows also stop and relaunch the app, so the data is read back from storage. Nothing is dialed and nothing leaves the emulator.
 
@@ -110,6 +113,14 @@ The script checks the APK with `scripts/check-android-release.sh` first, refuses
 During the run, the script records the app's log from `adb logcat` into a temporary file: the app's own lines, and the system's lines that name the package, which show each start of the app's process and any death or restart. When a flow fails or the run is interrupted, the script prints the file's path; when every flow passes, it deletes the file. A flow that ends on an unexpected screen can then be checked for a process restart.
 
 The script exits with 0 when every flow passes, with 1 when a flow fails or the release check finds something the build must not ship, and with 2 when it cannot run: a missing tool or APK, a bad option, not exactly one emulator, an `E2E_PIN` that does not match, or a release check that cannot read the build.
+
+### Layout
+
+The flows of `e2e/maestro/layout/` walk the app in French, one screen per flow, from the welcome screen through the onboarding, home, the emergency screen, the check-in, a lapse, the journal and a new note, the ranks, the settings and each screen they open, and ends on home with the undo line of a lapse just logged ([0050](../decisions/0050-layout-matrix.md)). After each flow, the script dumps the screen with `maestro hierarchy` and `scripts/check-layout.ts` checks it: no texts or controls overlap, none outside a view that scrolls reaches the tab bar, a system bar or a side of the screen, no view that scrolls runs under a bar, no text is squashed, and no label breaks inside a word beside its value. At a font scale of 1.0 or less and a default display, a swipe on home must not move it. Each problem is printed with the screen, the text or label and its bounds in pixels. The rules are in `scripts/layout/rules.ts`, tested by `scripts/layout/rules.test.ts`.
+
+A full run ends with two layout passes, font scale 1.0 at the emulator's density and 2.0 at the largest display size. `--layout` runs one pass, at the font scale and density given or the emulator's own. `--matrix` runs the corners of the display sizes Settings offers on the emulator, five on a 1080 by 2400 pixel screen at 420 dpi (356, 420, 460, 500 and 540 dpi): font scale 0.85 at the smallest, 1.0 at the default, 1.3 at the largest, and 2.0 at the smallest and the largest. It ends with home on a 750 by 1334 pixel screen at 320 dpi, 667 dp tall, which must not scroll. It takes about 30 minutes. `--full-matrix` runs every combination of the seven font scales of Android 14 and later, 0.85, 1.0, 1.15, 1.3, 1.5, 1.8 and 2.0, and the five display sizes, then the same home check. It takes more than four hours, and is a check before each release. The script restores the font scale, the density and the screen size at the end, and prints the folder that keeps each dump and each flow's Maestro output.
+
+The check reads bounds already clipped by the views around them, so a text cut inside its own frame, by a line limit for instance, is not seen, nor a control pushed entirely off screen: the flows assert the controls that must show, such as the urge button on home.
 
 What the flows cannot check, such as safe mode, time zone changes or TalkBack, is in the [manual checklist](manual-checklist.md).
 

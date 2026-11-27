@@ -1,0 +1,8 @@
+appId: org.fnyxgroup.flust
+---
+- back
+- scrollUntilVisible:
+    element: À propos
+    direction: DOWN
+- tapOn: À propos
+- assertVisible: Retour

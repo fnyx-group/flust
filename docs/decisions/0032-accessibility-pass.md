@@ -36,7 +36,7 @@ A review before version 0.1 found places where flust fell short of WCAG 2.2 AA o
   Screen readers read each of them in full. Every other text grows freely.
 
 - ESLint rejects a `Pressable` without `accessibilityRole` (or `role`) and a `TextInput` without `accessibilityLabel` (or `aria-label`), also written as `RN.Pressable` or `RN.TextInput`. A `Pressable` hidden from screen readers on both platforms, with `importantForAccessibility="no"` and `accessibilityElementsHidden`, such as a sheet backdrop, is exempt: the sheet has its own Cancel button. `accessible={false}` alone is not enough, since TalkBack still reaches a touchable view. So that nothing escapes the rule, ESLint also rejects the `Touchable` components, a pressable `Text`, an animated `Pressable` or `TextInput`, and either one under another name.
-- Hints are kept only where the label does not tell the result, such as a link that opens outside flust or a row that opens a list. The note row's "Opens the note" and the low mood card's "Opens help numbers", on "See help numbers", were removed.
+- Hints are kept only where the label does not tell the result, such as a link that opens outside flust or a row that opens a list. The note row's "Opens the note" and the low mood card's "Opens help numbers", on "Help numbers", were removed.
 - `useLargeText` lives in `src/ui`, so that shared components can use it, while `useReduceMotion` stays in `src/features/shared`: `src/ui` components that move, such as the wheel, take Reduce Motion as a prop. Moving it is left for later.
 
 ## Consequences

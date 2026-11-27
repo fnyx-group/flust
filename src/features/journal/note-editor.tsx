@@ -43,7 +43,6 @@ import { ConfirmSheet } from '@/ui/confirm-sheet';
 import { IconButton } from '@/ui/icon-button';
 import { CloseIcon } from '@/ui/icons/close-icon';
 import { KeyboardScreen, useFollowTextEnd } from '@/ui/keyboard-screen';
-import { PrivateLine } from '@/ui/private-line';
 import { colors, spacing, typography } from '@/ui/theme';
 
 // Ticks fall on the minute.
@@ -265,17 +264,16 @@ export function NoteEditor({ note }: { note: Note | null }) {
           selectionColor={colors.accent}
           style={styles.body}
         />
-        <View style={styles.after}>
-          <PrivateLine text={t('journal.note.private')} />
-          {note !== null && (
+        {note !== null && (
+          <View style={styles.after}>
             <Button
               variant="destructive"
               label={t('journal.note.delete')}
               disabled={busy}
               onPress={() => setSheet({ kind: 'delete' })}
             />
-          )}
-        </View>
+          </View>
+        )}
       </KeyboardScreen>
     </ClockContext>
   );

@@ -15,7 +15,7 @@ The checks before each store release, in order. A release that fails one is not 
    The check lists the permissions the build requests, the 32-bit native libraries not aligned for 16 KB pages, which it does not fail on, and prints the signer. It exits with 1 and lists what it found when the build has something it must not ship, and with 2 when it cannot read the build. A new permission is either blocked, or added to `PRODUCTION_ANDROID_PERMISSIONS` in `app.config.ts` and to the script, with a reason.
 
 5. Every help number was checked against its official sources within the last 400 days, which the review test enforces. Check them again every year ([0027](../decisions/0027-offline-help-resources.md)).
-6. The Maestro flows pass on the field APK of the release bundle ([Testing](testing.md#end-to-end)), and the [manual checklist](manual-checklist.md) is done for the platforms being released.
+6. The Maestro flows and the full layout matrix (`scripts/e2e-android.sh --full-matrix`) pass on the field APK of the release bundle ([Testing](testing.md#end-to-end)), and the [manual checklist](manual-checklist.md) is done for the platforms being released.
 7. The release goes out as a phased rollout on both stores ([Scenarios](../product/scenarios.md#production-incidents)).
 
 ## Upload key

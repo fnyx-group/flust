@@ -1,0 +1,20 @@
+# Home with the undo line, which shows from a lapse until local midnight: the relaunch keeps the
+# data and opens home.
+appId: org.fnyxgroup.flust
+---
+- launchApp
+- extendedWaitUntil:
+    visible: Série en cours.*
+    timeout: 10000
+- scrollUntilVisible:
+    element: J'ai eu un écart
+    direction: DOWN
+- tapOn: J'ai eu un écart
+- scrollUntilVisible:
+    element: Enregistrer et repartir
+    direction: DOWN
+- tapOn: Enregistrer et repartir
+- extendedWaitUntil:
+    visible: Écart noté\.
+    timeout: 10000
+- assertVisible: J'ai une envie

@@ -14,7 +14,7 @@ Nothing runs in the background to decide whether to remind someone today ([0021]
   - Risk times are fixed: 22:30 for "in bed at night", Saturday 10:00 for "the weekend". Other risk moments have no time and give no reminder.
 - At most two routine reminders a day, two hours apart, then one a day from the third day. The check-in wins over the thought. Risk reminders are exempt from the cap and from the two hours, since the person turned them on for that exact moment; they keep their own spacing.
 - The rank reminder is planned for when the next rank is reached (`nextRankAt`), held for six hours after a lapse is logged, and moved into 09:00 to 22:00. It keeps its instant across a time zone change, unlike the others, which keep their wall time.
-- The return message, "flust is here whenever you like, no pressure", is the last notification, at the check-in time or 19:00. Nothing follows it.
+- The return message, "flust is here whenever you like", is the last notification, at the check-in time or 19:00. Nothing follows it.
 - There is no reminder after a lapse.
 - Texts are neutral and never say what flust is about. A tap opens the check-in for its reminder, and home for the others.
 - When notifications are no longer allowed, every reminder is stored as off, so allowing them again never turns one back on by itself. The check-in counts from the day it is turned on again.

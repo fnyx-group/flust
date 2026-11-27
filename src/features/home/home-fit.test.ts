@@ -1,4 +1,12 @@
-import { fitHome, HOME_RING_MIN, homeSpacing, type HomeHeights } from '@/features/home/home-fit';
+import {
+  fitHome,
+  HOME_RING_MIN,
+  homeSpacing,
+  PINNED_MAX_SHARE,
+  pinsAllActions,
+  type HomeHeights,
+  type PinnedHeights,
+} from '@/features/home/home-fit';
 import { largeTextScale, sizes } from '@/ui/theme';
 
 // As measured on an Android emulator at font scale 1.0, with a two line quote without an author.
@@ -128,5 +136,33 @@ describe('fitHome', () => {
     expect(
       fitHome({ available: WITH_QUOTE + 170, fontScale: 1, ringMax: 170, heights: HEIGHTS }),
     ).toEqual({ ring: 170, quote: true });
+  });
+});
+
+// As measured on an Android emulator: the check-in line, the urge button and the lapse link.
+const PINNED: PinnedHeights = { checkIn: 44, urge: 58, lapse: 48 };
+const PINNED_BLOCK =
+  homeSpacing.actionsPadding +
+  PINNED.checkIn +
+  PINNED.urge +
+  PINNED.lapse +
+  2 * homeSpacing.actionsGap;
+// The same block at font scale 2.0, where each line takes twice the height.
+const PINNED_LARGE: PinnedHeights = { checkIn: 88, urge: 100, lapse: 96 };
+
+describe('pinsAllActions', () => {
+  it('keeps the check-in line and the lapse link pinned at the default size, from 640 points tall', () => {
+    expect(pinsAllActions(PINNED, 640)).toBe(true);
+    expect(pinsAllActions(PINNED, 667)).toBe(true);
+  });
+
+  it('pins only the urge button when the block would take more than its share of the window', () => {
+    expect(pinsAllActions(PINNED_LARGE, 711)).toBe(false);
+    expect(pinsAllActions(PINNED_LARGE, 1200)).toBe(true);
+  });
+
+  it('allows the block exactly its share', () => {
+    expect(pinsAllActions(PINNED, PINNED_BLOCK / PINNED_MAX_SHARE)).toBe(true);
+    expect(pinsAllActions(PINNED, PINNED_BLOCK / PINNED_MAX_SHARE - 1)).toBe(false);
   });
 });

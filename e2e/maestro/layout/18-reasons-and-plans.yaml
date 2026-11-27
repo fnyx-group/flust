@@ -1,0 +1,7 @@
+appId: org.fnyxgroup.flust
+---
+- scrollUntilVisible:
+    element: Raisons et plans.*
+    direction: UP
+- tapOn: Raisons et plans.*
+- assertVisible: Retour

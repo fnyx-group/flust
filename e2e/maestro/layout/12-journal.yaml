@@ -1,0 +1,6 @@
+appId: org.fnyxgroup.flust
+---
+- back
+- tapOn: Journal
+- assertVisible: Rien d'écrit pour l'instant.
+- assertVisible: Écrire une note

@@ -1,0 +1,8 @@
+appId: org.fnyxgroup.flust
+---
+- back
+- scrollUntilVisible:
+    element: Rapport d'erreurs
+    direction: DOWN
+- tapOn: Rapport d'erreurs
+- assertVisible: Retour

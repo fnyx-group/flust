@@ -22,22 +22,18 @@ describe('editor errors', () => {
     expect(planRemoveError('last-plan')).toBe('last-plan');
   });
 
-  it('say how many reasons and plans there already are when the limit is reached', () => {
+  it('give the limit on reasons and plans when it is reached', () => {
     expect(reasonErrorMessage(english, 'too-many-reasons')).toBe(
-      'You already have 10 reasons. Remove one to add another.',
+      '10 reasons at most. Remove one first.',
     );
-    expect(planErrorMessage(english, 'too-many-plans')).toBe(
-      'You already have 5 plans. Delete one to add another.',
-    );
+    expect(planErrorMessage(english, 'too-many-plans')).toBe('5 plans at most. Delete one first.');
     expect(planErrorMessage(french, 'too-many-plans')).toBe(
-      'Tu as déjà 5 plans. Supprimes-en un pour en ajouter un autre.',
+      "5 plans au plus. Supprimes-en un d'abord.",
     );
   });
 
-  it('explain why the last plan stays', () => {
-    expect(planErrorMessage(english, 'last-plan')).toBe(
-      'Keep at least one plan. The emergency screen always has one to show you.',
-    );
+  it('ask to keep the last plan', () => {
+    expect(planErrorMessage(english, 'last-plan')).toBe('Keep at least one plan.');
   });
 
   it('have a message for every other error', () => {

@@ -57,10 +57,10 @@ describe('spokenAction', () => {
       'Appeler le 3 1 1 4, Prévention du suicide. Numéro national, gratuit, 24\u00a0h/24 et 7\u00a0j/7',
     );
     expect(spokenAction(english, entryOf('US', 0), 'text')).toBe(
-      'Text 9 8 8, 988 Suicide & Crisis Lifeline. Call or text, 24/7. Conversations are free.',
+      'Text 9 8 8, 988 Suicide & Crisis Lifeline. Free call or text, 24/7',
     );
     expect(spokenAction(english, entryOf('CH', 0), 'call')).toBe(
-      'Call 1 4 3, La Main Tendue. Anonymous, day and night. The call may cost a few cents depending on the operator.',
+      'Call 1 4 3, La Main Tendue. Anonymous, day and night. A few cents depending on the operator.',
     );
   });
 

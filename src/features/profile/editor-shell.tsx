@@ -16,7 +16,7 @@ type Run = () => Promise<string | null>;
 
 type Removal = {
   label: string;
-  confirm: { title: string; message: string; cancel: string; confirm: string };
+  confirm: { title: string; cancel: string; confirm: string };
   run: Run;
 };
 
@@ -135,7 +135,6 @@ export function EditorShell({
             <ConfirmSheet
               visible={sheet?.kind === 'remove'}
               title={removal.confirm.title}
-              message={removal.confirm.message}
               cancelLabel={removal.confirm.cancel}
               confirmLabel={removal.confirm.confirm}
               destructive

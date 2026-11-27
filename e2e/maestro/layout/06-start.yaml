@@ -1,0 +1,5 @@
+appId: org.fnyxgroup.flust
+---
+- tapOn: Plus tard
+- assertVisible: Dernière étape
+- assertVisible: C'est parti
