@@ -3,9 +3,9 @@ import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-nativ
 import { useTranslation } from 'react-i18next';
 
 import type { Note } from '@/domain/journal';
-import { closeNote } from '@/features/journal/close-note';
 import { NoteEditor } from '@/features/journal/note-editor';
 import { noteTarget } from '@/features/journal/note-param';
+import { useGoBack } from '@/features/navigation/use-go-back';
 import { useStorage } from '@/features/storage/storage-context';
 import { Button } from '@/ui/button';
 import { IconButton } from '@/ui/icon-button';
@@ -67,6 +67,8 @@ function NoteUnavailable({
   status: 'loading' | 'missing' | 'failed';
   onRetry?: () => void;
 }) {
+  // The note can open alone, from a link at launch: closing it then shows the journal.
+  const closeNote = useGoBack('/journal');
   const { t } = useTranslation();
   const message = status === 'loading' ? null : t(`journal.note.unavailable.${status}`);
 

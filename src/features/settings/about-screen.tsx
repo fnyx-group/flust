@@ -1,8 +1,9 @@
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import type { ComponentType } from 'react';
 import { Linking, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { useGoBack } from '@/features/navigation/use-go-back';
 import { appVersion } from '@/features/settings/app-version';
 import { SOURCE_URL, WEBSITE_URL } from '@/features/settings/labels';
 import { displayUrl } from '@/features/shared/display-url';
@@ -23,6 +24,8 @@ import { colors, radii, spacing, typography } from '@/ui/theme';
 // Links open outside flust, in the browser or the app that handles the address: flust itself
 // sends nothing. Screen readers hear the address with each link, so it can be checked first.
 export function AboutScreen() {
+  const router = useRouter();
+  const goBack = useGoBack('/settings');
   const { t } = useTranslation();
   const version = appVersion();
 
@@ -32,11 +35,7 @@ export function AboutScreen() {
 
   return (
     <Screen bottomInset>
-      <BackHeader
-        backLabel={t('about.back')}
-        title={t('about.title')}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
-      />
+      <BackHeader backLabel={t('about.back')} title={t('about.title')} onBack={goBack} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
           <AppIcon size={64} />

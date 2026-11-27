@@ -43,6 +43,12 @@ class FilterVpnService : VpnService() {
   private val preparation: ExecutorService = Executors.newSingleThreadExecutor { task -> Thread(task, "flust-filter-start") }
   private val lists = FilterLists { Blocklist.read(assets.open(LISTS_ASSET).use { it.readBytes() }) }
 
+  // Also installed by the module: a start by a job, at boot or by always-on runs without the app.
+  override fun onCreate() {
+    super.onCreate()
+    CrashRestart.install(this)
+  }
+
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     if (intent?.action == ACTION_STOP) {
       FilterRestartJob.cancel(this)
@@ -193,6 +199,7 @@ class FilterVpnService : VpnService() {
       networks = watchNetworks(chain)
       tunnel = Tunnel(established, engine, reader, config, networks)
       FilterStatus.activeResolver = { chain.active()?.let(Resolvers.NAMES::get) }
+      FilterStatus.alwaysOn = { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) isAlwaysOn else null }
       reader.start()
       previous?.let(::close)
     } catch (error: Exception) {
@@ -267,6 +274,7 @@ class FilterVpnService : VpnService() {
     val running = tunnel ?: return
     tunnel = null
     FilterStatus.activeResolver = { null }
+    FilterStatus.alwaysOn = { null }
     close(running)
     FilterStatus.running = false
     if (reason != null) {

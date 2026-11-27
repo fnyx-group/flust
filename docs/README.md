@@ -71,6 +71,8 @@
 - [0045 Resolver chain of the Android filter](decisions/0045-resolver-chain.md): Quad9, then Cloudflare, then DNS4EU over DNS over TLS, probed in the background, never plain DNS.
 - [0046 Android App Bundle and upload key](decisions/0046-android-bundle-and-upload-key.md): the Play bundle built and signed locally with an upload key kept outside the repository, and checked for what Google Play refuses.
 - [0047 Foreground service and restart jobs of the Android filter](decisions/0047-filter-foreground-service.md): the VPN service in the foreground with a silent notification that flust never asks permission for, and restart jobs after a kill.
+- [0048 Router of each root](decisions/0048-router-per-root.md): navigation through `useRouter()` only, since the global router breaks when Android recreates the activity.
+- [0049 Filter restart after a crash, always-on status and unused app pause](decisions/0049-filter-restart-after-crash.md): a crash handler that schedules the restart job, the always-on state with a pointer to the gear, and a row to turn off the pause of unused apps.
 
 ## Development
 

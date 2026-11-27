@@ -9,6 +9,8 @@ const RUNNING: FilterStatus = {
   stopReason: null,
   strictPrivateDns: false,
   otherVpn: false,
+  alwaysOn: null,
+  pausedIfUnused: null,
 };
 
 const STOPPED: FilterStatus = { ...RUNNING, running: false };

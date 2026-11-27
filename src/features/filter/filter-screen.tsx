@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,7 @@ import { confirmTitle } from '@/features/filter/labels';
 import { useEnableFilter } from '@/features/filter/use-enable-filter';
 import { useFilterRequest } from '@/features/filter/use-filter-request';
 import { useFilterStatus } from '@/features/filter/use-filter-status';
+import { useGoBack } from '@/features/navigation/use-go-back';
 import { BackHeader } from '@/ui/back-header';
 import { ConfirmSheet } from '@/ui/confirm-sheet';
 import { DocumentIcon } from '@/ui/icons/document-icon';
@@ -25,7 +26,9 @@ import { ScrollView } from '@/ui/scroll-view';
 import { SwitchRow } from '@/ui/switch-row';
 import { colors, spacing, typography } from '@/ui/theme';
 
-// Android's own settings screens, opened by intent: flust cannot change them itself.
+// Android's own settings screens, opened by intent: flust cannot change them itself. No intent
+// opens the always-on setting of one app: in the VPN list, a tap on flust's name opens flust or
+// offers to disconnect, and only the gear next to it leads there.
 const VPN_SETTINGS = 'android.settings.VPN_SETTINGS';
 const NETWORK_SETTINGS = 'android.settings.WIRELESS_SETTINGS';
 
@@ -33,6 +36,8 @@ const NETWORK_SETTINGS = 'android.settings.WIRELESS_SETTINGS';
 // (docs/decisions/0038-content-filter.md). Turning either on is immediate; turning either off
 // waits 20 minutes, then asks once more (docs/decisions/0040-filter-delay.md).
 export function FilterScreen() {
+  const router = useRouter();
+  const goBack = useGoBack('/settings');
   const { t } = useTranslation();
   const { status, refresh } = useFilterStatus({ poll: true });
   const request = useFilterRequest(refresh);
@@ -62,12 +67,12 @@ export function FilterScreen() {
 
   function changeFilter(on: boolean) {
     if (on) void enabling.enable(youtubeStrict);
-    else ask('filter');
+    else void ask('filter');
   }
 
   function changeYoutube(on: boolean) {
     if (on) void strengthenYoutube();
-    else ask('youtube');
+    else void ask('youtube');
   }
 
   async function confirmRequest() {
@@ -80,13 +85,14 @@ export function FilterScreen() {
   }
 
   const working = busy || enabling.busy;
+  // Android tells only a running filter whether always-on names it.
+  const alwaysOnValue =
+    status.alwaysOn === null
+      ? undefined
+      : t(status.alwaysOn ? 'filter.value.on' : 'filter.value.off');
   return (
     <Screen bottomInset>
-      <BackHeader
-        backLabel={t('filter.back')}
-        title={t('filter.title')}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
-      />
+      <BackHeader backLabel={t('filter.back')} title={t('filter.title')} onBack={goBack} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <FilterStatusBlock
           view={view}
@@ -100,6 +106,11 @@ export function FilterScreen() {
         {enabling.notice !== null && (
           <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>
             {t(`filter.${enabling.notice}`)}
+          </Text>
+        )}
+        {request.failure !== null && (
+          <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>
+            {t(`filter.request.${request.failure}`)}
           </Text>
         )}
         <RowGroup>
@@ -126,6 +137,7 @@ export function FilterScreen() {
         <RowGroup>
           <NavRow
             label={t('filter.alwaysOn')}
+            value={alwaysOnValue}
             icon={{ icon: SettingsIcon, color: colors.textSecondary }}
             onPress={() => open(VPN_SETTINGS)}
           />
@@ -135,7 +147,19 @@ export function FilterScreen() {
             onPress={() => router.push('/licenses')}
           />
         </RowGroup>
-        <Text style={styles.note}>{t('filter.alwaysOnHint')}</Text>
+        {status.alwaysOn !== true && <Text style={styles.note}>{t('filter.alwaysOnGear')}</Text>}
+        {enabled && status.pausedIfUnused === true && (
+          <>
+            <RowGroup>
+              <NavRow
+                label={t('filter.unusedApps.label')}
+                icon={{ icon: SettingsIcon, color: colors.textSecondary }}
+                onPress={() => void filterBridge.openUnusedAppSettings()}
+              />
+            </RowGroup>
+            <Text style={styles.note}>{t('filter.unusedApps.hint')}</Text>
+          </>
+        )}
         {filterMeasureOn() && <FilterMeasure />}
       </ScrollView>
       <FilterDisclosureSheet

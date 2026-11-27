@@ -1,10 +1,11 @@
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/ui/button';
 import { MessageScreen } from '@/ui/message-screen';
 
 export function NotFoundScreen() {
+  const router = useRouter();
   const { t } = useTranslation();
   return (
     <MessageScreen

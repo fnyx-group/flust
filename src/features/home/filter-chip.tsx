@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -10,6 +10,7 @@ const HEIGHT = 36;
 // Takes the place of the circle name in the home header while the filter is inactive, so home
 // keeps its height and its fit on a 667 point phone. Neutral: no circle color, no red.
 export function FilterChip() {
+  const router = useRouter();
   const { t } = useTranslation();
   return (
     <Pressable

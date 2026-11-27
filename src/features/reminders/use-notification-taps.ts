@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 
 import { hold, isLocked } from '@/features/lock/held-navigation';
@@ -7,6 +7,7 @@ import { notifier } from '@/features/reminders/notifier';
 
 // A tap opens the screen of its reminder. While the app is locked, it waits for the unlock.
 export function useNotificationTaps(): void {
+  const router = useRouter();
   useEffect(() => {
     function open(route: NotificationRoute) {
       if (isLocked()) hold(route);
@@ -16,5 +17,5 @@ export function useNotificationTaps(): void {
       if (route !== null) open(route);
     });
     return notifier.onTap(open);
-  }, []);
+  }, [router]);
 }

@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +6,7 @@ import { LOCK_DELAYS, type LockSettings } from '@/domain/lock';
 import { delayLabel, lockToggleLabel } from '@/features/lock/labels';
 import { authenticate } from '@/features/lock/local-auth';
 import { useLock } from '@/features/lock/lock-context';
+import { useGoBack } from '@/features/navigation/use-go-back';
 import { useStorage } from '@/features/storage/storage-context';
 import { BackHeader } from '@/ui/back-header';
 import { LockIcon } from '@/ui/icons/lock-icon';
@@ -28,6 +28,7 @@ const NOTICES = {
 // Turning the lock on or off asks the device first, so it is known to work and cannot be turned
 // off by someone else holding the unlocked phone.
 export function LockSettingsScreen() {
+  const goBack = useGoBack('/settings');
   const { t } = useTranslation();
   const storage = useStorage();
   const lock = useLock();
@@ -77,7 +78,7 @@ export function LockSettingsScreen() {
       <BackHeader
         backLabel={t('lock.settings.back')}
         title={t('lock.settings.title')}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
+        onBack={goBack}
       />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <RowGroup>

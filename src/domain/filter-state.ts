@@ -24,6 +24,11 @@ export type FilterStatus =
       readonly stopReason: FilterStopReason | null;
       readonly strictPrivateDns: boolean;
       readonly otherVpn: boolean;
+      // Whether Android's always-on VPN names flust, or null when only a running filter can tell.
+      readonly alwaysOn: boolean | null;
+      // Whether Android pauses flust when it is not opened for months, which stops the filter, or
+      // null where Android has no such pause.
+      readonly pausedIfUnused: boolean | null;
     };
 
 export const FILTER_INACTIVE_REASONS = [

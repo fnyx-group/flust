@@ -1,0 +1,6 @@
+# First half of the recreation check (docs/decisions/0048-router-per-root.md): onboards and stays
+# on Home. scripts/e2e-android.sh then changes the font size, which makes Android recreate the
+# activity, and runs after.yaml.
+appId: org.fnyxgroup.flust
+---
+- runFlow: ../common/onboard.yaml

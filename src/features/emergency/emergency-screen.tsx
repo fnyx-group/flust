@@ -1,4 +1,4 @@
-import { router, useNavigation } from 'expo-router';
+import { useNavigation, useRouter, type ImperativeRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +33,7 @@ import { colors, spacing, typography } from '@/ui/theme';
 // plan and the reasons are read in the background and appear when they are ready:
 // nothing here waits on storage.
 export function EmergencyScreen() {
+  const router = useRouter();
   const { t } = useTranslation();
   const storage = useStorage();
   const navigation = useNavigation();
@@ -115,13 +116,13 @@ export function EmergencyScreen() {
             <NavRow
               label={t('emergency.writeNote')}
               icon={{ icon: PencilIcon, color: colors.accent }}
-              onPress={() => whenFocused(writeNote)}
+              onPress={() => whenFocused(() => writeNote(router))}
             />
             <NavRow
               label={t('emergency.darkThoughts')}
               icon={{ icon: HeartIcon, color: colors.teal }}
               accessibilityHint={t('emergency.darkThoughtsHint')}
-              onPress={() => whenFocused(openHelp)}
+              onPress={() => whenFocused(() => openHelp(router))}
             />
           </RowGroup>
           <View style={styles.actions}>
@@ -136,13 +137,13 @@ export function EmergencyScreen() {
 
 // The note opens over this screen, which stays open with its countdown running. It is offered
 // with every plan, not only one that says to write.
-function writeNote() {
+function writeNote(router: ImperativeRouter) {
   router.push('/note');
 }
 
 // Help opens over this screen too, so the visit and the countdown keep running underneath. Opening
 // it is not recorded.
-function openHelp() {
+function openHelp(router: ImperativeRouter) {
   router.push('/help');
 }
 

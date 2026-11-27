@@ -1,8 +1,8 @@
-import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { useGoBack } from '@/features/navigation/use-go-back';
 import { BackHeader } from '@/ui/back-header';
 import { Button } from '@/ui/button';
 import { Screen } from '@/ui/screen';
@@ -17,6 +17,7 @@ type EntriesUnavailableProps = {
 // Shown in place of a list or an editor that cannot show yet. The way back is there from the
 // start, so a slow read never traps the user.
 export function EntriesUnavailable({ message, onRetry }: EntriesUnavailableProps) {
+  const goBack = useGoBack('/settings');
   const { t } = useTranslation();
 
   // Android reads the message through its live region; iOS has no live regions.
@@ -28,10 +29,7 @@ export function EntriesUnavailable({ message, onRetry }: EntriesUnavailableProps
 
   return (
     <Screen bottomInset>
-      <BackHeader
-        backLabel={t('profile.back')}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
-      />
+      <BackHeader backLabel={t('profile.back')} onBack={goBack} />
       {message !== null && (
         <View style={styles.centered}>
           <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.message}>

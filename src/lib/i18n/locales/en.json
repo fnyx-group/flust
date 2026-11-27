@@ -915,7 +915,11 @@
     "resolvers": "The names of allowed sites go encrypted to Quad9, or to Cloudflare then DNS4EU when it does not answer. All three also block malware.",
     "chrome": "Nothing loads in Chrome? In its settings, Privacy and security, Use secure DNS, choose Automatic.",
     "alwaysOn": "Always-on VPN",
-    "alwaysOnHint": "Turn on Always-on VPN for flust, so the filter restarts by itself.",
+    "alwaysOnGear": "Tap the gear next to flust, then turn on Always-on VPN.",
+    "unusedApps": {
+      "label": "Keep flust from pausing",
+      "hint": "Otherwise Android may stop the filter if flust stays closed for months."
+    },
     "licenses": "List licenses",
     "inactive": {
       "private-dns": {
@@ -959,7 +963,12 @@
       "confirm": "Turn off",
       "keep": "Keep it as it is",
       "minutes": "{{count}} min",
-      "seconds": "{{count}} s"
+      "seconds": "{{count}} s",
+      "saveFailed": "The request could not be saved. Nothing changed.",
+      "failed": {
+        "filter": "The filter could not be turned off. It stays on.",
+        "youtube": "Strict YouTube could not be turned off. It stays on."
+      }
     },
     "disclosure": {
       "title": "Before turning the filter on",

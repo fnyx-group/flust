@@ -217,6 +217,15 @@ const networkImportPaths = [
   },
 ];
 
+// The global router is bound to the last navigation container that mounted and is unbound when any
+// container unmounts, so it fails after Android recreates the activity. useRouter() goes through
+// the screen's own container (docs/decisions/0048-router-per-root.md).
+const globalRouter = {
+  name: 'expo-router',
+  importNames: ['router'],
+  message: 'Use useRouter(): the global router breaks after the activity is recreated.',
+};
+
 const networkImportPatterns = [{ regex: '^expo-file-system/legacy$', message: networkMessage }];
 
 const networkProperties = ['downloadFileAsync', 'upload'].map((property) => ({
@@ -269,6 +278,7 @@ function layer(
   const paths = [
     ...networkImportPaths,
     touchables,
+    globalRouter,
     ...(allowNativeScroll ? [] : [nativeScrollViews]),
     ...ownedImportPaths(owner),
   ];

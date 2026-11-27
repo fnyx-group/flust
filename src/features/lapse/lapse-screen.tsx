@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams, useNavigation, usePreventRemove } from 'expo-router';
+import { useRouter, useLocalSearchParams, useNavigation, usePreventRemove } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -62,6 +62,7 @@ export function LapseScreen() {
 // The journey is the one from before the lapse, kept for the screen's whole life: the session
 // gets the new one while the screen is still closing, and the cards must not show it.
 function Lapse({ journey: initialJourney }: { journey: Journey }) {
+  const router = useRouter();
   const { t } = useTranslation();
   const storage = useStorage();
   const navigation = useNavigation();

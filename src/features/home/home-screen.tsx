@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useMemo, useState, type PropsWithChildren } from 'react';
 import { StyleSheet, useWindowDimensions, View, type LayoutChangeEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -47,6 +47,7 @@ type HomeProps = {
 // nothing else. A lapse moves the streak start, which the clock's ticks are aligned to, so it
 // gets a new clock.
 function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
+  const router = useRouter();
   const { t } = useTranslation();
   const anchor = streakStart(journey);
   const clock = useMemo(() => createMinuteClock(anchor, nativeClockDeps), [anchor]);

@@ -15,14 +15,19 @@ import { useStorage } from '@/features/storage/storage-context';
 
 export type PendingRequest = { readonly kind: FilterRequestKind } & FilterRequestPhase;
 
+// What the screen says when a request did not go through: the filter, or YouTube strict, stays on.
+export type RequestFailure = 'saveFailed' | 'failed.filter' | 'failed.youtube';
+
 // The request to weaken the filter, stored so it survives a restart, counted on the continuous
 // clock, cleared when it is cancelled, applied or expired (docs/decisions/0040-filter-delay.md).
 // Clearing it also closes its confirmation sheet, so a sheet left open never comes back by itself
-// with the next request.
+// with the next request. A request shows only once it is saved, and stays until it is applied, so
+// the screen never shows a wait or a change that did not happen.
 export function useFilterRequest(onApplied: () => void) {
   const storage = useStorage();
   const [request, setRequest] = useState<FilterRequest | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [failure, setFailure] = useState<RequestFailure | null>(null);
   // Bumped on each change, so a load started before it never lands.
   const change = useRef(0);
 
@@ -30,6 +35,7 @@ export function useFilterRequest(onApplied: () => void) {
     change.current += 1;
     setRequest(null);
     setConfirming(false);
+    setFailure(null);
     void storage.filter.clearRequest();
   }, [storage]);
 
@@ -58,22 +64,30 @@ export function useFilterRequest(onApplied: () => void) {
       ? null
       : { kind: request.kind, ...requestPhase({ ...request, leftMs: remaining }) };
 
-  function ask(kind: FilterRequestKind) {
+  async function ask(kind: FilterRequestKind) {
     const next = requestWeakening(kind);
     change.current += 1;
-    setRequest(next);
-    void storage.filter.saveRequest(next, readFilterClock());
+    const asked = change.current;
+    setFailure(null);
+    const saved = await storage.filter.saveRequest(next, readFilterClock());
+    if (asked !== change.current) return;
+    if (saved.ok) setRequest(next);
+    else setFailure('saveFailed');
   }
 
   async function confirm() {
     if (pending?.phase !== 'confirm') return;
-    clear();
-    await applyWeakening(filterBridge, pending.kind);
+    const { kind } = pending;
+    setFailure(null);
+    const applied = await applyWeakening(filterBridge, kind);
+    if (applied) clear();
+    else setFailure(`failed.${kind}`);
     onApplied();
   }
 
   return {
     pending,
+    failure,
     ask,
     cancel: clear,
     confirm,
