@@ -51,6 +51,9 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: 'typescript-eslint'
         update-types: [version-update:semver-major]
+      # Types follow the Node version in .node-version, which moves only on a deliberate upgrade.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
     groups:
       npm:
         applies-to: version-updates
