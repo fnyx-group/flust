@@ -1,11 +1,7 @@
-import { router } from 'expo-router';
-
 import { ErrorReportView } from '@/features/errors/error-report-view';
+import { useGoBack } from '@/features/navigation/use-go-back';
 
 export function ErrorReportScreen() {
-  return (
-    <ErrorReportView
-      onBack={() => (router.canGoBack() ? router.back() : router.replace('/about'))}
-    />
-  );
+  const goBack = useGoBack('/about');
+  return <ErrorReportView onBack={goBack} />;
 }

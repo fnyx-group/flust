@@ -14,6 +14,8 @@ function native(overrides: Partial<NativeFilter> = {}): NativeFilter {
       youtubeStrict: true,
       strictPrivateDns: true,
       otherVpn: false,
+      alwaysOn: true,
+      pausedIfUnused: true,
     }),
     requestConsent: async () => true,
     start: async () => true,
@@ -21,6 +23,7 @@ function native(overrides: Partial<NativeFilter> = {}): NativeFilter {
     resume: async () => true,
     describe: async () => undefined,
     measure: async () => ({ entries: 304114, bytes: 2737038, loadMillis: 41.5, decideMicros: 6.2 }),
+    openUnusedAppSettings: async () => true,
     ...overrides,
   };
 }
@@ -34,7 +37,8 @@ describe('the filter bridge', () => {
     await expect(bridge.start(SETTINGS)).resolves.toBe(false);
     await expect(bridge.resume()).resolves.toBe(false);
     await expect(bridge.measure()).resolves.toBeNull();
-    await expect(bridge.stop()).resolves.toBeUndefined();
+    await expect(bridge.stop()).resolves.toBe(false);
+    await expect(bridge.openUnusedAppSettings()).resolves.toBe(false);
   });
 
   it('reads the status, the setting and what it sees of the networks', () => {
@@ -47,6 +51,8 @@ describe('the filter bridge', () => {
       stopReason: null,
       strictPrivateDns: true,
       otherVpn: false,
+      alwaysOn: true,
+      pausedIfUnused: true,
     });
   });
 
@@ -64,6 +70,8 @@ describe('the filter bridge', () => {
           stopReason: 'exploded',
           youtubeStrict: 'yes',
           otherVpn: 1,
+          alwaysOn: 'on',
+          pausedIfUnused: 0,
         }),
       }),
     ).status();
@@ -77,6 +85,8 @@ describe('the filter bridge', () => {
       stopReason: null,
       strictPrivateDns: false,
       otherVpn: false,
+      alwaysOn: null,
+      pausedIfUnused: null,
     });
   });
 
@@ -101,6 +111,19 @@ describe('the filter bridge', () => {
     );
 
     expect(bridge.status()).toEqual({ available: false });
+  });
+
+  it('reports whether the setting of unused apps opened', async () => {
+    await expect(createFilterBridge(native()).openUnusedAppSettings()).resolves.toBe(true);
+    await expect(
+      createFilterBridge(
+        native({ openUnusedAppSettings: async () => false }),
+      ).openUnusedAppSettings(),
+    ).resolves.toBe(false);
+  });
+
+  it('reports a stop the module accepted', async () => {
+    await expect(createFilterBridge(native()).stop()).resolves.toBe(true);
   });
 
   it('passes the settings to the module when the filter starts', async () => {
@@ -154,9 +177,14 @@ describe('the filter bridge', () => {
           throw new Error('no activity');
         },
         start: async () => 'yes',
+        stop: async () => {
+          throw new Error('The filter settings cannot be read');
+        },
         measure: async () => ({ entries: 1 }),
       }),
     );
+
+    await expect(bridge.stop()).resolves.toBe(false);
 
     await expect(bridge.requestConsent()).resolves.toBe(false);
     await expect(bridge.start(SETTINGS)).resolves.toBe(false);

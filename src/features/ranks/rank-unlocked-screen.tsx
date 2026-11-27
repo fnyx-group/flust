@@ -1,4 +1,4 @@
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { Redirect, useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 import { AccessibilityInfo, Animated, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,7 @@ export function RankUnlockedScreen() {
 }
 
 function RankUnlocked({ unlock, totalCleanDays }: UnlockScreenData) {
+  const router = useRouter();
   const { t } = useTranslation();
   const text = unlockText(t, unlock, totalCleanDays);
   const progress = useRevealProgress();

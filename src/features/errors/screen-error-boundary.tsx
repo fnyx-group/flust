@@ -1,4 +1,4 @@
-import { router, useRoute, type ErrorBoundaryProps } from 'expo-router';
+import { useRouter, useRoute, type ErrorBoundaryProps } from 'expo-router';
 
 import { routeFromName } from '@/domain/error-log';
 import { ErrorFallback, useRecordRenderError } from '@/features/errors/error-fallback';
@@ -6,6 +6,7 @@ import { ErrorFallback, useRecordRenderError } from '@/features/errors/error-fal
 // Exported as `ErrorBoundary` by each route, so a failing screen leaves the tab bar, the other
 // screens and the lock cover working.
 export function ScreenErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  const router = useRouter();
   const route = useFailedRoute();
   useRecordRenderError(error, route);
   const atHome = route === HOME;

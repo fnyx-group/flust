@@ -24,6 +24,11 @@ export type FilterStatus =
       readonly stopReason: FilterStopReason | null;
       readonly strictPrivateDns: boolean;
       readonly otherVpn: boolean;
+      // Whether Android's always-on VPN names flust, or null when only a running filter can tell.
+      readonly alwaysOn: boolean | null;
+      // Whether Android pauses flust when it is not opened for months, which stops the filter, or
+      // null where Android has no such pause.
+      readonly pausedIfUnused: boolean | null;
     };
 
 export const FILTER_INACTIVE_REASONS = [
@@ -66,4 +71,22 @@ function stoppedReason(status: Extract<FilterStatus, { available: true }>): Filt
 
 export function isFilterInactive(view: FilterView): boolean {
   return view.state === 'inactive';
+}
+
+// What the always-on row shows next to its label: Android tells only a running filter whether
+// always-on names it, so nothing shows otherwise.
+export function alwaysOnValue(status: FilterStatus): 'on' | 'off' | null {
+  if (!status.available || status.alwaysOn === null) return null;
+  return status.alwaysOn ? 'on' : 'off';
+}
+
+// The line that says to tap the gear next to flust, until always-on is known to name it.
+export function showsAlwaysOnGear(status: FilterStatus): boolean {
+  return status.available && status.alwaysOn !== true;
+}
+
+// The row to keep Android from pausing flust, only while the filter is wanted and Android would
+// pause it (docs/decisions/0049-filter-restart-after-crash.md).
+export function showsUnusedAppsRow(status: FilterStatus): boolean {
+  return status.available && status.enabled && status.pausedIfUnused === true;
 }

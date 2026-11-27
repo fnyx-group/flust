@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -17,6 +17,7 @@ import { colors, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/
 // talking to someone, names the emergency number without a country, which holds wherever the
 // person is, and opens the help numbers. Closing it hides it until the next local day.
 export function LowMoodCard() {
+  const router = useRouter();
   const { t } = useTranslation();
   const storage = useStorage();
   const { checkIns, lowMoodDismissedDay, dismissLowMood } = useSession();

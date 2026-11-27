@@ -217,6 +217,24 @@ const networkImportPaths = [
   },
 ];
 
+// The global router is bound to the last navigation container that mounted and is unbound when any
+// container unmounts, so it fails after Android recreates the activity. useRouter() goes through
+// the screen's own container (docs/decisions/0048-router-per-root.md).
+const globalRouter = {
+  name: 'expo-router',
+  importNames: ['router'],
+  message: 'Use useRouter(): the global router breaks after the activity is recreated.',
+};
+
+// The methods of useRouter() that still read the navigation reference shared by every container,
+// which the old one clears as it unmounts. A namespace import of expo-router is already refused
+// with the global router above.
+const routerSyntax = ["object.name='router'", "object.callee.name='useRouter'"].map((object) => ({
+  selector: `MemberExpression[${object}][property.name=/^(canGoBack|canDismiss|setParams)$/]`,
+  message:
+    'Use useCanGoBack(), and no canDismiss or setParams: they read a navigation reference that breaks after the activity is recreated. See docs/decisions/0048-router-per-root.md.',
+}));
+
 const networkImportPatterns = [{ regex: '^expo-file-system/legacy$', message: networkMessage }];
 
 const networkProperties = ['downloadFileAsync', 'upload'].map((property) => ({
@@ -269,6 +287,7 @@ function layer(
   const paths = [
     ...networkImportPaths,
     touchables,
+    globalRouter,
     ...(allowNativeScroll ? [] : [nativeScrollViews]),
     ...ownedImportPaths(owner),
   ];
@@ -355,16 +374,28 @@ module.exports = defineConfig([
   restrictedSyntax(
     sourceFiles,
     [themeFile, ...testFiles, ...colorOwners],
-    [...hexColorSyntax, ...literalTextSyntax, ...accessibilitySyntax, ...ownedColorSyntax(null)],
+    [
+      ...hexColorSyntax,
+      ...literalTextSyntax,
+      ...accessibilitySyntax,
+      ...ownedColorSyntax(null),
+      ...routerSyntax,
+    ],
   ),
   ...colorOwners.map((file) =>
     restrictedSyntax(
       [file],
       [],
-      [...hexColorSyntax, ...literalTextSyntax, ...accessibilitySyntax, ...ownedColorSyntax(file)],
+      [
+        ...hexColorSyntax,
+        ...literalTextSyntax,
+        ...accessibilitySyntax,
+        ...ownedColorSyntax(file),
+        ...routerSyntax,
+      ],
     ),
   ),
-  restrictedSyntax([themeFile], [], literalTextSyntax),
-  restrictedSyntax(testFiles, [], hexColorSyntax),
+  restrictedSyntax([themeFile], [], [...literalTextSyntax, ...routerSyntax]),
+  restrictedSyntax(testFiles, [], [...hexColorSyntax, ...routerSyntax]),
   prettierConfig,
 ]);

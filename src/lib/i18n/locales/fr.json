@@ -915,7 +915,11 @@
     "resolvers": "Les noms des sites autorisés partent chiffrés vers Quad9, ou vers Cloudflare puis DNS4EU s'il ne répond pas. Les trois bloquent aussi les logiciels malveillants.",
     "chrome": "Plus rien ne charge dans Chrome ? Dans ses paramètres, Confidentialité et sécurité, Utiliser le DNS sécurisé, choisis Automatique.",
     "alwaysOn": "VPN permanent",
-    "alwaysOnHint": "Active VPN permanent pour flust, le filtre repart alors tout seul.",
+    "alwaysOnGear": "Touche l'engrenage à côté de flust, puis active VPN permanent.",
+    "unusedApps": {
+      "label": "Ne pas mettre flust en pause",
+      "hint": "Sinon, Android peut arrêter le filtre si flust reste fermé des mois."
+    },
     "licenses": "Licences des listes",
     "inactive": {
       "private-dns": {
@@ -959,7 +963,12 @@
       "confirm": "Désactiver",
       "keep": "Ne rien changer",
       "minutes": "{{count}} min",
-      "seconds": "{{count}} s"
+      "seconds": "{{count}} s",
+      "saveFailed": "La demande n'a pas pu être enregistrée. Rien n'a changé.",
+      "failed": {
+        "filter": "Le filtre n'a pas pu être désactivé. Il reste actif.",
+        "youtube": "YouTube strict n'a pas pu être désactivé. Il reste actif."
+      }
     },
     "disclosure": {
       "title": "Avant d'activer le filtre",

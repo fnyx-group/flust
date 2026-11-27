@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -31,6 +31,7 @@ type StreakCounterProps = {
 // on screen. Screen readers read the whole counter as one sentence instead. Like the rank line,
 // it opens the ranks tab, which shows where the ring is heading.
 export function StreakCounter({ journey, unlockedRanks, ring }: StreakCounterProps) {
+  const router = useRouter();
   const { t } = useTranslation();
   const display = useClock((now) => streakDisplay(currentStreakMs(journey, now)), sameFields);
   const fraction = useClock((now) => rankStanding(journey, unlockedRanks, now).fraction);

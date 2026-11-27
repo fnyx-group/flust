@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { useRouter, type ImperativeRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -21,11 +21,11 @@ import { Screen } from '@/ui/screen';
 import { ScreenTitle } from '@/ui/screen-title';
 import { colors, spacing, typography } from '@/ui/theme';
 
-function openNew() {
+function openNew(router: ImperativeRouter) {
   router.push('/note');
 }
 
-function openNote(note: NoteSummary) {
+function openNote(router: ImperativeRouter, note: NoteSummary) {
   router.push({ pathname: '/note', params: { id: String(note.id) } });
 }
 
@@ -36,14 +36,15 @@ const CLOCK_ANCHOR = 0;
 // The groups follow a clock rather than the time of the last read, so they move at midnight and
 // when the app comes back to the foreground on another day.
 export function JournalScreen() {
+  const router = useRouter();
   const { t } = useTranslation();
   const storage = useStorage();
   const { state, retry } = useNotes(storage.journal);
   const [{ firstWeekday }] = useState(deviceCalendar);
   const [clock] = useState(() => createMinuteClock(CLOCK_ANCHOR, nativeClockDeps));
   const whenFocused = useWhenFocused();
-  const write = () => whenFocused(openNew);
-  const open = (note: NoteSummary) => whenFocused(() => openNote(note));
+  const write = () => whenFocused(() => openNew(router));
+  const open = (note: NoteSummary) => whenFocused(() => openNote(router, note));
 
   return (
     <Screen>

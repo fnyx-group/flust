@@ -1,0 +1,20 @@
+# Second half of the recreation check. The new activity starts again from Home. Taps still
+# navigate, and back returns to the screen underneath, not to the screen it falls back to when
+# nothing is underneath.
+appId: org.fnyxgroup.flust
+---
+- extendedWaitUntil:
+    visible: Current streak.*
+    timeout: 10000
+- tapOn: Current streak.*
+- assertVisible: A lapse never brings your rank down.
+- tapOn: Settings
+- tapOn: Filter, Off
+# The larger font pushes the row below the fold.
+- scrollUntilVisible:
+    element: List licenses
+- tapOn: List licenses
+- assertVisible: Licenses
+- tapOn: Back
+- assertVisible: List licenses
+- assertNotVisible: Licenses

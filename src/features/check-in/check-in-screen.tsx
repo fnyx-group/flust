@@ -1,4 +1,4 @@
-import { router, usePreventRemove } from 'expo-router';
+import { useRouter, usePreventRemove } from 'expo-router';
 import { useRef, useState } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +42,7 @@ const CLOCK_ANCHOR = 0;
 // possible once a mood and an urge level are chosen, and the screen cannot be removed while it
 // saves. Nothing on it reads or mentions lapses.
 export function CheckInScreen() {
+  const router = useRouter();
   const { t } = useTranslation();
   const storage = useStorage();
   const { checkIns, setCheckIn } = useSession();

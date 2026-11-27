@@ -1,8 +1,9 @@
-import { router, usePreventRemove } from 'expo-router';
+import { usePreventRemove } from 'expo-router';
 import { useRef, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { useGoBack } from '@/features/navigation/use-go-back';
 import { BackHeader } from '@/ui/back-header';
 import { Button } from '@/ui/button';
 import { ConfirmSheet } from '@/ui/confirm-sheet';
@@ -44,6 +45,7 @@ export function EditorShell({
   note,
   children,
 }: EditorShellProps) {
+  const goBack = useGoBack('/reasons-and-plans');
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   // Set once the screen may close without asking: after a save, a removal or a discard.
@@ -63,8 +65,7 @@ export function EditorShell({
     setBusy(false);
     setDone(true);
     allowRemove();
-    if (router.canGoBack()) router.back();
-    else router.replace('/reasons-and-plans');
+    goBack();
   }
 
   // Android reads the message through its live region; iOS has no live regions.
@@ -91,13 +92,7 @@ export function EditorShell({
   return (
     <KeyboardScreen
       contentContainerStyle={styles.content}
-      header={
-        <BackHeader
-          backLabel={t('profile.back')}
-          disabled={busy}
-          onBack={() => (router.canGoBack() ? router.back() : router.replace('/reasons-and-plans'))}
-        />
-      }
+      header={<BackHeader backLabel={t('profile.back')} disabled={busy} onBack={goBack} />}
       footer={
         <View style={styles.footer}>
           {error !== null && (

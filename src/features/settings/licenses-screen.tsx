@@ -1,8 +1,8 @@
-import { router } from 'expo-router';
 import { memo, useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { useGoBack } from '@/features/navigation/use-go-back';
 import { LIST_LICENSES } from '@/features/settings/list-licenses';
 import { THIRD_PARTY_LIBRARIES } from '@/features/settings/third-party-licenses';
 import { BackHeader } from '@/ui/back-header';
@@ -42,6 +42,7 @@ const LIBRARIES: readonly Entry[] = THIRD_PARTY_LIBRARIES.map((library) => ({
 // texts in full would make a list nobody can scroll. Shown on Android for now: the iPhone ships
 // other native code, listed with lot 3.
 export function LicensesScreen() {
+  const goBack = useGoBack('/about');
   const { t } = useTranslation();
   const [open, setOpen] = useState<ReadonlySet<string>>(() => new Set());
   const toggle = useCallback((key: string) => {
@@ -59,11 +60,7 @@ export function LicensesScreen() {
 
   return (
     <Screen bottomInset>
-      <BackHeader
-        backLabel={t('licenses.back')}
-        title={t('licenses.title')}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/about'))}
-      />
+      <BackHeader backLabel={t('licenses.back')} title={t('licenses.title')} onBack={goBack} />
       <SectionList<Entry, Section>
         sections={sections}
         keyExtractor={(entry) => entry.key}

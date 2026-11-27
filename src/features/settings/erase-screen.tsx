@@ -1,14 +1,9 @@
-import { router } from 'expo-router';
-
+import { useGoBack } from '@/features/navigation/use-go-back';
 import { EraseView } from '@/features/settings/erase-view';
 import { useEraseAll } from '@/features/storage/storage-context';
 
 export function EraseScreen() {
+  const goBack = useGoBack('/settings');
   const eraseAll = useEraseAll();
-  return (
-    <EraseView
-      onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
-      onErase={eraseAll}
-    />
-  );
+  return <EraseView onBack={goBack} onErase={eraseAll} />;
 }

@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { ProfileEntries } from '@/data/profile-repository';
 import { RISK_MOMENT_IDS, toggleRiskMoment, type RiskMomentId } from '@/domain/presets';
 import { canAddPlan, canAddReason, MAX_PLANS, MAX_REASONS } from '@/domain/profile';
+import { useGoBack } from '@/features/navigation/use-go-back';
 import { EntriesUnavailable } from '@/features/profile/entries-unavailable';
 import { reasonText } from '@/features/profile/labels';
 import { useProfileEntries } from '@/features/profile/use-profile-entries';
@@ -41,6 +42,8 @@ type ReasonsAndPlansProps = {
 // Reasons and plans open their own screen. Risk moments are saved as they are toggled, like the
 // chips of the onboarding. Adding beyond a limit says so where the user tapped, calmly.
 function ReasonsAndPlans({ entries, update }: ReasonsAndPlansProps) {
+  const router = useRouter();
+  const goBack = useGoBack('/settings');
   const { t } = useTranslation();
   const storage = useStorage();
   const [notice, setNotice] = useState<Notice>(null);
@@ -86,11 +89,7 @@ function ReasonsAndPlans({ entries, update }: ReasonsAndPlansProps) {
 
   return (
     <Screen bottomInset>
-      <BackHeader
-        backLabel={t('profile.back')}
-        title={t('profile.title')}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
-      />
+      <BackHeader backLabel={t('profile.back')} title={t('profile.title')} onBack={goBack} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Section
           label={t('profile.reasons')}

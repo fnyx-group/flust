@@ -1,4 +1,4 @@
-import { router, useIsFocused } from 'expo-router';
+import { useRouter, useIsFocused } from 'expo-router';
 import { useEffect } from 'react';
 
 import type { Journey } from '@/domain/journey';
@@ -28,6 +28,7 @@ export function useRankUnlockTrigger(
   unlockedRanks: readonly RankId[],
   latestLapse: LapseRecord | null,
 ) {
+  const router = useRouter();
   const { announceUnlock } = useSession();
   const { locked } = useLock();
   const focused = useIsFocused();
@@ -45,5 +46,5 @@ export function useRankUnlockTrigger(
       pathname: '/rank-unlocked',
       params: toUnlockParams(ids, pending.totalCleanDays),
     });
-  }, [focused, locked, pending, announceUnlock]);
+  }, [focused, locked, pending, announceUnlock, router]);
 }

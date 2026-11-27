@@ -1,4 +1,4 @@
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
   AccessibilityInfo,
@@ -22,10 +22,11 @@ import {
   type ReminderSettings,
 } from '@/domain/reminders';
 import { useLock } from '@/features/lock/lock-context';
+import { useGoBack } from '@/features/navigation/use-go-back';
 import { formatReminderTime } from '@/features/reminders/labels';
+import { NotificationPreview } from '@/features/reminders/notification-preview';
 import { notifier } from '@/features/reminders/notifier';
 import type { NotificationPermission } from '@/features/reminders/notifier-types';
-import { NotificationPreview } from '@/features/reminders/notification-preview';
 import { requestReminderSync } from '@/features/reminders/sync-requests';
 import { TimeWheelSheet } from '@/features/reminders/time-wheel-sheet';
 import { deviceCalendar, deviceOffsetAt } from '@/features/shared/device-time';
@@ -261,13 +262,10 @@ export function RemindersScreen() {
 }
 
 function Header() {
+  const goBack = useGoBack('/settings');
   const { t } = useTranslation();
   return (
-    <BackHeader
-      backLabel={t('reminders.back')}
-      title={t('reminders.title')}
-      onBack={() => (router.canGoBack() ? router.back() : router.replace('/settings'))}
-    />
+    <BackHeader backLabel={t('reminders.back')} title={t('reminders.title')} onBack={goBack} />
   );
 }
 
