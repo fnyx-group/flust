@@ -1,0 +1,4 @@
+appId: org.fnyxgroup.flust
+---
+- tapOn: Écrire une note
+- assertVisible: Fermer

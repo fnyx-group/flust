@@ -1,0 +1,4 @@
+appId: org.fnyxgroup.flust
+---
+- tapOn: J'ai une envie
+- assertVisible: Laisse passer la vague.

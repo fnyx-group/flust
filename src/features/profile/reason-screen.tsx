@@ -83,7 +83,6 @@ function ReasonEditor({
               label: t('profile.reason.remove'),
               confirm: {
                 title: t('profile.reason.removeConfirm.title'),
-                message: t('profile.reason.removeConfirm.message'),
                 cancel: t('profile.reason.removeConfirm.cancel'),
                 confirm: t('profile.reason.removeConfirm.confirm'),
               },

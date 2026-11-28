@@ -20,7 +20,7 @@ Every step can be skipped. "Save and start again" and "Skip" both log the lapse;
 
 ## The following hours
 
-- For six hours after the lapse is logged, one short supportive line shows above the emergency button: "The next few hours matter. You've already done the hardest part by noting it."
+- For six hours after the lapse is logged, one short supportive line shows above the emergency button: "You did the hardest part by noting it."
 - No rank unlock screen appears during those hours. A rank reached meanwhile shows on the badge at once and is announced when they end.
 - If reminders are on, the app sends at most one gentle reminder. Its text is neutral, like every notification.
 
@@ -47,7 +47,7 @@ Pattern detection is computed on the device only. Nothing is sent anywhere.
 ## Special cases
 
 - Frequent lapses over a long period lead to a gentle suggestion to talk to someone, with a link to the help page.
-- When the three most recent check-ins of the last 14 local days all have a mood of 1 or 2, home shows a calm card. It suggests talking to someone you trust or a health professional, and reminds the user to call the local emergency number if they are in danger. It can be closed for the day, and opens the help page with the numbers of the device's country. See [0018](../decisions/0018-daily-check-in.md) and [0027](../decisions/0027-offline-help-resources.md).
+- When the three most recent check-ins of the last 14 local days all have a mood of 1 or 2, home shows a calm card. It suggests talking to someone close or to a professional, and reminds the user to call the local emergency number if they are in danger. It can be closed for the day, and opens the help page with the numbers of the device's country. See [0018](../decisions/0018-daily-check-in.md) and [0027](../decisions/0027-offline-help-resources.md).
 - The app never reads the journal. Pattern detection and suggestions use lapses and check-ins only.
 - A lapse logged by mistake can be undone from the "Undo the lapse" button under "Lapse noted." on the home screen, until local midnight and never less than an hour after it was logged. The previous streak, the answers and the plan are restored. See [0016](../decisions/0016-lapse-records-and-urge-events.md).
 

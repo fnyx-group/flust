@@ -1,4 +1,13 @@
-import { fitHome, HOME_RING_MIN, homeSpacing, type HomeHeights } from '@/features/home/home-fit';
+import {
+  fitHome,
+  HOME_RING_MIN,
+  homeSpacing,
+  PINNED_MAX_SHARE,
+  pinnedBlockHeight,
+  pinsAllActions,
+  type HomeHeights,
+  type PinnedHeights,
+} from '@/features/home/home-fit';
 import { largeTextScale, sizes } from '@/ui/theme';
 
 // As measured on an Android emulator at font scale 1.0, with a two line quote without an author.
@@ -128,5 +137,67 @@ describe('fitHome', () => {
     expect(
       fitHome({ available: WITH_QUOTE + 170, fontScale: 1, ringMax: 170, heights: HEIGHTS }),
     ).toEqual({ ring: 170, quote: true });
+  });
+});
+
+// Pixels of a `maestro hierarchy` dump of home on the emulator, in points.
+function points(pixels: number, dpi: number): number {
+  return (pixels * 160) / dpi;
+}
+
+// Font scale 1.0 at 420 dpi: the check-in line, the urge button and the lapse link, then the undo
+// line after a lapse, from the bounds of each and of the scrolling view above them.
+const DEFAULT: PinnedHeights = {
+  checkIn: points(1700 - 1584, 420),
+  urge: points(1872 - 1720, 420),
+  lapse: points(2019 - 1893, 420),
+  undo: 0,
+};
+const DEFAULT_AFTER_LAPSE: PinnedHeights = { ...DEFAULT, undo: points(2156 - 2040, 420) };
+// Font scale 2.0 at 540 dpi, the largest display size: the urge button grows from 58 to 69 points,
+// and the undo line wraps onto two rows. The window is 2400 pixels tall.
+const LARGEST: PinnedHeights = {
+  checkIn: points(1596 - 1447, 540),
+  urge: points(1855 - 1622, 540),
+  lapse: points(2086 - 1882, 540),
+  undo: 0,
+};
+const LARGEST_AFTER_LAPSE: PinnedHeights = { ...LARGEST, undo: points(2086 - 1795, 540) };
+const LARGEST_WINDOW = points(2400, 540);
+
+describe('pinnedBlockHeight', () => {
+  it('matches the block laid out on the emulator, from the scrolling view to its last line', () => {
+    expect(pinnedBlockHeight(DEFAULT)).toBeCloseTo(points(2156 - 1689, 420), 0);
+    expect(pinnedBlockHeight(DEFAULT_AFTER_LAPSE)).toBeCloseTo(points(2156 - 1552, 420), 0);
+    expect(pinnedBlockHeight(LARGEST_AFTER_LAPSE)).toBeCloseTo(points(2086 - 1087, 540), 0);
+  });
+
+  it('adds the undo line with its gap only while it shows', () => {
+    expect(pinnedBlockHeight(DEFAULT_AFTER_LAPSE) - pinnedBlockHeight(DEFAULT)).toBeCloseTo(
+      DEFAULT_AFTER_LAPSE.undo + homeSpacing.actionsGap,
+    );
+  });
+});
+
+describe('pinsAllActions', () => {
+  it('pins the whole block at the default size from about 508 points tall', () => {
+    expect(pinsAllActions(DEFAULT, 509)).toBe(true);
+    expect(pinsAllActions(DEFAULT, 508)).toBe(false);
+    expect(pinsAllActions(DEFAULT, 667)).toBe(true);
+  });
+
+  it('still pins it after a lapse on a 667 point tall phone', () => {
+    expect(pinsAllActions(DEFAULT_AFTER_LAPSE, 667)).toBe(true);
+  });
+
+  it('pins only the urge button once the undo line takes the block past its share', () => {
+    expect(pinsAllActions(LARGEST, LARGEST_WINDOW)).toBe(true);
+    expect(pinsAllActions(LARGEST_AFTER_LAPSE, LARGEST_WINDOW)).toBe(false);
+  });
+
+  it('allows the block exactly its share of the window', () => {
+    const block = pinnedBlockHeight(DEFAULT);
+    expect(pinsAllActions(DEFAULT, block / PINNED_MAX_SHARE)).toBe(true);
+    expect(pinsAllActions(DEFAULT, block / PINNED_MAX_SHARE - 1)).toBe(false);
   });
 });

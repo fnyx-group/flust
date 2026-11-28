@@ -68,7 +68,6 @@ function PlanEditor({ entries, entry }: { entries: ProfileEntries; entry: PlanEn
               label: t('profile.plan.remove'),
               confirm: {
                 title: t('profile.plan.removeConfirm.title'),
-                message: t('profile.plan.removeConfirm.message'),
                 cancel: t('profile.plan.removeConfirm.cancel'),
                 confirm: t('profile.plan.removeConfirm.confirm'),
               },

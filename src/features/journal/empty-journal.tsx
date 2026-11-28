@@ -9,7 +9,6 @@ export function EmptyJournal({ onWrite }: { onWrite: () => void }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{t('journal.empty.title')}</Text>
-      <Text style={styles.text}>{t('journal.empty.text')}</Text>
       <View style={styles.action}>
         <Button variant="secondary" label={t('journal.empty.action')} onPress={onWrite} />
       </View>
@@ -28,11 +27,6 @@ const styles = StyleSheet.create({
     ...typography.row,
     textAlign: 'center',
     color: colors.text,
-  },
-  text: {
-    ...typography.paragraph,
-    textAlign: 'center',
-    color: colors.textSecondary,
   },
   action: {
     paddingTop: spacing.l,

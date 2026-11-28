@@ -1,0 +1,4 @@
+appId: org.fnyxgroup.flust
+---
+- tapOn: Commencer
+- assertVisible: Pourquoi tu arrêtes.*

@@ -11,11 +11,11 @@ import {
 } from '@/lib/i18n/language';
 import { BrandHeader } from '@/ui/brand/brand-header';
 import { Button } from '@/ui/button';
-import { ClockIcon } from '@/ui/icons/clock-icon';
 import { GlobeIcon } from '@/ui/icons/globe-icon';
 import { OptionSheet } from '@/ui/option-sheet';
 import { RankEmblem } from '@/ui/rank-emblem';
 import { Screen } from '@/ui/screen';
+import { ScrollView } from '@/ui/scroll-view';
 import { colors, pressedOpacity, radii, sizes, spacing, typography } from '@/ui/theme';
 
 type WelcomeStepProps = {
@@ -34,26 +34,24 @@ export function WelcomeStep({ onStart }: WelcomeStepProps) {
   }, [erasedNotice, t]);
 
   return (
-    <Screen bottomInset style={styles.screen}>
-      <View style={styles.top}>
-        <BrandHeader />
-        <LanguageChoice />
-      </View>
-      <View style={styles.body}>
-        <Emblems />
-        <Text accessibilityRole="header" style={styles.title}>
-          {t('onboarding.welcome.title')}
-        </Text>
-        <Text style={styles.paragraph}>{t('onboarding.welcome.promise')}</Text>
-        <View style={styles.duration}>
-          <ClockIcon color={colors.gold} size={22} />
-          <Text style={styles.durationText}>{t('onboarding.welcome.duration')}</Text>
+    <Screen bottomInset>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.top}>
+          <BrandHeader />
+          <LanguageChoice />
         </View>
-      </View>
-      <View style={styles.footer}>
-        <Button label={t('onboarding.welcome.start')} onPress={onStart} />
-        <Text style={styles.caption}>{t('onboarding.welcome.footer')}</Text>
-      </View>
+        <View style={styles.body}>
+          <Emblems />
+          <Text accessibilityRole="header" style={styles.title}>
+            {t('onboarding.welcome.title')}
+          </Text>
+          <Text style={styles.paragraph}>{t('onboarding.welcome.promise')}</Text>
+        </View>
+        <View style={styles.footer}>
+          <Button label={t('onboarding.welcome.start')} onPress={onStart} />
+          <Text style={styles.caption}>{t('onboarding.welcome.footer')}</Text>
+        </View>
+      </ScrollView>
     </Screen>
   );
 }
@@ -123,11 +121,16 @@ function LanguageChoice() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  // Spread over the screen when it fits, and scrolls at large text and display sizes.
+  content: {
+    flexGrow: 1,
     justifyContent: 'space-between',
+    gap: spacing.xl,
   },
+  // The language pill wraps under the name when both no longer fit side by side.
   top: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.l,
@@ -166,17 +169,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 26,
     color: colors.textSecondary,
-  },
-  duration: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.m,
-  },
-  durationText: {
-    ...typography.row,
-    fontSize: 17,
-    flexShrink: 1,
-    color: colors.text,
   },
   footer: {
     gap: spacing.l,

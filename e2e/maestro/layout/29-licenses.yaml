@@ -1,0 +1,7 @@
+appId: org.fnyxgroup.flust
+---
+- scrollUntilVisible:
+    element: Licences
+    direction: DOWN
+- tapOn: Licences
+- assertVisible: Retour

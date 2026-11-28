@@ -73,6 +73,7 @@
 - [0047 Foreground service and restart jobs of the Android filter](decisions/0047-filter-foreground-service.md): the VPN service in the foreground with a silent notification that flust never asks permission for, and restart jobs after a kill.
 - [0048 Router of each root](decisions/0048-router-per-root.md): navigation through `useRouter()` only, since the global router breaks when Android recreates the activity.
 - [0049 Filter restart after a crash, always-on status and unused app pause](decisions/0049-filter-restart-after-crash.md): a crash handler that schedules the restart job, the always-on state with a pointer to the gear, and a row to turn off the pause of unused apps.
+- [0050 Layout at every text and display size](decisions/0050-layout-matrix.md): home pins only the urge button when its pinned block grows past 35 % of the window, and a Maestro matrix of font scales and display sizes checks each screen's hierarchy for clipped and overlapping content.
 
 ## Development
 

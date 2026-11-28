@@ -1,0 +1,9 @@
+# The check-in reminder on, with its time chip beside the switch. Notifications were refused at
+# launch, for the screen of the previous flow.
+appId: org.fnyxgroup.flust
+---
+- setPermissions:
+    permissions:
+      notifications: allow
+- tapOn: Check-in du soir
+- assertVisible: Heure du rappel, .*

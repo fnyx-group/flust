@@ -1,0 +1,15 @@
+# Run by scripts/e2e-android.sh --layout, one flow per screen in this order, each from the screen
+# the previous one left, with a dump of the screen after each. In French, whose texts are longer.
+appId: org.fnyxgroup.flust
+---
+- launchApp:
+    clearState: true
+    permissions:
+      notifications: deny
+- extendedWaitUntil:
+    visible: (Start|Commencer)
+    timeout: 30000
+- tapOn: '(Language|Langue).*'
+- tapOn: Français
+- assertVisible: Reprends le contrôle.
+- assertVisible: Commencer

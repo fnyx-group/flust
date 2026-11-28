@@ -166,7 +166,6 @@ export function RemindersScreen() {
         <RowGroup>
           <SwitchRow
             title={t('reminders.checkIn.title')}
-            subtitle={t('reminders.checkIn.subtitle')}
             icon={{ icon: PencilIcon, color: colors.gold }}
             accessory={settings.checkIn.on && timeChip('checkIn')}
             value={settings.checkIn.on}

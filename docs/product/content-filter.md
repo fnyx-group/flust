@@ -38,7 +38,7 @@ DNS has no equivalent of Strict YouTube for X, TikTok, Reddit or Instagram: none
 
 ## In the app
 
-- Settings has a Filter row with its state: on, off or inactive. It opens the filter screen: the state at the top, with the reason and what to do when inactive and the request while it waits, then the two switches, one line on what the filter blocks, one line saying that the names of allowed sites go encrypted to Quad9, or to Cloudflare then DNS4EU when it does not answer, all three blocking malware, a help line for Chrome's secure DNS, and links to the always-on VPN setting, with its state and, until it is on, a line saying to tap the gear next to flust, and to the licenses of the lists. While the filter is on and Android would pause flust when it is not opened for months, a row opens that setting, with one line on why ([0049](../decisions/0049-filter-restart-after-crash.md)).
+- Settings has a Filter row with its state: on, off or inactive. It opens the filter screen: the state at the top, with the reason and what to do when inactive and the request while it waits, then the two switches, one line on what the filter blocks, one line saying that allowed sites go encrypted through Quad9, Cloudflare or DNS4EU, a help line for Chrome's secure DNS, and links to the always-on VPN setting, with its state and, until it is on, a line saying to tap flust's gear, and to the licenses of the lists. While the filter is on and Android would pause flust when it is not opened for months, a row opens that setting, with one line on why ([0049](../decisions/0049-filter-restart-after-crash.md)).
 - The onboarding presents the filter in a step of its own before the start point, with the disclosure in full, "Accepter et activer" and "Plus tard" ([0042](../decisions/0042-filter-onboarding-and-disclosure.md)).
 - Turning the filter on from the filter screen shows the same disclosure in a sheet whenever Android's VPN dialog will follow.
 - Home shows an inactive filter with a neutral chip, a shield and "Filtre inactif", in place of the circle name in the header row. It takes no height, so home keeps its fit at 667 points, and it opens the filter screen.
@@ -53,7 +53,7 @@ DNS has no equivalent of Strict YouTube for X, TikTok, Reddit or Instagram: none
 | Another VPN                           | The tunnel stopped while another app's VPN network exists                       | Android keeps one VPN at a time. Turn the filter back on, after the disclosure                  |
 | Consent lost                          | Android's VPN consent no longer holds                                           | Turn the filter back on, after the disclosure                                                   |
 | VPN turned off in the system settings | The system revoked the tunnel. Shown while flust is running                     | Turn the filter back on, and the always-on VPN link. The next launch turns it back on by itself |
-| Lists unreadable                      | The compiled lists failed to load                                               | Update flust or reinstall it. No button                                                         |
+| Lists unreadable                      | The compiled lists failed to load                                               | Update flust. No button                                                                         |
 | Start refused at boot                 | Android refused to start the service after a reboot. Not shown as an error      | The filter resumes when flust opens, and always-on avoids the wait                              |
 | Stopped                               | Any other stop, such as an error in the tunnel or the app stopped by the system | Turn the filter back on                                                                         |
 
@@ -63,7 +63,7 @@ A filter that is on and stopped comes back by itself when flust launches, whatev
 
 ### Chrome's secure DNS
 
-With secure DNS set to a custom provider, Chrome does not fall back to the system resolver: strict mode blocks the provider's name and the tunnel resets its address, so browsing in Chrome stops. The filter screen says to set it back to Automatic in Chrome's settings, Privacy and security, Use secure DNS.
+With secure DNS set to a custom provider, Chrome does not fall back to the system resolver: strict mode blocks the provider's name and the tunnel resets its address, so browsing in Chrome stops. The filter screen says to set secure DNS back to Automatic in Chrome's settings.
 
 ## Android
 

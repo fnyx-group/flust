@@ -112,9 +112,6 @@ export function LockSettingsScreen() {
               : t(paused ? 'lock.settings.paused' : 'lock.settings.noDeviceLock')}
           </Text>
         )}
-        <View>
-          <Text style={styles.note}>{t('lock.settings.note')}</Text>
-        </View>
       </ScrollView>
     </Screen>
   );
@@ -131,9 +128,5 @@ const styles = StyleSheet.create({
   notice: {
     ...typography.body,
     color: colors.text,
-  },
-  note: {
-    ...typography.paragraph,
-    color: colors.textSecondary,
   },
 });

@@ -1,0 +1,8 @@
+# The urge button stays on screen without scrolling at every size.
+appId: org.fnyxgroup.flust
+---
+- tapOn: Continuer
+- extendedWaitUntil:
+    visible: Série en cours.*
+    timeout: 10000
+- assertVisible: J'ai une envie

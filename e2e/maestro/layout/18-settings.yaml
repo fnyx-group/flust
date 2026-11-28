@@ -1,0 +1,4 @@
+appId: org.fnyxgroup.flust
+---
+- tapOn: Réglages
+- assertVisible: Raisons et plans.*

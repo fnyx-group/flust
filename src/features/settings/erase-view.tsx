@@ -29,7 +29,6 @@ export function EraseView({ onBack, onErase }: { onBack: () => void; onErase: ()
           <IconTile icon={TrashIcon} color={colors.danger} />
           <Text style={styles.warning}>{t('erase.noRecovery')}</Text>
         </View>
-        <Text style={styles.after}>{t('erase.after')}</Text>
         <View style={[styles.card, styles.calm]}>
           <IconTile icon={WaveIcon} color={colors.teal} />
           <Text style={styles.hint}>{t('erase.lapseHint')}</Text>
@@ -85,10 +84,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: typography.quote.fontFamily,
     color: colors.text,
-  },
-  after: {
-    ...typography.paragraph,
-    color: colors.textSecondary,
   },
   hint: {
     ...typography.paragraph,

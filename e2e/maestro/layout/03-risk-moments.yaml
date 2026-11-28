@@ -1,0 +1,8 @@
+appId: org.fnyxgroup.flust
+---
+- scrollUntilVisible:
+    element: Mieux dormir
+    direction: DOWN
+- tapOn: Mieux dormir
+- tapOn: Continuer
+- assertVisible: Quand est-ce le plus dur.*

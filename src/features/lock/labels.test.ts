@@ -55,8 +55,8 @@ describe('delayLabel', () => {
 
 describe('waitLabel', () => {
   it('counts seconds under a minute, then minutes rounded up', () => {
-    expect(waitLabel(french, 29_500)).toBe('Nouvel essai possible dans 30 s.');
-    expect(waitLabel(english, MS_PER_MINUTE + MS_PER_SECOND)).toBe('You can try again in 2 min.');
-    expect(waitLabel(english, 15 * MS_PER_MINUTE)).toBe('You can try again in 15 min.');
+    expect(waitLabel(french, 29_500)).toBe('Réessaie dans 30 s.');
+    expect(waitLabel(english, MS_PER_MINUTE + MS_PER_SECOND)).toBe('Try again in 2 min.');
+    expect(waitLabel(english, 15 * MS_PER_MINUTE)).toBe('Try again in 15 min.');
   });
 });

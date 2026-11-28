@@ -66,7 +66,7 @@ export function SafeModeScreen({ onRetry, onErased }: SafeModeScreenProps) {
       return (
         <MessageScreen
           title={t('errors.safeMode.title')}
-          paragraphs={[t('errors.safeMode.stopped'), t('errors.safeMode.choices')]}
+          paragraphs={[t('errors.safeMode.stopped')]}
           notice={reportRefused ? t('errors.safeMode.reportRefused') : null}
           actions={
             <>

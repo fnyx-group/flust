@@ -39,19 +39,19 @@
       "noted": "Écart noté.",
       "undo": "Annuler l'écart",
       "undoSpoken": "Annuler l'écart noté",
-      "undoFailed": "L'écart n'a pas pu être annulé. Réessaie.",
-      "support": "Les prochaines heures comptent. Tu as déjà fait le plus dur en notant cet écart."
+      "undoFailed": "L'écart n'a pas pu être annulé.",
+      "support": "Tu as fait le plus dur en le notant."
     },
     "checkIn": {
-      "todo": "Ton check-in du jour t'attend",
+      "todo": "Check-in du jour",
       "done": "Check-in fait",
       "hint": "Ouvre le check-in"
     },
     "lowMood": {
-      "text": "Ces derniers jours ont l'air difficiles. En parler à quelqu'un de confiance ou à un professionnel de santé peut vraiment aider.",
-      "emergency": "Si tu es en danger, appelle le numéro d'urgence de l'endroit où tu te trouves.",
-      "dismiss": "Masquer ce message pour aujourd'hui",
-      "help": "Voir les numéros d'aide"
+      "text": "Ces derniers jours ont l'air durs. En parler à un proche ou à un professionnel peut aider.",
+      "emergency": "Si tu es en danger, appelle les urgences.",
+      "dismiss": "Masquer pour aujourd'hui",
+      "help": "Numéros d'aide"
     },
     "firstDay": "Premier jour",
     "filterInactive": "Filtre inactif",
@@ -75,8 +75,8 @@
     "reasons": "Tes raisons",
     "held": "J'ai tenu",
     "lapse": "J'ai eu un écart",
-    "writeNote": "Écrire maintenant",
-    "darkThoughts": "Des idées noires ? Parler à quelqu'un",
+    "writeNote": "Écrire",
+    "darkThoughts": "Idées noires ? Parler à quelqu'un",
     "darkThoughtsHint": "Ouvre les numéros d'aide",
     "countdown": "{{count}} min"
   },
@@ -84,7 +84,6 @@
     "back": "Retour",
     "skip": "Passer",
     "title": "Un écart, pas un retour à zéro.",
-    "subtitle": "Tes jours propres restent acquis. On repart d'ici.",
     "total_one": "jour propre, conservé",
     "total_other": "jours propres, conservés",
     "streakDays_one": "jour sur cette série",
@@ -105,12 +104,12 @@
     "nextTime": "La prochaine fois",
     "save": "Enregistrer et repartir",
     "errors": {
-      "lapse-in-future": "Ce moment est dans le futur. Vérifie l'heure de ton téléphone, ou choisis un autre moment.",
-      "lapse-before-last": "Ce moment est avant ton écart précédent. Vérifie l'heure de ton téléphone, ou choisis un autre moment.",
-      "lapse-before-start": "Ce moment est avant ton point de départ. Choisis un autre moment.",
-      "invalid-timestamp": "Ce moment ne peut pas être utilisé. Choisis un autre moment.",
-      "clock-behind": "La date et l'heure de ton téléphone sont antérieures à ta série en cours. Vérifie-les, puis réessaie.",
-      "save-failed": "L'écart n'a pas pu être enregistré. Rien n'est perdu. Réessaie."
+      "lapse-in-future": "Ce moment est dans le futur. Vérifie l'heure du téléphone.",
+      "lapse-before-last": "Ce moment est avant ton dernier écart.",
+      "lapse-before-start": "Ce moment est avant ton départ.",
+      "invalid-timestamp": "Choisis un autre moment.",
+      "clock-behind": "L'heure du téléphone semble fausse. Vérifie-la.",
+      "save-failed": "L'écart n'a pas pu être enregistré. Réessaie."
     }
   },
   "checkIn": {
@@ -130,30 +129,28 @@
     },
     "context": "Contexte",
     "note": "Note",
-    "optional": "(facultatif)",
     "noteSpoken": "Note, facultatif",
     "notePlaceholder": "Une phrase, si tu veux",
     "save": "Enregistrer",
-    "private": "Reste sur ton téléphone, chiffré.",
+    "private": "Chiffré sur ton téléphone.",
     "errors": {
-      "note-too-long": "Cette note est trop longue. Raccourcis-la, puis réessaie.",
-      "save-failed": "Le check-in n'a pas pu être enregistré. Rien n'est perdu. Réessaie."
+      "note-too-long": "Note trop longue. Raccourcis-la.",
+      "save-failed": "Le check-in n'a pas pu être enregistré. Réessaie."
     }
   },
   "journal": {
     "title": "Journal",
     "newNote": "Nouvelle note",
-    "private": "Chiffré, sur ton téléphone uniquement",
+    "private": "Chiffré sur ton téléphone",
     "groups": {
       "thisWeek": "Cette semaine",
       "lastWeek": "Semaine dernière"
     },
     "empty": {
       "title": "Rien d'écrit pour l'instant.",
-      "text": "Quelques lignes suffisent, quand tu veux.",
       "action": "Écrire une note"
     },
-    "loadFailed": "Le journal n'a pas pu être lu. Rien n'est perdu.",
+    "loadFailed": "Le journal n'a pas pu être lu.",
     "retry": "Réessayer",
     "note": {
       "close": "Fermer",
@@ -174,34 +171,33 @@
         "proud": "Ma fierté du jour, c'est ",
         "tomorrow": "Demain, je "
       },
-      "private": "Chiffrée dès l'enregistrement",
       "delete": "Supprimer la note",
       "deleteConfirm": {
         "title": "Supprimer cette note ?",
-        "message": "Elle sera effacée de ton téléphone. Tu ne pourras pas la retrouver.",
+        "message": "Elle sera effacée pour de bon.",
         "confirm": "Supprimer",
         "cancel": "Annuler"
       },
       "leave": {
         "title": "Quitter sans enregistrer ?",
-        "message": "Ce que tu as écrit depuis le dernier enregistrement sera perdu.",
+        "message": "Tes derniers changements seront perdus.",
         "messageNew": "Ce que tu as écrit sera perdu.",
         "keep": "Continuer à écrire",
         "discard": "Ne pas enregistrer"
       },
       "errors": {
         "empty": "Écris quelques mots avant d'enregistrer.",
-        "title-too-long": "Ce titre est trop long. Raccourcis-le, puis réessaie.",
-        "body-too-long": "Cette note est trop longue. Raccourcis-la, puis réessaie.",
-        "save-failed": "La note n'a pas pu être enregistrée. Ton texte est toujours là. Réessaie.",
+        "title-too-long": "Titre trop long.",
+        "body-too-long": "Note trop longue.",
+        "save-failed": "La note n'a pas pu être enregistrée. Réessaie.",
         "delete-failed": "La note n'a pas pu être supprimée. Réessaie.",
-        "prompt-too-long": "Il ne reste plus assez de place dans la note pour cette phrase.",
-        "note-missing": "Cette note n'existe plus. Ton texte est toujours là, tu peux l'enregistrer comme nouvelle note."
+        "prompt-too-long": "Plus de place pour cette phrase.",
+        "note-missing": "Cette note n'existe plus. Enregistre ton texte comme nouvelle note."
       },
       "saveAsNew": "Enregistrer comme nouvelle note",
       "unavailable": {
         "missing": "Cette note n'existe plus.",
-        "failed": "La note n'a pas pu être lue. Rien n'est perdu."
+        "failed": "La note n'a pas pu être lue."
       }
     },
     "refreshFailed": "Le journal n'a pas pu être actualisé."
@@ -216,7 +212,7 @@
     "about": "À propos",
     "erase": "Tout effacer",
     "eraseHint": "Explique ce qui sera effacé avant de demander confirmation",
-    "footer": "flust {{version}}, open source et chiffré sur ton téléphone",
+    "footer": "flust {{version}}",
     "languageSaveFailed": "La langue n'a pas pu être enregistrée.",
     "reminders": "Rappels",
     "lock": "Verrouillage",
@@ -240,21 +236,20 @@
     "back": "Retour",
     "title": "Tout effacer",
     "what": "Ton parcours, tes rangs, ton journal, tes réglages et tout le reste seront supprimés de ce téléphone.",
-    "noRecovery": "Il n'existe aucune autre copie. Rien ne pourra être récupéré.",
-    "after": "flust recommencera ensuite depuis le début.",
+    "noRecovery": "Aucune copie n'existe ailleurs.",
     "lapseHint": "Après un écart, pas besoin de tout effacer. Note-le, tes jours propres restent acquis.",
     "continue": "Effacer mes données",
     "confirm": {
       "title": "Effacer définitivement ?",
-      "message": "Tout ce qui est décrit sera supprimé de ce téléphone. Tu ne pourras pas revenir en arrière.",
+      "message": "C'est définitif.",
       "cancel": "Annuler",
       "erase": "Tout effacer"
     },
-    "erasing": "Effacement en cours…",
+    "erasing": "Effacement en cours",
     "done": "Tes données ont été effacées.",
     "failed": {
       "title": "L'effacement n'a pas abouti",
-      "body": "Une partie de tes données est peut-être encore sur ce téléphone. Réessaie pour terminer l'effacement.",
+      "body": "Des données sont peut-être encore là. Réessaie.",
       "retry": "Réessayer"
     },
     "cancel": "Annuler"
@@ -271,11 +266,11 @@
     "addPlan": "Ajouter un plan",
     "editPlanHint": "Modifie ou supprime ce plan",
     "footer": "Ils s'affichent sur l'écran d'urgence.",
-    "reasonLimit": "Tu as déjà {{count}} raisons. Retires-en une pour en ajouter une autre.",
-    "planLimit": "Tu as déjà {{count}} plans. Supprimes-en un pour en ajouter un autre.",
-    "loadFailed": "Tes raisons et tes plans n'ont pas pu être lus. Rien n'est perdu.",
+    "reasonLimit": "{{count}} raisons au plus. Retires-en une d'abord.",
+    "planLimit": "{{count}} plans au plus. Supprimes-en un d'abord.",
+    "loadFailed": "Tes raisons et plans n'ont pas pu être lus.",
     "retry": "Réessayer",
-    "saveFailed": "Le changement n'a pas pu être enregistré. Réessaie.",
+    "saveFailed": "Le changement n'a pas pu être enregistré.",
     "leave": {
       "title": "Quitter sans enregistrer ?",
       "message": "Tes changements seront perdus.",
@@ -291,14 +286,13 @@
       "remove": "Retirer cette raison",
       "removeConfirm": {
         "title": "Retirer cette raison ?",
-        "message": "Tu pourras l'ajouter de nouveau quand tu veux.",
         "cancel": "Annuler",
         "confirm": "Retirer"
       },
       "errors": {
         "same-reason": "Cette raison est déjà dans ta liste.",
-        "not-found": "Cette raison n'existe plus. Reviens à la liste pour en ajouter une.",
-        "save-failed": "L'enregistrement n'a pas abouti. Réessaie.",
+        "not-found": "Cette raison n'existe plus.",
+        "save-failed": "L'enregistrement a échoué. Réessaie.",
         "remove-failed": "La raison n'a pas pu être retirée. Réessaie."
       }
     },
@@ -306,17 +300,16 @@
       "titleNew": "Nouveau plan",
       "titleEdit": "Ton plan",
       "remove": "Supprimer ce plan",
-      "lastPlan": "Garde au moins un plan. L'écran d'urgence en a toujours un à te montrer.",
+      "lastPlan": "Garde au moins un plan.",
       "removeConfirm": {
         "title": "Supprimer ce plan ?",
-        "message": "Tu pourras en créer un autre quand tu veux.",
         "cancel": "Annuler",
         "confirm": "Supprimer"
       },
       "errors": {
         "same-plan": "Ce plan est déjà dans ta liste.",
-        "not-found": "Ce plan n'existe plus. Reviens à la liste pour en ajouter un.",
-        "save-failed": "L'enregistrement n'a pas abouti. Réessaie.",
+        "not-found": "Ce plan n'existe plus.",
+        "save-failed": "L'enregistrement a échoué. Réessaie.",
         "remove-failed": "Le plan n'a pas pu être supprimé. Réessaie."
       }
     }
@@ -346,28 +339,28 @@
       "title": "Tes données ne peuvent pas être ouvertes pour l'instant",
       "action": "Réessayer",
       "reasons": {
-        "key-unavailable": "Le stockage sécurisé de ce téléphone n'est pas encore disponible. Cela peut arriver juste après un redémarrage. Déverrouille ton téléphone, puis réessaie. Tes données n'ont pas été modifiées.",
-        "storage-unavailable": "flust n'a pas pu accéder à son stockage sur ce téléphone. Tes données n'ont pas été modifiées. Réessaie.",
-        "cipher-unavailable": "Cette version de flust ne peut pas chiffrer tes données, elle ne les ouvrira donc pas. Installe la dernière version de flust. Tes données n'ont pas été modifiées.",
-        "schema-too-new": "Tes données ont été enregistrées par une version plus récente de flust. Mets flust à jour pour les ouvrir. Tes données n'ont pas été modifiées.",
-        "migration-failed": "flust n'a pas pu mettre à jour tes données pour cette version. Elles ont été remises exactement comme avant. Réessaie, ou attends la prochaine mise à jour de flust.",
+        "key-unavailable": "Le stockage sécurisé n'est pas encore prêt. Déverrouille le téléphone, puis réessaie.",
+        "storage-unavailable": "flust n'a pas pu accéder à son stockage. Réessaie.",
+        "cipher-unavailable": "Cette version de flust ne peut pas chiffrer tes données. Installe la dernière version.",
+        "schema-too-new": "Tes données viennent d'une version plus récente. Mets flust à jour.",
+        "migration-failed": "La mise à jour de tes données a échoué. Elles sont intactes. Réessaie.",
         "reset-failed": "L'effacement n'a pas abouti. Réessaie.",
-        "storage-failed": "flust n'a pas pu lire tes données sur ce téléphone. Tes données n'ont pas été modifiées. Réessaie."
+        "storage-failed": "flust n'a pas pu lire tes données. Elles sont intactes. Réessaie."
       }
     },
     "reset": {
       "title": "Tes données ne peuvent pas être déchiffrées",
       "reasons": {
-        "key-missing": "flust chiffre tes données avec une clé que seul ce téléphone conserve, dans son stockage sécurisé. Cette clé n'est plus là. Cela arrive quand le téléphone est restauré depuis une sauvegarde ou que les données sont transférées sur un autre téléphone, car la clé n'est jamais copiée.",
-        "database-unreadable": "flust chiffre tes données avec une clé que seul ce téléphone conserve, dans son stockage sécurisé. Les données de ce téléphone ne correspondent pas à cette clé, ou le fichier est endommagé, elles ne peuvent donc pas être déchiffrées.",
-        "journey-corrupted": "flust peut ouvrir tes données, mais ton parcours y est abîmé. Ses dates ne sont pas cohérentes, donc ta série et ton total de jours ne peuvent pas être calculés correctement. Réessayer relira les mêmes données."
+        "key-missing": "La clé de chiffrement de ce téléphone n'est plus là. Cela arrive après une restauration ou un transfert.",
+        "database-unreadable": "Tes données ne correspondent pas à la clé de ce téléphone, ou le fichier est endommagé.",
+        "journey-corrupted": "Les dates de ton parcours sont incohérentes. Ta série ne peut pas être calculée, et réessayer n'y changera rien."
       },
-      "noRecovery": "Il n'en existe aucune autre copie. flust n'a ni compte, ni serveur, ni sauvegarde, donc personne, pas même les personnes qui font flust, ne peut récupérer ces données. Tu peux réessayer, ou les effacer et recommencer.",
+      "noRecovery": "Il n'en existe aucune autre copie. Personne ne peut récupérer tes données.",
       "startOver": "Effacer et recommencer",
       "retry": "Réessayer",
       "confirm": {
         "title": "Tout effacer ?",
-        "body": "Cela supprime définitivement de ce téléphone ton parcours et tes écarts, tes rangs, ton journal, tes check-ins, tes raisons, tes moments à risque et tes plans, l'historique de tes envies et tes réglages, et flust recommence depuis le début. C'est irréversible.",
+        "body": "Tout ce que contient flust sera supprimé de ce téléphone. C'est irréversible.",
         "erase": "Tout effacer",
         "cancel": "Annuler"
       }
@@ -388,22 +381,21 @@
       "languageTitle": "Langue",
       "title": "Reprends le contrôle.",
       "promise": "Sans compte, sans pub, sans pistage. Tout reste chiffré sur ton téléphone.",
-      "duration": "Deux minutes pour poser tes bases.",
       "start": "Commencer",
-      "footer": "Open source, par fnyx-group"
+      "footer": "Open source"
     },
     "reasons": {
       "title": "Pourquoi tu arrêtes ?",
-      "subtitle": "On te les rappellera quand ce sera dur.",
+      "subtitle": "On te les rappellera dans les moments durs.",
       "custom": "Écrire la mienne"
     },
     "riskMoments": {
-      "title": "Quand est-ce que c'est le plus dur ?",
-      "subtitle": "Connaître tes moments à risque, c'est déjà les désamorcer."
+      "title": "Quand est-ce le plus dur ?",
+      "subtitle": "Les connaître aide à les désamorcer."
     },
     "plan": {
       "title": "Ton premier plan",
-      "subtitle": "Décide à froid. Au moment de l'envie, tu n'auras qu'à suivre.",
+      "subtitle": "Décide maintenant. Au moment de l'envie, suis ton plan.",
       "if": "Si",
       "then": "Alors",
       "triggerHint": "Ouvre la liste des moments",
@@ -414,7 +406,7 @@
     },
     "start": {
       "title": "Dernière étape",
-      "subtitle": "Protège ton espace et choisis ton point de départ.",
+      "subtitle": "Choisis ton point de départ.",
       "label": "Point de départ",
       "now": "Maintenant",
       "pickDate": "Choisir une date",
@@ -422,23 +414,23 @@
       "finish": "C'est parti",
       "footer": "Tu pourras tout changer dans les réglages.",
       "errors": {
-        "start-in-future": "Ce point de départ est dans le futur. Vérifie la date et l'heure de ton téléphone, ou choisis un autre moment.",
-        "invalid-timestamp": "Ce point de départ ne peut pas être utilisé. Choisis un autre moment.",
-        "save-failed": "Tes réponses n'ont pas pu être enregistrées. Rien n'est perdu. Réessaie."
+        "start-in-future": "Ce point de départ est dans le futur.",
+        "invalid-timestamp": "Choisis un autre moment.",
+        "save-failed": "Tes réponses n'ont pas pu être enregistrées. Réessaie."
       },
       "protection": {
         "label": "Protection",
         "checkInSubtitle": "Un rappel discret à {{time}}",
-        "lockUnavailable": "Ajoute un code de verrouillage à ton téléphone pour activer cette protection.",
-        "lockNotConfirmed": "Le déverrouillage n'a pas été confirmé. Le verrouillage reste désactivé."
+        "lockUnavailable": "Ajoute un verrouillage d'écran au téléphone pour l'activer.",
+        "lockNotConfirmed": "Non confirmé. Le verrouillage reste désactivé."
       }
     },
     "filter": {
       "title": "Un filtre pour tout le téléphone",
-      "subtitle": "flust peut bloquer les sites pour adultes et le porno IA dans toutes tes apps, sans compte et sans serveur.",
+      "subtitle": "Bloque les sites pour adultes et le porno IA dans toutes tes apps, sans compte ni serveur.",
       "label": "Ce que fait le filtre",
-      "on": "Le filtre est activé. Tu le retrouves dans les réglages.",
-      "later": "Tu pourras l'activer plus tard dans les réglages."
+      "on": "Le filtre est activé.",
+      "later": "Tu pourras l'activer dans les réglages."
     }
   },
   "presets": {
@@ -462,7 +454,7 @@
       "weekend": "Le week-end"
     },
     "actions": {
-      "phone-out-of-room": "Je pose le téléphone hors de la chambre",
+      "phone-out-of-room": "Je sors le téléphone de la chambre",
       "guided-breathing": "Je lance la respiration guidée",
       "journal-three-lines": "J'écris trois lignes dans le journal",
       "walk-ten-minutes": "Je sors marcher dix minutes"
@@ -485,12 +477,12 @@
         "stress": "le stress monte",
         "tiredness": "la fatigue me gagne",
         "boredom": "l'ennui s'installe",
-        "after-social-media": "je viens de passer du temps sur les réseaux sociaux",
+        "after-social-media": "je sors des réseaux sociaux",
         "after-alcohol": "j'ai bu de l'alcool",
         "weekend": "c'est le week-end"
       },
       "actions": {
-        "phone-out-of-room": "je pose le téléphone hors de la chambre",
+        "phone-out-of-room": "je sors le téléphone de la chambre",
         "guided-breathing": "je lance la respiration guidée",
         "journal-three-lines": "j'écris trois lignes dans le journal",
         "walk-ten-minutes": "je sors marcher dix minutes"
@@ -539,8 +531,8 @@
         "next": "prochain rang, verrouillé",
         "locked": "verrouillé"
       },
-      "totalDays_one": "{{count}} jour propre au total",
-      "totalDays_other": "{{count}} jours propres au total",
+      "totalDays_one": "{{count}} jour propre en tout",
+      "totalDays_other": "{{count}} jours propres en tout",
       "nextAt": "{{name}} à {{count}}"
     },
     "unlocked": {
@@ -562,8 +554,8 @@
         "4": "Tu avances dans le cercle de la Couronne.",
         "5": "Tu avances dans le cercle de l'Absolu."
       },
-      "others_one": "{{names}} aussi débloqué",
-      "others_other": "{{names}} aussi débloqués",
+      "others_one": "Aussi débloqué, {{names}}",
+      "others_other": "Aussi débloqués, {{names}}",
       "listSeparator": ", ",
       "spoken": "Nouveau rang, {{name}}, {{circle}}",
       "continue": "Continuer",
@@ -617,8 +609,7 @@
   "reminders": {
     "title": "Rappels",
     "checkIn": {
-      "title": "Check-in du soir",
-      "subtitle": "Faire le point en dix secondes"
+      "title": "Check-in du soir"
     },
     "thought": {
       "title": "Mot du jour",
@@ -626,7 +617,7 @@
     },
     "riskHours": {
       "title": "Heures à risque",
-      "subtitle": "Un rappel avant tes moments sensibles",
+      "subtitle": "Avant tes moments sensibles",
       "unavailable": "Choisis un moment comme le soir au lit ou le week-end."
     },
     "ranks": {
@@ -645,23 +636,23 @@
     "preview": "Aperçu",
     "previewLabel": "Aperçu d'une notification de flust, {{text}}",
     "footer": "Les notifications restent neutres.",
-    "denied": "Les notifications sont désactivées pour flust. Tu peux les autoriser dans les réglages du téléphone.",
+    "lockScreenPreviews": "Pour masquer les aperçus sur l'écran verrouillé, passe par les réglages du téléphone.",
+    "denied": "Notifications bloquées pour flust.",
     "openSettings": "Ouvrir les réglages",
     "saveFailed": "Le rappel n'a pas pu être enregistré. Réessaie.",
-    "loadFailed": "Les rappels n'ont pas pu être lus. Réessaie plus tard.",
+    "loadFailed": "Les rappels n'ont pas pu être lus.",
     "off": "Désactivés",
     "notifications": {
       "check-in": "Comment s'est passée ta journée ?",
       "thought": "Ton mot du jour est là.",
       "risk-hours": "Un moment pour toi, si tu en as besoin.",
       "rank": "Un nouveau palier t'attend.",
-      "return": "flust est là quand tu veux, sans pression.",
+      "return": "flust est là quand tu veux.",
       "channelName": "Rappels",
-      "channelDescription": "Les rappels que tu as activés dans flust",
+      "channelDescription": "Tes rappels",
       "previewPlaceholder": "Rappel"
     },
-    "back": "Retour",
-    "lockScreenPreviews": "Pour les masquer sur l'écran verrouillé, passe par les réglages du téléphone."
+    "back": "Retour"
   },
   "lock": {
     "locked": "Verrouillé",
@@ -669,21 +660,20 @@
     "usePasscode": "Entrer le code",
     "prompt": "Déverrouiller flust",
     "cancel": "Annuler",
-    "wait": "Nouvel essai possible dans {{time}}.",
+    "wait": "Réessaie dans {{time}}.",
     "waitSeconds": "{{count}} s",
     "waitMinutes": "{{count}} min",
-    "lockout": "Trop d'essais. Déverrouille ton téléphone, puis réessaie.",
-    "cover": "flust est masqué",
+    "lockout": "Trop d'essais. Déverrouille le téléphone, puis réessaie.",
+    "cover": "Masqué",
     "settings": {
       "title": "Verrouillage",
       "toggle": "Verrouiller flust",
       "toggleWith": "Verrouiller avec {{method}}",
       "toggleSubtitle": "Avec le code du téléphone en secours",
       "delay": "Demander à nouveau",
-      "noDeviceLock": "Ajoute un code de verrouillage à ton téléphone pour activer cette protection.",
-      "paused": "Verrouillage en pause. Ton téléphone n'a plus de code de verrouillage.",
-      "note": "Tes données restent chiffrées, verrou ou pas.",
-      "notConfirmed": "Le déverrouillage n'a pas été confirmé. Le verrouillage reste désactivé.",
+      "noDeviceLock": "Ajoute un verrouillage d'écran au téléphone pour l'activer.",
+      "paused": "En pause, le téléphone n'a plus de verrouillage d'écran.",
+      "notConfirmed": "Non confirmé. Le verrouillage reste désactivé.",
       "saveFailed": "Le réglage n'a pas pu être enregistré. Réessaie.",
       "back": "Retour"
     },
@@ -746,7 +736,7 @@
       },
       "fr114": {
         "name": "Urgences par SMS",
-        "detail": "SMS gratuit, 24 h/24, si tu ne peux pas parler ou entendre, ou pas sans danger"
+        "detail": "SMS gratuit, 24 h/24, si tu ne peux pas parler ou entendre, ou pas sans danger"
       },
       "be0800": {
         "name": "Centre de Prévention du Suicide",
@@ -766,7 +756,7 @@
       },
       "ch143": {
         "name": "La Main Tendue",
-        "detail": "Anonyme, de jour comme de nuit. L'appel peut coûter quelques centimes selon l'opérateur."
+        "detail": "Anonyme, jour et nuit. Quelques centimes selon l'opérateur."
       },
       "ch144": {
         "name": "Ambulance",
@@ -782,7 +772,7 @@
       },
       "ca988": {
         "name": "Ligne d'aide en cas de crise de suicide",
-        "detail": "Appel ou SMS, 24 h/24 et 7 j/7, en français et en anglais. L'appel est gratuit."
+        "detail": "Appel gratuit ou SMS, 24 h/24, en français et en anglais"
       },
       "ca911": {
         "name": "Urgences",
@@ -790,7 +780,7 @@
       },
       "us988": {
         "name": "988 Suicide & Crisis Lifeline",
-        "detail": "Appel ou SMS, 24 h/24 et 7 j/7. Les échanges sont gratuits."
+        "detail": "Appel ou SMS gratuit, 24 h/24"
       },
       "us911": {
         "name": "Urgences",
@@ -834,7 +824,7 @@
     "textSpoken": "Envoyer un SMS au {{number}}, {{name}}. {{detail}}",
     "callHint": "Ouvre le téléphone avec ce numéro",
     "textHint": "Ouvre les messages avec ce numéro",
-    "directoryIntro": "Des lignes d'écoute dans d'autres pays. S'ouvre hors de flust.",
+    "directoryIntro": "Autres pays. S'ouvre hors de flust.",
     "directory": "Trouver une ligne d'écoute",
     "callFailed": "Le téléphone n'a pas pu s'ouvrir. Tu peux composer le {{number}} toi-même.",
     "textFailed": "Les messages n'ont pas pu s'ouvrir. Tu peux écrire au {{number}} toi-même.",
@@ -845,36 +835,35 @@
   "errors": {
     "fallback": {
       "title": "Cet écran n'a pas pu s'afficher",
-      "body": "Un problème est survenu en l'affichant. Tes données n'ont pas été modifiées. Tu peux réessayer.",
+      "body": "Tes données n'ont pas été modifiées.",
       "retry": "Réessayer",
       "home": "Retour à l'accueil"
     },
     "root": {
       "title": "flust a rencontré un problème",
-      "body": "Tes données n'ont pas été modifiées. Réessaie. Si cela se reproduit au démarrage, flust s'ouvrira en mode sans échec.",
+      "body": "Tes données n'ont pas été modifiées. Réessaie.",
       "retry": "Réessayer"
     },
     "safeMode": {
       "title": "Mode sans échec",
-      "stopped": "flust n'a pas pu démarrer deux fois de suite. Tes données n'ont été ni ouvertes ni modifiées.",
-      "choices": "Tu peux réessayer, consulter le rapport d'erreurs et le partager pour signaler le problème, ou tout effacer et recommencer.",
+      "stopped": "flust n'a pas pu démarrer deux fois de suite. Tes données n'ont pas été touchées.",
       "retry": "Réessayer",
       "report": "Voir le rapport d'erreurs",
       "reportHint": "Demande d'abord le déverrouillage du téléphone, s'il en a un.",
       "reportPrompt": "Ouvrir le rapport d'erreurs",
       "reportCancel": "Annuler",
-      "reportRefused": "Le rapport reste fermé. Le téléphone n'a pas confirmé que c'est toi.",
+      "reportRefused": "Le téléphone n'a pas confirmé que c'est toi.",
       "erase": "Tout effacer"
     },
     "report": {
       "title": "Rapport d'erreurs",
       "back": "Retour",
-      "intro": "Les dernières erreurs techniques, chiffrées sur ce téléphone. Rien de ce que tu écris.",
+      "intro": "Les dernières erreurs techniques, sans rien de ce que tu écris.",
       "preview": "Voici exactement ce qui sera partagé.",
       "empty": "Aucune erreur enregistrée.",
       "share": "Partager ce rapport",
       "shareHint": "Ouvre le menu de partage. Tu choisis où part le rapport.",
-      "shareFailed": "Le menu de partage n'a pas pu s'ouvrir. Tu peux sélectionner le texte ci-dessus et le copier.",
+      "shareFailed": "Le partage n'a pas pu s'ouvrir. Copie le texte.",
       "nothingSent": "Rien ne part sans toi.",
       "clear": "Effacer le rapport",
       "clearFailed": "Le rapport n'a pas pu être effacé. Réessaie.",
@@ -887,7 +876,7 @@
     },
     "notFound": {
       "title": "Cet écran n'existe pas",
-      "body": "flust n'a pas trouvé ce qui était demandé. Rien n'a été ouvert ni modifié.",
+      "body": "Rien n'a été ouvert ni modifié.",
       "home": "Retour à l'accueil"
     }
   },
@@ -901,7 +890,7 @@
     "status": {
       "on": "Le filtre protège ce téléphone.",
       "off": "Le filtre est désactivé.",
-      "inactive": "Le filtre ne protège pas en ce moment."
+      "inactive": "Le filtre ne protège pas."
     },
     "value": {
       "on": "Activé",
@@ -911,39 +900,39 @@
     "filter": "Filtre",
     "youtubeStrict": "YouTube strict",
     "youtubeStrictHint": "Masque plus de vidéos que le mode restreint de base.",
-    "blocks": "Bloque les sites pour adultes, le porno IA et les contournements, et impose SafeSearch sur Google, Bing, DuckDuckGo et YouTube.",
-    "resolvers": "Les noms des sites autorisés partent chiffrés vers Quad9, ou vers Cloudflare puis DNS4EU s'il ne répond pas. Les trois bloquent aussi les logiciels malveillants.",
-    "chrome": "Plus rien ne charge dans Chrome ? Dans ses paramètres, Confidentialité et sécurité, Utiliser le DNS sécurisé, choisis Automatique.",
+    "blocks": "Bloque les sites pour adultes, le porno IA et les contournements. Impose SafeSearch.",
+    "resolvers": "Les sites autorisés passent chiffrés par Quad9, Cloudflare ou DNS4EU.",
+    "chrome": "Chrome ne charge plus ? Dans ses paramètres, mets le DNS sécurisé sur Automatique.",
     "alwaysOn": "VPN permanent",
-    "alwaysOnGear": "Touche l'engrenage à côté de flust, puis active VPN permanent.",
+    "alwaysOnGear": "Touche l'engrenage de flust, puis active VPN permanent.",
     "unusedApps": {
       "label": "Ne pas mettre flust en pause",
-      "hint": "Sinon, Android peut arrêter le filtre si flust reste fermé des mois."
+      "hint": "Sinon, Android peut couper le filtre après des mois sans ouverture."
     },
     "licenses": "Licences des listes",
     "inactive": {
       "private-dns": {
-        "text": "Le DNS privé d'Android contourne le filtre. Dans les réglages, Réseau et Internet, DNS privé, choisis Automatique.",
+        "text": "Le DNS privé contourne le filtre. Mets-le sur Automatique.",
         "action": "Ouvrir les réglages"
       },
       "other-vpn": {
-        "text": "Une autre app VPN a pris la place. Android n'en garde qu'un à la fois.",
+        "text": "Un autre VPN a pris la place.",
         "action": "Réactiver le filtre"
       },
       "consent": {
-        "text": "Android ne permet plus à flust de filtrer. Il faut redonner ton accord.",
+        "text": "flust n'a plus l'autorisation VPN d'Android.",
         "action": "Réactiver le filtre"
       },
       "vpn-off": {
-        "text": "Le filtre a été coupé dans les réglages d'Android.",
+        "text": "Le filtre a été coupé dans Android.",
         "action": "Réactiver le filtre"
       },
       "lists": {
-        "text": "Les listes du filtre n'ont pas pu être lues. Mets flust à jour, ou réinstalle-le."
+        "text": "Les listes du filtre sont illisibles. Mets flust à jour."
       },
       "boot-deferred": {
-        "text": "Android n'a pas relancé le filtre au démarrage. Il reprend à l'ouverture de flust, et le VPN permanent évite cette attente.",
-        "action": "Relancer le filtre"
+        "text": "Le filtre n'a pas repris au démarrage.",
+        "action": "Réactiver le filtre"
       },
       "stopped": {
         "text": "Le filtre s'est arrêté.",
@@ -953,18 +942,18 @@
     "request": {
       "filter": "Le filtre se désactive dans {{time}}.",
       "youtube": "YouTube strict se désactive dans {{time}}.",
-      "why": "Ce délai t'aide à laisser passer le moment. Tu peux annuler à tout moment.",
+      "why": "Ce délai t'aide à laisser passer l'envie.",
       "cancel": "Annuler la demande",
-      "ready": "Les 20 minutes sont passées. Confirme dans les {{time}} qui viennent, sinon la demande expire.",
+      "ready": "Confirme dans les {{time}}, sinon la demande expire.",
       "confirmOpen": "Confirmer",
       "confirmFilterTitle": "Désactiver le filtre ?",
       "confirmYoutubeTitle": "Désactiver YouTube strict ?",
-      "confirmMessage": "Tu peux le réactiver à tout moment, c'est immédiat.",
+      "confirmMessage": "Le réactiver est immédiat.",
       "confirm": "Désactiver",
       "keep": "Ne rien changer",
       "minutes": "{{count}} min",
       "seconds": "{{count}} s",
-      "saveFailed": "La demande n'a pas pu être enregistrée. Rien n'a changé.",
+      "saveFailed": "La demande n'a pas été enregistrée. Rien n'a changé.",
       "failed": {
         "filter": "Le filtre n'a pas pu être désactivé. Il reste actif.",
         "youtube": "YouTube strict n'a pas pu être désactivé. Il reste actif."
@@ -972,11 +961,11 @@
     },
     "disclosure": {
       "title": "Avant d'activer le filtre",
-      "text": "flust utilise le service VPN d'Android pour filtrer les noms des sites que tes apps ouvrent, sur tout le téléphone. Les noms bloqués ne quittent jamais le téléphone. Les noms des sites autorisés partent chiffrés vers Quad9, ou vers Cloudflare puis DNS4EU quand Quad9 ne répond pas. Cloudflare efface les adresses IP anonymisées sous 25 heures. DNS4EU peut garder certaines données de requêtes jusqu'à six mois pour la recherche sur les menaces, sans les vendre ni s'en servir pour du profilage ou de la publicité. Le reste de ton trafic ne passe pas par flust, sauf les connexions directes à des serveurs DNS publics connus, qui sont bloquées.",
+      "text": "flust utilise le VPN d'Android pour filtrer les noms des sites ouverts sur ce téléphone. Les noms bloqués ne quittent jamais le téléphone. Les autres partent chiffrés vers Quad9, ou vers Cloudflare puis DNS4EU quand Quad9 ne répond pas. Cloudflare efface les adresses IP anonymisées sous 25 heures. DNS4EU peut garder des données de requêtes jusqu'à six mois pour la recherche sur les menaces, sans les vendre ni s'en servir pour du profilage ou de la publicité. Le reste de ton trafic ne passe pas par flust, sauf les connexions directes à des DNS publics connus, qui sont bloquées.",
       "accept": "Accepter et activer",
       "later": "Plus tard"
     },
-    "refused": "Sans ton accord dans Android, le filtre ne peut pas démarrer.",
+    "refused": "Sans ton accord, le filtre ne peut pas démarrer.",
     "failed": "Le filtre n'a pas pu démarrer. Réessaie.",
     "measure": "Mesurer les listes",
     "measured": "{{entries}} domaines, {{kilobytes}} Ko, chargés en {{load}} ms, {{decide}} µs par nom.",
@@ -989,7 +978,7 @@
   "licenses": {
     "title": "Licences",
     "back": "Retour",
-    "intro": "flust repose sur ces projets, sous leurs licences, des sources des listes du filtre aux bibliothèques de l'app.",
+    "intro": "Les projets sur lesquels flust repose.",
     "lists": "Listes du filtre",
     "libraries": "Bibliothèques de l'app",
     "details": "{{version}}, {{license}}",

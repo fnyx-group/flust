@@ -22,7 +22,8 @@ type NavRowProps = {
 } & ({ label: string; value?: string; children?: never } | { children: ReactNode; label?: never });
 
 // A row of a RowGroup that opens another screen or a sheet: its label, or any content, an
-// optional value, and a chevron.
+// optional value, and a chevron. The value sits at the end of the label's line, and goes under the
+// label when both do not fit on it, so that neither is squeezed into a narrow column.
 export function NavRow({
   accessibilityLabel,
   accessibilityHint,
@@ -50,12 +51,12 @@ export function NavRow({
         {content.label === undefined ? (
           content.children
         ) : (
-          <Text style={[styles.label, destructive && styles.destructive]}>{content.label}</Text>
+          <View style={styles.texts}>
+            <Text style={[styles.label, destructive && styles.destructive]}>{content.label}</Text>
+            {content.value !== undefined && <Text style={styles.value}>{content.value}</Text>}
+          </View>
         )}
       </View>
-      {content.label !== undefined && content.value !== undefined && (
-        <Text style={styles.value}>{content.value}</Text>
-      )}
       {accessibilityRole === 'link' ? (
         <ExternalIcon color={colors.textSecondary} size={sizes.icon} />
       ) : (
@@ -103,8 +104,16 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  texts: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    columnGap: spacing.m,
+  },
   label: {
     ...typography.row,
+    flexShrink: 1,
     color: colors.text,
   },
   destructive: {
@@ -113,7 +122,6 @@ const styles = StyleSheet.create({
   value: {
     ...typography.bodyLarge,
     flexShrink: 1,
-    textAlign: 'right',
     color: colors.textSecondary,
   },
   add: {

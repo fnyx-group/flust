@@ -1,0 +1,8 @@
+appId: org.fnyxgroup.flust
+---
+- scrollUntilVisible:
+    element: Le stress
+    direction: DOWN
+- tapOn: Le stress
+- tapOn: Continuer
+- assertVisible: Ton premier plan

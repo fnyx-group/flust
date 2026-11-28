@@ -60,7 +60,7 @@ describe('currentRankText', () => {
       circle: "Cercle de l'Éveil",
       name: 'Premier rang',
       detail: `Novice dans 16${NBSP}h${NBSP}20`,
-      total: '0 jour propre au total',
+      total: '0 jour propre en tout',
       target: 'Novice à 1',
     });
     expect(text.rank.id).toBe('novice');
@@ -76,7 +76,7 @@ describe('currentRankText', () => {
       circle: "Cercle de l'Ombre",
       name: 'Mage noir',
       detail: 'Prochain rang dans 13 jours',
-      total: '32 jours propres au total',
+      total: '32 jours propres en tout',
       target: 'Sorcier à 45',
       spokenLabel: 'Mage noir, cercle 2, Ombre, Prochain rang dans 13 jours',
     });
@@ -162,10 +162,10 @@ describe('unlockText', () => {
 
   it('lists the other ranks unlocked at the same time', () => {
     expect(unlockText(french, unlock('initiate', 'watcher'), 20).others).toBe(
-      'Initié aussi débloqué',
+      'Aussi débloqué, Initié',
     );
     expect(unlockText(french, unlock('apprentice', 'initiate', 'watcher'), 20).others).toBe(
-      'Apprenti, Initié aussi débloqués',
+      'Aussi débloqués, Apprenti, Initié',
     );
   });
 

@@ -56,7 +56,7 @@ The check-in records:
 - context chips,
 - an optional note.
 
-There is one check-in per local day, editable until local midnight. It never mentions a lapse. Home shows "Ton check-in du jour t'attend" or "Check-in fait" under the quote, and a calm card after several low mood check-ins, which opens the help resources (see [Relapse](relapse.md#special-cases)).
+There is one check-in per local day, editable until local midnight. It never mentions a lapse. Home shows "Check-in du jour" or "Check-in fait" under the quote, and a calm card after several low mood check-ins, which opens the help resources (see [Relapse](relapse.md#special-cases)).
 
 ### Journal
 
@@ -95,9 +95,9 @@ Local reminders, all off until turned on, each with a switch:
 - Risk hours: before "In bed at night" (22:30) and on "The weekend" (Saturday 10:00), when those risk moments are chosen. Other risk moments have no time. They come at their moment even on a day that already has other reminders.
 - Ranks and milestones: when the next rank is reached, in the daytime, never in the six hours after a lapse is logged.
 
-Reminders thin out when the app is not opened, and stop after a week with one last message: "flust is here whenever you like, no pressure." There is no reminder after a lapse. See [0022](../decisions/0022-reminder-schedule.md).
+Reminders thin out when the app is not opened, and stop after a week with one last message: "flust is here whenever you like." There is no reminder after a lapse. See [0022](../decisions/0022-reminder-schedule.md).
 
-Notification text is always neutral and never reveals what the app is about. It may show on the lock screen, depending on the device's settings: on Android, when sensitive content is shown on the lock screen, which most devices do by default; on iOS, when previews are shown, and a note explains how to hide them. The permission is asked only when a reminder is turned on. A refusal leaves it off, with a way to the system settings. When notifications are no longer allowed, every reminder is turned off, and allowing them again turns none back on by itself.
+Notification text is always neutral and never reveals what the app is about. It may show on the lock screen, depending on the device's settings: on Android, when sensitive content is shown on the lock screen, which most devices do by default; on iOS, when previews are shown. The reminders screen says that previews on the lock screen are hidden from the phone's settings. The permission is asked only when a reminder is turned on. A refusal leaves it off, with a way to the system settings. When notifications are no longer allowed, every reminder is turned off, and allowing them again turns none back on by itself.
 
 ### App lock
 

@@ -1,0 +1,5 @@
+appId: org.fnyxgroup.flust
+---
+- tapOn: Continuer
+- assertVisible: Un filtre pour tout le téléphone
+- assertVisible: Plus tard

@@ -1,0 +1,8 @@
+appId: org.fnyxgroup.flust
+---
+- back
+- scrollUntilVisible:
+    element: Check-in du jour
+    direction: DOWN
+- tapOn: Check-in du jour
+- assertVisible: Comment ça va.*

@@ -12,7 +12,7 @@ export function NoteField({ value, onChangeText }: NoteFieldProps) {
   return (
     <View style={styles.field}>
       <Text importantForAccessibility="no" accessibilityElementsHidden style={styles.label}>
-        {t('checkIn.note')} <Text style={styles.optional}>{t('checkIn.optional')}</Text>
+        {t('checkIn.note')}
       </Text>
       <TextInput
         accessibilityLabel={t('checkIn.noteSpoken')}
@@ -37,10 +37,6 @@ const styles = StyleSheet.create({
   label: {
     ...typography.sectionLabel,
     color: colors.accentText,
-  },
-  optional: {
-    fontFamily: typography.bodyLarge.fontFamily,
-    color: colors.textSecondary,
   },
   input: {
     ...typography.paragraph,

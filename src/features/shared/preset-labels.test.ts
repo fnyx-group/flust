@@ -74,7 +74,7 @@ describe('planCondition and planAction', () => {
     expect(planCondition(french, 'in-bed-at-night')).toBe('je suis au lit le soir');
     expect(planCondition(english, 'urge')).toBe('an urge hits');
     expect(planAction(french, { kind: 'preset', id: 'phone-out-of-room' })).toBe(
-      'je pose le téléphone hors de la chambre',
+      'je sors le téléphone de la chambre',
     );
     expect(planAction(english, { kind: 'preset', id: 'guided-breathing' })).toBe(
       'I start the guided breathing',
@@ -106,7 +106,7 @@ describe('planSentence', () => {
         trigger: 'in-bed-at-night',
         action: { kind: 'preset', id: 'phone-out-of-room' },
       }),
-    ).toBe('Si je suis au lit le soir, alors je pose le téléphone hors de la chambre.');
+    ).toBe('Si je suis au lit le soir, alors je sors le téléphone de la chambre.');
     expect(
       planSentence(createI18n('en').t, {
         trigger: 'urge',

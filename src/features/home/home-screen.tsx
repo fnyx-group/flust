@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useState, type PropsWithChildren } from 'react';
+import { useCallback, useMemo, useState, type PropsWithChildren } from 'react';
 import { StyleSheet, useWindowDimensions, View, type LayoutChangeEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -16,9 +16,10 @@ import { CheckInLine } from '@/features/home/check-in-line';
 import { CircleName } from '@/features/home/circle-name';
 import { FilterChip } from '@/features/home/filter-chip';
 import { DailyQuote } from '@/features/home/daily-quote';
-import { fitHome, homeSpacing, type HomeFit } from '@/features/home/home-fit';
+import { fitHome, homeSpacing, pinsAllActions, type HomeFit } from '@/features/home/home-fit';
 import { SupportLine, UndoLine } from '@/features/home/lapse-lines';
 import { LowMoodCard } from '@/features/home/low-mood-card';
+import { measuring } from '@/features/home/measuring';
 import { RankLine } from '@/features/home/rank-line';
 import { StreakCounter } from '@/features/home/streak-counter';
 import { useRankUnlockTrigger } from '@/features/ranks/use-rank-unlock-trigger';
@@ -51,17 +52,40 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
   const { t } = useTranslation();
   const anchor = streakStart(journey);
   const clock = useMemo(() => createMinuteClock(anchor, nativeClockDeps), [anchor]);
-  const { width, fontScale } = useWindowDimensions();
+  const { width, height: windowHeight, fontScale } = useWindowDimensions();
   const ringMax = streakRingSize(width);
   const [measured, setMeasured] = useState<Measured>({});
-  const measure = (part: MeasuredPart) => (event: LayoutChangeEvent) => {
-    const { height } = event.nativeEvent.layout;
+  const record = useCallback((part: MeasuredPart, height: number) => {
     setMeasured((previous) =>
       previous[part] === height ? previous : { ...previous, [part]: height },
     );
-  };
+  }, []);
+  const measure = (part: MeasuredPart) => (event: LayoutChangeEvent) =>
+    record(part, event.nativeEvent.layout.height);
+  // Stable, since the undo line reports its height from an effect.
+  const measureUndo = useCallback((height: number) => record('undo', height), [record]);
   const filterInactive = isFilterInactive(filterView(useFilterStatus().status));
   const fit = fitOf(measured, fontScale, ringMax);
+  const pinsAll = pinsAllOf(measured, windowHeight);
+  const contentMeasuring = measuring(fit === null);
+  const actionsMeasuring = measuring(pinsAll === null);
+  const checkIn = (
+    <View onLayout={measure('checkIn')}>
+      <CheckInLine />
+    </View>
+  );
+  const lapse = (
+    <>
+      <View onLayout={measure('lapse')}>
+        <Button
+          variant="plain"
+          label={t('home.lapse.link')}
+          onPress={() => router.push('/lapse')}
+        />
+      </View>
+      <UndoLine journey={journey} latestLapse={latestLapse} onHeight={measureUndo} />
+    </>
+  );
   return (
     <Screen>
       <ClockContext value={clock}>
@@ -79,8 +103,9 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
           )}
         </View>
         <ScrollView
+          {...contentMeasuring}
           style={styles.scroll}
-          contentContainerStyle={[styles.content, fit === null && styles.measuring]}
+          contentContainerStyle={[styles.content, contentMeasuring.style]}
           showsVerticalScrollIndicator={false}
           onLayout={measure('available')}
         >
@@ -101,23 +126,27 @@ function Home({ journey, unlockedRanks, latestLapse }: HomeProps) {
             <LowMoodCard />
             <SupportLine latestLapse={latestLapse} />
           </View>
+          {pinsAll === false && (
+            <View style={styles.scrolledActions}>
+              {checkIn}
+              {lapse}
+            </View>
+          )}
         </ScrollView>
-        <View style={styles.actions}>
-          <CheckInLine />
-          <Button label={t('home.urgeButton')} onPress={() => router.push('/emergency')} />
-          <Button
-            variant="plain"
-            label={t('home.lapse.link')}
-            onPress={() => router.push('/lapse')}
-          />
-          <UndoLine journey={journey} latestLapse={latestLapse} />
+        <View {...actionsMeasuring} style={[styles.actions, actionsMeasuring.style]}>
+          {pinsAll !== false && checkIn}
+          <View onLayout={measure('urge')}>
+            <Button label={t('home.urgeButton')} onPress={() => router.push('/emergency')} />
+          </View>
+          {pinsAll !== false && lapse}
         </View>
       </ClockContext>
     </Screen>
   );
 }
 
-type MeasuredPart = 'available' | 'rankLine' | 'quote' | 'notices';
+type MeasuredPart =
+  'available' | 'rankLine' | 'quote' | 'notices' | 'checkIn' | 'urge' | 'lapse' | 'undo';
 
 type Measured = Partial<Record<MeasuredPart, number>>;
 
@@ -140,6 +169,15 @@ function fitOf(measured: Measured, fontScale: number, ringMax: number): HomeFit 
   });
 }
 
+// null until the pinned block has been measured once. Its parts keep their height wherever they
+// are laid out, so moving them never changes the result. The undo line reports its height only
+// while it shows.
+function pinsAllOf(measured: Measured, windowHeight: number): boolean | null {
+  const { checkIn, urge, lapse, undo = 0 } = measured;
+  if (checkIn === undefined || urge === undefined || lapse === undefined) return null;
+  return pinsAllActions({ checkIn, urge, lapse, undo }, windowHeight);
+}
+
 const styles = StyleSheet.create({
   // The same row as the screen titles of the other tabs.
   header: {
@@ -156,11 +194,6 @@ const styles = StyleSheet.create({
   // above the buttons only when fitHome cannot make it fit, with large text.
   content: {
     flexGrow: 1,
-  },
-  // Unseen for the first layout, until the parts are measured, so a too tall first layout does
-  // not flash.
-  measuring: {
-    opacity: 0,
   },
   // The ring, the rank line and the quote are one block: the free space goes above and below it,
   // never between its parts. The padding is the least space left around it.
@@ -182,11 +215,19 @@ const styles = StyleSheet.create({
     opacity: 0,
     pointerEvents: 'none',
   },
-  // Outside the scroll view, so the check-in line and the urge button are always on screen,
-  // whatever the text size.
+  // Outside the scroll view, so the urge button is always on screen, whatever the text and
+  // display size. The check-in line, the lapse link and the undo line stay with it while the block
+  // takes at most PINNED_MAX_SHARE of the window. Both blocks stay unseen for their first layout,
+  // until their parts are measured, so a too tall first layout does not flash.
   actions: {
-    gap: spacing.s,
-    paddingTop: spacing.m,
+    gap: homeSpacing.actionsGap,
+    paddingTop: homeSpacing.actionsPadding,
+  },
+  // Under the notices, which fitHome makes room for: these scroll into view, like the rest of the
+  // content at the sizes where they leave the pinned block.
+  scrolledActions: {
+    gap: homeSpacing.actionsGap,
+    paddingTop: homeSpacing.actionsPadding,
   },
 });
 

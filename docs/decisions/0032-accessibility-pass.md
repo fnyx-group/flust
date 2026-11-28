@@ -20,7 +20,7 @@ A review before version 0.1 found places where flust fell short of WCAG 2.2 AA o
 - Calendar days are 44 by 44. The calendar card keeps a thin side padding so that seven of them fit a 360 point screen.
 - With Reduce Motion on, every stack screen fades in instead of sliding, through `useReduceMotion` in the root layout. While the setting is still unknown, screens fade, as the breathing guide and the wheels stay still. The note editor follows the cursor to the end of the text without animation.
 - Disabled controls use `disabledOpacity`, 0.4, even when touched; pressed ones keep 0.8. `controlOpacity` in `src/ui` gives both, and its test reproduces the bug.
-- Above a text scale of 1.3 (`largeTextScale`, read through `useLargeText` in `src/ui`), layouts change instead of clipping: the segmented control stacks its segments, the rank grid goes from 3 columns to 2, a note title in the journal gets up to three lines, and the help and plan rows stack, as they already did. The lock screen scrolls when its content no longer fits, and the reminder time chip has vertical padding.
+- Above a text scale of 1.3 (`largeTextScale`, read through `useLargeText` in `src/ui`), layouts change instead of clipping: the segmented control stacked its segments (it now measures its labels instead, [0050](0050-layout-matrix.md)), the rank grid goes from 3 columns to 2, a note title in the journal gets up to three lines, and the help and plan rows stack, as they already did. The lock screen scrolls when its content no longer fits, and the reminder time chip has vertical padding.
 - A few texts sit in a place of fixed size, so their growth is capped, each by a value of `maxFontScale` in `src/ui/theme.ts` with its reason:
 
   | Text                 | Cap | Reason                                                                                 |
@@ -36,7 +36,7 @@ A review before version 0.1 found places where flust fell short of WCAG 2.2 AA o
   Screen readers read each of them in full. Every other text grows freely.
 
 - ESLint rejects a `Pressable` without `accessibilityRole` (or `role`) and a `TextInput` without `accessibilityLabel` (or `aria-label`), also written as `RN.Pressable` or `RN.TextInput`. A `Pressable` hidden from screen readers on both platforms, with `importantForAccessibility="no"` and `accessibilityElementsHidden`, such as a sheet backdrop, is exempt: the sheet has its own Cancel button. `accessible={false}` alone is not enough, since TalkBack still reaches a touchable view. So that nothing escapes the rule, ESLint also rejects the `Touchable` components, a pressable `Text`, an animated `Pressable` or `TextInput`, and either one under another name.
-- Hints are kept only where the label does not tell the result, such as a link that opens outside flust or a row that opens a list. The note row's "Opens the note" and the low mood card's "Opens help numbers", on "See help numbers", were removed.
+- Hints are kept only where the label does not tell the result, such as a link that opens outside flust or a row that opens a list. The note row's "Opens the note" and the low mood card's "Opens help numbers", on "Help numbers", were removed.
 - `useLargeText` lives in `src/ui`, so that shared components can use it, while `useReduceMotion` stays in `src/features/shared`: `src/ui` components that move, such as the wheel, take Reduce Motion as a prop. Moving it is left for later.
 
 ## Consequences

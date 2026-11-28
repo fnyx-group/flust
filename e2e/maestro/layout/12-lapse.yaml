@@ -1,0 +1,8 @@
+appId: org.fnyxgroup.flust
+---
+- back
+- scrollUntilVisible:
+    element: J'ai eu un écart
+    direction: DOWN
+- tapOn: J'ai eu un écart
+- assertVisible: Un écart, pas un retour à zéro.

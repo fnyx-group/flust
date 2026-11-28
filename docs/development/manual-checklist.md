@@ -120,6 +120,7 @@ TalkBack is in Settings, Accessibility, TalkBack. The font scale can be set with
 
 1. A call row opens the dialer with the number, and a text row the messages app. Nothing is dialed or sent.
 2. On a device without a phone app, such as a tablet emulator, the row shows the number to dial by hand.
+3. Low mood card: check in with a mood of 1 or 2 on three days in a row, by setting the date forward in Settings, System, Date and time, with the automatic time off. Home shows the card at the end of its content: the suggestion to talk to someone close or to a professional, the emergency line, "Numéros d'aide" and the close button. It opens the help screen, and closing it hides it until the next day. At font scale 2.0 and the largest display size, the card scrolls into view and nothing in it is cut or breaks inside a word. The layout matrix does not show it, since three days of check-ins cannot be made in one run ([0050](../decisions/0050-layout-matrix.md)).
 
 ### Languages
 
@@ -142,7 +143,7 @@ These run on the production APK of [Release](release.md#local-production-build),
 9. Chrome's secure DNS: in Chrome, Settings, Privacy and security, Use secure DNS, choose a custom provider `https://dns.google/dns-query`. Browsing in Chrome stops. The filter screen's help line says how to fix it; set it back to Automatic and pages load again.
 10. Private DNS: Settings, Network and internet, Private DNS, Automatic: names still resolve without delay, blocked ones stay blocked. Hostname `dns.google`: within two seconds the filter screen reads that the filter does not protect, with the Private DNS reason and "Ouvrir les réglages", which opens the network settings, and home shows the "Filtre inactif" chip in place of the circle name. Set it back to Automatic: both go back to normal.
 11. Home at 667 points: on an emulator 667 points tall (a 1334 by 750 pixel screen at 320 dpi, `adb shell wm size 750x1334` and `adb shell wm density 320`), home with the chip does not scroll. `adb shell wm size reset` and `adb shell wm density reset` after.
-12. Delay, then confirm: turn the filter off. The state reads "Le filtre se désactive dans 20 min." and the filter still blocks. Wait 20 minutes with the screen off for part of it: "Les 20 minutes sont passées" shows with "Confirmer". Confirm in the sheet: the key icon goes away and `pornhub.com` resolves.
+12. Delay, then confirm: turn the filter off. The state reads "Le filtre se désactive dans 20 min." and the filter still blocks. Wait 20 minutes with the screen off for part of it: "Confirme dans les 10 min, sinon la demande expire." shows with "Confirmer". Confirm in the sheet: the key icon goes away and `pornhub.com` resolves.
 13. Expiry: turn the filter on, ask to turn it off, wait 31 minutes away from flust, then open it: the request is gone and the filter is on.
 14. Clock changes during the wait: `adb root`, ask to turn the filter off, then `adb shell date 010100002030` (forward) and `adb shell am force-stop org.fnyxgroup.flust`; open flust: the wait has not moved. Set the date back with `adb shell date` to the real time, or turn automatic time back on.
 15. Reboot during the wait: ask to turn the filter off, wait 2 minutes, `adb reboot`, wait 5 minutes, open flust: the wait left is about 18 minutes minus the time since boot, never less.

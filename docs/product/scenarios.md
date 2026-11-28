@@ -41,14 +41,14 @@ A clock set forwards can unlock ranks early. This is accepted: the app is person
 
 ## Unresponsive user
 
-| Case                               | Expected behavior                                                                                                             |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Several reminders ignored in a row | Reminders space out automatically, then one a day at most from the third day without opening the app.                         |
-| App not opened for 7 days          | One kind message is sent, "flust is here whenever you like, no pressure", then the app stays silent until it is opened again. |
-| Missed check-ins                   | Never shown as failures, in the check-in, the journal or the statistics.                                                      |
-| Notification permission refused    | Everything works without it. The reminder stays off, and the reminders screen offers the system settings.                     |
-| Onboarding interrupted             | The onboarding resumes at the same step on next launch.                                                                       |
-| Onboarding steps skipped           | Skipped steps get default values, which can be changed later in the settings.                                                 |
+| Case                               | Expected behavior                                                                                                |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Several reminders ignored in a row | Reminders space out automatically, then one a day at most from the third day without opening the app.            |
+| App not opened for 7 days          | One kind message is sent, "flust is here whenever you like", then the app stays silent until it is opened again. |
+| Missed check-ins                   | Never shown as failures, in the check-in, the journal or the statistics.                                         |
+| Notification permission refused    | Everything works without it. The reminder stays off, and the reminders screen offers the system settings.        |
+| Onboarding interrupted             | The onboarding resumes at the same step on next launch.                                                          |
+| Onboarding steps skipped           | Skipped steps get default values, which can be changed later in the settings.                                    |
 
 ## Journal
 

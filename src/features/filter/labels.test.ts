@@ -50,7 +50,7 @@ describe('the filter labels', () => {
     ).toBe('Strict YouTube turns off in 30 s.');
     expect(
       requestLine(english, { kind: 'filter', phase: 'confirm', confirmMs: 9 * MS_PER_MINUTE }),
-    ).toBe('The 20 minutes are over. Confirm within 9 min, or the request expires.');
+    ).toBe('Confirm within 9 min, or the request expires.');
     expect(requestLine(english, { kind: 'filter', phase: 'expired' })).toBeNull();
   });
 

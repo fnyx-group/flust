@@ -1,0 +1,10 @@
+# The disclosure sheet, which shows before Android's VPN dialog while flust has no consent: the
+# script takes it away before each pass.
+appId: org.fnyxgroup.flust
+---
+- tapOn:
+    text: Filtre
+    below: Le filtre est désactivé.
+- assertVisible: Avant d'activer le filtre
+- assertVisible: Plus tard
+- assertVisible: Accepter et activer

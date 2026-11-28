@@ -39,19 +39,19 @@
       "noted": "Lapse noted.",
       "undo": "Undo",
       "undoSpoken": "Undo the lapse you noted",
-      "undoFailed": "The lapse could not be undone. Try again.",
-      "support": "The next few hours matter. You've already done the hardest part by noting it."
+      "undoFailed": "The lapse could not be undone.",
+      "support": "You did the hardest part by noting it."
     },
     "checkIn": {
-      "todo": "Your check-in for today is waiting",
+      "todo": "Today's check-in",
       "done": "Check-in done",
       "hint": "Opens the check-in"
     },
     "lowMood": {
-      "text": "These last few days seem hard. Talking to someone you trust or to a health professional can really help.",
-      "emergency": "If you are in danger, call the emergency number where you are.",
-      "dismiss": "Hide this message for today",
-      "help": "See help numbers"
+      "text": "These last few days seem hard. Talking to someone close or to a professional can help.",
+      "emergency": "If you are in danger, call emergency services.",
+      "dismiss": "Hide for today",
+      "help": "Help numbers"
     },
     "firstDay": "First day",
     "filterInactive": "Filter inactive",
@@ -75,7 +75,7 @@
     "reasons": "Your reasons",
     "held": "I held on",
     "lapse": "I had a lapse",
-    "writeNote": "Write now",
+    "writeNote": "Write",
     "darkThoughts": "Dark thoughts? Talk to someone",
     "darkThoughtsHint": "Opens help numbers",
     "countdown": "{{count}} min"
@@ -84,7 +84,6 @@
     "back": "Back",
     "skip": "Skip",
     "title": "A lapse, not a reset.",
-    "subtitle": "Your clean days are yours to keep. We start again from here.",
     "total_one": "clean day, kept",
     "total_other": "clean days, kept",
     "streakDays_one": "day on this streak",
@@ -105,12 +104,12 @@
     "nextTime": "Next time",
     "save": "Save and start again",
     "errors": {
-      "lapse-in-future": "This time is in the future. Check your phone's date and time, or choose another moment.",
-      "lapse-before-last": "This time is before your previous lapse. Check your phone's date and time, or choose another moment.",
-      "lapse-before-start": "This time is before your starting point. Choose another moment.",
-      "invalid-timestamp": "This time can't be used. Choose another moment.",
-      "clock-behind": "Your phone's date and time are earlier than your current streak. Check them, then try again.",
-      "save-failed": "The lapse could not be saved. Nothing was lost. Try again."
+      "lapse-in-future": "This time is in the future. Check the phone's time.",
+      "lapse-before-last": "This time is before your last lapse.",
+      "lapse-before-start": "This time is before your start.",
+      "invalid-timestamp": "Choose another moment.",
+      "clock-behind": "The phone's time seems wrong. Check it.",
+      "save-failed": "The lapse could not be saved. Try again."
     }
   },
   "checkIn": {
@@ -130,30 +129,28 @@
     },
     "context": "Context",
     "note": "Note",
-    "optional": "(optional)",
     "noteSpoken": "Note, optional",
     "notePlaceholder": "A sentence, if you like",
     "save": "Save",
-    "private": "Stays on your phone, encrypted.",
+    "private": "Encrypted on your phone.",
     "errors": {
-      "note-too-long": "This note is too long. Shorten it, then try again.",
-      "save-failed": "The check-in could not be saved. Nothing is lost. Try again."
+      "note-too-long": "Note too long. Shorten it.",
+      "save-failed": "The check-in could not be saved. Try again."
     }
   },
   "journal": {
     "title": "Journal",
     "newNote": "New note",
-    "private": "Encrypted, only on your phone",
+    "private": "Encrypted on your phone",
     "groups": {
       "thisWeek": "This week",
       "lastWeek": "Last week"
     },
     "empty": {
       "title": "Nothing written yet.",
-      "text": "A few lines are enough, whenever you like.",
       "action": "Write a note"
     },
-    "loadFailed": "The journal could not be read. Nothing is lost.",
+    "loadFailed": "The journal could not be read.",
     "retry": "Try again",
     "note": {
       "close": "Close",
@@ -174,34 +171,33 @@
         "proud": "Today I'm proud of ",
         "tomorrow": "Tomorrow, I "
       },
-      "private": "Encrypted as soon as it's saved",
       "delete": "Delete note",
       "deleteConfirm": {
         "title": "Delete this note?",
-        "message": "It will be erased from your phone. You won't be able to get it back.",
+        "message": "It will be erased for good.",
         "confirm": "Delete",
         "cancel": "Cancel"
       },
       "leave": {
         "title": "Leave without saving?",
-        "message": "What you wrote since the last save will be lost.",
+        "message": "Your latest changes will be lost.",
         "messageNew": "What you wrote will be lost.",
         "keep": "Keep writing",
         "discard": "Don't save"
       },
       "errors": {
         "empty": "Write a few words before saving.",
-        "title-too-long": "This title is too long. Shorten it, then try again.",
-        "body-too-long": "This note is too long. Shorten it, then try again.",
-        "save-failed": "The note could not be saved. Your text is still here. Try again.",
+        "title-too-long": "Title too long.",
+        "body-too-long": "Note too long.",
+        "save-failed": "The note could not be saved. Try again.",
         "delete-failed": "The note could not be deleted. Try again.",
-        "prompt-too-long": "There is not enough room left in this note for this line.",
-        "note-missing": "This note no longer exists. Your text is still here, and you can save it as a new note."
+        "prompt-too-long": "No room left for this line.",
+        "note-missing": "This note no longer exists. Save your text as a new note."
       },
       "saveAsNew": "Save as a new note",
       "unavailable": {
         "missing": "This note no longer exists.",
-        "failed": "The note could not be read. Nothing is lost."
+        "failed": "The note could not be read."
       }
     },
     "refreshFailed": "The journal could not be refreshed."
@@ -216,7 +212,7 @@
     "about": "About",
     "erase": "Erase everything",
     "eraseHint": "Explains what will be erased before asking to confirm",
-    "footer": "flust {{version}}, open source and encrypted on your phone",
+    "footer": "flust {{version}}",
     "languageSaveFailed": "The language could not be saved.",
     "reminders": "Reminders",
     "lock": "App lock",
@@ -240,21 +236,20 @@
     "back": "Back",
     "title": "Erase everything",
     "what": "Your journey, ranks, journal, settings and everything else will be deleted from this phone.",
-    "noRecovery": "There is no other copy. Nothing can be recovered.",
-    "after": "flust then starts again from the beginning.",
+    "noRecovery": "No copy exists anywhere else.",
     "lapseHint": "After a lapse, no need to erase everything. Note it, your clean days stay yours.",
     "continue": "Erase my data",
     "confirm": {
       "title": "Erase for good?",
-      "message": "Everything described will be deleted from this phone. You won't be able to go back.",
+      "message": "This is permanent.",
       "cancel": "Cancel",
       "erase": "Erase everything"
     },
-    "erasing": "Erasing…",
+    "erasing": "Erasing",
     "done": "Your data has been erased.",
     "failed": {
       "title": "Erasing did not finish",
-      "body": "Some of your data may still be on this phone. Try again to finish erasing it.",
+      "body": "Some data may still be here. Try again.",
       "retry": "Try again"
     },
     "cancel": "Cancel"
@@ -271,11 +266,11 @@
     "addPlan": "Add a plan",
     "editPlanHint": "Edit or delete this plan",
     "footer": "They show on the emergency screen.",
-    "reasonLimit": "You already have {{count}} reasons. Remove one to add another.",
-    "planLimit": "You already have {{count}} plans. Delete one to add another.",
-    "loadFailed": "Your reasons and plans could not be read. Nothing is lost.",
+    "reasonLimit": "{{count}} reasons at most. Remove one first.",
+    "planLimit": "{{count}} plans at most. Delete one first.",
+    "loadFailed": "Your reasons and plans could not be read.",
     "retry": "Try again",
-    "saveFailed": "The change could not be saved. Try again.",
+    "saveFailed": "The change could not be saved.",
     "leave": {
       "title": "Leave without saving?",
       "message": "Your changes will be lost.",
@@ -291,14 +286,13 @@
       "remove": "Remove this reason",
       "removeConfirm": {
         "title": "Remove this reason?",
-        "message": "You can add it again whenever you want.",
         "cancel": "Cancel",
         "confirm": "Remove"
       },
       "errors": {
         "same-reason": "This reason is already in your list.",
-        "not-found": "This reason no longer exists. Go back to the list to add one.",
-        "save-failed": "Saving did not work. Try again.",
+        "not-found": "This reason no longer exists.",
+        "save-failed": "Saving failed. Try again.",
         "remove-failed": "The reason could not be removed. Try again."
       }
     },
@@ -306,17 +300,16 @@
       "titleNew": "New plan",
       "titleEdit": "Your plan",
       "remove": "Delete this plan",
-      "lastPlan": "Keep at least one plan. The emergency screen always has one to show you.",
+      "lastPlan": "Keep at least one plan.",
       "removeConfirm": {
         "title": "Delete this plan?",
-        "message": "You can create another one whenever you want.",
         "cancel": "Cancel",
         "confirm": "Delete"
       },
       "errors": {
         "same-plan": "This plan is already in your list.",
-        "not-found": "This plan no longer exists. Go back to the list to add one.",
-        "save-failed": "Saving did not work. Try again.",
+        "not-found": "This plan no longer exists.",
+        "save-failed": "Saving failed. Try again.",
         "remove-failed": "The plan could not be deleted. Try again."
       }
     }
@@ -346,28 +339,28 @@
       "title": "Your data can't be opened right now",
       "action": "Try again",
       "reasons": {
-        "key-unavailable": "The secure storage of this phone is not available yet. This can happen right after the phone restarts. Unlock your phone, then try again. Your data has not been changed.",
-        "storage-unavailable": "flust could not reach its storage on this phone. Your data has not been changed. Try again.",
-        "cipher-unavailable": "This version of flust cannot encrypt your data, so it will not open it. Install the latest version of flust. Your data has not been changed.",
-        "schema-too-new": "Your data was saved by a newer version of flust. Update flust to open it. Your data has not been changed.",
-        "migration-failed": "flust could not update your data for this version. Your data was put back exactly as it was. Try again, or wait for the next update of flust.",
+        "key-unavailable": "Secure storage is not ready yet. Unlock the phone, then try again.",
+        "storage-unavailable": "flust could not reach its storage. Try again.",
+        "cipher-unavailable": "This version of flust cannot encrypt your data. Install the latest version.",
+        "schema-too-new": "Your data comes from a newer version. Update flust.",
+        "migration-failed": "Updating your data failed. It is intact. Try again.",
         "reset-failed": "Erasing did not finish. Try again.",
-        "storage-failed": "flust could not read your data on this phone. Your data has not been changed. Try again."
+        "storage-failed": "flust could not read your data. It is intact. Try again."
       }
     },
     "reset": {
       "title": "Your data can't be decrypted",
       "reasons": {
-        "key-missing": "flust encrypts your data with a key that only this phone keeps, in its secure storage. That key is no longer there. This happens when the phone is restored from a backup or the data is moved to another phone, because the key is never copied.",
-        "database-unreadable": "flust encrypts your data with a key that only this phone keeps, in its secure storage. The data on this phone does not match that key, or the file is damaged, so it cannot be decrypted.",
-        "journey-corrupted": "flust can open your data, but your journey in it is damaged. Its dates do not make sense, so your streak and clean days cannot be counted correctly. Trying again reads the same data."
+        "key-missing": "This phone's encryption key is gone. This happens after a restore or a transfer.",
+        "database-unreadable": "Your data does not match this phone's key, or the file is damaged.",
+        "journey-corrupted": "Your journey's dates do not make sense. Your streak cannot be counted, and trying again will not change that."
       },
-      "noRecovery": "There is no other copy. flust has no account, no server and no backup, so nobody, including the people who make flust, can recover this data. You can try again, or erase it and start over.",
+      "noRecovery": "There is no other copy. Nobody can recover your data.",
       "startOver": "Erase and start over",
       "retry": "Try again",
       "confirm": {
         "title": "Erase everything?",
-        "body": "This permanently deletes from this phone your journey and lapses, your ranks, your journal, your check-ins, your reasons, risk moments and plans, your urge history and your settings, and flust starts again from the beginning. This cannot be undone.",
+        "body": "Everything flust holds will be deleted from this phone. This cannot be undone.",
         "erase": "Erase everything",
         "cancel": "Cancel"
       }
@@ -388,22 +381,21 @@
       "languageTitle": "Language",
       "title": "Take back control.",
       "promise": "No account, no ads, no tracking. Everything stays encrypted on your phone.",
-      "duration": "Two minutes to lay your foundations.",
       "start": "Start",
-      "footer": "Open source, by fnyx-group"
+      "footer": "Open source"
     },
     "reasons": {
       "title": "Why are you quitting?",
-      "subtitle": "We'll remind you of them when things get hard.",
+      "subtitle": "We'll remind you of them in hard moments.",
       "custom": "Write my own"
     },
     "riskMoments": {
       "title": "When is it hardest?",
-      "subtitle": "Knowing your risky moments is already a way to defuse them."
+      "subtitle": "Knowing them helps defuse them."
     },
     "plan": {
       "title": "Your first plan",
-      "subtitle": "Decide with a clear head. When the urge comes, just follow.",
+      "subtitle": "Decide now. When the urge comes, follow your plan.",
       "if": "If",
       "then": "Then",
       "triggerHint": "Opens the list of moments",
@@ -414,7 +406,7 @@
     },
     "start": {
       "title": "Last step",
-      "subtitle": "Protect your space and choose your starting point.",
+      "subtitle": "Choose your starting point.",
       "label": "Starting point",
       "now": "Now",
       "pickDate": "Pick a date",
@@ -422,23 +414,23 @@
       "finish": "Let's go",
       "footer": "You can change all of this later in the settings.",
       "errors": {
-        "start-in-future": "This starting point is in the future. Check your phone's date and time, or pick another moment.",
-        "invalid-timestamp": "This starting point can't be used. Pick another moment.",
-        "save-failed": "Your answers could not be saved. Nothing was lost. Try again."
+        "start-in-future": "This starting point is in the future.",
+        "invalid-timestamp": "Pick another moment.",
+        "save-failed": "Your answers could not be saved. Try again."
       },
       "protection": {
         "label": "Protection",
         "checkInSubtitle": "A discreet reminder at {{time}}",
-        "lockUnavailable": "Set a screen lock on your phone to turn this on.",
-        "lockNotConfirmed": "Unlocking was not confirmed. The lock stays off."
+        "lockUnavailable": "Add a screen lock to the phone to turn this on.",
+        "lockNotConfirmed": "Not confirmed. The lock stays off."
       }
     },
     "filter": {
       "title": "A filter for the whole phone",
-      "subtitle": "flust can block adult sites and AI porn in all your apps, with no account and no server.",
+      "subtitle": "Blocks adult sites and AI porn in all your apps, with no account or server.",
       "label": "What the filter does",
-      "on": "The filter is on. You will find it in the settings.",
-      "later": "You can turn it on later in the settings."
+      "on": "The filter is on.",
+      "later": "You can turn it on in the settings."
     }
   },
   "presets": {
@@ -462,7 +454,7 @@
       "weekend": "The weekend"
     },
     "actions": {
-      "phone-out-of-room": "I put my phone outside the bedroom",
+      "phone-out-of-room": "I take my phone out of the bedroom",
       "guided-breathing": "I start the guided breathing",
       "journal-three-lines": "I write three lines in the journal",
       "walk-ten-minutes": "I go out for a ten-minute walk"
@@ -485,12 +477,12 @@
         "stress": "stress builds up",
         "tiredness": "tiredness takes over",
         "boredom": "boredom sets in",
-        "after-social-media": "I've just spent time on social media",
+        "after-social-media": "I get off social media",
         "after-alcohol": "I've been drinking",
         "weekend": "it's the weekend"
       },
       "actions": {
-        "phone-out-of-room": "I put my phone outside the bedroom",
+        "phone-out-of-room": "I take my phone out of the bedroom",
         "guided-breathing": "I start the guided breathing",
         "journal-three-lines": "I write three lines in the journal",
         "walk-ten-minutes": "I go out for a ten-minute walk"
@@ -562,8 +554,8 @@
         "4": "You move forward in the circle of the Crown.",
         "5": "You move forward in the circle of the Absolute."
       },
-      "others_one": "{{names}} unlocked too",
-      "others_other": "{{names}} unlocked too",
+      "others_one": "Also unlocked, {{names}}",
+      "others_other": "Also unlocked, {{names}}",
       "listSeparator": ", ",
       "spoken": "New rank, {{name}}, {{circle}}",
       "continue": "Continue",
@@ -617,8 +609,7 @@
   "reminders": {
     "title": "Reminders",
     "checkIn": {
-      "title": "Evening check-in",
-      "subtitle": "Take stock in ten seconds"
+      "title": "Evening check-in"
     },
     "thought": {
       "title": "Quote of the day",
@@ -626,7 +617,7 @@
     },
     "riskHours": {
       "title": "Risky hours",
-      "subtitle": "A reminder before your sensitive moments",
+      "subtitle": "Before your sensitive moments",
       "unavailable": "Add a night or weekend moment to your risk moments first."
     },
     "ranks": {
@@ -645,23 +636,23 @@
     "preview": "Preview",
     "previewLabel": "Preview of a flust notification, {{text}}",
     "footer": "Notifications stay neutral.",
-    "denied": "Notifications are off for flust. You can allow them in your phone's settings.",
+    "lockScreenPreviews": "To hide previews on the lock screen, use the phone's settings.",
+    "denied": "Notifications are blocked for flust.",
     "openSettings": "Open settings",
     "saveFailed": "The reminder could not be saved. Try again.",
-    "loadFailed": "Reminders could not be read. Try again later.",
+    "loadFailed": "Reminders could not be read.",
     "off": "Off",
     "notifications": {
       "check-in": "How was your day?",
       "thought": "Your quote for today is here.",
       "risk-hours": "A moment for yourself, if you need it.",
       "rank": "A new milestone is waiting for you.",
-      "return": "flust is here whenever you like, no pressure.",
+      "return": "flust is here whenever you like.",
       "channelName": "Reminders",
-      "channelDescription": "The reminders you turned on in flust",
+      "channelDescription": "Your reminders",
       "previewPlaceholder": "Reminder"
     },
-    "back": "Back",
-    "lockScreenPreviews": "To hide them on the lock screen, use your phone's settings."
+    "back": "Back"
   },
   "lock": {
     "locked": "Locked",
@@ -669,21 +660,20 @@
     "usePasscode": "Enter passcode",
     "prompt": "Unlock flust",
     "cancel": "Cancel",
-    "wait": "You can try again in {{time}}.",
+    "wait": "Try again in {{time}}.",
     "waitSeconds": "{{count}} s",
     "waitMinutes": "{{count}} min",
-    "lockout": "Too many attempts. Unlock your phone, then try again.",
-    "cover": "flust is hidden",
+    "lockout": "Too many attempts. Unlock the phone, then try again.",
+    "cover": "Hidden",
     "settings": {
       "title": "App lock",
       "toggle": "Lock flust",
       "toggleWith": "Lock with {{method}}",
       "toggleSubtitle": "With your phone's passcode as a fallback",
       "delay": "Ask again",
-      "noDeviceLock": "Set a screen lock on your phone to turn this on.",
-      "paused": "Lock paused. Your phone no longer has a screen lock.",
-      "note": "Your data stays encrypted, lock or not.",
-      "notConfirmed": "Unlocking was not confirmed. The lock stays off.",
+      "noDeviceLock": "Add a screen lock to the phone to turn this on.",
+      "paused": "Paused, the phone no longer has a screen lock.",
+      "notConfirmed": "Not confirmed. The lock stays off.",
       "saveFailed": "The setting could not be saved. Try again.",
       "back": "Back"
     },
@@ -766,7 +756,7 @@
       },
       "ch143": {
         "name": "La Main Tendue",
-        "detail": "Anonymous, day and night. The call may cost a few cents depending on the operator."
+        "detail": "Anonymous, day and night. A few cents depending on the operator."
       },
       "ch144": {
         "name": "Ambulance",
@@ -782,7 +772,7 @@
       },
       "ca988": {
         "name": "Suicide Crisis Helpline",
-        "detail": "Call or text, 24/7, in English and French. Calls are free."
+        "detail": "Free call, or text, 24/7, in English and French"
       },
       "ca911": {
         "name": "Emergency services",
@@ -790,7 +780,7 @@
       },
       "us988": {
         "name": "988 Suicide & Crisis Lifeline",
-        "detail": "Call or text, 24/7. Conversations are free."
+        "detail": "Free call or text, 24/7"
       },
       "us911": {
         "name": "Emergency services",
@@ -834,7 +824,7 @@
     "textSpoken": "Text {{number}}, {{name}}. {{detail}}",
     "callHint": "Opens the phone app with this number",
     "textHint": "Opens messages with this number",
-    "directoryIntro": "Helplines in other countries. Opens outside flust.",
+    "directoryIntro": "Other countries. Opens outside flust.",
     "directory": "Find a helpline",
     "callFailed": "The phone app could not open. You can dial {{number}} yourself.",
     "textFailed": "Messages could not open. You can text {{number}} yourself.",
@@ -845,36 +835,35 @@
   "errors": {
     "fallback": {
       "title": "This screen could not be shown",
-      "body": "Something went wrong while showing it. Your data has not been changed. You can try again.",
+      "body": "Your data has not been changed.",
       "retry": "Try again",
       "home": "Back to home"
     },
     "root": {
       "title": "flust ran into a problem",
-      "body": "Your data has not been changed. Try again. If this keeps happening when flust starts, it will open in safe mode.",
+      "body": "Your data has not been changed. Try again.",
       "retry": "Try again"
     },
     "safeMode": {
       "title": "Safe mode",
-      "stopped": "flust could not start twice in a row. Your data has been neither opened nor changed.",
-      "choices": "You can try again, look at the error report and share it to report the problem, or erase everything and start over.",
+      "stopped": "flust could not start twice in a row. Your data has not been touched.",
       "retry": "Try again",
       "report": "See the error report",
       "reportHint": "Asks for your phone's unlock first, if it has one.",
       "reportPrompt": "Open the error report",
       "reportCancel": "Cancel",
-      "reportRefused": "The report stays closed. The phone did not confirm it's you.",
+      "reportRefused": "The phone did not confirm it's you.",
       "erase": "Erase everything"
     },
     "report": {
       "title": "Error report",
       "back": "Back",
-      "intro": "The last technical errors, encrypted on this phone. Nothing you write.",
+      "intro": "The last technical errors, with nothing you write.",
       "preview": "This is exactly what will be shared.",
       "empty": "No error has been recorded.",
       "share": "Share this report",
       "shareHint": "Opens the share sheet. You choose where the report goes.",
-      "shareFailed": "The share sheet could not open. You can select the text above and copy it.",
+      "shareFailed": "The share sheet could not open. Copy the text.",
       "nothingSent": "Nothing leaves without you.",
       "clear": "Clear the report",
       "clearFailed": "The report could not be cleared. Try again.",
@@ -887,7 +876,7 @@
     },
     "notFound": {
       "title": "This screen does not exist",
-      "body": "flust could not find what was asked for. Nothing has been opened or changed.",
+      "body": "Nothing has been opened or changed.",
       "home": "Back to home"
     }
   },
@@ -901,7 +890,7 @@
     "status": {
       "on": "The filter protects this phone.",
       "off": "The filter is off.",
-      "inactive": "The filter is not protecting right now."
+      "inactive": "The filter is not protecting."
     },
     "value": {
       "on": "On",
@@ -911,39 +900,39 @@
     "filter": "Filter",
     "youtubeStrict": "Strict YouTube",
     "youtubeStrictHint": "Hides more videos than the basic restricted mode.",
-    "blocks": "Blocks adult sites, AI porn and bypasses, and enforces SafeSearch on Google, Bing, DuckDuckGo and YouTube.",
-    "resolvers": "The names of allowed sites go encrypted to Quad9, or to Cloudflare then DNS4EU when it does not answer. All three also block malware.",
-    "chrome": "Nothing loads in Chrome? In its settings, Privacy and security, Use secure DNS, choose Automatic.",
+    "blocks": "Blocks adult sites, AI porn and bypasses. Enforces SafeSearch.",
+    "resolvers": "Allowed sites go encrypted through Quad9, Cloudflare or DNS4EU.",
+    "chrome": "Chrome not loading? In its settings, set secure DNS to Automatic.",
     "alwaysOn": "Always-on VPN",
-    "alwaysOnGear": "Tap the gear next to flust, then turn on Always-on VPN.",
+    "alwaysOnGear": "Tap flust's gear, then turn on Always-on VPN.",
     "unusedApps": {
       "label": "Keep flust from pausing",
-      "hint": "Otherwise Android may stop the filter if flust stays closed for months."
+      "hint": "Otherwise Android may turn off the filter after months unopened."
     },
     "licenses": "List licenses",
     "inactive": {
       "private-dns": {
-        "text": "Android's Private DNS goes around the filter. In the settings, Network and internet, Private DNS, choose Automatic.",
+        "text": "Private DNS goes around the filter. Set it to Automatic.",
         "action": "Open the settings"
       },
       "other-vpn": {
-        "text": "Another VPN app took over. Android keeps only one at a time.",
+        "text": "Another VPN took over.",
         "action": "Turn the filter back on"
       },
       "consent": {
-        "text": "Android no longer lets flust filter. Give your consent again.",
+        "text": "flust no longer has Android's VPN permission.",
         "action": "Turn the filter back on"
       },
       "vpn-off": {
-        "text": "The filter was turned off in Android's settings.",
+        "text": "The filter was turned off in Android.",
         "action": "Turn the filter back on"
       },
       "lists": {
-        "text": "The filter's lists could not be read. Update flust, or reinstall it."
+        "text": "The filter's lists are unreadable. Update flust."
       },
       "boot-deferred": {
-        "text": "Android did not restart the filter at boot. It resumes when flust opens, and Always-on VPN avoids the wait.",
-        "action": "Restart the filter"
+        "text": "The filter did not resume at startup.",
+        "action": "Turn the filter back on"
       },
       "stopped": {
         "text": "The filter stopped.",
@@ -953,18 +942,18 @@
     "request": {
       "filter": "The filter turns off in {{time}}.",
       "youtube": "Strict YouTube turns off in {{time}}.",
-      "why": "This wait helps you let the moment pass. You can cancel at any time.",
+      "why": "This wait helps you let the urge pass.",
       "cancel": "Cancel the request",
-      "ready": "The 20 minutes are over. Confirm within {{time}}, or the request expires.",
+      "ready": "Confirm within {{time}}, or the request expires.",
       "confirmOpen": "Confirm",
       "confirmFilterTitle": "Turn the filter off?",
       "confirmYoutubeTitle": "Turn Strict YouTube off?",
-      "confirmMessage": "You can turn it back on at any time, at once.",
+      "confirmMessage": "Turning it back on is immediate.",
       "confirm": "Turn off",
       "keep": "Keep it as it is",
       "minutes": "{{count}} min",
       "seconds": "{{count}} s",
-      "saveFailed": "The request could not be saved. Nothing changed.",
+      "saveFailed": "The request was not saved. Nothing changed.",
       "failed": {
         "filter": "The filter could not be turned off. It stays on.",
         "youtube": "Strict YouTube could not be turned off. It stays on."
@@ -972,11 +961,11 @@
     },
     "disclosure": {
       "title": "Before turning the filter on",
-      "text": "flust uses Android's VPN service to filter the names of the sites your apps open, across the whole phone. Blocked names never leave the phone. The names of allowed sites go encrypted to Quad9, or to Cloudflare then DNS4EU when Quad9 does not answer. Cloudflare deletes anonymized IP addresses within 25 hours. DNS4EU can keep some query data for up to six months for threat research, without selling it or using it for profiling or advertising. The rest of your traffic does not go through flust, except direct connections to known public DNS servers, which are blocked.",
+      "text": "flust uses Android's VPN to filter the names of the sites opened on this phone. Blocked names never leave the phone. The others go encrypted to Quad9, or to Cloudflare then DNS4EU when Quad9 does not answer. Cloudflare deletes anonymized IP addresses within 25 hours. DNS4EU can keep query data for up to six months for threat research, without selling it or using it for profiling or advertising. The rest of your traffic does not go through flust, except direct connections to known public DNS servers, which are blocked.",
       "accept": "Accept and turn on",
       "later": "Not now"
     },
-    "refused": "Without your consent in Android, the filter cannot start.",
+    "refused": "Without your consent, the filter cannot start.",
     "failed": "The filter could not start. Try again.",
     "measure": "Measure the lists",
     "measured": "{{entries}} domains, {{kilobytes}} KB, loaded in {{load}} ms, {{decide}} µs per name.",
@@ -989,7 +978,7 @@
   "licenses": {
     "title": "Licenses",
     "back": "Back",
-    "intro": "flust is built on these projects, under their licenses, from the sources of the filter's lists to the libraries of the app.",
+    "intro": "The projects flust is built on.",
     "lists": "Filter lists",
     "libraries": "App libraries",
     "details": "{{version}}, {{license}}",

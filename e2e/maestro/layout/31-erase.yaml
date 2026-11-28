@@ -1,0 +1,9 @@
+appId: org.fnyxgroup.flust
+---
+- back
+- back
+- scrollUntilVisible:
+    element: Tout effacer
+    direction: DOWN
+- tapOn: Tout effacer
+- assertVisible: Effacer mes données

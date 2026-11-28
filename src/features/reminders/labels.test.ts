@@ -20,9 +20,7 @@ describe('notificationText', () => {
       expect(notificationText(french, kind)).not.toMatch(/porno|rechute|craquage|envie|addict/i);
     }
     expect(notificationText(french, 'check-in')).toBe("Comment s'est passée ta journée\u202f?");
-    expect(notificationText(english, 'return')).toBe(
-      'flust is here whenever you like, no pressure.',
-    );
+    expect(notificationText(english, 'return')).toBe('flust is here whenever you like.');
   });
 
   it('names the channel and the hidden preview in each language', () => {

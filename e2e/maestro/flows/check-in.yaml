@@ -1,7 +1,7 @@
 appId: org.fnyxgroup.flust
 ---
 - runFlow: ../common/onboard.yaml
-- tapOn: Your check-in for today.*
+- tapOn: Today's check-in.*
 - assertVisible: How are you\?
 - tapOn: 4 out of 5
 - tapOn: Light

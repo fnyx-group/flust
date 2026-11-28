@@ -1,0 +1,39 @@
+# 0050 Layout at every text and display size
+
+## Context
+
+A field test on a Xiaomi Poco F4 showed that with a large font size or display size the bottom of the home screen and of the journal was cut, and that the language row of the settings split its label and value into two narrow columns at the largest font. The first run of the check below found the same squeeze on other settings rows from a font scale of 1.0 at the largest display size, where "Verrouillage" broke over three lines beside its value. Android offers font scales from 0.85 to 2.0 and display sizes from one step below the default density to up to three above it, and they combine. Checking each screen at each combination by hand is not possible, and screenshots are black under the screen privacy flag ([0025](0025-screen-privacy.md)), so a check has to read the view hierarchy.
+
+Home pins the check-in line, the urge button and the lapse link under its scrolling content ([design system](../design/design-system.md#home)). At large sizes that block took close to half the height, which left little room for the rest.
+
+## Decision
+
+- Home keeps its rule at the default text and display size: no scroll from 667 points tall. Beyond it, nothing is cut and "J'ai une envie" always stays on screen without scrolling. When the pinned block, with the undo line and its gap while it shows, takes more than 35 % of the window height, the check-in line, the lapse link and the undo line move into the scrolling content, under the notices, and only the urge button stays pinned. `fitHome` does not count them among the notices: they scroll into view, and the ring and the quote keep their room. Their heights do not depend on where they are laid out, and the undo line reports no height while it only moves, so the choice cannot flip back and forth. At 2.0 on the largest display, the undo line wraps onto two rows and alone takes the block past its share. `pinsAllActions` in `src/features/home/home-fit.ts` makes it, tested against the heights of an emulator's dumps. Until the block is measured, it is unseen, and neither a tap nor a screen reader reaches it.
+- A segmented control measures its labels on one line, offstage and in the bold of the chosen segment, and puts its segments on one row while they all fit, else in rows of two when there are four, else one per row, at any text and display size. A fixed text scale could not decide it: the check-in's urge levels broke mid-word from a scale of 1.0 at the largest display size. `segmentColumns` in `src/ui/segment-columns.ts` makes the choice.
+- A navigation row puts its value at the end of the label's line, and under the label when both do not fit on it, at any text and display size. Its label never breaks inside a word because of the value.
+- The welcome screen scrolls when it does not fit, and its language pill wraps under the name.
+- `scripts/e2e-android.sh --layout` runs the flows of `e2e/maestro/layout/` in order, one per screen in French, whose texts are longer, each from the screen the previous one left. The filter's disclosure sheet is one of them: before each pass the script sets flust's VPN consent back to its default with `appops`, as on a new install, since clearing the app's data keeps it. After each, `maestro hierarchy` dumps the screen, and `scripts/check-layout.ts` fails when:
+  - two texts or controls overlap, by more than a dp each way. A full window backdrop behind a sheet is left out, and so is the screen behind the lock screen: the lock screen's opaque layer hides it, and screen readers cannot reach it;
+  - a text or control outside a view that scrolls reaches the tab bar, the navigation bar, the status bar or a side of the screen;
+  - inside a view that scrolls, a control and its label reach the same side of that view, so the padding around the label was cut;
+  - a view that scrolls runs under the tab bar, the navigation bar or the status bar;
+  - a text is squashed below 8 dp, unless the view that scrolls it cuts it at its top or bottom;
+  - a word has more letters than its box holds on one line: 4.2 letters per line height of width, where the app's fonts take at most 3.7 on every screen of the full matrix, with words of three letters or less, which narrow letters fill unevenly, left out. Spaces, hyphens and slashes are where lines may break, and the line height is the text's height shared among its words, which can only underestimate it. Two kinds of text are not measured: the names of the licenses screen, from `list-licenses.ts` and `third-party-licenses.json`, since a single long proper noun such as "ShadowWhisperer" has nowhere else to wrap at large sizes, and a text that a view scrolling sideways shows only in part at its edge, such as a journal prompt chip running off the screen;
+  - inside one control, a single word is half as tall again as the text beside it, so it broke over lines;
+  - at a font scale of 1.0 or less and a default display, an upward swipe inside home's scrolling view, placed from the dump, moves the content.
+- The display sizes are those Android offers on the emulator, computed from its density and width as Settings computes them. `--matrix` runs the layout flows at the corners: font scale 0.85 at the smallest display size, 1.0 at the default, 1.3 at the largest, and 2.0 at the smallest and the largest. `--full-matrix` runs them at every font scale and display size, 35 combinations on the emulator, before a release. Both end with the home check on a 750 by 1334 pixel screen at 320 dpi, 667 dp tall. A full run of the script ends with two passes: font scale 1.0 at the default density, and 2.0 at the largest. Besides each screen of the app, the flows show the states that change a layout most:
+  - the start step with its calendar, and a start a day ago, so that home first shows the rank unlock screen;
+  - the journal with a note;
+  - the reminders screen with the check-in reminder on and its time chip, after Maestro grants the notification permission;
+  - the filter's disclosure sheet, then the filter on and inactive, with its reason and button. Before that flow the script turns on a strict Private DNS, which goes around the filter, and puts the setting back after its dump and when the run stops;
+  - home with the undo line of a lapse just logged;
+  - the lock turned on with the emulator's PIN, then the lock screen. They come last, so that no other flow runs with the lock on.
+- The dump is Maestro's, not `uiautomator dump`, which waits for an idle screen that the emergency screen's breathing guide never gives.
+
+## Consequences
+
+- A layout change is checked at the corners in about 30 minutes, at the two extremes on every full run, and at all 35 combinations in more than four hours before a release.
+- The check sees only what is in the hierarchy, with bounds already clipped: a text cut inside its own frame, such as by a line limit, and a control pushed entirely off screen are not seen. Inside a view that scrolls, reaching one of its sides is not a cut by itself, since chips and texts that fill their line do it by design: a text cut at a side on its own, or a label cut inside a control that keeps its padding, is seen only when a word is cut short enough to be too long for its box. A break inside one word of a long label can be missed. The flows assert the controls that must show, and the rest stays in the [manual checklist](../development/manual-checklist.md).
+- Some screens are not in the matrix and are checked by hand: the low mood card, which needs check-ins on three days, safe mode, which needs two failed starts in a row, and the error screens, which need a failure of storage or of a screen.
+- React Native's ScrollView reports itself scrollable even when its content fits, so whether home scrolls is checked by a swipe rather than read from the hierarchy.
+- At large sizes, the check-in line and the lapse link can need a scroll on home. The urge button never does.

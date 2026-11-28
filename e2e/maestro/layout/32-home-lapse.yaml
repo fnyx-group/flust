@@ -1,0 +1,22 @@
+# Home with the undo line, which shows from a lapse until local midnight: the relaunch keeps the
+# data and opens home.
+appId: org.fnyxgroup.flust
+---
+- launchApp
+- extendedWaitUntil:
+    visible: Série en cours.*
+    timeout: 10000
+- scrollUntilVisible:
+    element: J'ai eu un écart
+    direction: DOWN
+- tapOn: J'ai eu un écart
+- scrollUntilVisible:
+    element: Enregistrer et repartir
+    direction: DOWN
+- tapOn: Enregistrer et repartir
+# With the largest text and display, the undo line no longer lets the actions stay pinned: it
+# scrolls with them, under the fold.
+- scrollUntilVisible:
+    element: Écart noté\.
+    direction: DOWN
+- assertVisible: J'ai une envie
