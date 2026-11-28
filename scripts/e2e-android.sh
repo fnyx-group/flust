@@ -118,11 +118,42 @@ qemu=$("$adb" shell 'getprop ro.boot.qemu; getprop ro.kernel.qemu' | tr -d '\r')
 
 previous_scale=$("$adb" shell settings get system font_scale | tr -d '\r')
 display_changed=false
+private_dns_set=false
+previous_dns_mode=
+previous_dns_specifier=
 layout_dir=
 pin_set=false
 logcat_pid=
 logcat_file=
 status=1
+
+# Puts back a global setting as it was read, "null" when it was never set.
+restore_setting() {
+  if [[ $2 == null ]]; then
+    "$adb" shell settings delete global "$1" >/dev/null
+  else
+    "$adb" shell settings put global "$1" "$2"
+  fi
+}
+
+# A strict Private DNS goes around the filter, which shows it as inactive with its reason and
+# button: the layout flow of that screen needs it, and only that flow.
+strict_private_dns() {
+  if ! $private_dns_set; then
+    previous_dns_mode=$("$adb" shell settings get global private_dns_mode | tr -d '\r')
+    previous_dns_specifier=$("$adb" shell settings get global private_dns_specifier | tr -d '\r')
+    private_dns_set=true
+  fi
+  "$adb" shell settings put global private_dns_specifier dns.google
+  "$adb" shell settings put global private_dns_mode hostname
+}
+
+restore_private_dns() {
+  $private_dns_set || return 0
+  restore_setting private_dns_mode "$previous_dns_mode" &&
+    restore_setting private_dns_specifier "$previous_dns_specifier" &&
+    private_dns_set=false
+}
 
 # shellcheck disable=SC2329 # Called by trap restore EXIT, which shellcheck does not follow.
 restore() {
@@ -137,6 +168,7 @@ restore() {
   if $pin_set; then
     "$adb" shell locksettings clear --old "$pin" >/dev/null || echo "Could not remove the emulator PIN $pin." >&2
   fi
+  restore_private_dns || echo "Could not restore the emulator's Private DNS." >&2
   if $display_changed; then
     "$adb" shell wm density reset >/dev/null || echo "Could not reset the emulator density." >&2
     "$adb" shell wm size reset >/dev/null || echo "Could not reset the emulator screen size." >&2
@@ -258,7 +290,7 @@ check_layout() {
 # fit without scrolling: a swipe on it must not move anything.
 # Usage: layout_pass <font scale> <density> [<width>x<height>] [<last flow>]
 layout_pass() {
-  local scale=$1 dpi=$2 size=${3:-} last=${4:-} name flow file width status_bottom nav_top fits
+  local scale=$1 dpi=$2 size=${3:-} last=${4:-} name flow file width status_bottom nav_top fits x from_y to_y
   local physical failed=0 checked=0
   physical=$("$adb" shell wm density | awk '/Physical density/ { print $3 }')
   display_changed=true
@@ -271,21 +303,31 @@ layout_pass() {
   fits=false
   awk -v s="$scale" 'BEGIN { exit !(s <= 1.0) }' && [[ -n $size || $dpi -le $physical ]] && fits=true
   echo "Layout at font scale $scale, $dpi dpi${size:+, $size}"
+  # As on a new install, so that the filter screen shows its disclosure sheet: clearing the app's
+  # data keeps Android's VPN consent.
+  "$adb" shell appops set "$package" ACTIVATE_VPN default
   for flow in "$root"/e2e/maestro/layout/*.yaml; do
     name=$(basename "$flow" .yaml)
+    [[ $name != *-filter-inactive ]] || strict_private_dns
     if ! run_maestro "$flow" >"$layout_dir/$scale-$dpi${size:+-$size}-$name.log" 2>&1; then
       echo "  $name: the flow failed after $checked screens, see $layout_dir/$scale-$dpi${size:+-$size}-$name.log" >&2
+      restore_private_dns
       return 1
     fi
     file=$layout_dir/$scale-$dpi${size:+-$size}-$name.json
-    dump_screen "$file" || { echo "  $name: no dump" >&2; return 1; }
+    dump_screen "$file" || { echo "  $name: no dump" >&2; restore_private_dns; return 1; }
+    restore_private_dns
     check_layout --width "$width" --density "$dpi" \
       --status-bar-bottom "$status_bottom" --navigation-bar-top "$nav_top" "$file" | sed 's/^/  /' || failed=1
     if $fits && [[ $name == *-home ]]; then
-      local x y
-      x=$((width / 2))
-      y=$((nav_top / 2))
-      "$adb" shell input swipe "$x" "$((y + y / 2))" "$x" "$((y / 2))" 300
+      # Inside the scrolling content, read from the dump: a swipe that starts on the pinned
+      # buttons scrolls nothing, and the check would always pass.
+      local swipe
+      swipe=$(check_layout --swipe --width "$width" --density "$dpi" \
+        --status-bar-bottom "$status_bottom" --navigation-bar-top "$nav_top" "$file") ||
+        { echo "  $name: nothing to swipe" >&2; return 1; }
+      read -r x from_y to_y <<<"$swipe"
+      "$adb" shell input swipe "$x" "$from_y" "$x" "$to_y" 300
       sleep 1
       dump_screen "${file%.json}-swiped.json" || return 1
       check_layout --unscrolled --width "$width" --density "$dpi" \
@@ -322,7 +364,7 @@ layout_check() {
       layout_pass 2.0 "$largest" || failed=1
     fi
     # The iPhone SE's height: 667 dp is 1334 pixels at 320 dpi, 750 pixels wide.
-    layout_pass 1.0 320 750x1334 07-home || failed=1
+    layout_pass 1.0 320 750x1334 08-home || failed=1
   elif $layout; then
     local current=$previous_scale
     [[ $current != null ]] || current=1.0

@@ -1,0 +1,18 @@
+# The lock on, asked again at once. Needs the screen lock PIN that scripts/e2e-android.sh sets on
+# the emulator and passes as PIN. After the lapse of the previous flow, so that no other flow runs
+# with the lock on.
+appId: org.fnyxgroup.flust
+---
+- tapOn: Réglages
+- scrollUntilVisible:
+    element: Verrouillage.*
+    direction: DOWN
+- tapOn: Verrouillage.*
+- tapOn: Verrouiller (flust|avec .*)
+# The system prompt that confirms the lock.
+- inputText: ${PIN}
+- pressKey: Enter
+- tapOn: Immédiatement
+- assertVisible:
+    text: Immédiatement
+    checked: true

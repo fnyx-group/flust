@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -21,18 +21,34 @@ export function SupportLine({ latestLapse }: { latestLapse: LapseRecord | null }
   return <Text style={styles.support}>{t('home.lapse.support')}</Text>;
 }
 
-type UndoLineProps = { journey: Journey; latestLapse: LapseRecord | null };
+type UndoLineProps = {
+  journey: Journey;
+  latestLapse: LapseRecord | null;
+  // The line's height, and 0 once it hides. Moving the line elsewhere reports nothing in between,
+  // so the home screen never sees it gone while it only moves.
+  onHeight: (height: number) => void;
+};
 
 // "Lapse noted." and the undo button, until local midnight and at least an hour after the lapse
 // was logged.
-export function UndoLine({ journey, latestLapse }: UndoLineProps) {
-  const shown = useClock((now) => canUndo(latestLapse, now, deviceOffsetAt));
+export function UndoLine({ journey, latestLapse, onHeight }: UndoLineProps) {
+  const canStillUndo = useClock((now) => canUndo(latestLapse, now, deviceOffsetAt));
+  const shown = canStillUndo && latestLapse !== null;
+  useEffect(() => {
+    if (!shown) onHeight(0);
+  }, [shown, onHeight]);
   if (!shown || latestLapse === null) return null;
   // A new lapse gets a fresh line, so an error about the previous one never stays on screen.
-  return <Undo key={latestLapse.id} journey={journey} record={latestLapse} />;
+  return <Undo key={latestLapse.id} journey={journey} record={latestLapse} onHeight={onHeight} />;
 }
 
-function Undo({ journey, record }: { journey: Journey; record: LapseRecord }) {
+type UndoProps = {
+  journey: Journey;
+  record: LapseRecord;
+  onHeight: (height: number) => void;
+};
+
+function Undo({ journey, record, onHeight }: UndoProps) {
   const { t } = useTranslation();
   const storage = useStorage();
   const { setLapses } = useSession();
@@ -59,7 +75,7 @@ function Undo({ journey, record }: { journey: Journey; record: LapseRecord }) {
   }
 
   return (
-    <View style={styles.undo}>
+    <View style={styles.undo} onLayout={(event) => onHeight(event.nativeEvent.layout.height)}>
       <View style={styles.undoRow}>
         <Text style={styles.noted}>{t('home.lapse.noted')}</Text>
         <Pressable

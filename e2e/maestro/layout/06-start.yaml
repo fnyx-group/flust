@@ -1,5 +1,12 @@
+# A start a day ago, the default of "Choisir une date", so that home first shows the unlock screen
+# of the first rank. The step is checked with its calendar open, scrolled to it.
 appId: org.fnyxgroup.flust
 ---
 - tapOn: Plus tard
 - assertVisible: Dernière étape
+- tapOn: Choisir une date
+# With large text the calendar opens below the fold.
+- scrollUntilVisible:
+    element: Départ le .*
+    direction: DOWN
 - assertVisible: C'est parti

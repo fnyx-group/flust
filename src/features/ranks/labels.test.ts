@@ -161,9 +161,11 @@ describe('unlockText', () => {
   });
 
   it('lists the other ranks unlocked at the same time', () => {
-    expect(unlockText(french, unlock('initiate', 'watcher'), 20).others).toBe('Aussi Initié');
+    expect(unlockText(french, unlock('initiate', 'watcher'), 20).others).toBe(
+      'Aussi débloqué, Initié',
+    );
     expect(unlockText(french, unlock('apprentice', 'initiate', 'watcher'), 20).others).toBe(
-      'Aussi Apprenti, Initié',
+      'Aussi débloqués, Apprenti, Initié',
     );
   });
 

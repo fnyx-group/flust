@@ -14,7 +14,9 @@ appId: org.fnyxgroup.flust
     element: Enregistrer et repartir
     direction: DOWN
 - tapOn: Enregistrer et repartir
-- extendedWaitUntil:
-    visible: Écart noté\.
-    timeout: 10000
+# With the largest text and display, the undo line no longer lets the actions stay pinned: it
+# scrolls with them, under the fold.
+- scrollUntilVisible:
+    element: Écart noté\.
+    direction: DOWN
 - assertVisible: J'ai une envie

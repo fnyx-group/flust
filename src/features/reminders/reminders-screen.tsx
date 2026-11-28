@@ -228,7 +228,10 @@ export function RemindersScreen() {
           <SectionLabel>{t('reminders.preview')}</SectionLabel>
           <NotificationPreview text={t('reminders.notifications.check-in')} />
         </View>
-        <Text style={styles.footer}>{t('reminders.footer')}</Text>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>{t('reminders.footer')}</Text>
+          <Text style={styles.footerText}>{t('reminders.lockScreenPreviews')}</Text>
+        </View>
       </ScrollView>
       {editing !== null && (
         <TimeWheelSheet
@@ -301,6 +304,9 @@ const styles = StyleSheet.create({
     gap: spacing.m,
   },
   footer: {
+    gap: spacing.l,
+  },
+  footerText: {
     ...typography.paragraphSmall,
     color: colors.textSecondary,
   },

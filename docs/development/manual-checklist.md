@@ -120,6 +120,7 @@ TalkBack is in Settings, Accessibility, TalkBack. The font scale can be set with
 
 1. A call row opens the dialer with the number, and a text row the messages app. Nothing is dialed or sent.
 2. On a device without a phone app, such as a tablet emulator, the row shows the number to dial by hand.
+3. Low mood card: check in with a mood of 1 or 2 on three days in a row, by setting the date forward in Settings, System, Date and time, with the automatic time off. Home shows the card at the end of its content: the suggestion to talk to someone close or to a professional, the emergency line, "Numéros d'aide" and the close button. It opens the help screen, and closing it hides it until the next day. At font scale 2.0 and the largest display size, the card scrolls into view and nothing in it is cut or breaks inside a word. The layout matrix does not show it, since three days of check-ins cannot be made in one run ([0050](../decisions/0050-layout-matrix.md)).
 
 ### Languages
 

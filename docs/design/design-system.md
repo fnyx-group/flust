@@ -93,7 +93,7 @@ The counter does not grow with the system text size, since it is already the lar
 
 ### Text size
 
-Text grows with the system text size. Above a text scale of 1.3, layouts change instead of clipping: segmented controls stack their segments, the rank grid shows 2 columns, a note title in the journal takes up to three lines, and the help rows stack. At any size, a navigation row puts its value under its label when both no longer fit on one line, so that neither breaks inside its words. A few texts sit in places of fixed size and grow only up to a cap: the streak counter and the breathing seconds (1, no growth), the lapse summary values and the wheel rows (1.2), the tab labels (1.3; on iOS a long press shows them large), the breathing phase name and the emergency countdown (1.5). [Decision 0032](../decisions/0032-accessibility-pass.md) gives the reason for each.
+Text grows with the system text size. Above a text scale of 1.3, layouts change instead of clipping: the rank grid shows 2 columns, a note title in the journal takes up to three lines, and the help rows stack. At any size, a segmented control keeps its labels whole: its segments go on one row while every label fits on one line, else in rows of two when there are four, else one per row. A navigation row puts its value under its label when both no longer fit on one line, so that neither breaks inside its words. A few texts sit in places of fixed size and grow only up to a cap: the streak counter and the breathing seconds (1, no growth), the lapse summary values and the wheel rows (1.2), the tab labels (1.3; on iOS a long press shows them large), the breathing phase name and the emergency countdown (1.5). [Decision 0032](../decisions/0032-accessibility-pass.md) gives the reason for each.
 
 ## Layout
 
@@ -141,7 +141,7 @@ The home screen does not scroll at the default text size on a phone from 667 poi
 
 Above a text scale of 1.3, the quote stays, since losing text would hurt more than scrolling: the ring still shrinks to 200 points, then the content above the check-in line scrolls, and the header and the pinned buttons stay in place. `fitHome` in `src/features/home/home-fit.ts` makes the choice from the height measured between the header and the check-in line, the measured heights of the rank line and the quote, and the text scale, and its tests cover each case.
 
-Beyond the default text and display size, nothing is cut. When the pinned block, the check-in line, the urge button and the lapse link with their gaps, takes more than 35 % of the window height, only the urge button stays pinned: the check-in line, the lapse link and the undo line move to the end of the scrolling content, under the notices, in the same order. The undo line does not count in that height, so the hours after a lapse never change the layout ([0050](../decisions/0050-layout-matrix.md)).
+Beyond the default text and display size, nothing is cut. When the pinned block, the check-in line, the urge button, the lapse link and, after a lapse, the undo line, with their gaps, takes more than 35 % of the window height, only the urge button stays pinned: the check-in line, the lapse link and the undo line move to the end of the scrolling content, under the notices, in the same order, and the ring and the quote keep the room they had. At the largest sizes, the undo line can be what moves the block, for the hours it shows ([0050](../decisions/0050-layout-matrix.md)).
 
 The check-in line, centered just above the urge button, holds a gold pencil and one line of body text: "Check-in du jour", or "Check-in fait" once today's check-in is saved. It opens the check-in and is read as one button. A missed check-in never looks like a failure.
 
@@ -201,7 +201,7 @@ Each grid cell is read as one label: name or "Rang verrouillé", circle, state a
 
 ## Rank unlock screen
 
-A full screen, without the tab bar. Centered in the free space: a 196 point ring in the circle's color at low opacity, eight small sparks around it in the circle's color, teal and violet, with the 120 point emblem inside. Under them: "Nouveau rang" (unlock label, in the circle's text color), the rank name (40/800), then the total clean days and the circle line (16/400, line height 24, secondary text). Other ranks unlocked at the same time are listed below in body text, such as "Aussi Apprenti, Initié". At the bottom, the "Continuer" primary button and the "Voir mes rangs" text button.
+A full screen, without the tab bar. Centered in the free space: a 196 point ring in the circle's color at low opacity, eight small sparks around it in the circle's color, teal and violet, with the 120 point emblem inside. Under them: "Nouveau rang" (unlock label, in the circle's text color), the rank name (40/800), then the total clean days and the circle line (16/400, line height 24, secondary text). Other ranks unlocked at the same time are listed below in body text, such as "Aussi débloqués, Apprenti, Initié". At the bottom, the "Continuer" primary button and the "Voir mes rangs" text button.
 
 The screen reveals itself in about 900 milliseconds: the ring fades in, then the emblem fades in while growing from 85 to 100 percent, then the text rises 8 points into place. With reduce motion on, everything shows at once. Screen readers announce "Nouveau rang, Mage blanc, cercle 3, Lumière" when the screen opens.
 
@@ -346,7 +346,7 @@ A screen pushed over the others: the back button and "Besoin d'aide" title, then
 3. "Écoute" (section label, teal) over a card of the listening lines, then "Urgences" (section label, red) over a card of the emergency numbers. Each row holds the number on the left (30/600 Barlow Condensed, tabular figures, text color), its groups joined by no-break spaces so it never wraps, then the service name (row style) and its detail (15/400, line height 22, secondary text), and on the right a 40 point round button tinted teal with a phone, or a message bubble for a text-only service such as the 114. Above a text scale of 1.3, the number goes above the name and the detail. The whole row is one button that opens the phone app, or the messages app. A service that also takes text messages has a second, short row under it, "Ou par SMS au 988" (row style, secondary text). Screen readers read each row as its action, the number digit by digit, the service and its detail: "Appeler le 3 1 1 4, Prévention du suicide. Numéro national, gratuit, 24 h/24 et 7 j/7". "Écoute" is left out when the country has no listening line.
 4. "Autres pays. S'ouvre hors de flust." (15/400, secondary text) over the "Trouver une ligne d'écoute" secondary button, a link to findahelpline.com, shown for every country.
 5. If the phone, the messages or the link cannot open, a line in text color (15/400, line height 22) under the row or the button that was tapped gives the number or the address to use by hand. Screen readers hear it at once.
-6. A footer: "L'appel part de ton téléphone." (15/400, secondary text), then "Numéros vérifiés en novembre 2026" (body, muted), the month of the oldest check of the list shown.
+6. A footer: "flust n'envoie rien. L'appel part de ton téléphone." (15/400, secondary text), then "Numéros vérifiés en novembre 2026" (body, muted), the month of the oldest check of the list shown.
 
 Red marks the emergency numbers only. Nothing on the screen promises confidentiality beyond what each service states.
 
@@ -354,7 +354,7 @@ Red marks the emergency numbers only. Nothing on the screen promises confidentia
 
 A screen pushed over the tabs: the back button and "Tout effacer" title, then, scrolling:
 
-1. "Ton parcours, tes rangs, ton journal et tes réglages seront supprimés de ce téléphone." (16/400, line height 24, text color).
+1. "Ton parcours, tes rangs, ton journal, tes réglages et tout le reste seront supprimés de ce téléphone." (16/400, line height 24, text color).
 2. A card with a red border at half opacity, a red trash tile and "Aucune copie n'existe ailleurs." (16/700).
 3. A card on the accent surface with a teal wave tile: "Après un écart, pas besoin de tout effacer. Note-le, tes jours propres restent acquis."
 
@@ -375,7 +375,7 @@ A screen pushed over the tabs: the back button and "Rappels" title, then, scroll
 2. Without "Le soir au lit" or "Le week-end" among the risk moments, "Heures à risque" is disabled and a line in secondary body text says which to choose, "Choisis un moment comme le soir au lit ou le week-end."
 3. When notifications are not allowed: a line saying so and "Ouvrir les réglages" (secondary button).
 4. "Aperçu" (section label): a notification card, centered on the locked fill color (radius 22): the 44 point app icon, "flust" (15/800) and "Comment s'est passée ta journée ?".
-5. A footer in 15/400 secondary text: "Les notifications restent neutres."
+5. A footer in 15/400 secondary text, 24 points apart: "Les notifications restent neutres." and "Pour masquer les aperçus sur l'écran verrouillé, passe par les réglages du téléphone."
 
 ## Lock
 

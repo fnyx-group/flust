@@ -51,27 +51,28 @@ export function fitHome({ available, fontScale, ringMax, heights }: HomeFitInput
   return { ring: ringMin, quote: steps.at(-1) ?? true };
 }
 
-// The block pinned under the scrolling content: the check-in line, the urge button and the lapse
-// link, with their padding and gaps. The undo line is left out, so the few hours after a lapse
-// never change the layout.
+// The block pinned under the scrolling content: the check-in line, the urge button, the lapse link
+// and, after a lapse, the undo line, with the padding above them and the gaps between them.
 export type PinnedHeights = {
   readonly checkIn: number;
   readonly urge: number;
   readonly lapse: number;
+  // 0 while the undo line is hidden, which also takes away its gap.
+  readonly undo: number;
 };
 
 // The most of the window height the pinned block may take. Beyond it, at large text or display
 // sizes, only the urge button stays pinned, and the rest scrolls under the notices.
 export const PINNED_MAX_SHARE = 0.35;
 
+export function pinnedBlockHeight({ checkIn, urge, lapse, undo }: PinnedHeights): number {
+  const parts = undo > 0 ? [checkIn, urge, lapse, undo] : [checkIn, urge, lapse];
+  const total = parts.reduce((sum, part) => sum + part, 0);
+  return homeSpacing.actionsPadding + total + (parts.length - 1) * homeSpacing.actionsGap;
+}
+
 export function pinsAllActions(heights: PinnedHeights, windowHeight: number): boolean {
-  const block =
-    homeSpacing.actionsPadding +
-    heights.checkIn +
-    heights.urge +
-    heights.lapse +
-    2 * homeSpacing.actionsGap;
-  return block <= windowHeight * PINNED_MAX_SHARE;
+  return pinnedBlockHeight(heights) <= windowHeight * PINNED_MAX_SHARE;
 }
 
 function heightWithoutRing(quote: boolean, heights: HomeHeights): number {

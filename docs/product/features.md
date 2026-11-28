@@ -97,7 +97,7 @@ Local reminders, all off until turned on, each with a switch:
 
 Reminders thin out when the app is not opened, and stop after a week with one last message: "flust is here whenever you like." There is no reminder after a lapse. See [0022](../decisions/0022-reminder-schedule.md).
 
-Notification text is always neutral and never reveals what the app is about. It may show on the lock screen, depending on the device's settings: on Android, when sensitive content is shown on the lock screen, which most devices do by default; on iOS, when previews are shown, and a note explains how to hide them. The permission is asked only when a reminder is turned on. A refusal leaves it off, with a way to the system settings. When notifications are no longer allowed, every reminder is turned off, and allowing them again turns none back on by itself.
+Notification text is always neutral and never reveals what the app is about. It may show on the lock screen, depending on the device's settings: on Android, when sensitive content is shown on the lock screen, which most devices do by default; on iOS, when previews are shown. The reminders screen says that previews on the lock screen are hidden from the phone's settings. The permission is asked only when a reminder is turned on. A refusal leaves it off, with a way to the system settings. When notifications are no longer allowed, every reminder is turned off, and allowing them again turns none back on by itself.
 
 ### App lock
 

@@ -1,0 +1,8 @@
+# Leaving flust and coming back shows the lock screen.
+appId: org.fnyxgroup.flust
+---
+- pressKey: Home
+- launchApp:
+    stopApp: false
+- assertVisible: Verrouillé
+- assertVisible: Entrer le code

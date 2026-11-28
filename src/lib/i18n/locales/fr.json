@@ -48,7 +48,7 @@
       "hint": "Ouvre le check-in"
     },
     "lowMood": {
-      "text": "Ces derniers jours ont l'air durs. En parler à quelqu'un de confiance peut aider.",
+      "text": "Ces derniers jours ont l'air durs. En parler à un proche ou à un professionnel peut aider.",
       "emergency": "Si tu es en danger, appelle les urgences.",
       "dismiss": "Masquer pour aujourd'hui",
       "help": "Numéros d'aide"
@@ -104,7 +104,7 @@
     "nextTime": "La prochaine fois",
     "save": "Enregistrer et repartir",
     "errors": {
-      "lapse-in-future": "Ce moment est dans le futur.",
+      "lapse-in-future": "Ce moment est dans le futur. Vérifie l'heure du téléphone.",
       "lapse-before-last": "Ce moment est avant ton dernier écart.",
       "lapse-before-start": "Ce moment est avant ton départ.",
       "invalid-timestamp": "Choisis un autre moment.",
@@ -235,7 +235,7 @@
   "erase": {
     "back": "Retour",
     "title": "Tout effacer",
-    "what": "Ton parcours, tes rangs, ton journal et tes réglages seront supprimés de ce téléphone.",
+    "what": "Ton parcours, tes rangs, ton journal, tes réglages et tout le reste seront supprimés de ce téléphone.",
     "noRecovery": "Aucune copie n'existe ailleurs.",
     "lapseHint": "Après un écart, pas besoin de tout effacer. Note-le, tes jours propres restent acquis.",
     "continue": "Effacer mes données",
@@ -353,9 +353,9 @@
       "reasons": {
         "key-missing": "La clé de chiffrement de ce téléphone n'est plus là. Cela arrive après une restauration ou un transfert.",
         "database-unreadable": "Tes données ne correspondent pas à la clé de ce téléphone, ou le fichier est endommagé.",
-        "journey-corrupted": "Les dates de ton parcours sont incohérentes. Ta série ne peut pas être calculée."
+        "journey-corrupted": "Les dates de ton parcours sont incohérentes. Ta série ne peut pas être calculée, et réessayer n'y changera rien."
       },
-      "noRecovery": "Il n'en existe aucune autre copie. Personne ne peut les récupérer.",
+      "noRecovery": "Il n'en existe aucune autre copie. Personne ne peut récupérer tes données.",
       "startOver": "Effacer et recommencer",
       "retry": "Réessayer",
       "confirm": {
@@ -421,8 +421,8 @@
       "protection": {
         "label": "Protection",
         "checkInSubtitle": "Un rappel discret à {{time}}",
-        "lockUnavailable": "Ajoute un code au téléphone pour l'activer.",
-        "lockNotConfirmed": "Déverrouillage non confirmé."
+        "lockUnavailable": "Ajoute un verrouillage d'écran au téléphone pour l'activer.",
+        "lockNotConfirmed": "Non confirmé. Le verrouillage reste désactivé."
       }
     },
     "filter": {
@@ -554,8 +554,8 @@
         "4": "Tu avances dans le cercle de la Couronne.",
         "5": "Tu avances dans le cercle de l'Absolu."
       },
-      "others_one": "Aussi {{names}}",
-      "others_other": "Aussi {{names}}",
+      "others_one": "Aussi débloqué, {{names}}",
+      "others_other": "Aussi débloqués, {{names}}",
       "listSeparator": ", ",
       "spoken": "Nouveau rang, {{name}}, {{circle}}",
       "continue": "Continuer",
@@ -636,6 +636,7 @@
     "preview": "Aperçu",
     "previewLabel": "Aperçu d'une notification de flust, {{text}}",
     "footer": "Les notifications restent neutres.",
+    "lockScreenPreviews": "Pour masquer les aperçus sur l'écran verrouillé, passe par les réglages du téléphone.",
     "denied": "Notifications bloquées pour flust.",
     "openSettings": "Ouvrir les réglages",
     "saveFailed": "Le rappel n'a pas pu être enregistré. Réessaie.",
@@ -670,9 +671,9 @@
       "toggleWith": "Verrouiller avec {{method}}",
       "toggleSubtitle": "Avec le code du téléphone en secours",
       "delay": "Demander à nouveau",
-      "noDeviceLock": "Ajoute un code au téléphone pour l'activer.",
-      "paused": "En pause, le téléphone n'a plus de code.",
-      "notConfirmed": "Déverrouillage non confirmé.",
+      "noDeviceLock": "Ajoute un verrouillage d'écran au téléphone pour l'activer.",
+      "paused": "En pause, le téléphone n'a plus de verrouillage d'écran.",
+      "notConfirmed": "Non confirmé. Le verrouillage reste désactivé.",
       "saveFailed": "Le réglage n'a pas pu être enregistré. Réessaie.",
       "back": "Retour"
     },
@@ -735,7 +736,7 @@
       },
       "fr114": {
         "name": "Urgences par SMS",
-        "detail": "SMS gratuit, 24 h/24, si tu ne peux pas parler"
+        "detail": "SMS gratuit, 24 h/24, si tu ne peux pas parler ou entendre, ou pas sans danger"
       },
       "be0800": {
         "name": "Centre de Prévention du Suicide",
@@ -771,7 +772,7 @@
       },
       "ca988": {
         "name": "Ligne d'aide en cas de crise de suicide",
-        "detail": "Appel ou SMS gratuit, 24 h/24, en français et en anglais"
+        "detail": "Appel gratuit ou SMS, 24 h/24, en français et en anglais"
       },
       "ca911": {
         "name": "Urgences",
@@ -828,7 +829,7 @@
     "callFailed": "Le téléphone n'a pas pu s'ouvrir. Tu peux composer le {{number}} toi-même.",
     "textFailed": "Les messages n'ont pas pu s'ouvrir. Tu peux écrire au {{number}} toi-même.",
     "linkFailed": "Le lien n'a pas pu s'ouvrir. L'adresse est {{address}}.",
-    "footer": "L'appel part de ton téléphone.",
+    "footer": "flust n'envoie rien. L'appel part de ton téléphone.",
     "checked": "Numéros vérifiés en {{month}}"
   },
   "errors": {
@@ -919,7 +920,7 @@
         "action": "Réactiver le filtre"
       },
       "consent": {
-        "text": "Android a retiré ton accord au filtre.",
+        "text": "flust n'a plus l'autorisation VPN d'Android.",
         "action": "Réactiver le filtre"
       },
       "vpn-off": {
@@ -960,7 +961,7 @@
     },
     "disclosure": {
       "title": "Avant d'activer le filtre",
-      "text": "flust utilise le VPN d'Android pour filtrer les noms des sites ouverts sur ce téléphone. Les noms bloqués ne quittent jamais le téléphone. Les autres partent chiffrés vers Quad9, sinon Cloudflare puis DNS4EU. Cloudflare efface les adresses IP anonymisées sous 25 heures. DNS4EU peut garder des données de requêtes jusqu'à six mois contre les menaces, sans les vendre ni profiler. Le reste de ton trafic ne passe pas par flust, sauf les connexions directes aux DNS publics, qui sont bloquées.",
+      "text": "flust utilise le VPN d'Android pour filtrer les noms des sites ouverts sur ce téléphone. Les noms bloqués ne quittent jamais le téléphone. Les autres partent chiffrés vers Quad9, ou vers Cloudflare puis DNS4EU quand Quad9 ne répond pas. Cloudflare efface les adresses IP anonymisées sous 25 heures. DNS4EU peut garder des données de requêtes jusqu'à six mois pour la recherche sur les menaces, sans les vendre ni s'en servir pour du profilage ou de la publicité. Le reste de ton trafic ne passe pas par flust, sauf les connexions directes à des DNS publics connus, qui sont bloquées.",
       "accept": "Accepter et activer",
       "later": "Plus tard"
     },

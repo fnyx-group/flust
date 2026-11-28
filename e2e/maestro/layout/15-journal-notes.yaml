@@ -1,0 +1,24 @@
+# The journal with a note. The body is written first: with large text, the keyboard covers it
+# once the title is typed. The note then scrolls to the body, and is swiped back up to the title. Save is in
+# the header, above the keyboard: hideKeyboard could press Back and close the note.
+appId: org.fnyxgroup.flust
+---
+- tapOn: Texte de la note
+- inputText: Une longue marche au bord de l'eau, et l'envie est passée.
+# Inside the note, above the keyboard: a swipe at the screen's center lands on the chips, which
+# scroll sideways.
+- repeat:
+    times: 5
+    while:
+      notVisible: Titre, facultatif
+    commands:
+      - swipe:
+          start: 50%, 25%
+          end: 50%, 40%
+- tapOn: Titre, facultatif
+- inputText: Une marche
+- tapOn: Enregistrer
+- extendedWaitUntil:
+    notVisible: Fermer
+    timeout: 5000
+- assertVisible: '.*, Une marche, .*'

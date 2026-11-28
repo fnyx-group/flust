@@ -1,0 +1,15 @@
+# The filter on, then inactive with its reason and button: scripts/e2e-android.sh turns on a strict
+# Private DNS before this flow, and back off after its dump. Android's own dialog is in the
+# system's language: the emulator runs in English.
+appId: org.fnyxgroup.flust
+---
+- tapOn: Accepter et activer
+- runFlow:
+    when:
+      visible: Connection request
+    commands:
+      - tapOn: OK
+- extendedWaitUntil:
+    visible: Le DNS privé contourne le filtre.*
+    timeout: 30000
+- assertVisible: Ouvrir les réglages

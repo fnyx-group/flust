@@ -48,7 +48,7 @@
       "hint": "Opens the check-in"
     },
     "lowMood": {
-      "text": "These last few days seem hard. Talking to someone you trust can help.",
+      "text": "These last few days seem hard. Talking to someone close or to a professional can help.",
       "emergency": "If you are in danger, call emergency services.",
       "dismiss": "Hide for today",
       "help": "Help numbers"
@@ -104,7 +104,7 @@
     "nextTime": "Next time",
     "save": "Save and start again",
     "errors": {
-      "lapse-in-future": "This time is in the future.",
+      "lapse-in-future": "This time is in the future. Check the phone's time.",
       "lapse-before-last": "This time is before your last lapse.",
       "lapse-before-start": "This time is before your start.",
       "invalid-timestamp": "Choose another moment.",
@@ -235,7 +235,7 @@
   "erase": {
     "back": "Back",
     "title": "Erase everything",
-    "what": "Your journey, ranks, journal and settings will be deleted from this phone.",
+    "what": "Your journey, ranks, journal, settings and everything else will be deleted from this phone.",
     "noRecovery": "No copy exists anywhere else.",
     "lapseHint": "After a lapse, no need to erase everything. Note it, your clean days stay yours.",
     "continue": "Erase my data",
@@ -353,9 +353,9 @@
       "reasons": {
         "key-missing": "This phone's encryption key is gone. This happens after a restore or a transfer.",
         "database-unreadable": "Your data does not match this phone's key, or the file is damaged.",
-        "journey-corrupted": "Your journey's dates do not make sense. Your streak cannot be counted."
+        "journey-corrupted": "Your journey's dates do not make sense. Your streak cannot be counted, and trying again will not change that."
       },
-      "noRecovery": "There is no other copy. Nobody can recover it.",
+      "noRecovery": "There is no other copy. Nobody can recover your data.",
       "startOver": "Erase and start over",
       "retry": "Try again",
       "confirm": {
@@ -422,7 +422,7 @@
         "label": "Protection",
         "checkInSubtitle": "A discreet reminder at {{time}}",
         "lockUnavailable": "Add a screen lock to the phone to turn this on.",
-        "lockNotConfirmed": "Unlock not confirmed."
+        "lockNotConfirmed": "Not confirmed. The lock stays off."
       }
     },
     "filter": {
@@ -554,8 +554,8 @@
         "4": "You move forward in the circle of the Crown.",
         "5": "You move forward in the circle of the Absolute."
       },
-      "others_one": "Also {{names}}",
-      "others_other": "Also {{names}}",
+      "others_one": "Also unlocked, {{names}}",
+      "others_other": "Also unlocked, {{names}}",
       "listSeparator": ", ",
       "spoken": "New rank, {{name}}, {{circle}}",
       "continue": "Continue",
@@ -636,6 +636,7 @@
     "preview": "Preview",
     "previewLabel": "Preview of a flust notification, {{text}}",
     "footer": "Notifications stay neutral.",
+    "lockScreenPreviews": "To hide previews on the lock screen, use the phone's settings.",
     "denied": "Notifications are blocked for flust.",
     "openSettings": "Open settings",
     "saveFailed": "The reminder could not be saved. Try again.",
@@ -672,7 +673,7 @@
       "delay": "Ask again",
       "noDeviceLock": "Add a screen lock to the phone to turn this on.",
       "paused": "Paused, the phone no longer has a screen lock.",
-      "notConfirmed": "Unlock not confirmed.",
+      "notConfirmed": "Not confirmed. The lock stays off.",
       "saveFailed": "The setting could not be saved. Try again.",
       "back": "Back"
     },
@@ -735,7 +736,7 @@
       },
       "fr114": {
         "name": "Emergencies by text",
-        "detail": "Free text, 24/7, if you cannot speak"
+        "detail": "Free text, 24/7, if you cannot speak or hear, or cannot speak safely"
       },
       "be0800": {
         "name": "Centre de Prévention du Suicide",
@@ -771,7 +772,7 @@
       },
       "ca988": {
         "name": "Suicide Crisis Helpline",
-        "detail": "Free call or text, 24/7, in English and French"
+        "detail": "Free call, or text, 24/7, in English and French"
       },
       "ca911": {
         "name": "Emergency services",
@@ -828,7 +829,7 @@
     "callFailed": "The phone app could not open. You can dial {{number}} yourself.",
     "textFailed": "Messages could not open. You can text {{number}} yourself.",
     "linkFailed": "The link could not open. The address is {{address}}.",
-    "footer": "The call goes from your phone.",
+    "footer": "flust sends nothing. The call goes from your phone.",
     "checked": "Numbers checked in {{month}}"
   },
   "errors": {
@@ -919,7 +920,7 @@
         "action": "Turn the filter back on"
       },
       "consent": {
-        "text": "Android withdrew your consent to the filter.",
+        "text": "flust no longer has Android's VPN permission.",
         "action": "Turn the filter back on"
       },
       "vpn-off": {
@@ -960,7 +961,7 @@
     },
     "disclosure": {
       "title": "Before turning the filter on",
-      "text": "flust uses Android's VPN to filter the names of the sites opened on this phone. Blocked names never leave the phone. The others go encrypted to Quad9, or else Cloudflare then DNS4EU. Cloudflare deletes anonymized IP addresses within 25 hours. DNS4EU can keep query data for up to six months against threats, without selling it or profiling. The rest of your traffic does not go through flust, except direct connections to public DNS servers, which are blocked.",
+      "text": "flust uses Android's VPN to filter the names of the sites opened on this phone. Blocked names never leave the phone. The others go encrypted to Quad9, or to Cloudflare then DNS4EU when Quad9 does not answer. Cloudflare deletes anonymized IP addresses within 25 hours. DNS4EU can keep query data for up to six months for threat research, without selling it or using it for profiling or advertising. The rest of your traffic does not go through flust, except direct connections to known public DNS servers, which are blocked.",
       "accept": "Accept and turn on",
       "later": "Not now"
     },

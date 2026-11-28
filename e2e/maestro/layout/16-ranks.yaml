@@ -1,5 +1,4 @@
 appId: org.fnyxgroup.flust
 ---
-- tapOn: Fermer
 - tapOn: Rangs
 - assertVisible: Rangs

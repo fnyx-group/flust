@@ -1,0 +1,7 @@
+appId: org.fnyxgroup.flust
+---
+- tapOn: C'est parti
+- extendedWaitUntil:
+    visible: Nouveau rang
+    timeout: 10000
+- assertVisible: Continuer
